@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Commons</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            background: #ffffff;
+            color: #000000;
+            max-width: 600px;
+            margin: 80px auto;
+            padding: 0 20px;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: normal;
+            margin-bottom: 8px;
+        }
+        p {
+            margin-bottom: 32px;
+        }
+        .notify {
+            display: flex;
+            gap: 8px;
+        }
+        input {
+            font-family: Georgia, serif;
+            font-size: 16px;
+            padding: 10px 14px;
+            border: 1px solid #000;
+            width: 100%;
+            outline: none;
+        }
+        button {
+            font-family: Georgia, serif;
+            font-size: 16px;
+            padding: 10px 20px;
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .message {
+            margin-top: 16px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Page Commons</h1>
+    <p>A reading companion for e-ink devices.<br>Coming soon.</p>
+    <div class="notify">
+        <input type="email" id="email" placeholder="your@email.com" />
+        <button onclick="notify()">Notify me</button>
+    </div>
+    <div class="message" id="message"></div>
+    <script>
+        function notify() {
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message');
+            if (!email || !email.includes('@')) {
+                message.textContent = 'Please enter a valid email address.';
+                return;
+            }
+            // Store in localStorage for now
+            const emails = JSON.parse(localStorage.getItem('waitlist') || '[]');
+            emails.push({ email, date: new Date().toISOString() });
+            localStorage.setItem('waitlist', JSON.stringify(emails));
+            message.textContent = 'Thank you — we will let you know when Page Commons is ready.';
+            document.getElementById('email').value = '';
+        }
+    </script>
+</body>
+</html>
