@@ -930,8 +930,8 @@ async function searchBooks() {
     if (!books.length) {
       statusEl.textContent = 'No results found — try different keywords or enter manually below.';
       statusEl.style.display = 'block';
-      // Show more button if there might be more results
-    if (books.length >= 6) {
+      // Show more button if there are more than 6 results
+    if (books.length > 6) {
       const moreBtn = document.createElement('button');
       moreBtn.className = 'btn';
       moreBtn.textContent = 'Show more results';
@@ -940,8 +940,7 @@ async function searchBooks() {
       moreBtn.onclick = async () => {
         moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
         try {
-          const more = _hasNonLatin ? await fetchGoogleBooks(_gbQuery, 8) : await fetchOpenLibrary(_olQuery, 12);
-          const extra = more.slice(6);
+          const extra = books.slice(6);
           extra.forEach(book => {
             const el = document.createElement('div'); el.className = 'book-result';
             const thumbHtml = book.thumb ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
@@ -966,7 +965,8 @@ async function searchBooks() {
     renderManualEntry(searchTitle, resultsEl); return;
     }
 
-    books.forEach(book => {
+    const displayBooks = books.slice(0,6);
+    displayBooks.forEach(book => {
       const el = document.createElement('div');
       el.className = 'book-result';
       const thumbHtml = book.thumb
@@ -977,8 +977,8 @@ async function searchBooks() {
       resultsEl.appendChild(el);
     });
 
-    // Show more button if there might be more results
-    if (books.length >= 6) {
+    // Show more button if there are more than 6 results
+    if (books.length > 6) {
       const moreBtn = document.createElement('button');
       moreBtn.className = 'btn';
       moreBtn.textContent = 'Show more results';
@@ -987,8 +987,7 @@ async function searchBooks() {
       moreBtn.onclick = async () => {
         moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
         try {
-          const more = _hasNonLatin ? await fetchGoogleBooks(_gbQuery, 8) : await fetchOpenLibrary(_olQuery, 12);
-          const extra = more.slice(6);
+          const extra = books.slice(6);
           extra.forEach(book => {
             const el = document.createElement('div'); el.className = 'book-result';
             const thumbHtml = book.thumb ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
@@ -1014,8 +1013,8 @@ async function searchBooks() {
   } catch(e) {
     statusEl.textContent = 'Search failed — check your connection and try again.';
     statusEl.className = 'status-msg error'; statusEl.style.display = 'block';
-    // Show more button if there might be more results
-    if (books.length >= 6) {
+    // Show more button if there are more than 6 results
+    if (books.length > 6) {
       const moreBtn = document.createElement('button');
       moreBtn.className = 'btn';
       moreBtn.textContent = 'Show more results';
@@ -1024,8 +1023,7 @@ async function searchBooks() {
       moreBtn.onclick = async () => {
         moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
         try {
-          const more = _hasNonLatin ? await fetchGoogleBooks(_gbQuery, 8) : await fetchOpenLibrary(_olQuery, 12);
-          const extra = more.slice(6);
+          const extra = books.slice(6);
           extra.forEach(book => {
             const el = document.createElement('div'); el.className = 'book-result';
             const thumbHtml = book.thumb ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
@@ -1051,8 +1049,8 @@ async function searchBooks() {
   }
 }
 
-async function fetchOpenLibrary(q) {
-  const res  = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=10&fields=key,title,author_name,first_publish_year`);
+async function fetchOpenLibrary(q, limit=10) {
+  const res  = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=${limit}&fields=key,title,author_name,first_publish_year`);
   const data = await res.json();
   const seen = new Map();
   (data.docs||[]).forEach(d => {
@@ -1070,7 +1068,7 @@ async function fetchOpenLibrary(q) {
     if (aExact !== bExact) return aExact - bExact;
     return (a.year||9999) - (b.year||9999);
   });
-  return results.slice(0,6);
+  return results;
 }
 
 async function fetchGoogleBooks(q, maxResults=8) {
