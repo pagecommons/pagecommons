@@ -1260,6 +1260,14 @@ function detectLanguage(book) {
 }
 
 function launchCompanion(book) {
+  // assign conversation ID if not set
+  if (!STATE.currentConvId) {
+    STATE.currentConvId   = 'conv_' + Date.now();
+    STATE.currentConvName = null;
+  }
+  // add to shelf
+  if (typeof addBookToShelf === 'function') addBookToShelf(book);
+
   document.getElementById('book-title-display').textContent  = book.title;
   document.getElementById('book-author-display').textContent = book.author;
   document.getElementById('input-book-context').textContent  = book.title + (book.author ? ' · ' + book.author : '');
@@ -1748,9 +1756,6 @@ function saveCurrentConversation() {
   addBookToShelf(STATE.book);
 }
 
-// Auto-save after each companion reply
-const _origAppendBubble = appendBubble;
-
 function renderShelf() {
   const books  = getShelfBooks();
   const listEl = document.getElementById('shelf-list');
@@ -1893,16 +1898,7 @@ function updateBookStatus() {
   navigate('status');
 }
 
-// Override launchCompanion to assign a conv ID and add to shelf
-const _origLaunchCompanion = launchCompanion;
-function launchCompanion(book) {
-  if (!STATE.currentConvId) {
-    STATE.currentConvId  = 'conv_' + Date.now();
-    STATE.currentConvName = null;
-  }
-  addBookToShelf(book);
-  _origLaunchCompanion(book);
-}
+// launchCompanion shelf logic folded into main function below
 
 // shelf render handled inside main handleRoute
 
