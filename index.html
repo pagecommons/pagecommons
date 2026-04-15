@@ -802,9 +802,18 @@ async function searchBooks() {
 
   const q = searchAuthor ? `${searchTitle} ${searchAuthor}` : searchTitle;
 
+  // Non-Latin script detection — skip Open Library, go straight to Google Books
+  const hasNonLatin = /[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0600-\u06ff\u0400-\u04ff\u0900-\u097f\u0e00-\u0e7f]/.test(raw);
+
   try {
-    let books = await fetchOpenLibrary(q);
-    if (!books.length) { statusEl.textContent = 'Trying Google Books…'; books = await fetchGoogleBooks(q); }
+    let books = [];
+    if (hasNonLatin) {
+      statusEl.textContent = 'Searching Google Books…'; statusEl.style.display = 'block';
+      books = await fetchGoogleBooks(q);
+    } else {
+      books = await fetchOpenLibrary(q);
+      if (!books.length) { statusEl.textContent = 'Trying Google Books…'; statusEl.style.display = 'block'; books = await fetchGoogleBooks(q); }
+    }
 
     statusEl.style.display = 'none';
 
