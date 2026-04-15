@@ -583,7 +583,9 @@ function handleRoute() {
   }
   if (hash === 'search' && !STATE.apiKey) { navigate('key'); return; }
 
-  showScreen(SCREENS.includes(hash) ? hash : 'home');
+  const target = SCREENS.includes(hash) ? hash : 'home';
+  showScreen(target);
+  if (target === 'shelf') renderShelf();
 }
 
 function navigate(view) {
@@ -1212,6 +1214,7 @@ async function sendMessage(retryText) {
     loadEl.style.display = 'none';
     const el = appendBubble('companion', reply);
     scrollToMessage(el);
+    saveCurrentConversation();
   } catch(err) {
     loadEl.style.display = 'none';
     appendError(err);
@@ -1570,20 +1573,9 @@ function launchCompanion(book) {
   _origLaunchCompanion(book);
 }
 
-// Patch handleRoute to render shelf on navigate
-const _origHandleRoute = handleRoute;
-function handleRoute() {
-  _origHandleRoute();
-  const hash = window.location.hash.replace('#','') || 'home';
-  if (hash === 'shelf') renderShelf();
-}
+// shelf render handled inside main handleRoute
 
-// Auto-save conversation after each AI reply — patch sendMessage
-const _origSendMessage = sendMessage;
-async function sendMessage(retryText) {
-  await _origSendMessage(retryText);
-  saveCurrentConversation();
-}
+// Auto-save is called directly inside sendMessage
 
 </script>
 </body>
