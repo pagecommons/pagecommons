@@ -936,10 +936,11 @@ async function searchBooks() {
       moreBtn.className = 'btn';
       moreBtn.textContent = 'Show more results';
       moreBtn.style.marginBottom = '10px';
+      const _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
       moreBtn.onclick = async () => {
         moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
         try {
-          const more = hasNonLatin ? await fetchGoogleBooks(gbQuery, 8) : await fetchOpenLibrary(olQuery, 12);
+          const more = _hasNonLatin ? await fetchGoogleBooks(_gbQuery, 8) : await fetchOpenLibrary(_olQuery, 12);
           const extra = more.slice(6);
           extra.forEach(book => {
             const el = document.createElement('div'); el.className = 'book-result';
@@ -982,10 +983,11 @@ async function searchBooks() {
       moreBtn.className = 'btn';
       moreBtn.textContent = 'Show more results';
       moreBtn.style.marginBottom = '10px';
+      const _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
       moreBtn.onclick = async () => {
         moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
         try {
-          const more = hasNonLatin ? await fetchGoogleBooks(gbQuery, 8) : await fetchOpenLibrary(olQuery, 12);
+          const more = _hasNonLatin ? await fetchGoogleBooks(_gbQuery, 8) : await fetchOpenLibrary(_olQuery, 12);
           const extra = more.slice(6);
           extra.forEach(book => {
             const el = document.createElement('div'); el.className = 'book-result';
@@ -1018,10 +1020,11 @@ async function searchBooks() {
       moreBtn.className = 'btn';
       moreBtn.textContent = 'Show more results';
       moreBtn.style.marginBottom = '10px';
+      const _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
       moreBtn.onclick = async () => {
         moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
         try {
-          const more = hasNonLatin ? await fetchGoogleBooks(gbQuery, 8) : await fetchOpenLibrary(olQuery, 12);
+          const more = _hasNonLatin ? await fetchGoogleBooks(_gbQuery, 8) : await fetchOpenLibrary(_olQuery, 12);
           const extra = more.slice(6);
           extra.forEach(book => {
             const el = document.createElement('div'); el.className = 'book-result';
@@ -1061,7 +1064,7 @@ async function fetchOpenLibrary(q) {
   const results = Array.from(seen.values());
   // Sort: exact title matches first, then by year
   results.sort((a,b) => {
-    const aq = olQuery.toLowerCase(), at = a.title.toLowerCase(), bt = b.title.toLowerCase();
+    const aq = q.toLowerCase(), at = a.title.toLowerCase(), bt = b.title.toLowerCase();
     const aExact = at === aq ? 0 : at.startsWith(aq) ? 1 : 2;
     const bExact = bt === aq ? 0 : bt.startsWith(aq) ? 1 : 2;
     if (aExact !== bExact) return aExact - bExact;
