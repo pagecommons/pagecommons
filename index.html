@@ -216,6 +216,47 @@
     .conv-btn:active { background: var(--grey-light); }
     .conv-btn.primary { background: var(--black); color: var(--white); }
     .conv-btn.danger  { color: var(--grey-dark); }
+    /* BOOK COVERS */
+    .book-result { position: relative; }
+    .book-cover-thumb {
+      width: 40px; height: 60px; object-fit: cover;
+      border: var(--border); flex-shrink: 0;
+      background: var(--grey-light);
+    }
+    .book-result-inner { display: flex; gap: 12px; align-items: flex-start; }
+    .book-result-text  { flex: 1; min-width: 0; }
+
+    /* BUBBLE ACTIONS */
+    .bubble-actions {
+      display: flex; gap: 8px; margin-top: 6px; padding: 0 6px;
+    }
+    .bubble-action-btn {
+      background: none; border: none; cursor: pointer;
+      font-family: var(--font-serif); font-size: 0.75rem;
+      color: var(--grey-dark); text-decoration: underline; padding: 0;
+      min-height: 32px;
+    }
+    .bubble-action-btn:active { opacity: 0.5; }
+    .bubble-action-btn.saved  { color: var(--black); font-style: italic; }
+
+    /* PASSAGES PANEL */
+    #passages-panel {
+      display: none; border: var(--border); border-radius: var(--radius-sm);
+      padding: 16px; margin-bottom: 16px;
+    }
+    #passages-panel.open { display: block; }
+    .passage-item {
+      border-left: 3px solid var(--grey-mid);
+      padding: 8px 12px; margin-bottom: 12px;
+      font-size: 0.9rem; line-height: 1.6;
+    }
+    .passages-empty { font-size: 0.9rem; color: var(--grey-dark); font-style: italic; }
+
+    /* T&C SCREEN */
+    .tc-section { margin-bottom: 20px; }
+
+    /* AGE GATE */
+    .age-gate-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -226,7 +267,7 @@
 
   <header class="site-header">
     <div class="site-name">Page Commons</div>
-    <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.9</div>
+    <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.10</div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -477,8 +518,9 @@
       <div id="reader-toolbar">
         <button class="toolbar-btn" id="font-toolbar-btn" onclick="toggleFontPanel()">Aa</button>
         <button class="toolbar-btn" id="highlights-toolbar-btn" style="display:none" onclick="toggleHighlights()">Highlights</button>
+        <button class="toolbar-btn" id="passages-toolbar-btn" style="display:none" onclick="togglePassagesPanel()">Passages</button>
         <button class="toolbar-btn" onclick="navigate('shelf')">Shelf</button>
-        <button class="toolbar-btn" onclick="navigate('search')">Change book</button>
+        <button class="toolbar-btn" onclick="endConversation()">Done</button>
         <button class="toolbar-btn" onclick="showOtherOptions()">More</button>
       </div>
 
@@ -498,6 +540,14 @@
         <div id="highlights-count" style="font-size:0.85rem;color:var(--grey-dark);margin-bottom:10px"></div>
         <div id="highlights-list"  style="font-size:0.9rem;line-height:1.6"></div>
       </div>
+
+      <div id="passages-panel">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+          <span style="font-size:0.85rem;color:var(--grey-dark)" id="passages-count">No passages saved yet</span>
+          <button class="bubble-action-btn" onclick="copyAllPassages()" style="font-size:0.85rem">Copy all</button>
+        </div>
+        <div id="passages-list"></div>
+      </div>
     </div>
 
     <div id="key-status-bar">
@@ -505,6 +555,41 @@
       <button onclick="clearKey()" style="background:none;border:none;cursor:pointer;text-decoration:underline;font-family:var(--font-serif);font-size:0.78rem;color:var(--grey-dark)">Remove</button>
     </div>
 
+  </section>
+
+
+  <!-- T&C SCREEN -->
+  <section id="screen-tc" class="screen">
+    <h1>Welcome to Page Commons</h1>
+    <div class="tc-section">
+      <p>Before you continue, please read and agree to the following:</p>
+      <div class="note">
+        <strong>Age:</strong> By continuing you confirm you are 13 years of age or older. Some books contain adult content — you confirm you are 18 or over before accessing such material.
+      </div>
+      <div class="note">
+        <strong>Privacy:</strong> Your API key and reading data are stored only in your browser. We do not collect or store personal data on our servers.
+      </div>
+      <div class="note">
+        <strong>Content:</strong> Page Commons is a reading companion. Discussions are anchored to books. We are not responsible for AI responses but take reasonable steps to keep them appropriate.
+      </div>
+      <div class="note">
+        <strong>Open source:</strong> Page Commons is open source software provided as-is. Use it responsibly.
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="acceptTC()">I agree — take me in</button>
+    <p style="font-size:0.78rem;color:var(--grey-dark);margin-top:12px;text-align:center">Your agreement is stored locally in your browser only.</p>
+  </section>
+
+  <!-- AGE GATE -->
+  <section id="screen-age-gate" class="screen">
+    <h1>Just a moment</h1>
+    <p id="age-gate-book-name" style="font-style:italic;margin-bottom:8px"></p>
+    <p>This book has been flagged as containing adult content.</p>
+    <p style="font-size:0.88rem;color:var(--grey-dark)">We don't store this confirmation — it is only used at this moment of adding the book.</p>
+    <div class="age-gate-btns">
+      <button class="btn btn-primary" onclick="confirmAgeGate()">I'm 18 or over — continue</button>
+      <button class="btn" onclick="navigate('search')">Take me back</button>
+    </div>
   </section>
 
   <!-- YOUR SHELF -->
@@ -547,7 +632,9 @@ const STATE = {
   lastUserText:   '',
   thinkingPhrases:  null,
   currentConvId:   null,
-  currentConvName: null, // cached per language
+  currentConvName: null,
+  pendingBook:     null,   // held during age gate
+  passages:        [],     // saved passages for current book // cached per language
 };
 
 const STATIC_PROMPTS = [
@@ -566,7 +653,7 @@ const STATIC_THINKING = ['Typing…','Reading your note…','Considering…','Le
 // ═══════════════════════════════════════════════════
 //  SCREENS + NAVIGATION
 // ═══════════════════════════════════════════════════
-const SCREENS = ['home','key','search','status','language','companion','about','shelf','book-shelf'];
+const SCREENS = ['home','key','search','status','language','companion','about','shelf','book-shelf','tc','age-gate'];
 
 // navigate() defined above with showScreen
 
@@ -672,6 +759,10 @@ async function processOfflineQueue() {
   } catch(e) {}
 
   updateGreeting();
+  // Show T&C on first visit
+  if (!localStorage.getItem('pc_tc_accepted')) {
+    handleRoute = function() { showScreen('tc'); };
+  }
   handleRoute();
   // Safety net for local file opening — ensure at least one screen is visible
   if (!document.querySelector('.screen.active')) showScreen('home');
@@ -839,21 +930,120 @@ async function searchBooks() {
     if (!books.length) {
       statusEl.textContent = 'No results found — try different keywords or enter manually below.';
       statusEl.style.display = 'block';
-      renderManualEntry(searchTitle, resultsEl); return;
+      // Show more button if there might be more results
+    if (books.length >= 6) {
+      const moreBtn = document.createElement('button');
+      moreBtn.className = 'btn';
+      moreBtn.textContent = 'Show more results';
+      moreBtn.style.marginBottom = '10px';
+      moreBtn.onclick = async () => {
+        moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
+        try {
+          const more = hasNonLatin ? await fetchGoogleBooks(gbQuery, 8) : await fetchOpenLibrary(olQuery, 12);
+          const extra = more.slice(6);
+          extra.forEach(book => {
+            const el = document.createElement('div'); el.className = 'book-result';
+            const thumbHtml = book.thumb ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+            el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
+            el.addEventListener('click', () => selectBookWithAgeCheck(book));
+            resultsEl.insertBefore(el, moreBtn);
+          });
+        } catch(e) {}
+        moreBtn.remove();
+      };
+      resultsEl.appendChild(moreBtn);
+    }
+
+    // Author-only refine prompt
+    if (!searchTitle && searchAuthor) {
+      const refineEl = document.createElement('p');
+      refineEl.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);margin-bottom:12px;font-style:italic';
+      refineEl.textContent = `Showing books by "${searchAuthor}". Add a title above to narrow down.`;
+      resultsEl.insertBefore(refineEl, resultsEl.firstChild);
+    }
+
+    renderManualEntry(searchTitle, resultsEl); return;
     }
 
     books.forEach(book => {
       const el = document.createElement('div');
       el.className = 'book-result';
-      el.innerHTML = `<div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div>`;
-      el.addEventListener('click', () => selectBook(book));
+      const thumbHtml = book.thumb
+        ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+        : '';
+      el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
+      el.addEventListener('click', () => selectBookWithAgeCheck(book));
       resultsEl.appendChild(el);
     });
+
+    // Show more button if there might be more results
+    if (books.length >= 6) {
+      const moreBtn = document.createElement('button');
+      moreBtn.className = 'btn';
+      moreBtn.textContent = 'Show more results';
+      moreBtn.style.marginBottom = '10px';
+      moreBtn.onclick = async () => {
+        moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
+        try {
+          const more = hasNonLatin ? await fetchGoogleBooks(gbQuery, 8) : await fetchOpenLibrary(olQuery, 12);
+          const extra = more.slice(6);
+          extra.forEach(book => {
+            const el = document.createElement('div'); el.className = 'book-result';
+            const thumbHtml = book.thumb ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+            el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
+            el.addEventListener('click', () => selectBookWithAgeCheck(book));
+            resultsEl.insertBefore(el, moreBtn);
+          });
+        } catch(e) {}
+        moreBtn.remove();
+      };
+      resultsEl.appendChild(moreBtn);
+    }
+
+    // Author-only refine prompt
+    if (!searchTitle && searchAuthor) {
+      const refineEl = document.createElement('p');
+      refineEl.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);margin-bottom:12px;font-style:italic';
+      refineEl.textContent = `Showing books by "${searchAuthor}". Add a title above to narrow down.`;
+      resultsEl.insertBefore(refineEl, resultsEl.firstChild);
+    }
 
     renderManualEntry(searchTitle, resultsEl);
   } catch(e) {
     statusEl.textContent = 'Search failed — check your connection and try again.';
     statusEl.className = 'status-msg error'; statusEl.style.display = 'block';
+    // Show more button if there might be more results
+    if (books.length >= 6) {
+      const moreBtn = document.createElement('button');
+      moreBtn.className = 'btn';
+      moreBtn.textContent = 'Show more results';
+      moreBtn.style.marginBottom = '10px';
+      moreBtn.onclick = async () => {
+        moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
+        try {
+          const more = hasNonLatin ? await fetchGoogleBooks(gbQuery, 8) : await fetchOpenLibrary(olQuery, 12);
+          const extra = more.slice(6);
+          extra.forEach(book => {
+            const el = document.createElement('div'); el.className = 'book-result';
+            const thumbHtml = book.thumb ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+            el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
+            el.addEventListener('click', () => selectBookWithAgeCheck(book));
+            resultsEl.insertBefore(el, moreBtn);
+          });
+        } catch(e) {}
+        moreBtn.remove();
+      };
+      resultsEl.appendChild(moreBtn);
+    }
+
+    // Author-only refine prompt
+    if (!searchTitle && searchAuthor) {
+      const refineEl = document.createElement('p');
+      refineEl.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);margin-bottom:12px;font-style:italic';
+      refineEl.textContent = `Showing books by "${searchAuthor}". Add a title above to narrow down.`;
+      resultsEl.insertBefore(refineEl, resultsEl.firstChild);
+    }
+
     renderManualEntry(searchTitle, resultsEl);
   }
 }
@@ -865,19 +1055,31 @@ async function fetchOpenLibrary(q) {
   (data.docs||[]).forEach(d => {
     const title = d.title||'Unknown title', author = (d.author_name||['Unknown author'])[0];
     const k = title.toLowerCase()+'||'+author.toLowerCase(), year = d.first_publish_year||9999;
-    if (!seen.has(k)||year<seen.get(k).year) seen.set(k,{title,author,year:d.first_publish_year||'',key:d.key||'',source:'Open Library'});
+    const olid = d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-S.jpg` : '';
+    if (!seen.has(k)||year<seen.get(k).year) seen.set(k,{title,author,year:d.first_publish_year||'',key:d.key||'',source:'Open Library',thumb:olid});
   });
-  return Array.from(seen.values()).slice(0,6);
+  const results = Array.from(seen.values());
+  // Sort: exact title matches first, then by year
+  results.sort((a,b) => {
+    const aq = olQuery.toLowerCase(), at = a.title.toLowerCase(), bt = b.title.toLowerCase();
+    const aExact = at === aq ? 0 : at.startsWith(aq) ? 1 : 2;
+    const bExact = bt === aq ? 0 : bt.startsWith(aq) ? 1 : 2;
+    if (aExact !== bExact) return aExact - bExact;
+    return (a.year||9999) - (b.year||9999);
+  });
+  return results.slice(0,6);
 }
 
-async function fetchGoogleBooks(q) {
-  const res  = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=8`);
+async function fetchGoogleBooks(q, maxResults=8) {
+  const res  = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=${maxResults}`);
   const data = await res.json();
   const seen = new Map();
   (data.items||[]).forEach(item => {
     const info = item.volumeInfo||{}, title = info.title||'Unknown title', author = (info.authors||['Unknown author'])[0];
     const k = title.toLowerCase()+'||'+author.toLowerCase();
-    if (!seen.has(k)) seen.set(k,{title,author,year:info.publishedDate?info.publishedDate.slice(0,4):'',key:item.id||'',source:'Google Books',lang:info.language||''});
+    const thumb = info.imageLinks?.smallThumbnail || info.imageLinks?.thumbnail || '';
+    const cats = (info.categories||[]).join(' ').toLowerCase();
+    if (!seen.has(k)) seen.set(k,{title,author,year:info.publishedDate?info.publishedDate.slice(0,4):'',key:item.id||'',source:'Google Books',lang:info.language||'',thumb,cats});
   });
   return Array.from(seen.values()).slice(0,6);
 }
@@ -898,6 +1100,44 @@ function selectManualBook() {
   const author = (document.getElementById('manual-author')||{}).value||'';
   if (!title.trim()) return;
   selectBook({title:title.trim(),author:author.trim()||'Unknown author',year:'',key:''});
+}
+
+
+// ═══════════════════════════════════════════════════
+//  AGE GATE + T&C
+// ═══════════════════════════════════════════════════
+function acceptTC() {
+  localStorage.setItem('pc_tc_accepted', '1');
+  // Restore real handleRoute
+  handleRoute = _realHandleRoute;
+  navigate('key');
+}
+
+const _realHandleRoute = handleRoute;
+
+function isAdultBook(book) {
+  const ADULT_TAGS = ['erotica','erotic','adult fiction','explicit','mature','sexuality','pornography'];
+  const cats = (book.cats || '').toLowerCase();
+  return ADULT_TAGS.some(t => cats.includes(t));
+}
+
+let _pendingBookForAgeGate = null;
+
+function selectBookWithAgeCheck(book) {
+  if (isAdultBook(book)) {
+    _pendingBookForAgeGate = book;
+    document.getElementById('age-gate-book-name').textContent = '"' + book.title + '"';
+    navigate('age-gate');
+  } else {
+    selectBook(book);
+  }
+}
+
+function confirmAgeGate() {
+  if (_pendingBookForAgeGate) {
+    selectBook(_pendingBookForAgeGate);
+    _pendingBookForAgeGate = null;
+  }
 }
 
 // ═══════════════════════════════════════════════════
@@ -996,6 +1236,7 @@ function launchCompanion(book) {
   document.getElementById('icebreakers').style.display = 'block';
   updateStatusDisplay();
   renderHighlightsPanel();
+  updatePassagesToolbarBtn();
   populateIcebreakers(book);
   navigate('companion');
 }
@@ -1256,6 +1497,34 @@ function appendBubble(role, text) {
   roleEl.textContent = role === 'user' ? 'You' : STATE.companionName;
   const bubble = document.createElement('div'); bubble.className = 'message-bubble'; bubble.innerHTML = formatText(text);
   wrap.appendChild(roleEl); wrap.appendChild(bubble);
+
+  // Add copy + save actions to companion bubbles only
+  if (role === 'companion') {
+    const actions = document.createElement('div');
+    actions.className = 'bubble-actions';
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'bubble-action-btn';
+    copyBtn.textContent = 'Copy';
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(text).then(() => {
+        copyBtn.textContent = 'Copied';
+        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+      }).catch(() => showToolbarMsg('Copy not available in this browser.'));
+    };
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'bubble-action-btn';
+    saveBtn.textContent = 'Save passage';
+    saveBtn.onclick = () => {
+      savePassage(text, saveBtn);
+    };
+
+    actions.appendChild(copyBtn);
+    actions.appendChild(saveBtn);
+    wrap.appendChild(actions);
+  }
+
   document.getElementById('chat-log').appendChild(wrap);
   return wrap;
 }
@@ -1313,7 +1582,9 @@ If the conversation drifts away from the book, find a gentle bridge back — con
 
 If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.
 
-Respond in plain prose only. No bullet points. No headers. No lists of any kind.${langNote}${highlightsText}`;
+Respond in plain prose only. No bullet points. No headers. No lists of any kind.
+
+If there are any signs this reader may be a minor, default to age-appropriate discussion regardless of the book's content rating.${langNote}${highlightsText}`;
 }
 
 async function callAI() {
@@ -1604,6 +1875,89 @@ function launchCompanion(book) {
 // shelf render handled inside main handleRoute
 
 // Auto-save is called directly inside sendMessage
+
+
+// ═══════════════════════════════════════════════════
+//  PASSAGES
+// ═══════════════════════════════════════════════════
+function getPassages() {
+  if (!STATE.book) return [];
+  try { return JSON.parse(localStorage.getItem('pc_passages_' + bookKey(STATE.book)) || '[]'); } catch(e) { return []; }
+}
+
+function savePassage(text, btn) {
+  const passages = getPassages();
+  // avoid duplicates
+  if (passages.includes(text)) {
+    btn.textContent = 'Already saved';
+    btn.classList.add('saved');
+    setTimeout(() => { btn.textContent = 'Save passage'; btn.classList.remove('saved'); }, 1500);
+    return;
+  }
+  passages.push(text);
+  localStorage.setItem('pc_passages_' + bookKey(STATE.book), JSON.stringify(passages));
+  btn.textContent = 'Saved ✓';
+  btn.classList.add('saved');
+  setTimeout(() => { btn.textContent = 'Save passage'; btn.classList.remove('saved'); }, 1500);
+  updatePassagesToolbarBtn();
+  renderPassagesPanel();
+}
+
+function updatePassagesToolbarBtn() {
+  const passages = getPassages();
+  const btn = document.getElementById('passages-toolbar-btn');
+  if (!btn) return;
+  if (passages.length) {
+    btn.style.display = 'block';
+    btn.textContent = `Passages (${passages.length})`;
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+function renderPassagesPanel() {
+  const passages = getPassages();
+  const listEl   = document.getElementById('passages-list');
+  const countEl  = document.getElementById('passages-count');
+  if (!passages.length) {
+    countEl.textContent = 'No passages saved yet';
+    listEl.innerHTML = '';
+    return;
+  }
+  countEl.textContent = `${passages.length} passage${passages.length !== 1 ? 's' : ''} saved`;
+  listEl.innerHTML = passages.map((p, i) =>
+    `<div class="passage-item">${formatText(p)}</div>`
+  ).join('');
+}
+
+function togglePassagesPanel() {
+  const panel = document.getElementById('passages-panel');
+  const btn   = document.getElementById('passages-toolbar-btn');
+  panel.classList.toggle('open');
+  document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('font-toolbar-btn').classList.remove('active');
+  document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  btn.classList.toggle('active', panel.classList.contains('open'));
+  if (panel.classList.contains('open')) renderPassagesPanel();
+}
+
+function copyAllPassages() {
+  const passages = getPassages();
+  if (!passages.length) { showToolbarMsg('No passages saved yet.'); return; }
+  const text = passages.map((p, i) => `[${i+1}] ${p}`).join('\n\n');
+  navigator.clipboard.writeText(text).then(() => {
+    showToolbarMsg(`${passages.length} passage${passages.length !== 1 ? 's' : ''} copied to clipboard.`);
+  }).catch(() => showToolbarMsg('Copy not available in this browser.'));
+}
+
+// ═══════════════════════════════════════════════════
+//  END CONVERSATION
+// ═══════════════════════════════════════════════════
+function endConversation() {
+  saveCurrentConversation();
+  navigate('home');
+}
 
 </script>
 </body>
