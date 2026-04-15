@@ -374,10 +374,16 @@
     <h1>Which book?</h1>
 
     <div class="field">
-      <label for="book-search-input">Search by title or author</label>
+      <label for="book-search-title">Title</label>
+      <input type="search" id="book-search-title"
+             placeholder="e.g. 射鵰英雄傳, Reacher…"
+             onkeydown="if(event.key==='Enter') searchBooks()" />
+    </div>
+    <div class="field">
+      <label for="book-search-author">Author <span style="font-weight:normal;text-transform:none">(optional)</span></label>
       <div class="search-row">
-        <input type="search" id="book-search-input"
-               placeholder="Title, author, or describe the book…"
+        <input type="search" id="book-search-author"
+               placeholder="e.g. 金庸, Lee Child…"
                onkeydown="if(event.key==='Enter') searchBooks()" />
         <button class="btn btn-primary btn-small" onclick="searchBooks()">Search</button>
       </div>
@@ -782,28 +788,32 @@ async function interpretSearchQuery(q) {
 }
 
 async function searchBooks() {
-  const raw = document.getElementById('book-search-input').value.trim();
+  const rawTitle  = document.getElementById('book-search-title').value.trim();
+  const rawAuthor = document.getElementById('book-search-author').value.trim();
+  const raw = rawTitle || rawAuthor;
   if (!raw) return;
   const statusEl  = document.getElementById('search-status');
   const resultsEl = document.getElementById('search-results');
   resultsEl.innerHTML = '';
 
-  let searchTitle = raw, searchAuthor = '';
-  const isNL = looksLikeNaturalLanguage(raw);
+  let searchTitle = rawTitle, searchAuthor = rawAuthor;
+  statusEl.textContent = 'Searching…'; statusEl.className = 'status-msg'; statusEl.style.display = 'block';
 
+  // Only apply NL interpretation if user filled title field with a descriptive phrase
+  // and left author blank (so we don't mangle explicit author entries)
+  const isNL = !rawAuthor && looksLikeNaturalLanguage(rawTitle);
   if (isNL && STATE.apiKey) {
-    statusEl.textContent = 'Understanding your search…'; statusEl.className = 'status-msg'; statusEl.style.display = 'block';
-    const interp = await interpretSearchQuery(raw);
-    searchTitle = interp.title; searchAuthor = interp.author;
+    statusEl.textContent = 'Understanding your search…';
+    const interp = await interpretSearchQuery(rawTitle);
+    searchTitle = interp.title;
+    searchAuthor = interp.author || rawAuthor;
     statusEl.textContent = `Searching for "${searchTitle}"${searchAuthor ? ' by ' + searchAuthor : ''}…`;
-  } else {
-    statusEl.textContent = 'Searching…'; statusEl.className = 'status-msg'; statusEl.style.display = 'block';
   }
 
-  const q = searchAuthor ? `${searchTitle} ${searchAuthor}` : searchTitle;
+  const q = [searchTitle, searchAuthor].filter(Boolean).join(' ');
 
   // Non-Latin script detection — skip Open Library, go straight to Google Books
-  const hasNonLatin = /[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0600-\u06ff\u0400-\u04ff\u0900-\u097f\u0e00-\u0e7f]/.test(raw);
+  const hasNonLatin = /[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0600-\u06ff\u0400-\u04ff\u0900-\u097f\u0e00-\u0e7f]/.test(q);
 
   try {
     let books = [];
