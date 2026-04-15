@@ -810,7 +810,16 @@ async function searchBooks() {
     statusEl.textContent = `Searching for "${searchTitle}"${searchAuthor ? ' by ' + searchAuthor : ''}…`;
   }
 
-  const q = [searchTitle, searchAuthor].filter(Boolean).join(' ');
+  // Build queries with field qualifiers
+  // Google Books supports intitle: and inauthor: operators
+  const gbParts = [];
+  if (searchTitle)  gbParts.push('intitle:' + searchTitle);
+  if (searchAuthor) gbParts.push('inauthor:' + searchAuthor);
+  const gbQuery = gbParts.join('+');
+
+  // Open Library uses plain combined query (no field operators)
+  const olQuery = [searchTitle, searchAuthor].filter(Boolean).join(' ');
+  const q = olQuery;
 
   // Non-Latin script detection — skip Open Library, go straight to Google Books
   const hasNonLatin = /[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0600-\u06ff\u0400-\u04ff\u0900-\u097f\u0e00-\u0e7f]/.test(q);
@@ -819,10 +828,10 @@ async function searchBooks() {
     let books = [];
     if (hasNonLatin) {
       statusEl.textContent = 'Searching Google Books…'; statusEl.style.display = 'block';
-      books = await fetchGoogleBooks(q);
+      books = await fetchGoogleBooks(gbQuery);
     } else {
-      books = await fetchOpenLibrary(q);
-      if (!books.length) { statusEl.textContent = 'Trying Google Books…'; statusEl.style.display = 'block'; books = await fetchGoogleBooks(q); }
+      books = await fetchOpenLibrary(olQuery);
+      if (!books.length) { statusEl.textContent = 'Trying Google Books…'; statusEl.style.display = 'block'; books = await fetchGoogleBooks(gbQuery); }
     }
 
     statusEl.style.display = 'none';
