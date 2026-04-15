@@ -171,12 +171,19 @@
 
     .status-msg {
       font-size: 0.9rem;
-      padding: 10px 14px;
-      border: var(--border);
+      padding: 6px 0;
       margin-bottom: 16px;
+      color: var(--grey-dark);
+      font-style: italic;
     }
 
-    .status-msg.error { border-left: 4px solid var(--black); background: var(--grey-light); }
+    .status-msg.error {
+      font-style: normal;
+      color: var(--black);
+      border-left: 4px solid var(--black);
+      background: var(--grey-light);
+      padding: 10px 14px;
+    }
 
     /* ── SCREEN: KEY ENTRY ── */
     #key-hint { font-size: 0.8rem; color: var(--grey-dark); margin-top: 6px; }
@@ -196,11 +203,13 @@
     /* ── SCREEN: BOOK SEARCH ── */
     .search-row {
       display: flex;
+      flex-direction: row;
       gap: 10px;
+      align-items: flex-start;
     }
 
-    .search-row input { flex: 1; }
-    .search-row .btn { width: auto; white-space: nowrap; }
+    .search-row input { flex: 1; min-width: 0; }
+    .search-row .btn { width: auto; white-space: nowrap; flex-shrink: 0; }
 
     #search-results { margin-top: 20px; }
 
@@ -382,10 +391,7 @@
     }
 
     /* responsive: full width on small screens already via max-width */
-    @media (max-width: 640px) {
-      .search-row { flex-direction: column; }
-      .search-row .btn { width: 100%; }
-    }
+
   </style>
 </head>
 <body>
@@ -397,7 +403,7 @@
   <!-- ── HEADER ── -->
   <header class="site-header">
     <div class="site-name">Page Commons</div>
-    <div class="site-tagline">A reading companion</div>
+    <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.2</div>
   </header>
 
   <!-- ════════════════════════════════════════
@@ -627,7 +633,7 @@ async function searchBooks() {
     statusEl.style.display = 'none';
 
     if (!books.length) {
-      statusEl.textContent = 'No results found. Try different keywords.';
+      statusEl.textContent = 'Not in Open Library — enter the book manually below.';
       statusEl.style.display = 'block';
       return;
     }
@@ -643,6 +649,7 @@ async function searchBooks() {
       el.addEventListener('click', () => selectBook(book));
       resultsEl.appendChild(el);
     });
+    renderManualEntry(q, resultsEl);
   } catch(e) {
     statusEl.textContent = 'Search failed. Check your connection and try again.';
     statusEl.style.display = 'block';
@@ -959,6 +966,49 @@ function esc(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+
+function renderManualEntry(prefill, container) {
+  const existing = container.querySelector('.manual-entry');
+  if (existing) existing.remove();
+  const wrap = document.createElement('div');
+  wrap.className = 'manual-entry';
+  wrap.style.cssText = 'border-top:1px solid #000;padding-top:16px;margin-top:8px';
+
+  const note = document.createElement('p');
+  note.style.cssText = 'font-size:0.85rem;color:#666;margin-bottom:12px';
+  note.textContent = 'Not seeing your book? Enter it manually:';
+  wrap.appendChild(note);
+
+  const tf = document.createElement('div');
+  tf.className = 'field';
+  tf.innerHTML = '<label>Title</label><input type="text" id="manual-title" />';
+  wrap.appendChild(tf);
+
+  const af = document.createElement('div');
+  af.className = 'field';
+  af.innerHTML = '<label>Author</label><input type="text" id="manual-author" placeholder="Author name (optional)" />';
+  wrap.appendChild(af);
+
+  const btn = document.createElement('button');
+  btn.className = 'btn btn-primary';
+  btn.textContent = 'Start companion';
+  btn.onclick = selectManualBook;
+  wrap.appendChild(btn);
+
+  container.appendChild(wrap);
+  const ti = document.getElementById('manual-title');
+  if (ti) ti.value = prefill || '';
+}
+
+function selectManualBook() {
+  const titleEl  = document.getElementById('manual-title');
+  const authorEl = document.getElementById('manual-author');
+  const title  = titleEl  ? titleEl.value.trim()  : '';
+  const author = authorEl ? authorEl.value.trim() : '';
+  if (!title) return;
+  selectBook({ title, author: author || 'Unknown author', year: '', key: '' });
+}
+
 </script>
 </body>
 </html>
