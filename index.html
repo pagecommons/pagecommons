@@ -759,11 +759,12 @@ async function processOfflineQueue() {
   } catch(e) {}
 
   updateGreeting();
-  // Show T&C on first visit
+  // Show T&C on first visit — use showScreen directly, don't override handleRoute
   if (!localStorage.getItem('pc_tc_accepted')) {
-    handleRoute = function() { showScreen('tc'); };
+    showScreen('tc');
+  } else {
+    handleRoute();
   }
-  handleRoute();
   // Safety net for local file opening — ensure at least one screen is visible
   if (!document.querySelector('.screen.active')) showScreen('home');
 })();
@@ -1143,12 +1144,8 @@ function selectManualBook() {
 // ═══════════════════════════════════════════════════
 function acceptTC() {
   localStorage.setItem('pc_tc_accepted', '1');
-  // Restore real handleRoute
-  handleRoute = _realHandleRoute;
   navigate('key');
 }
-
-const _realHandleRoute = handleRoute;
 
 function isAdultBook(book) {
   const ADULT_TAGS = ['erotica','erotic','adult fiction','explicit','mature','sexuality','pornography'];
