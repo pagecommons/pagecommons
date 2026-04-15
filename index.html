@@ -967,6 +967,9 @@ async function searchBooks() {
 
     // Render a batch of book results into container
     function renderBookBatch(batch, container, insertBefore) {
+      // always insert before manual entry if present
+      const manualEntry = container.querySelector('.manual-entry');
+      const anchor = insertBefore || manualEntry || null;
       batch.forEach(book => {
         const el = document.createElement('div'); el.className = 'book-result';
         const thumbHtml = book.thumb
@@ -974,7 +977,7 @@ async function searchBooks() {
           : '';
         el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
         el.addEventListener('click', () => selectBookWithAgeCheck(book));
-        if (insertBefore) container.insertBefore(el, insertBefore);
+        if (anchor) container.insertBefore(el, anchor);
         else container.appendChild(el);
       });
     }
@@ -1003,25 +1006,30 @@ async function searchBooks() {
             more = await fetchOpenLibrary(_olQuery, _page * 6 + 6);
             more = more.filter(b => !_seen.has(b.title.toLowerCase() + '||' + b.author.toLowerCase()));
           }
-          // dedupe against already shown
           const fresh = more.filter(b => {
             const k = b.title.toLowerCase() + '||' + b.author.toLowerCase();
             if (_seen.has(k)) return false;
             _seen.add(k); return true;
           });
+          // remove btn, insert new results before manual entry
+          const manualEntry = resultsEl.querySelector('.manual-entry');
           moreBtn.remove();
           if (fresh.length) {
-            renderBookBatch(fresh, resultsEl, null);
+            renderBookBatch(fresh, resultsEl, manualEntry || null);
             if (fresh.length >= 4) addShowMoreBtn();
           } else {
             const noMore = document.createElement('p');
             noMore.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);font-style:italic;margin-bottom:12px';
             noMore.textContent = 'No more results found.';
-            resultsEl.appendChild(noMore);
+            if (manualEntry) resultsEl.insertBefore(noMore, manualEntry);
+            else resultsEl.appendChild(noMore);
           }
         } catch(e) { moreBtn.textContent = 'Show more results'; moreBtn.disabled = false; }
       };
-      resultsEl.appendChild(moreBtn);
+      // Insert show more button before manual entry so it stays above it
+      const manualEntry = resultsEl.querySelector('.manual-entry');
+      if (manualEntry) resultsEl.insertBefore(moreBtn, manualEntry);
+      else resultsEl.appendChild(moreBtn);
     }
 
     // Show more button if initial results filled a full page
