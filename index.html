@@ -965,41 +965,67 @@ async function searchBooks() {
     renderManualEntry(searchTitle, resultsEl); return;
     }
 
-    const displayBooks = books.slice(0,6);
-    displayBooks.forEach(book => {
-      const el = document.createElement('div');
-      el.className = 'book-result';
-      const thumbHtml = book.thumb
-        ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">`
-        : '';
-      el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
-      el.addEventListener('click', () => selectBookWithAgeCheck(book));
-      resultsEl.appendChild(el);
-    });
+    // Render a batch of book results into container
+    function renderBookBatch(batch, container, insertBefore) {
+      batch.forEach(book => {
+        const el = document.createElement('div'); el.className = 'book-result';
+        const thumbHtml = book.thumb
+          ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+          : '';
+        el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
+        el.addEventListener('click', () => selectBookWithAgeCheck(book));
+        if (insertBefore) container.insertBefore(el, insertBefore);
+        else container.appendChild(el);
+      });
+    }
 
-    // Show more button if there are more than 6 results
-    if (books.length > 6) {
+    renderBookBatch(books.slice(0, 6), resultsEl, null);
+
+    // Show more — paginated, always fetches fresh next page
+    let _page = 1;
+    const _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
+    const _seen = new Set(books.map(b => b.title.toLowerCase() + '||' + b.author.toLowerCase()));
+
+    function addShowMoreBtn() {
       const moreBtn = document.createElement('button');
       moreBtn.className = 'btn';
       moreBtn.textContent = 'Show more results';
       moreBtn.style.marginBottom = '10px';
-      const _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
       moreBtn.onclick = async () => {
         moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
+        _page++;
         try {
-          const extra = books.slice(6);
-          extra.forEach(book => {
-            const el = document.createElement('div'); el.className = 'book-result';
-            const thumbHtml = book.thumb ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
-            el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
-            el.addEventListener('click', () => selectBookWithAgeCheck(book));
-            resultsEl.insertBefore(el, moreBtn);
+          let more = [];
+          if (_hasNonLatin) {
+            const startIndex = (_page - 1) * 6;
+            more = await fetchGoogleBooks(_gbQuery, 6, startIndex);
+          } else {
+            more = await fetchOpenLibrary(_olQuery, _page * 6 + 6);
+            more = more.filter(b => !_seen.has(b.title.toLowerCase() + '||' + b.author.toLowerCase()));
+          }
+          // dedupe against already shown
+          const fresh = more.filter(b => {
+            const k = b.title.toLowerCase() + '||' + b.author.toLowerCase();
+            if (_seen.has(k)) return false;
+            _seen.add(k); return true;
           });
-        } catch(e) {}
-        moreBtn.remove();
+          moreBtn.remove();
+          if (fresh.length) {
+            renderBookBatch(fresh, resultsEl, null);
+            if (fresh.length >= 4) addShowMoreBtn();
+          } else {
+            const noMore = document.createElement('p');
+            noMore.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);font-style:italic;margin-bottom:12px';
+            noMore.textContent = 'No more results found.';
+            resultsEl.appendChild(noMore);
+          }
+        } catch(e) { moreBtn.textContent = 'Show more results'; moreBtn.disabled = false; }
       };
       resultsEl.appendChild(moreBtn);
     }
+
+    // Show more button if initial results filled a full page
+    if (books.length >= 6) addShowMoreBtn();
 
     // Author-only refine prompt
     if (!searchTitle && searchAuthor) {
@@ -1049,8 +1075,8 @@ async function searchBooks() {
   }
 }
 
-async function fetchOpenLibrary(q, limit=10) {
-  const res  = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=${limit}&fields=key,title,author_name,first_publish_year`);
+async function fetchOpenLibrary(q, limit=10, offset=0) {
+  const res  = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=${limit}&offset=${offset}&fields=key,title,author_name,first_publish_year`);
   const data = await res.json();
   const seen = new Map();
   (data.docs||[]).forEach(d => {
@@ -1071,8 +1097,8 @@ async function fetchOpenLibrary(q, limit=10) {
   return results;
 }
 
-async function fetchGoogleBooks(q, maxResults=8) {
-  const res  = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=${maxResults}`);
+async function fetchGoogleBooks(q, maxResults=8, startIndex=0) {
+  const res  = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=${maxResults}&startIndex=${startIndex}`);
   const data = await res.json();
   const seen = new Map();
   (data.items||[]).forEach(item => {
