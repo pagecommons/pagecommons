@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Page Commons</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.svg">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -252,6 +254,22 @@
     }
     .passages-empty { font-size: 0.9rem; color: var(--grey-dark); font-style: italic; }
 
+    /* REPLY LENGTH PANEL */
+    #length-panel {
+      display: none; border: var(--border); border-radius: var(--radius-sm);
+      padding: 16px; margin-bottom: 16px; background: var(--grey-light);
+    }
+    #length-panel.open { display: block; }
+    .length-options { display: flex; gap: 8px; }
+    .length-opt {
+      flex: 1; border: var(--border); border-radius: var(--radius-sm);
+      background: var(--white); font-family: var(--font-serif);
+      cursor: pointer; padding: 10px 4px; text-align: center; min-height: 44px; color: var(--black);
+      font-size: 0.88rem;
+    }
+    .length-opt.active { background: var(--black); color: var(--white); }
+    .length-opt:active { opacity: 0.7; }
+
     /* T&C SCREEN */
     .tc-section { margin-bottom: 20px; }
 
@@ -267,7 +285,7 @@
 
   <header class="site-header">
     <div class="site-name">Page Commons</div>
-    <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.10</div>
+    <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.11</div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -363,7 +381,10 @@
        KEY SCREEN
        ══════════════════════════════════ -->
   <section id="screen-key" class="screen">
-    <button class="back-link" onclick="navigate('home')">← Back</button>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:24px">
+      <button class="back-link" style="margin-bottom:0" onclick="navigate('home')">← Back</button>
+      <button class="back-link" style="margin-bottom:0" onclick="navigate('shelf')">Your shelf →</button>
+    </div>
     <h1>Your companion awaits</h1>
     <p>Choose your AI provider and enter your API key. Your key stays in your browser — it never touches our servers.</p>
 
@@ -430,6 +451,7 @@
       </div>
     </div>
 
+    <div class="note" style="margin-bottom:12px">Tip: paste an ISBN (e.g. 9780747532743) to find an exact edition.</div>
     <div id="search-status" class="status-msg" style="display:none"></div>
     <div id="search-results"></div>
 
@@ -468,6 +490,10 @@
       <button class="status-opt" onclick="setReadingStatus('finished')">
         <span class="status-opt-label">Just finished</span>
         <span class="status-opt-sub">Ready to talk about all of it</span>
+      </button>
+      <button class="status-opt" onclick="setReadingStatus('revisiting')">
+        <span class="status-opt-label">Read before, revisiting</span>
+        <span class="status-opt-sub">Coming back with fresh eyes</span>
       </button>
     </div>
   </section>
@@ -521,7 +547,7 @@
         <button class="toolbar-btn" id="passages-toolbar-btn" style="display:none" onclick="togglePassagesPanel()">Passages</button>
         <button class="toolbar-btn" onclick="navigate('shelf')">Shelf</button>
         <button class="toolbar-btn" onclick="endConversation()">Done</button>
-        <button class="toolbar-btn" onclick="showOtherOptions()">More</button>
+        <button class="toolbar-btn" id="length-toolbar-btn" onclick="toggleLengthPanel()">More</button>
       </div>
 
       <div id="toolbar-msg"></div>
@@ -539,6 +565,16 @@
       <div id="highlights-panel">
         <div id="highlights-count" style="font-size:0.85rem;color:var(--grey-dark);margin-bottom:10px"></div>
         <div id="highlights-list"  style="font-size:0.9rem;line-height:1.6"></div>
+      </div>
+
+      <div id="length-panel">
+        <div class="font-panel-label">Reply length</div>
+        <div class="length-options">
+          <button class="length-opt active" data-length="short"    onclick="setReplyLength('short')">Short</button>
+          <button class="length-opt"        data-length="medium"   onclick="setReplyLength('medium')">Medium</button>
+          <button class="length-opt"        data-length="detailed" onclick="setReplyLength('detailed')">Detailed</button>
+        </div>
+        <p style="font-size:0.78rem;color:var(--grey-dark);margin-top:10px;margin-bottom:0">Short keeps replies to a few sentences. Detailed allows longer responses.</p>
       </div>
 
       <div id="passages-panel">
@@ -616,10 +652,6 @@
 </div>
 
 <script>
-window.onerror = function(msg, src, line, col, err) {
-  document.body.innerHTML += '<p style="color:red;padding:20px;font-family:monospace">JS ERROR: ' + msg + ' (line ' + line + ')</p>';
-  return false;
-};
 // ═══════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════
@@ -638,7 +670,8 @@ const STATE = {
   currentConvId:   null,
   currentConvName: null,
   pendingBook:     null,   // held during age gate
-  passages:        [],     // saved passages for current book // cached per language
+  passages:        [],     // saved passages for current book
+  replyLength:     'medium', // 'short' | 'medium' | 'detailed'
 };
 
 const STATIC_PROMPTS = [
@@ -854,36 +887,48 @@ async function searchBooks() {
   const rawAuthor = document.getElementById('book-search-author').value.trim();
   const raw = rawTitle || rawAuthor;
   if (!raw) return;
-  const statusEl  = document.getElementById('search-status');
-  const resultsEl = document.getElementById('search-results');
-  resultsEl.innerHTML = '';
 
-  let searchTitle = rawTitle, searchAuthor = rawAuthor;
-  statusEl.textContent = 'Searching…'; statusEl.className = 'status-msg'; statusEl.style.display = 'block';
-
-  // Only apply NL interpretation if user filled title field with a descriptive phrase
-  // and left author blank (so we don't mangle explicit author entries)
-  const isNL = !rawAuthor && looksLikeNaturalLanguage(rawTitle);
-  if (isNL && STATE.apiKey) {
-    statusEl.textContent = 'Understanding your search…';
-    const interp = await interpretSearchQuery(rawTitle);
-    searchTitle = interp.title;
-    searchAuthor = interp.author || rawAuthor;
-    statusEl.textContent = `Searching for "${searchTitle}"${searchAuthor ? ' by ' + searchAuthor : ''}…`;
+  // ISBN detection — route directly to Open Library ISBN API
+  const isbnClean = raw.replace(/[-\s]/g, '');
+  if (/^(97[89])?\d{9}[\dX]$/.test(isbnClean)) {
+    const statusEl  = document.getElementById('search-status');
+    const resultsEl = document.getElementById('search-results');
+    statusEl.textContent = 'Looking up ISBN…'; statusEl.className = 'status-msg'; statusEl.style.display = 'block';
+    resultsEl.innerHTML = '';
+    try {
+      const isbnUrl = 'https://openlibrary.org/api/books?bibkeys=ISBN:' + isbnClean + '&format=json&jscmd=data';
+      const res  = await fetch(isbnUrl);
+      const data = await res.json();
+      const key  = 'ISBN:' + isbnClean;
+      if (data[key]) {
+        const b = data[key];
+        const book = {
+          title:  b.title || 'Unknown title',
+          author: (b.authors || [{name:'Unknown author'}])[0].name,
+          year:   b.publish_date ? b.publish_date.slice(-4) : '',
+          key:    '',
+          source: 'Open Library (ISBN)',
+          thumb:  b.cover ? (b.cover.small || '') : '',
+        };
+        statusEl.style.display = 'none';
+        const el = document.createElement('div'); el.className = 'book-result';
+        const thumbHtml = book.thumb ? '<img class="book-cover-thumb" src="' + esc(book.thumb) + '" alt="" loading="lazy" onerror="this.style.display=\"none\"">' : '';
+        el.innerHTML = '<div class="book-result-inner">' + thumbHtml + '<div class="book-result-text"><div class="book-result-title">' + esc(book.title) + '</div><div class="book-result-author">' + esc(book.author) + '</div><div class="book-result-meta">' + (book.year ? book.year + ' · ' : '') + esc(book.source) + '</div></div></div>';
+        el.addEventListener('click', () => selectBookWithAgeCheck(book));
+        resultsEl.appendChild(el);
+      } else {
+        statusEl.textContent = 'ISBN not found — try searching by title instead.';
+        statusEl.style.display = 'block';
+        renderManualEntry(raw, resultsEl);
+      }
+    } catch(e) {
+      document.getElementById('search-status').textContent = 'ISBN lookup failed — check your connection.';
+      document.getElementById('search-status').style.display = 'block';
+    }
+    return;
   }
 
-  // Build queries with field qualifiers
-  // Google Books supports intitle: and inauthor: operators
-  const gbParts = [];
-  if (searchTitle)  gbParts.push('intitle:' + searchTitle);
-  if (searchAuthor) gbParts.push('inauthor:' + searchAuthor);
-  const gbQuery = gbParts.join('+');
-
-  // Open Library uses plain combined query (no field operators)
-  const olQuery = [searchTitle, searchAuthor].filter(Boolean).join(' ');
-  const q = olQuery;
-
-  // Non-Latin script detection — skip Open Library, go straight to Google Books
+    // Non-Latin script detection — skip Open Library, go straight to Google Books
   const hasNonLatin = /[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0600-\u06ff\u0400-\u04ff\u0900-\u097f\u0e00-\u0e7f]/.test(q);
 
   try {
@@ -893,7 +938,16 @@ async function searchBooks() {
       books = await fetchGoogleBooks(gbQuery);
     } else {
       books = await fetchOpenLibrary(olQuery);
+      // If combined title+author returns nothing, try title-only fallback
+      if (!books.length && searchTitle && searchAuthor) {
+        statusEl.textContent = 'Trying title only…'; statusEl.style.display = 'block';
+        books = await fetchOpenLibrary(searchTitle);
+      }
       if (!books.length) { statusEl.textContent = 'Trying Google Books…'; statusEl.style.display = 'block'; books = await fetchGoogleBooks(gbQuery); }
+      // Google Books fallback: also try title-only if combined returns nothing
+      if (!books.length && searchTitle && searchAuthor) {
+        books = await fetchGoogleBooks('intitle:' + searchTitle);
+      }
     }
 
     statusEl.style.display = 'none';
@@ -1125,7 +1179,7 @@ function isAdultBook(book) {
 
 let _pendingBookForAgeGate = null;
 
-function selectBookWithAgeCheck(book) {
+async function selectBookWithAgeCheck(book) {
   if (isAdultBook(book)) {
     _pendingBookForAgeGate = book;
     document.getElementById('age-gate-book-name').textContent = '"' + book.title + '"';
@@ -1135,17 +1189,82 @@ function selectBookWithAgeCheck(book) {
   }
 }
 
-function confirmAgeGate() {
+async function confirmAgeGate() {
   if (_pendingBookForAgeGate) {
-    selectBook(_pendingBookForAgeGate);
+    await selectBook(_pendingBookForAgeGate);
     _pendingBookForAgeGate = null;
   }
+}
+
+
+// ═══════════════════════════════════════════════════
+//  STATUS SCREEN TRANSLATION
+// ═══════════════════════════════════════════════════
+const STATUS_OPTIONS_EN = [
+  { value: 'considering', label: 'Thinking about reading it',  sub: "Help me decide if it's for me" },
+  { value: 'started',     label: 'Just started',               sub: "I'm in the early pages" },
+  { value: 'midway',      label: 'Halfway through',            sub: 'Getting into it' },
+  { value: 'finished',    label: 'Just finished',              sub: 'Ready to talk about all of it' },
+  { value: 'revisiting',  label: 'Read before, revisiting',   sub: 'Coming back with fresh eyes' },
+];
+
+async function renderStatusScreen(book) {
+  const lang = STATE.detectedLang;
+  const chatLang = STATE.chatLanguage;
+  let options = STATUS_OPTIONS_EN;
+
+  // Translate if native language chosen and language detected
+  if (chatLang === 'native' && lang && STATE.apiKey) {
+    const cacheKey = 'pc_status_opts_' + lang.toLowerCase();
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try { options = JSON.parse(cached); } catch(e) {}
+    } else {
+      try {
+        const prompt = `Translate these 5 reading status options into ${lang}. Return ONLY a JSON array of 5 objects with "label" and "sub" keys, in the same order. No other text.\n${JSON.stringify(STATUS_OPTIONS_EN.map(o => ({label:o.label, sub:o.sub})))}`;
+        let text = '';
+        if (STATE.provider === 'anthropic') {
+          const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:300, messages:[{role:'user',content:prompt}] }) });
+          text = (await res.json()).content?.[0]?.text || '';
+        } else if (STATE.provider === 'gemini') {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
+          text = (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '';
+        } else if (STATE.provider === 'groq') {
+          const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:300, messages:[{role:'user',content:prompt}] }) });
+          text = (await res.json()).choices?.[0]?.message?.content || '';
+        }
+        const translated = JSON.parse(text.replace(/```json|```/g,'').trim());
+        if (Array.isArray(translated) && translated.length === 5) {
+          options = STATUS_OPTIONS_EN.map((o, i) => ({ ...o, label: translated[i].label || o.label, sub: translated[i].sub || o.sub }));
+          localStorage.setItem(cacheKey, JSON.stringify(options));
+        }
+      } catch(e) { /* fall back to English */ }
+    }
+  }
+
+  // Render buttons dynamically
+  const container = document.querySelector('#screen-status .status-options');
+  if (!container) return;
+  container.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'status-opt';
+    btn.onclick = () => setReadingStatus(opt.value);
+    btn.innerHTML = `<span class="status-opt-label">${esc(opt.label)}</span><span class="status-opt-sub">${esc(opt.sub)}</span>`;
+    container.appendChild(btn);
+  });
+
+  // Update heading
+  const h1 = document.getElementById('status-book-title');
+  if (h1) h1.textContent = lang && chatLang === 'native'
+    ? book.title  // just show title, keep heading neutral
+    : 'Where are you with "' + book.title + '"?';
 }
 
 // ═══════════════════════════════════════════════════
 //  BOOK SELECTION → STATUS → LANGUAGE → COMPANION
 // ═══════════════════════════════════════════════════
-function selectBook(book) {
+async function selectBook(book) {
   STATE.book = book;
   STATE.messages = [];
 
@@ -1165,18 +1284,17 @@ function selectBook(book) {
     STATE.detectedLang  = detectedLang;
     // restore thinking phrases if native language was chosen
     if (STATE.chatLanguage === 'native' && detectedLang) {
-      generateThinkingPhrases(detectedLang);
+      await generateThinkingPhrases(detectedLang);
     }
     launchCompanion(book);
   } else {
     // new book — ask reading status first
-    document.getElementById('status-book-title').textContent =
-      'Where are you with "' + book.title + '"?';
+    renderStatusScreen(book);
     navigate('status');
   }
 }
 
-function setReadingStatus(status) {
+async function setReadingStatus(status) {
   STATE.readingStatus = status;
   localStorage.setItem('pc_status_' + bookKey(STATE.book), status);
 
@@ -1199,7 +1317,7 @@ function setReadingStatus(status) {
   }
 }
 
-function setLanguage(choice) {
+async function setLanguage(choice) {
   STATE.chatLanguage = choice;
   localStorage.setItem('pc_lang_' + bookKey(STATE.book), choice);
   // if native, generate thinking phrases in that language
@@ -1580,7 +1698,10 @@ function appendBubble(role, text) {
 
     const saveBtn = document.createElement('button');
     saveBtn.className = 'bubble-action-btn';
-    saveBtn.textContent = 'Save passage';
+    // Check if already saved
+    const alreadySaved = getPassages().includes(text);
+    saveBtn.textContent = alreadySaved ? 'Saved ✓' : 'Save passage';
+    if (alreadySaved) saveBtn.classList.add('saved');
     saveBtn.onclick = () => {
       savePassage(text, saveBtn);
     };
@@ -1627,6 +1748,7 @@ function buildSystemPrompt() {
     started:     'The reader has just started this book. Be curious about their first impressions. No spoilers beyond the early pages.',
     midway:      'The reader is halfway through. Engage with what they\'ve experienced so far. Check before discussing anything from the second half.',
     finished:    'The reader has just finished this book. Full discussion is welcome — no spoiler restrictions.',
+    revisiting:  'The reader has read this book before and is revisiting it. They may have fresh perspectives or notice things they missed first time. Treat them as someone who knows the book well.',
   };
 
   const statusNote = statusInstructions[STATE.readingStatus] || 'Be spoiler-aware — ask the reader how far they\'ve got before revealing plot details.';
@@ -1646,6 +1768,10 @@ ${statusNote}
 If the conversation drifts away from the book, find a gentle bridge back — connect what the reader said to something in the book rather than refusing or redirecting bluntly. You are a reading companion, not a general assistant.
 
 If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.
+
+${STATE.replyLength === 'short' ? 'Keep your response very brief — 2 to 3 short sentences maximum.' : STATE.replyLength === 'detailed' ? 'You may give fuller, more detailed responses when the topic warrants it.' : 'Keep responses concise — 2 to 4 short paragraphs maximum.'}
+
+Be honest about the limits of your knowledge. If you are not confident about specific details of this book — plot points, character names, themes — say so openly and invite the reader to share what they know. Never confabulate or pretend to know something you are uncertain about. A good reading companion says "I'm not sure about that — what did you make of it?" rather than guessing.
 
 Respond in plain prose only. No bullet points. No headers. No lists of any kind.
 
@@ -1848,7 +1974,7 @@ function renderConvList(book) {
   });
 }
 
-function continueConversation(convId) {
+async function continueConversation(convId) {
   const convs = getConvs(STATE.book);
   const conv  = convs.find(c => c.id === convId);
   if (!conv) return;
@@ -1862,7 +1988,7 @@ function continueConversation(convId) {
   STATE.currentConvName = conv.name;
 
   if (STATE.chatLanguage === 'native' && STATE.detectedLang) {
-    generateThinkingPhrases(STATE.detectedLang);
+    await generateThinkingPhrases(STATE.detectedLang);
   }
 
   document.getElementById('book-title-display').textContent  = STATE.book.title;
@@ -1901,7 +2027,7 @@ function deleteConversation(convId) {
   renderConvList(STATE.book);
 }
 
-function startNewConversation() {
+async function startNewConversation() {
   const bk = bookKey(STATE.book);
   STATE.readingStatus  = localStorage.getItem('pc_status_' + bk) || null;
   STATE.chatLanguage   = localStorage.getItem('pc_lang_' + bk) || 'english';
@@ -1911,15 +2037,14 @@ function startNewConversation() {
   STATE.currentConvName = null;
 
   if (STATE.chatLanguage === 'native' && STATE.detectedLang) {
-    generateThinkingPhrases(STATE.detectedLang);
+    await generateThinkingPhrases(STATE.detectedLang);
   }
 
   launchCompanion(STATE.book);
 }
 
 function updateBookStatus() {
-  document.getElementById('status-book-title').textContent =
-    'Where are you now with "' + STATE.book.title + '"?';
+  renderStatusScreen(STATE.book);
   navigate('status');
 }
 
@@ -1929,6 +2054,33 @@ function updateBookStatus() {
 
 // Auto-save is called directly inside sendMessage
 
+
+
+// ═══════════════════════════════════════════════════
+//  REPLY LENGTH
+// ═══════════════════════════════════════════════════
+function toggleLengthPanel() {
+  const panel = document.getElementById('length-panel');
+  const btn   = document.getElementById('length-toolbar-btn');
+  panel.classList.toggle('open');
+  // close other panels
+  document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('passages-panel').classList.remove('open');
+  document.getElementById('font-toolbar-btn').classList.remove('active');
+  document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('passages-toolbar-btn').classList.remove('active');
+  btn.classList.toggle('active', panel.classList.contains('open'));
+}
+
+function setReplyLength(length) {
+  STATE.replyLength = length;
+  localStorage.setItem('pc_reply_length', length);
+  document.querySelectorAll('.length-opt').forEach(b => {
+    b.classList.toggle('active', b.dataset.length === length);
+  });
+  showToolbarMsg('Reply length set to ' + length + '.');
+}
 
 // ═══════════════════════════════════════════════════
 //  PASSAGES
@@ -2027,6 +2179,8 @@ function init() {
 
   const sz = localStorage.getItem('pc_font_size');
   if (sz) applyFontSize(parseInt(sz));
+  const rl = localStorage.getItem('pc_reply_length');
+  if (rl) { STATE.replyLength = rl; document.querySelectorAll('.length-opt').forEach(b => b.classList.toggle('active', b.dataset.length === rl)); }
 
   try {
     const savedBook = JSON.parse(localStorage.getItem('pc_last_book') || 'null');
