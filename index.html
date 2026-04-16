@@ -222,6 +222,9 @@
     .conv-btn.danger  { color: var(--grey-dark); }
     /* BOOK COVERS */
     .book-result { position: relative; }
+    .book-cover-thumb { image-rendering: auto; }
+    .book-cover-thumb:-moz-broken { display: none; }
+    .book-cover-thumb[src=""] { display: none; }
     .book-cover-thumb {
       width: 40px; height: 60px; object-fit: cover;
       border: var(--border); flex-shrink: 0;
@@ -904,6 +907,29 @@ async function interpretSearchQuery(q) {
   } catch(e) {}
   return { title: q, author: '' };
 }
+
+// ═══════════════════════════════════════════════════
+//  RENDER BOOK BATCH (search results helper)
+// ═══════════════════════════════════════════════════
+function renderBookBatch(batch, container, insertBefore) {
+  const anchor = insertBefore || container.querySelector('.manual-entry') || null;
+  batch.forEach(book => {
+    const el = document.createElement('div'); el.className = 'book-result';
+    const th = book.thumb
+      ? '<img class="book-cover-thumb" src="' + esc(book.thumb) + '" alt="" loading="lazy">'
+      : '';
+    el.innerHTML = '<div class="book-result-inner">' + th +
+      '<div class="book-result-text">' +
+      '<div class="book-result-title">'  + esc(book.title)  + '</div>' +
+      '<div class="book-result-author">' + esc(book.author) + '</div>' +
+      '<div class="book-result-meta">'   + (book.year ? book.year + ' · ' : '') + esc(book.source || 'Open Library') + '</div>' +
+      '</div></div>';
+    el.addEventListener('click', () => selectBookWithAgeCheck(book));
+    if (anchor) container.insertBefore(el, anchor);
+    else container.appendChild(el);
+  });
+}
+
 
 async function searchBooks() {
   const rawTitle  = document.getElementById('book-search-title').value.trim();
