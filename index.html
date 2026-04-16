@@ -417,14 +417,14 @@
     <div class="field">
       <label for="book-search-title">Title</label>
       <input type="search" id="book-search-title"
-             placeholder="e.g. 射鵰英雄傳, Reacher…"
+             placeholder="e.g. Middlemarch, Reacher…"
              onkeydown="if(event.key==='Enter') searchBooks()" />
     </div>
     <div class="field">
       <label for="book-search-author">Author <span style="font-weight:normal;text-transform:none">(optional)</span></label>
       <div class="search-row">
         <input type="search" id="book-search-author"
-               placeholder="e.g. 金庸, Lee Child…"
+               placeholder="e.g. Austen, Lee Child…"
                onkeydown="if(event.key==='Enter') searchBooks()" />
         <button class="btn btn-primary btn-small" onclick="searchBooks()">Search</button>
       </div>
@@ -509,7 +509,7 @@
       <div id="input-book-context"></div>
       <div class="send-row">
         <textarea id="chat-input" rows="2"
-                  placeholder="What did you make of the ending…"
+                  placeholder="Write your message…"
                   oninput="autoGrow(this)"
                   onkeydown="handleChatKeydown(event)"></textarea>
         <button class="btn btn-primary btn-small" onclick="sendMessage()">Send</button>
