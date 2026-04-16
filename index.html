@@ -616,6 +616,10 @@
 </div>
 
 <script>
+window.onerror = function(msg, src, line, col, err) {
+  document.body.innerHTML += '<p style="color:red;padding:20px;font-family:monospace">JS ERROR: ' + msg + ' (line ' + line + ')</p>';
+  return false;
+};
 // ═══════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════
@@ -1486,10 +1490,10 @@ Rules:
 - NOT: "What is the main idea?"
 - NOT: "How long does it take to read?"
 - Tone matches reading status:
-  considering → curiosity, uncertainty, is this worth my time?
-  just started → early impressions, what to expect ahead
-  halfway → tensions building, character observations, predictions
-  just finished → emotional reactions, themes, meaning, what next${langNote}
+  considering: curiosity, uncertainty, is this worth my time?
+  just started: early impressions, what to expect ahead
+  halfway: tensions building, character observations, predictions
+  just finished: emotional reactions, themes, meaning, what next${langNote}
 
 Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.
 Example format: ["prompt one","prompt two","prompt three","prompt four"]`;
@@ -1507,7 +1511,7 @@ Example format: ["prompt one","prompt two","prompt three","prompt four"]`;
   }
 
   // Clean response and attempt JSON parse
-  const clean = text.replace(/\`\`\`json|\`\`\`/g,'').trim();
+  const clean = text.replace(/```json|```/g,'').trim();
   let parsed = null;
 
   try {
