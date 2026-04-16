@@ -736,42 +736,8 @@ async function processOfflineQueue() {
 // ═══════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════
-(function init() {
-  const prov = localStorage.getItem('pc_provider');
-  if (prov) { STATE.provider = prov; applyProviderUI(prov); }
+// init() called at end of file
 
-  const key = localStorage.getItem('pc_api_key');
-  if (key) { STATE.apiKey = key; document.getElementById('api-key-input').value = key; document.getElementById('key-status-bar').style.display = 'block'; }
-
-  const name = localStorage.getItem('pc_companion_name');
-  if (name) { STATE.companionName = name; document.getElementById('companion-name-input').value = name; }
-
-  try { STATE.highlights = JSON.parse(localStorage.getItem('pc_highlights') || '[]'); } catch(e) {}
-
-  const sz = localStorage.getItem('pc_font_size');
-  if (sz) applyFontSize(parseInt(sz));
-
-  try {
-    const savedBook = JSON.parse(localStorage.getItem('pc_last_book') || 'null');
-    if (savedBook) {
-      STATE.book          = savedBook;
-      STATE.readingStatus = localStorage.getItem('pc_status_' + bookKey(savedBook)) || null;
-      STATE.chatLanguage  = localStorage.getItem('pc_lang_'   + bookKey(savedBook)) || 'english';
-      STATE.detectedLang  = savedBook.detectedLang || null;
-      restoreCompanionUI(savedBook);
-    }
-  } catch(e) {}
-
-  updateGreeting();
-  // Show T&C on first visit — use showScreen directly, don't override handleRoute
-  if (!localStorage.getItem('pc_tc_accepted')) {
-    showScreen('tc');
-  } else {
-    handleRoute();
-  }
-  // Safety net for local file opening — ensure at least one screen is visible
-  if (!document.querySelector('.screen.active')) showScreen('home');
-})();
 
 function bookKey(book) {
   return btoa(encodeURIComponent((book.title + '||' + book.author).slice(0,40))).replace(/=/g,'');
@@ -2046,6 +2012,45 @@ function endConversation() {
   navigate('home');
 }
 
+
+function init() {
+  const prov = localStorage.getItem('pc_provider');
+  if (prov) { STATE.provider = prov; applyProviderUI(prov); }
+
+  const key = localStorage.getItem('pc_api_key');
+  if (key) { STATE.apiKey = key; document.getElementById('api-key-input').value = key; document.getElementById('key-status-bar').style.display = 'block'; }
+
+  const name = localStorage.getItem('pc_companion_name');
+  if (name) { STATE.companionName = name; document.getElementById('companion-name-input').value = name; }
+
+  try { STATE.highlights = JSON.parse(localStorage.getItem('pc_highlights') || '[]'); } catch(e) {}
+
+  const sz = localStorage.getItem('pc_font_size');
+  if (sz) applyFontSize(parseInt(sz));
+
+  try {
+    const savedBook = JSON.parse(localStorage.getItem('pc_last_book') || 'null');
+    if (savedBook) {
+      STATE.book          = savedBook;
+      STATE.readingStatus = localStorage.getItem('pc_status_' + bookKey(savedBook)) || null;
+      STATE.chatLanguage  = localStorage.getItem('pc_lang_'   + bookKey(savedBook)) || 'english';
+      STATE.detectedLang  = savedBook.detectedLang || null;
+      restoreCompanionUI(savedBook);
+    }
+  } catch(e) {}
+
+  updateGreeting();
+  // Show T&C on first visit — use showScreen directly, don't override handleRoute
+  if (!localStorage.getItem('pc_tc_accepted')) {
+    showScreen('tc');
+  } else {
+    handleRoute();
+  }
+  // Safety net for local file opening — ensure at least one screen is visible
+  if (!document.querySelector('.screen.active')) showScreen('home');
+}
+
+init();
 </script>
 </body>
 </html>
