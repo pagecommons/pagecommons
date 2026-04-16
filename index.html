@@ -32,6 +32,8 @@
 
     .site-header { border-bottom: var(--border); padding: 20px 0 14px; margin-bottom: 28px; }
     .site-name { font-size: 1rem; font-weight: normal; letter-spacing: 0.05em; text-transform: uppercase; }
+    .site-name-link { cursor: pointer; text-decoration: none; color: var(--black); }
+    .site-name-link:hover { text-decoration: underline; }
     .site-tagline { font-size: 0.8rem; color: var(--grey-dark); margin-top: 2px; }
 
     .screen { display: none; }
@@ -284,7 +286,7 @@
 <div class="page">
 
   <header class="site-header">
-    <div class="site-name">Page Commons</div>
+    <div class="site-name" id="site-name-el">Page Commons</div>
     <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.11</div>
   </header>
 
@@ -716,6 +718,7 @@ function handleRoute() {
   const target = SCREENS.includes(hash) ? hash : 'home';
   showScreen(target);
   if (target === 'shelf') renderShelf();
+  updateTitleLink();
 }
 
 function navigate(view) {
@@ -728,6 +731,26 @@ function navigate(view) {
 }
 
 window.addEventListener('hashchange', handleRoute);
+
+
+// ═══════════════════════════════════════════════════
+//  CLICKABLE TITLE
+// ═══════════════════════════════════════════════════
+// Update title clickability based on current screen
+function updateTitleLink() {
+  const el = document.getElementById('site-name-el');
+  if (!el) return;
+  const hash = window.location.hash.replace('#','') || 'home';
+  const noClick = ['home','key','tc'];
+  if (noClick.includes(hash)) {
+    el.style.cursor = 'default';
+    el.onclick = null;
+  } else {
+    el.style.cursor = 'pointer';
+    el.title = 'Back to library hall';
+    el.onclick = () => navigate('home');
+  }
+}
 
 // ═══════════════════════════════════════════════════
 //  OFFLINE + MESSAGE QUEUE
@@ -888,13 +911,14 @@ async function searchBooks() {
   const raw = rawTitle || rawAuthor;
   if (!raw) return;
 
-  // ISBN detection — route directly to Open Library ISBN API
+  const statusEl  = document.getElementById('search-status');
+  const resultsEl = document.getElementById('search-results');
+  resultsEl.innerHTML = '';
+
+  // ISBN detection
   const isbnClean = raw.replace(/[-\s]/g, '');
-  if (/^(97[89])?\d{9}[\dX]$/.test(isbnClean)) {
-    const statusEl  = document.getElementById('search-status');
-    const resultsEl = document.getElementById('search-results');
+  if (/^(97[89])?\d{9}[\dXx]$/.test(isbnClean)) {
     statusEl.textContent = 'Looking up ISBN…'; statusEl.className = 'status-msg'; statusEl.style.display = 'block';
-    resultsEl.innerHTML = '';
     try {
       const isbnUrl = 'https://openlibrary.org/api/books?bibkeys=ISBN:' + isbnClean + '&format=json&jscmd=data';
       const res  = await fetch(isbnUrl);
@@ -906,29 +930,46 @@ async function searchBooks() {
           title:  b.title || 'Unknown title',
           author: (b.authors || [{name:'Unknown author'}])[0].name,
           year:   b.publish_date ? b.publish_date.slice(-4) : '',
-          key:    '',
-          source: 'Open Library (ISBN)',
-          thumb:  b.cover ? (b.cover.small || '') : '',
+          key: '', source: 'Open Library (ISBN)',
+          thumb: b.cover ? (b.cover.small || '') : '',
         };
         statusEl.style.display = 'none';
         const el = document.createElement('div'); el.className = 'book-result';
-        const thumbHtml = book.thumb ? '<img class="book-cover-thumb" src="' + esc(book.thumb) + '" alt="" loading="lazy" onerror="this.style.display=\"none\"">' : '';
-        el.innerHTML = '<div class="book-result-inner">' + thumbHtml + '<div class="book-result-text"><div class="book-result-title">' + esc(book.title) + '</div><div class="book-result-author">' + esc(book.author) + '</div><div class="book-result-meta">' + (book.year ? book.year + ' · ' : '') + esc(book.source) + '</div></div></div>';
+        const th = book.thumb ? '<img class="book-cover-thumb" src="' + esc(book.thumb) + '" alt="" loading="lazy">' : '';
+        el.innerHTML = '<div class="book-result-inner">' + th + '<div class="book-result-text"><div class="book-result-title">' + esc(book.title) + '</div><div class="book-result-author">' + esc(book.author) + '</div><div class="book-result-meta">' + (book.year||'') + (book.year?' · ':'') + esc(book.source) + '</div></div></div>';
         el.addEventListener('click', () => selectBookWithAgeCheck(book));
         resultsEl.appendChild(el);
       } else {
-        statusEl.textContent = 'ISBN not found — try searching by title instead.';
+        statusEl.textContent = 'ISBN not found — try searching by title.';
         statusEl.style.display = 'block';
         renderManualEntry(raw, resultsEl);
       }
     } catch(e) {
-      document.getElementById('search-status').textContent = 'ISBN lookup failed — check your connection.';
-      document.getElementById('search-status').style.display = 'block';
+      statusEl.textContent = 'ISBN lookup failed — check your connection.';
+      statusEl.className = 'status-msg error'; statusEl.style.display = 'block';
     }
     return;
   }
 
-    // Non-Latin script detection — skip Open Library, go straight to Google Books
+  // Build search terms
+  let searchTitle = rawTitle, searchAuthor = rawAuthor;
+  statusEl.textContent = 'Searching…'; statusEl.className = 'status-msg'; statusEl.style.display = 'block';
+
+  // AI natural language interpretation (title field only, no author given)
+  const isNL = !rawAuthor && looksLikeNaturalLanguage(rawTitle);
+  if (isNL && STATE.apiKey) {
+    statusEl.textContent = 'Understanding your search…';
+    const interp = await interpretSearchQuery(rawTitle);
+    searchTitle = interp.title;
+    searchAuthor = interp.author || rawAuthor;
+    statusEl.textContent = 'Searching for "' + searchTitle + '"' + (searchAuthor ? ' by ' + searchAuthor : '') + '…';
+  }
+
+  const gbParts = [];
+  if (searchTitle)  gbParts.push('intitle:' + searchTitle);
+  if (searchAuthor) gbParts.push('inauthor:' + searchAuthor);
+  const gbQuery = gbParts.join('+');
+  const olQuery = [searchTitle, searchAuthor].filter(Boolean).join(' ');
   const hasNonLatin = /[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0600-\u06ff\u0400-\u04ff\u0900-\u097f\u0e00-\u0e7f]/.test(raw);
 
   try {
@@ -938,13 +979,14 @@ async function searchBooks() {
       books = await fetchGoogleBooks(gbQuery);
     } else {
       books = await fetchOpenLibrary(olQuery);
-      // If combined title+author returns nothing, try title-only fallback
       if (!books.length && searchTitle && searchAuthor) {
         statusEl.textContent = 'Trying title only…'; statusEl.style.display = 'block';
         books = await fetchOpenLibrary(searchTitle);
       }
-      if (!books.length) { statusEl.textContent = 'Trying Google Books…'; statusEl.style.display = 'block'; books = await fetchGoogleBooks(gbQuery); }
-      // Google Books fallback: also try title-only if combined returns nothing
+      if (!books.length) {
+        statusEl.textContent = 'Trying Google Books…'; statusEl.style.display = 'block';
+        books = await fetchGoogleBooks(gbQuery);
+      }
       if (!books.length && searchTitle && searchAuthor) {
         books = await fetchGoogleBooks('intitle:' + searchTitle);
       }
@@ -955,61 +997,21 @@ async function searchBooks() {
     if (!books.length) {
       statusEl.textContent = 'No results found — try different keywords or enter manually below.';
       statusEl.style.display = 'block';
-      // Show more button if there are more than 6 results
-    if (books.length > 6) {
-      const moreBtn = document.createElement('button');
-      moreBtn.className = 'btn';
-      moreBtn.textContent = 'Show more results';
-      moreBtn.style.marginBottom = '10px';
-      const _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
-      moreBtn.onclick = async () => {
-        moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
-        try {
-          const extra = books.slice(6);
-          extra.forEach(book => {
-            const el = document.createElement('div'); el.className = 'book-result';
-            const thumbHtml = book.thumb ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
-            el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
-            el.addEventListener('click', () => selectBookWithAgeCheck(book));
-            resultsEl.insertBefore(el, moreBtn);
-          });
-        } catch(e) {}
-        moreBtn.remove();
-      };
-      resultsEl.appendChild(moreBtn);
+      renderManualEntry(searchTitle, resultsEl);
+      return;
     }
 
     // Author-only refine prompt
     if (!searchTitle && searchAuthor) {
       const refineEl = document.createElement('p');
       refineEl.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);margin-bottom:12px;font-style:italic';
-      refineEl.textContent = `Showing books by "${searchAuthor}". Add a title above to narrow down.`;
-      resultsEl.insertBefore(refineEl, resultsEl.firstChild);
-    }
-
-    renderManualEntry(searchTitle, resultsEl); return;
-    }
-
-    // Render a batch of book results into container
-    function renderBookBatch(batch, container, insertBefore) {
-      // always insert before manual entry if present
-      const manualEntry = container.querySelector('.manual-entry');
-      const anchor = insertBefore || manualEntry || null;
-      batch.forEach(book => {
-        const el = document.createElement('div'); el.className = 'book-result';
-        const thumbHtml = book.thumb
-          ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">`
-          : '';
-        el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
-        el.addEventListener('click', () => selectBookWithAgeCheck(book));
-        if (anchor) container.insertBefore(el, anchor);
-        else container.appendChild(el);
-      });
+      refineEl.textContent = 'Showing books by "' + searchAuthor + '". Add a title above to narrow down.';
+      resultsEl.appendChild(refineEl);
     }
 
     renderBookBatch(books.slice(0, 6), resultsEl, null);
 
-    // Show more — paginated, always fetches fresh next page
+    // Pagination state
     let _page = 1;
     const _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
     const _seen = new Set(books.map(b => b.title.toLowerCase() + '||' + b.author.toLowerCase()));
@@ -1025,18 +1027,15 @@ async function searchBooks() {
         try {
           let more = [];
           if (_hasNonLatin) {
-            const startIndex = (_page - 1) * 6;
-            more = await fetchGoogleBooks(_gbQuery, 6, startIndex);
+            more = await fetchGoogleBooks(_gbQuery, 6, (_page-1)*6);
           } else {
-            more = await fetchOpenLibrary(_olQuery, _page * 6 + 6);
-            more = more.filter(b => !_seen.has(b.title.toLowerCase() + '||' + b.author.toLowerCase()));
+            more = await fetchOpenLibrary(_olQuery, _page*6+6);
           }
           const fresh = more.filter(b => {
             const k = b.title.toLowerCase() + '||' + b.author.toLowerCase();
             if (_seen.has(k)) return false;
             _seen.add(k); return true;
           });
-          // remove btn, insert new results before manual entry
           const manualEntry = resultsEl.querySelector('.manual-entry');
           moreBtn.remove();
           if (fresh.length) {
@@ -1051,59 +1050,17 @@ async function searchBooks() {
           }
         } catch(e) { moreBtn.textContent = 'Show more results'; moreBtn.disabled = false; }
       };
-      // Insert show more button before manual entry so it stays above it
       const manualEntry = resultsEl.querySelector('.manual-entry');
       if (manualEntry) resultsEl.insertBefore(moreBtn, manualEntry);
       else resultsEl.appendChild(moreBtn);
     }
 
-    // Show more button if initial results filled a full page
     if (books.length >= 6) addShowMoreBtn();
-
-    // Author-only refine prompt
-    if (!searchTitle && searchAuthor) {
-      const refineEl = document.createElement('p');
-      refineEl.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);margin-bottom:12px;font-style:italic';
-      refineEl.textContent = `Showing books by "${searchAuthor}". Add a title above to narrow down.`;
-      resultsEl.insertBefore(refineEl, resultsEl.firstChild);
-    }
-
     renderManualEntry(searchTitle, resultsEl);
+
   } catch(e) {
     statusEl.textContent = 'Search failed — check your connection and try again.';
     statusEl.className = 'status-msg error'; statusEl.style.display = 'block';
-    // Show more button if there are more than 6 results
-    if (books.length > 6) {
-      const moreBtn = document.createElement('button');
-      moreBtn.className = 'btn';
-      moreBtn.textContent = 'Show more results';
-      moreBtn.style.marginBottom = '10px';
-      const _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
-      moreBtn.onclick = async () => {
-        moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
-        try {
-          const extra = books.slice(6);
-          extra.forEach(book => {
-            const el = document.createElement('div'); el.className = 'book-result';
-            const thumbHtml = book.thumb ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
-            el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
-            el.addEventListener('click', () => selectBookWithAgeCheck(book));
-            resultsEl.insertBefore(el, moreBtn);
-          });
-        } catch(e) {}
-        moreBtn.remove();
-      };
-      resultsEl.appendChild(moreBtn);
-    }
-
-    // Author-only refine prompt
-    if (!searchTitle && searchAuthor) {
-      const refineEl = document.createElement('p');
-      refineEl.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);margin-bottom:12px;font-style:italic';
-      refineEl.textContent = `Showing books by "${searchAuthor}". Add a title above to narrow down.`;
-      resultsEl.insertBefore(refineEl, resultsEl.firstChild);
-    }
-
     renderManualEntry(searchTitle, resultsEl);
   }
 }
