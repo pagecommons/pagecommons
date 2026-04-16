@@ -1,79 +1,1992 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page Commons</title>
-    <style>
-        body {
-            font-family: Georgia, serif;
-            background: #ffffff;
-            color: #000000;
-            max-width: 600px;
-            margin: 80px auto;
-            padding: 0 20px;
-            font-size: 18px;
-            line-height: 1.6;
-        }
-        h1 {
-            font-size: 28px;
-            font-weight: normal;
-            margin-bottom: 8px;
-        }
-        p {
-            margin-bottom: 32px;
-        }
-        .notify {
-            display: flex;
-            gap: 8px;
-        }
-        input {
-            font-family: Georgia, serif;
-            font-size: 16px;
-            padding: 10px 14px;
-            border: 1px solid #000;
-            width: 100%;
-            outline: none;
-        }
-        button {
-            font-family: Georgia, serif;
-            font-size: 16px;
-            padding: 10px 20px;
-            background: #000000;
-            color: #ffffff;
-            border: none;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        .message {
-            margin-top: 16px;
-            font-size: 16px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page Commons</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --grey-light: #f0f0f0;
+      --grey-mid: #d0d0d0;
+      --grey-dark: #666666;
+      --border: 1px solid #000000;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --font-serif: Georgia, 'Times New Roman', serif;
+      --max-width: 600px;
+      --font-size: 18px;
+    }
+
+    html { font-size: var(--font-size); }
+    body { background: var(--white); color: var(--black); font-family: var(--font-serif); line-height: 1.65; min-height: 100vh; }
+
+    #offline-banner { display: none; background: var(--black); color: var(--white); text-align: center; padding: 10px; font-size: 0.85rem; letter-spacing: 0.03em; }
+
+    .page { max-width: var(--max-width); margin: 0 auto; padding: 0 20px 140px; }
+
+    .site-header { border-bottom: var(--border); padding: 20px 0 14px; margin-bottom: 28px; }
+    .site-name { font-size: 1rem; font-weight: normal; letter-spacing: 0.05em; text-transform: uppercase; }
+    .site-tagline { font-size: 0.8rem; color: var(--grey-dark); margin-top: 2px; }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+    #screen-home.active { display: flex; flex-direction: column; min-height: calc(100vh - 80px); }
+
+    h1 { font-size: 1.55rem; font-weight: normal; line-height: 1.3; margin-bottom: 20px; }
+    h2 { font-size: 1.15rem; font-weight: normal; margin-bottom: 14px; }
+    p  { margin-bottom: 14px; }
+
+    label { display: block; font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; color: var(--grey-dark); }
+
+    input[type="text"], input[type="password"], input[type="search"], textarea {
+      width: 100%; border: var(--border); background: var(--white); color: var(--black);
+      font-family: var(--font-serif); font-size: 1rem; padding: 12px 16px;
+      outline: none; -webkit-appearance: none; border-radius: var(--radius-sm);
+    }
+    input:focus, textarea:focus { outline: 2px solid var(--black); outline-offset: 2px; }
+    textarea { resize: none; min-height: 60px; overflow-y: hidden; }
+    .field { margin-bottom: 18px; }
+
+    .btn { display: inline-block; border: var(--border); background: var(--white); color: var(--black); font-family: var(--font-serif); font-size: 1rem; padding: 12px 24px; cursor: pointer; min-height: 44px; text-align: center; text-decoration: none; -webkit-appearance: none; border-radius: var(--radius-sm); width: 100%; }
+    .btn:active { background: var(--grey-light); }
+    .btn-primary { background: var(--black); color: var(--white); }
+    .btn-primary:active { background: #333; }
+    .btn-small { padding: 10px 18px; font-size: 0.9rem; width: auto; min-height: 44px; }
+
+    .file-input-wrapper { position: relative; display: block; }
+    .file-input-wrapper input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .file-btn-label { display: block; background: var(--black); color: var(--white); font-family: var(--font-serif); font-size: 1rem; padding: 12px 24px; border-radius: var(--radius-sm); text-align: center; cursor: pointer; min-height: 44px; line-height: 1.4; border: var(--border); }
+    #clippings-filename { font-size: 0.85rem; color: var(--grey-dark); margin-top: 8px; font-style: italic; }
+
+    hr { border: none; border-top: var(--border); margin: 24px 0; }
+
+    .note { font-size: 0.85rem; color: var(--grey-dark); border-left: 3px solid var(--grey-mid); padding-left: 12px; margin-bottom: 14px; }
+    .status-msg { font-size: 0.9rem; padding: 4px 0; margin-bottom: 12px; color: var(--grey-dark); font-style: italic; }
+    .status-msg.error { font-style: normal; color: var(--black); background: var(--grey-light); padding: 12px 16px; border-radius: var(--radius-sm); border: var(--border); }
+
+    .back-link { display: inline-block; font-size: 0.9rem; color: var(--black); cursor: pointer; background: none; border: none; font-family: var(--font-serif); text-decoration: underline; margin-bottom: 24px; padding: 0; }
+
+    /* PROVIDER SELECTOR */
+    .provider-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .provider-opt { display: flex; align-items: center; justify-content: space-between; border: var(--border); border-radius: var(--radius-sm); padding: 12px 16px; cursor: pointer; min-height: 44px; background: var(--white); }
+    .provider-opt.selected { background: var(--black); color: var(--white); }
+    .provider-opt.selected .provider-link { color: var(--grey-mid); }
+    .provider-opt-left { display: flex; align-items: center; gap: 10px; }
+    .provider-opt-name { font-family: var(--font-serif); font-size: 1rem; }
+    .provider-link { font-size: 0.75rem; color: var(--grey-dark); text-decoration: underline; white-space: nowrap; background: none; border: none; cursor: pointer; font-family: var(--font-serif); padding: 0; }
+
+    #key-hint { font-size: 0.8rem; color: var(--grey-dark); margin-top: 6px; }
+    .key-toggle { background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--grey-dark); text-decoration: underline; padding: 0; margin-top: 4px; font-family: var(--font-serif); }
+
+    /* SEARCH */
+    .search-row { display: flex; flex-direction: row; gap: 10px; align-items: flex-start; }
+    .search-row input { flex: 1; min-width: 0; }
+    .search-row .btn  { width: auto; white-space: nowrap; flex-shrink: 0; }
+    #search-results { margin-top: 20px; }
+    .book-result { border: var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 10px; cursor: pointer; }
+    .book-result:active { background: var(--grey-light); }
+    .book-result-title  { font-size: 1.05rem; margin-bottom: 3px; }
+    .book-result-author { font-size: 0.9rem; color: var(--grey-dark); margin-bottom: 3px; }
+    .book-result-meta   { font-size: 0.78rem; color: var(--grey-dark); }
+
+    /* READING STATUS SCREEN */
+    .status-options { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+    .status-opt {
+      border: var(--border); border-radius: var(--radius);
+      padding: 16px 18px; cursor: pointer; background: var(--white);
+      font-family: var(--font-serif); font-size: 1rem; text-align: left;
+      min-height: 44px; color: var(--black); -webkit-appearance: none;
+    }
+    .status-opt:active { background: var(--grey-light); }
+    .status-opt-label { font-size: 1rem; display: block; }
+    .status-opt-sub   { font-size: 0.82rem; color: var(--grey-dark); margin-top: 3px; display: block; }
+
+    /* LANGUAGE CHOICE */
+    .lang-options { display: flex; gap: 10px; margin-top: 8px; }
+    .lang-options .btn { flex: 1; }
+
+    /* COMPANION NAME */
+    #companion-name-section { margin-top: 20px; border-top: var(--border); padding-top: 20px; }
+    #companion-name-section label { margin-bottom: 8px; }
+
+    /* COMPANION SCREEN */
+    #book-header { border: var(--border); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 20px; }
+    #book-title-display  { font-size: 1.1rem; margin-bottom: 2px; }
+    #book-author-display { font-size: 0.88rem; color: var(--grey-dark); }
+    #book-status-display { font-size: 0.78rem; color: var(--grey-dark); margin-top: 4px; font-style: italic; }
+    #change-book-btn { font-size: 0.78rem; color: var(--grey-dark); text-decoration: underline; background: none; border: none; cursor: pointer; margin-top: 6px; font-family: var(--font-serif); padding: 0; }
+
+    /* ICE BREAKERS */
+    #icebreakers { margin-bottom: 20px; }
+    .icebreaker-label { font-size: 0.78rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--grey-dark); margin-bottom: 10px; }
+    .icebreaker-prompts { display: flex; flex-direction: column; gap: 8px; }
+    .icebreaker-btn { border: var(--border); border-radius: var(--radius); background: var(--white); color: var(--black); font-family: var(--font-serif); font-size: 0.95rem; padding: 12px 18px; text-align: left; cursor: pointer; line-height: 1.4; -webkit-appearance: none; min-height: 44px; }
+    .icebreaker-btn:active { background: var(--grey-light); }
+
+    /* CHAT */
+    #chat-log { padding-top: 4px; margin-bottom: 8px; }
+    .message { display: flex; flex-direction: column; margin-bottom: 16px; }
+    .message.user      { align-items: flex-end; }
+    .message.companion { align-items: flex-start; }
+    .message-role { font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--grey-dark); margin-bottom: 4px; padding: 0 6px; }
+    .message-bubble { font-size: 1rem; line-height: 1.65; padding: 12px 16px; max-width: 88%; border: var(--border); }
+    .message.user .message-bubble { background: var(--black); color: var(--white); border-radius: var(--radius) var(--radius) 4px var(--radius); }
+    .message.companion .message-bubble { background: var(--white); color: var(--black); border-radius: var(--radius) var(--radius) var(--radius) 4px; }
+    .message.error-msg .message-bubble { background: var(--grey-light); border-radius: var(--radius-sm); max-width: 100%; }
+    .retry-btn { margin-top: 8px; background: none; border: var(--border); border-radius: var(--radius-sm); font-family: var(--font-serif); font-size: 0.88rem; padding: 8px 16px; cursor: pointer; color: var(--black); }
+    .retry-btn:active { background: var(--grey-light); }
+
+    #loading-indicator { display: none; font-size: 0.9rem; color: var(--grey-dark); font-style: italic; padding: 4px 6px; margin-bottom: 12px; }
+
+    #chat-input-area { border-top: var(--border); padding-top: 16px; margin-top: 8px; }
+    #input-book-context { font-size: 0.78rem; color: var(--grey-dark); margin-bottom: 8px; font-style: italic; }
+    .send-row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 12px; }
+    .send-row textarea { flex: 1; min-width: 0; }
+    .send-row .btn { width: auto; flex-shrink: 0; align-self: flex-end; }
+
+    /* TOOLBAR */
+    #reader-toolbar { display: flex; align-items: stretch; border: var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 16px; }
+    .toolbar-btn { flex: 1; background: var(--white); border: none; border-right: var(--border); font-family: var(--font-serif); font-size: 0.95rem; padding: 10px 8px; cursor: pointer; text-align: center; min-height: 44px; color: var(--black); }
+    .toolbar-btn:last-child { border-right: none; }
+    .toolbar-btn:active { background: var(--grey-light); }
+    .toolbar-btn.active { background: var(--black); color: var(--white); }
+
+    #font-panel { display: none; border: var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px; background: var(--grey-light); }
+    #font-panel.open { display: block; }
+    .font-panel-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--grey-dark); margin-bottom: 12px; }
+    .font-size-options { display: flex; gap: 8px; }
+    .font-size-opt { flex: 1; border: var(--border); border-radius: var(--radius-sm); background: var(--white); font-family: var(--font-serif); cursor: pointer; padding: 10px 4px; text-align: center; min-height: 44px; color: var(--black); }
+    .font-size-opt.active { background: var(--black); color: var(--white); }
+
+    #highlights-panel { display: none; border: var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px; }
+    #highlights-panel.open { display: block; }
+
+    #toolbar-msg { display: none; font-size: 0.85rem; color: var(--grey-dark); font-style: italic; padding: 4px 0; margin-bottom: 12px; }
+
+    #key-status-bar { display: none; font-size: 0.78rem; color: var(--grey-dark); border-top: var(--border); padding: 10px 0; margin-top: 24px; }
+
+    .manual-entry { border-top: var(--border); padding-top: 16px; margin-top: 8px; }
+
+    /* LIBRARY HALL */
+    .hall-body { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 40px 0 20px; }
+    .hall-greeting { font-size: 1rem; color: var(--grey-dark); margin-bottom: 6px; font-style: italic; }
+    .hall-title { font-size: 2rem; font-weight: normal; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.01em; }
+    .hall-description { font-size: 1rem; color: var(--grey-dark); line-height: 1.7; margin-bottom: 28px; max-width: 480px; }
+    .hall-doors { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    .hall-door { border: var(--border); border-radius: var(--radius-sm); padding: 18px 20px; cursor: pointer; background: var(--white); font-family: var(--font-serif); text-align: left; min-height: 44px; -webkit-appearance: none; width: 100%; color: var(--black); }
+    .hall-door:active { background: var(--grey-light); }
+    .hall-door.primary { background: var(--black); color: var(--white); }
+    .hall-door.primary:active { background: #333; }
+    .hall-door.disabled { opacity: 0.45; cursor: default; pointer-events: none; }
+    .hall-door-title { font-size: 1rem; display: block; margin-bottom: 3px; }
+    .hall-door-sub { font-size: 0.8rem; opacity: 0.75; display: block; }
+    .hall-newhero { font-size: 0.85rem; color: var(--grey-dark); margin-bottom: 36px; }
+    .hall-newhero a { color: var(--grey-dark); text-decoration: underline; }
+    .hall-divider { border: none; border-top: var(--border); margin: 0 0 20px; }
+    .hall-footer { font-size: 0.78rem; color: var(--grey-dark); line-height: 1.6; padding-bottom: 20px; }
+    .hall-footer-links { display: flex; gap: 20px; margin-top: 8px; flex-wrap: wrap; }
+    .hall-footer-links a { color: var(--grey-dark); font-size: 0.78rem; text-decoration: underline; }
+
+    /* ABOUT SCREEN */
+    .about-section { margin-bottom: 28px; }
+    .about-section h2 { border-bottom: var(--border); padding-bottom: 8px; margin-bottom: 14px; }
+    .about-feature { border: var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 10px; }
+    .about-feature-title { font-size: 1rem; margin-bottom: 4px; }
+    .about-feature-desc  { font-size: 0.88rem; color: var(--grey-dark); margin: 0; }
+    /* YOUR SHELF */
+    .shelf-empty { font-size: 0.9rem; color: var(--grey-dark); font-style: italic; padding: 20px 0; }
+    .shelf-book {
+      border: var(--border); border-radius: var(--radius-sm);
+      padding: 16px; margin-bottom: 10px; cursor: pointer;
+    }
+    .shelf-book:active { background: var(--grey-light); }
+    .shelf-book-title  { font-size: 1.05rem; margin-bottom: 3px; }
+    .shelf-book-author { font-size: 0.88rem; color: var(--grey-dark); margin-bottom: 3px; }
+    .shelf-book-meta   { font-size: 0.78rem; color: var(--grey-dark); }
+
+    .conv-item { border: var(--border); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 10px; }
+    .conv-item-name    { font-size: 1rem; margin-bottom: 3px; }
+    .conv-item-meta    { font-size: 0.78rem; color: var(--grey-dark); margin-bottom: 10px; }
+    .conv-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .conv-btn { border: var(--border); border-radius: var(--radius-sm); background: var(--white); font-family: var(--font-serif); font-size: 0.85rem; padding: 8px 14px; cursor: pointer; color: var(--black); min-height: 44px; }
+    .conv-btn:active { background: var(--grey-light); }
+    .conv-btn.primary { background: var(--black); color: var(--white); }
+    .conv-btn.danger  { color: var(--grey-dark); }
+    /* BOOK COVERS */
+    .book-result { position: relative; }
+    .book-cover-thumb {
+      width: 40px; height: 60px; object-fit: cover;
+      border: var(--border); flex-shrink: 0;
+      background: var(--grey-light);
+    }
+    .book-result-inner { display: flex; gap: 12px; align-items: flex-start; }
+    .book-result-text  { flex: 1; min-width: 0; }
+
+    /* BUBBLE ACTIONS */
+    .bubble-actions {
+      display: flex; gap: 8px; margin-top: 6px; padding: 0 6px;
+    }
+    .bubble-action-btn {
+      background: none; border: none; cursor: pointer;
+      font-family: var(--font-serif); font-size: 0.75rem;
+      color: var(--grey-dark); text-decoration: underline; padding: 0;
+      min-height: 32px;
+    }
+    .bubble-action-btn:active { opacity: 0.5; }
+    .bubble-action-btn.saved  { color: var(--black); font-style: italic; }
+
+    /* PASSAGES PANEL */
+    #passages-panel {
+      display: none; border: var(--border); border-radius: var(--radius-sm);
+      padding: 16px; margin-bottom: 16px;
+    }
+    #passages-panel.open { display: block; }
+    .passage-item {
+      border-left: 3px solid var(--grey-mid);
+      padding: 8px 12px; margin-bottom: 12px;
+      font-size: 0.9rem; line-height: 1.6;
+    }
+    .passages-empty { font-size: 0.9rem; color: var(--grey-dark); font-style: italic; }
+
+    /* T&C SCREEN */
+    .tc-section { margin-bottom: 20px; }
+
+    /* AGE GATE */
+    .age-gate-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+  </style>
 </head>
 <body>
-    <h1>Page Commons</h1>
-    <p>A reading companion for e-ink devices.<br>Coming soon.</p>
-    <div class="notify">
-        <input type="email" id="email" placeholder="your@email.com" />
-        <button onclick="notify()">Notify me</button>
+
+<div id="offline-banner">Offline — your message will be saved and sent when you reconnect</div>
+
+<div class="page">
+
+  <header class="site-header">
+    <div class="site-name">Page Commons</div>
+    <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.10</div>
+  </header>
+
+  <!-- ══════════════════════════════════
+       HOME — Library Hall
+       ══════════════════════════════════ -->
+  <section id="screen-home" class="screen">
+    <div class="hall-body">
+      <div class="hall-greeting">Good evening</div>
+      <div class="hall-title">A quiet place to talk about books.</div>
+      <p class="hall-description">
+        Discuss what you're reading, discover what others thought,
+        or find your next book.
+      </p>
+
+      <div class="hall-doors">
+        <button class="hall-door primary" onclick="navigate('key')">
+          <span class="hall-door-title">Talk to your companion</span>
+          <span class="hall-door-sub">A private AI reading companion, just for you</span>
+        </button>
+        <button class="hall-door disabled">
+          <span class="hall-door-title">Enter a book room</span>
+          <span class="hall-door-sub">Coming soon — read notes from other readers</span>
+        </button>
+      </div>
+
+      <p class="hall-newhero">
+        <a href="#" onclick="navigate('about'); return false;">New here? Learn what Page Commons is →</a>
+      </p>
+
+      <hr class="hall-divider" />
+      <div class="hall-footer">
+        No ads. No algorithms. No engagement metrics. Just books.
+        <div class="hall-footer-links">
+          <a href="#" onclick="navigate('shelf'); return false;">Your shelf</a>
+          <a href="#" onclick="navigate('key'); return false;">API key settings</a>
+        </div>
+      </div>
     </div>
-    <div class="message" id="message"></div>
-    <script>
-        function notify() {
-            const email = document.getElementById('email').value;
-            const message = document.getElementById('message');
-            if (!email || !email.includes('@')) {
-                message.textContent = 'Please enter a valid email address.';
-                return;
-            }
-            // Store in localStorage for now
-            const emails = JSON.parse(localStorage.getItem('waitlist') || '[]');
-            emails.push({ email, date: new Date().toISOString() });
-            localStorage.setItem('waitlist', JSON.stringify(emails));
-            message.textContent = 'Thank you — we will let you know when Page Commons is ready.';
-            document.getElementById('email').value = '';
-        }
-    </script>
+  </section>
+
+  <!-- ══════════════════════════════════
+       ABOUT
+       ══════════════════════════════════ -->
+  <section id="screen-about" class="screen">
+    <button class="back-link" onclick="navigate('home')">← Back</button>
+    <h1>What is Page Commons?</h1>
+
+    <p>Page Commons is a quiet place for readers. No social feed, no follower counts, no algorithmic recommendations. Just books and the people who read them.</p>
+
+    <div class="about-section">
+      <h2>Your reading companion</h2>
+      <p style="font-size:0.9rem;color:var(--grey-dark);margin-bottom:14px">A private AI companion you can talk to about any book — like a well-read friend who has also read it.</p>
+      <div class="about-feature">
+        <div class="about-feature-title">Discusses books, not summaries</div>
+        <p class="about-feature-desc">Your companion never recites plot points. It asks questions, offers opinions when asked, and follows your lead.</p>
+      </div>
+      <div class="about-feature">
+        <div class="about-feature-title">Knows your highlights</div>
+        <p class="about-feature-desc">Import your Kindle clippings and the companion will remember the passages that stayed with you.</p>
+      </div>
+      <div class="about-feature">
+        <div class="about-feature-title">Meets you where you are</div>
+        <p class="about-feature-desc">Tell it whether you're considering the book, just started, halfway through, or finished — and it adapts accordingly.</p>
+      </div>
+      <div class="about-feature">
+        <div class="about-feature-title">Bring your own key</div>
+        <p class="about-feature-desc">Your conversations are powered by your own AI provider key. Nothing is stored on our servers.</p>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h2>Book rooms <span style="font-size:0.78rem;color:var(--grey-dark);font-weight:normal">(coming soon)</span></h2>
+      <p style="font-size:0.9rem;color:var(--grey-dark);margin-bottom:14px">Each book has a room. Readers leave short notes — like margin notes in a second-hand book.</p>
+      <div class="about-feature">
+        <div class="about-feature-title">No likes, no rankings</div>
+        <p class="about-feature-desc">Notes are shown in reading order, not by popularity. There is no engagement metric to optimise for.</p>
+      </div>
+      <div class="about-feature">
+        <div class="about-feature-title">Spoiler-aware by default</div>
+        <p class="about-feature-desc">Notes are gated by reading stage. You only see what's appropriate for where you are in the book.</p>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h2>The philosophy</h2>
+      <p style="font-size:0.9rem;color:var(--grey-dark)">Page Commons is built for serious readers who feel underserved by Goodreads and generic AI chatbots. It is open source, privacy-first, and funded by readers — not advertisers.</p>
+    </div>
+
+    <button class="btn btn-primary" onclick="navigate('home')">Back to the library</button>
+  </section>
+
+  <!-- ══════════════════════════════════
+       KEY SCREEN
+       ══════════════════════════════════ -->
+  <section id="screen-key" class="screen">
+    <button class="back-link" onclick="navigate('home')">← Back</button>
+    <h1>Your companion awaits</h1>
+    <p>Choose your AI provider and enter your API key. Your key stays in your browser — it never touches our servers.</p>
+
+    <div class="field">
+      <label>AI Provider</label>
+      <div class="provider-options">
+        <div class="provider-opt selected" id="prov-anthropic" onclick="selectProvider('anthropic')">
+          <div class="provider-opt-left"><span class="provider-opt-name">Anthropic Claude</span></div>
+          <a class="provider-link" href="https://console.anthropic.com" target="_blank" onclick="event.stopPropagation()">Get free key →</a>
+        </div>
+        <div class="provider-opt" id="prov-gemini" onclick="selectProvider('gemini')">
+          <div class="provider-opt-left"><span class="provider-opt-name">Google Gemini</span></div>
+          <a class="provider-link" href="https://aistudio.google.com" target="_blank" onclick="event.stopPropagation()">Get free key →</a>
+        </div>
+        <div class="provider-opt" id="prov-groq" onclick="selectProvider('groq')">
+          <div class="provider-opt-left"><span class="provider-opt-name">Groq</span></div>
+          <a class="provider-link" href="https://console.groq.com" target="_blank" onclick="event.stopPropagation()">Get free key →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="api-key-input">API Key</label>
+      <input type="password" id="api-key-input" placeholder="sk-ant-…" autocomplete="off" spellcheck="false" />
+      <button class="key-toggle" onclick="toggleKeyVisibility()">Show key</button>
+      <p id="key-hint">Get your key at console.anthropic.com</p>
+    </div>
+
+    <!-- Optional companion name -->
+    <div id="companion-name-section">
+      <label for="companion-name-input">Give your companion a name <span style="font-weight:normal;text-transform:none;font-size:0.85rem">(optional)</span></label>
+      <input type="text" id="companion-name-input" placeholder="e.g. Ellis, River, Claude…" autocomplete="off" />
+      <p style="font-size:0.78rem;color:var(--grey-dark);margin-top:6px">Leave blank to use "Companion". You can change this later in More.</p>
+    </div>
+
+    <hr />
+    <div id="key-error" class="status-msg error" style="display:none"></div>
+    <button class="btn btn-primary" onclick="saveKey()">Continue</button>
+    <hr />
+    <p class="note">Your key is stored only in your browser's localStorage. We cannot see it, retrieve it, or use it.</p>
+    <p class="note">Free tier with shared access coming soon — no key needed.</p>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SEARCH
+       ══════════════════════════════════ -->
+  <section id="screen-search" class="screen">
+    <button class="back-link" onclick="navigate('home')">← Back</button>
+    <h1>Which book?</h1>
+
+    <div class="field">
+      <label for="book-search-title">Title</label>
+      <input type="search" id="book-search-title"
+             placeholder="e.g. 射鵰英雄傳, Reacher…"
+             onkeydown="if(event.key==='Enter') searchBooks()" />
+    </div>
+    <div class="field">
+      <label for="book-search-author">Author <span style="font-weight:normal;text-transform:none">(optional)</span></label>
+      <div class="search-row">
+        <input type="search" id="book-search-author"
+               placeholder="e.g. 金庸, Lee Child…"
+               onkeydown="if(event.key==='Enter') searchBooks()" />
+        <button class="btn btn-primary btn-small" onclick="searchBooks()">Search</button>
+      </div>
+    </div>
+
+    <div id="search-status" class="status-msg" style="display:none"></div>
+    <div id="search-results"></div>
+
+    <hr />
+    <h2>Or import from Kindle</h2>
+    <p class="note">Upload your <em>My Clippings.txt</em> to auto-detect your last book and load your highlights.</p>
+    <div class="field">
+      <label>My Clippings.txt</label>
+      <div class="file-input-wrapper">
+        <div class="file-btn-label">Choose file</div>
+        <input type="file" id="clippings-file" accept=".txt" onchange="parseClippings(this)" />
+      </div>
+      <div id="clippings-filename">No file chosen</div>
+    </div>
+    <div id="clippings-status" class="status-msg" style="display:none"></div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       READING STATUS SCREEN
+       ══════════════════════════════════ -->
+  <section id="screen-status" class="screen">
+    <h1 id="status-book-title">Where are you with this book?</h1>
+    <div class="status-options">
+      <button class="status-opt" onclick="setReadingStatus('considering')">
+        <span class="status-opt-label">Thinking about reading it</span>
+        <span class="status-opt-sub">Help me decide if it's for me</span>
+      </button>
+      <button class="status-opt" onclick="setReadingStatus('started')">
+        <span class="status-opt-label">Just started</span>
+        <span class="status-opt-sub">I'm in the early pages</span>
+      </button>
+      <button class="status-opt" onclick="setReadingStatus('midway')">
+        <span class="status-opt-label">Halfway through</span>
+        <span class="status-opt-sub">Getting into it</span>
+      </button>
+      <button class="status-opt" onclick="setReadingStatus('finished')">
+        <span class="status-opt-label">Just finished</span>
+        <span class="status-opt-sub">Ready to talk about all of it</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       LANGUAGE CHOICE SCREEN
+       ══════════════════════════════════ -->
+  <section id="screen-language" class="screen">
+    <h1>Which language?</h1>
+    <p id="lang-prompt-text">This looks like a non-English book. Would you like to chat in the book's language or in English?</p>
+    <div class="lang-options">
+      <button class="btn btn-primary" id="lang-native-btn" onclick="setLanguage('native')">Chat in the book's language</button>
+      <button class="btn" onclick="setLanguage('english')">Chat in English</button>
+    </div>
+    <p style="font-size:0.78rem;color:var(--grey-dark);margin-top:16px">You can change this later in More.</p>
+  </section>
+
+  <!-- ══════════════════════════════════
+       COMPANION
+       ══════════════════════════════════ -->
+  <section id="screen-companion" class="screen">
+
+    <div id="book-header">
+      <div id="book-title-display">—</div>
+      <div id="book-author-display"></div>
+      <div id="book-status-display"></div>
+      <button id="change-book-btn" onclick="navigate('search')">Change book</button>
+    </div>
+
+    <div id="icebreakers">
+      <div class="icebreaker-label">Start here, or write your own below</div>
+      <div class="icebreaker-prompts" id="icebreaker-list"></div>
+    </div>
+
+    <div id="chat-log"></div>
+    <div id="loading-indicator">Thinking…</div>
+
+    <div id="chat-input-area">
+      <div id="input-book-context"></div>
+      <div class="send-row">
+        <textarea id="chat-input" rows="2"
+                  placeholder="What did you make of the ending…"
+                  oninput="autoGrow(this)"
+                  onkeydown="handleChatKeydown(event)"></textarea>
+        <button class="btn btn-primary btn-small" onclick="sendMessage()">Send</button>
+      </div>
+
+      <div id="reader-toolbar">
+        <button class="toolbar-btn" id="font-toolbar-btn" onclick="toggleFontPanel()">Aa</button>
+        <button class="toolbar-btn" id="highlights-toolbar-btn" style="display:none" onclick="toggleHighlights()">Highlights</button>
+        <button class="toolbar-btn" id="passages-toolbar-btn" style="display:none" onclick="togglePassagesPanel()">Passages</button>
+        <button class="toolbar-btn" onclick="navigate('shelf')">Shelf</button>
+        <button class="toolbar-btn" onclick="endConversation()">Done</button>
+        <button class="toolbar-btn" onclick="showOtherOptions()">More</button>
+      </div>
+
+      <div id="toolbar-msg"></div>
+
+      <div id="font-panel">
+        <div class="font-panel-label">Text size</div>
+        <div class="font-size-options">
+          <button class="font-size-opt" style="font-size:0.85rem" data-size="16" onclick="setFontSize(16)">A</button>
+          <button class="font-size-opt" style="font-size:1rem"    data-size="18" onclick="setFontSize(18)">A</button>
+          <button class="font-size-opt" style="font-size:1.15rem" data-size="20" onclick="setFontSize(20)">A</button>
+          <button class="font-size-opt" style="font-size:1.3rem"  data-size="22" onclick="setFontSize(22)">A</button>
+        </div>
+      </div>
+
+      <div id="highlights-panel">
+        <div id="highlights-count" style="font-size:0.85rem;color:var(--grey-dark);margin-bottom:10px"></div>
+        <div id="highlights-list"  style="font-size:0.9rem;line-height:1.6"></div>
+      </div>
+
+      <div id="passages-panel">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+          <span style="font-size:0.85rem;color:var(--grey-dark)" id="passages-count">No passages saved yet</span>
+          <button class="bubble-action-btn" onclick="copyAllPassages()" style="font-size:0.85rem">Copy all</button>
+        </div>
+        <div id="passages-list"></div>
+      </div>
+    </div>
+
+    <div id="key-status-bar">
+      API key loaded &nbsp;·&nbsp;
+      <button onclick="clearKey()" style="background:none;border:none;cursor:pointer;text-decoration:underline;font-family:var(--font-serif);font-size:0.78rem;color:var(--grey-dark)">Remove</button>
+    </div>
+
+  </section>
+
+
+  <!-- T&C SCREEN -->
+  <section id="screen-tc" class="screen">
+    <h1>Welcome to Page Commons</h1>
+    <div class="tc-section">
+      <p>Before you continue, please read and agree to the following:</p>
+      <div class="note">
+        <strong>Age:</strong> By continuing you confirm you are 13 years of age or older. Some books contain adult content — you confirm you are 18 or over before accessing such material.
+      </div>
+      <div class="note">
+        <strong>Privacy:</strong> Your API key and reading data are stored only in your browser. We do not collect or store personal data on our servers.
+      </div>
+      <div class="note">
+        <strong>Content:</strong> Page Commons is a reading companion. Discussions are anchored to books. We are not responsible for AI responses but take reasonable steps to keep them appropriate.
+      </div>
+      <div class="note">
+        <strong>Open source:</strong> Page Commons is open source software provided as-is. Use it responsibly.
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="acceptTC()">I agree — take me in</button>
+    <p style="font-size:0.78rem;color:var(--grey-dark);margin-top:12px;text-align:center">Your agreement is stored locally in your browser only.</p>
+  </section>
+
+  <!-- AGE GATE -->
+  <section id="screen-age-gate" class="screen">
+    <h1>Just a moment</h1>
+    <p id="age-gate-book-name" style="font-style:italic;margin-bottom:8px"></p>
+    <p>This book has been flagged as containing adult content.</p>
+    <p style="font-size:0.88rem;color:var(--grey-dark)">We don't store this confirmation — it is only used at this moment of adding the book.</p>
+    <div class="age-gate-btns">
+      <button class="btn btn-primary" onclick="confirmAgeGate()">I'm 18 or over — continue</button>
+      <button class="btn" onclick="navigate('search')">Take me back</button>
+    </div>
+  </section>
+
+  <!-- YOUR SHELF -->
+  <section id="screen-shelf" class="screen">
+    <button class="back-link" onclick="navigate('home')">← Back</button>
+    <h1>Your shelf</h1>
+    <p style="font-size:0.88rem;color:var(--grey-dark);margin-bottom:20px">Books you have discussed with your companion.</p>
+    <div id="shelf-list"></div>
+  </section>
+
+  <!-- BOOK CONVERSATIONS -->
+  <section id="screen-book-shelf" class="screen">
+    <button class="back-link" onclick="navigate('shelf')">← Your shelf</button>
+    <h1 id="book-shelf-title">—</h1>
+    <p id="book-shelf-author" style="font-size:0.88rem;color:var(--grey-dark);margin-bottom:4px"></p>
+    <p id="book-shelf-status" style="font-size:0.78rem;color:var(--grey-dark);font-style:italic;margin-bottom:20px"></p>
+    <div style="display:flex;gap:10px;margin-bottom:24px">
+      <button class="btn btn-primary btn-small" onclick="startNewConversation()">New conversation</button>
+      <button class="btn btn-small" onclick="updateBookStatus()">Update status</button>
+    </div>
+    <div id="conv-list"></div>
+  </section>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+const STATE = {
+  apiKey:        '',
+  provider:      'anthropic',
+  companionName: 'Companion',
+  book:          null,
+  readingStatus: null,   // 'considering' | 'started' | 'midway' | 'finished'
+  chatLanguage:  'english', // 'english' | 'native'
+  detectedLang:  null,   // language name detected from book, e.g. 'Chinese'
+  highlights:    [],
+  messages:      [],
+  lastUserText:   '',
+  thinkingPhrases:  null,
+  currentConvId:   null,
+  currentConvName: null,
+  pendingBook:     null,   // held during age gate
+  passages:        [],     // saved passages for current book // cached per language
+};
+
+const STATIC_PROMPTS = [
+  "I just finished it",
+  "Something is still on my mind",
+  "I want to understand something better",
+  "There's a passage I keep thinking about",
+  "I'm not sure how I feel about it",
+  "I gave up — can we talk about why?",
+  "I want to know what to read next",
+  "Something surprised me",
+];
+
+const STATIC_THINKING = ['Typing…','Reading your note…','Considering…','Let me think…','Hmm…','One moment…','With you…'];
+
+// ═══════════════════════════════════════════════════
+//  SCREENS + NAVIGATION
+// ═══════════════════════════════════════════════════
+const SCREENS = ['home','key','search','status','language','companion','about','shelf','book-shelf','tc','age-gate'];
+
+// navigate() defined above with showScreen
+
+function showScreen(id) {
+  const target = SCREENS.includes(id) ? id : 'home';
+  SCREENS.forEach(s => {
+    const el = document.getElementById('screen-'+s);
+    if (el) el.classList.toggle('active', s === target);
+  });
+  window.scrollTo(0,0);
+}
+
+function handleRoute() {
+  const hash = window.location.hash.replace('#','') || 'home';
+
+  // defensive redirects
+  if (hash === 'companion') {
+    if (!STATE.apiKey) { navigate('key');    return; }
+    if (!STATE.book)   { navigate('search'); return; }
+  }
+  if (hash === 'search' && !STATE.apiKey) { navigate('key'); return; }
+
+  const target = SCREENS.includes(hash) ? hash : 'home';
+  showScreen(target);
+  if (target === 'shelf') renderShelf();
+}
+
+function navigate(view) {
+  if (window.location.hash.replace('#','') === view) {
+    // Already on this hash — just show the screen directly (handles local file edge case)
+    showScreen(view);
+  } else {
+    window.location.hash = view;
+  }
+}
+
+window.addEventListener('hashchange', handleRoute);
+
+// ═══════════════════════════════════════════════════
+//  OFFLINE + MESSAGE QUEUE
+// ═══════════════════════════════════════════════════
+function updateOffline() {
+  document.getElementById('offline-banner').style.display = navigator.onLine ? 'none' : 'block';
+}
+window.addEventListener('offline', updateOffline);
+window.addEventListener('online', () => { updateOffline(); processOfflineQueue(); });
+updateOffline();
+
+function queueOfflineMessage(text) {
+  const q = getOfflineQueue();
+  q.push({ text, book: STATE.book, timestamp: Date.now() });
+  localStorage.setItem('pc_offline_queue', JSON.stringify(q));
+}
+function getOfflineQueue() { try { return JSON.parse(localStorage.getItem('pc_offline_queue') || '[]'); } catch(e) { return []; } }
+function clearOfflineQueue() { localStorage.removeItem('pc_offline_queue'); }
+
+async function processOfflineQueue() {
+  const queue = getOfflineQueue();
+  if (!queue.length || !STATE.apiKey) return;
+  showToolbarMsg("You're back online — sending your saved message…");
+  clearOfflineQueue();
+  for (const item of queue) {
+    if (item.book && STATE.book && item.book.title === STATE.book.title) {
+      STATE.messages.push({ role: 'user', content: item.text });
+      appendBubble('user', item.text);
+      try {
+        const reply = await callAI();
+        STATE.messages.push({ role: 'assistant', content: reply });
+        const el = appendBubble('companion', reply);
+        scrollToMessage(el);
+      } catch(err) { appendError(err); }
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+(function init() {
+  const prov = localStorage.getItem('pc_provider');
+  if (prov) { STATE.provider = prov; applyProviderUI(prov); }
+
+  const key = localStorage.getItem('pc_api_key');
+  if (key) { STATE.apiKey = key; document.getElementById('api-key-input').value = key; document.getElementById('key-status-bar').style.display = 'block'; }
+
+  const name = localStorage.getItem('pc_companion_name');
+  if (name) { STATE.companionName = name; document.getElementById('companion-name-input').value = name; }
+
+  try { STATE.highlights = JSON.parse(localStorage.getItem('pc_highlights') || '[]'); } catch(e) {}
+
+  const sz = localStorage.getItem('pc_font_size');
+  if (sz) applyFontSize(parseInt(sz));
+
+  try {
+    const savedBook = JSON.parse(localStorage.getItem('pc_last_book') || 'null');
+    if (savedBook) {
+      STATE.book          = savedBook;
+      STATE.readingStatus = localStorage.getItem('pc_status_' + bookKey(savedBook)) || null;
+      STATE.chatLanguage  = localStorage.getItem('pc_lang_'   + bookKey(savedBook)) || 'english';
+      STATE.detectedLang  = savedBook.detectedLang || null;
+      restoreCompanionUI(savedBook);
+    }
+  } catch(e) {}
+
+  updateGreeting();
+  // Show T&C on first visit — use showScreen directly, don't override handleRoute
+  if (!localStorage.getItem('pc_tc_accepted')) {
+    showScreen('tc');
+  } else {
+    handleRoute();
+  }
+  // Safety net for local file opening — ensure at least one screen is visible
+  if (!document.querySelector('.screen.active')) showScreen('home');
+})();
+
+function bookKey(book) {
+  return btoa(encodeURIComponent((book.title + '||' + book.author).slice(0,40))).replace(/=/g,'');
+}
+
+function restoreCompanionUI(book) {
+  document.getElementById('book-title-display').textContent  = book.title;
+  document.getElementById('book-author-display').textContent = book.author;
+  document.getElementById('input-book-context').textContent  = book.title + (book.author ? ' · ' + book.author : '');
+  updateStatusDisplay();
+  populateIcebreakers(book);
+  renderHighlightsPanel();
+}
+
+// ═══════════════════════════════════════════════════
+//  GREETING
+// ═══════════════════════════════════════════════════
+function updateGreeting() {
+  const h = new Date().getHours();
+  const g = h < 5 ? 'Reading late?' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 21 ? 'Good evening' : 'Reading tonight?';
+  const el = document.querySelector('.hall-greeting');
+  if (el) el.textContent = g;
+}
+
+// ═══════════════════════════════════════════════════
+//  PROVIDER SELECTION
+// ═══════════════════════════════════════════════════
+const PROVIDER_CONFIG = {
+  anthropic: { placeholder: 'sk-ant-…',  hint: 'Get your key at console.anthropic.com' },
+  gemini:    { placeholder: 'AIza…',      hint: 'Get your free key at aistudio.google.com' },
+  groq:      { placeholder: 'gsk_…',      hint: 'Get your free key at console.groq.com' },
+};
+
+function selectProvider(prov) { STATE.provider = prov; localStorage.setItem('pc_provider', prov); applyProviderUI(prov); }
+
+function applyProviderUI(prov) {
+  ['anthropic','gemini','groq'].forEach(p => document.getElementById('prov-'+p).classList.toggle('selected', p === prov));
+  const cfg = PROVIDER_CONFIG[prov];
+  document.getElementById('api-key-input').placeholder = cfg.placeholder;
+  document.getElementById('key-hint').textContent = cfg.hint;
+}
+
+// ═══════════════════════════════════════════════════
+//  API KEY + COMPANION NAME
+// ═══════════════════════════════════════════════════
+function toggleKeyVisibility() {
+  const inp = document.getElementById('api-key-input');
+  const btn = document.querySelector('.key-toggle');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? 'Show key' : 'Hide key';
+}
+
+function saveKey() {
+  const val  = document.getElementById('api-key-input').value.trim();
+  const name = document.getElementById('companion-name-input').value.trim();
+  const err  = document.getElementById('key-error');
+  err.style.display = 'none';
+
+  if (!val) { err.textContent = 'Please enter your API key.'; err.style.display = 'block'; return; }
+
+  STATE.apiKey = val;
+  localStorage.setItem('pc_api_key', val);
+
+  if (name) {
+    STATE.companionName = name;
+    localStorage.setItem('pc_companion_name', name);
+  } else {
+    STATE.companionName = 'Companion';
+  }
+
+  document.getElementById('key-status-bar').style.display = 'block';
+  navigate('search');
+}
+
+function clearKey() {
+  STATE.apiKey = '';
+  localStorage.removeItem('pc_api_key');
+  document.getElementById('api-key-input').value = '';
+  document.getElementById('key-status-bar').style.display = 'none';
+  navigate('key');
+}
+
+// ═══════════════════════════════════════════════════
+//  BOOK SEARCH — AI interpretation + OL + Google Books
+// ═══════════════════════════════════════════════════
+function looksLikeNaturalLanguage(q) {
+  const nl = /\b(the one|that book|written by|by the author|about|popular|famous|japanese|chinese|korean|french|spanish|german|italian|novel|memoir|classic|recent|new|old)\b/i;
+  return nl.test(q) || q.trim().split(/\s+/).length > 5;
+}
+
+async function interpretSearchQuery(q) {
+  if (!STATE.apiKey) return { title: q, author: '' };
+  const prompt = `A user is searching for a book with this query: "${q}"\nExtract the most likely book title and author. Return ONLY a JSON object like: {"title":"...","author":"..."}\nIf you cannot determine the author, use an empty string. No other text.`;
+  try {
+    let text = '';
+    if (STATE.provider === 'anthropic') {
+      const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:80, messages:[{role:'user',content:prompt}] }) });
+      text = (await res.json()).content?.[0]?.text || '';
+    } else if (STATE.provider === 'gemini') {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
+      text = (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '';
+    } else if (STATE.provider === 'groq') {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:80, messages:[{role:'user',content:prompt}] }) });
+      text = (await res.json()).choices?.[0]?.message?.content || '';
+    }
+    const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+    if (parsed.title) return { title: parsed.title, author: parsed.author || '' };
+  } catch(e) {}
+  return { title: q, author: '' };
+}
+
+async function searchBooks() {
+  const rawTitle  = document.getElementById('book-search-title').value.trim();
+  const rawAuthor = document.getElementById('book-search-author').value.trim();
+  const raw = rawTitle || rawAuthor;
+  if (!raw) return;
+  const statusEl  = document.getElementById('search-status');
+  const resultsEl = document.getElementById('search-results');
+  resultsEl.innerHTML = '';
+
+  let searchTitle = rawTitle, searchAuthor = rawAuthor;
+  statusEl.textContent = 'Searching…'; statusEl.className = 'status-msg'; statusEl.style.display = 'block';
+
+  // Only apply NL interpretation if user filled title field with a descriptive phrase
+  // and left author blank (so we don't mangle explicit author entries)
+  const isNL = !rawAuthor && looksLikeNaturalLanguage(rawTitle);
+  if (isNL && STATE.apiKey) {
+    statusEl.textContent = 'Understanding your search…';
+    const interp = await interpretSearchQuery(rawTitle);
+    searchTitle = interp.title;
+    searchAuthor = interp.author || rawAuthor;
+    statusEl.textContent = `Searching for "${searchTitle}"${searchAuthor ? ' by ' + searchAuthor : ''}…`;
+  }
+
+  // Build queries with field qualifiers
+  // Google Books supports intitle: and inauthor: operators
+  const gbParts = [];
+  if (searchTitle)  gbParts.push('intitle:' + searchTitle);
+  if (searchAuthor) gbParts.push('inauthor:' + searchAuthor);
+  const gbQuery = gbParts.join('+');
+
+  // Open Library uses plain combined query (no field operators)
+  const olQuery = [searchTitle, searchAuthor].filter(Boolean).join(' ');
+  const q = olQuery;
+
+  // Non-Latin script detection — skip Open Library, go straight to Google Books
+  const hasNonLatin = /[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0600-\u06ff\u0400-\u04ff\u0900-\u097f\u0e00-\u0e7f]/.test(q);
+
+  try {
+    let books = [];
+    if (hasNonLatin) {
+      statusEl.textContent = 'Searching Google Books…'; statusEl.style.display = 'block';
+      books = await fetchGoogleBooks(gbQuery);
+    } else {
+      books = await fetchOpenLibrary(olQuery);
+      if (!books.length) { statusEl.textContent = 'Trying Google Books…'; statusEl.style.display = 'block'; books = await fetchGoogleBooks(gbQuery); }
+    }
+
+    statusEl.style.display = 'none';
+
+    if (!books.length) {
+      statusEl.textContent = 'No results found — try different keywords or enter manually below.';
+      statusEl.style.display = 'block';
+      // Show more button if there are more than 6 results
+    if (books.length > 6) {
+      const moreBtn = document.createElement('button');
+      moreBtn.className = 'btn';
+      moreBtn.textContent = 'Show more results';
+      moreBtn.style.marginBottom = '10px';
+      const _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
+      moreBtn.onclick = async () => {
+        moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
+        try {
+          const extra = books.slice(6);
+          extra.forEach(book => {
+            const el = document.createElement('div'); el.className = 'book-result';
+            const thumbHtml = book.thumb ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+            el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
+            el.addEventListener('click', () => selectBookWithAgeCheck(book));
+            resultsEl.insertBefore(el, moreBtn);
+          });
+        } catch(e) {}
+        moreBtn.remove();
+      };
+      resultsEl.appendChild(moreBtn);
+    }
+
+    // Author-only refine prompt
+    if (!searchTitle && searchAuthor) {
+      const refineEl = document.createElement('p');
+      refineEl.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);margin-bottom:12px;font-style:italic';
+      refineEl.textContent = `Showing books by "${searchAuthor}". Add a title above to narrow down.`;
+      resultsEl.insertBefore(refineEl, resultsEl.firstChild);
+    }
+
+    renderManualEntry(searchTitle, resultsEl); return;
+    }
+
+    // Render a batch of book results into container
+    function renderBookBatch(batch, container, insertBefore) {
+      // always insert before manual entry if present
+      const manualEntry = container.querySelector('.manual-entry');
+      const anchor = insertBefore || manualEntry || null;
+      batch.forEach(book => {
+        const el = document.createElement('div'); el.className = 'book-result';
+        const thumbHtml = book.thumb
+          ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+          : '';
+        el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
+        el.addEventListener('click', () => selectBookWithAgeCheck(book));
+        if (anchor) container.insertBefore(el, anchor);
+        else container.appendChild(el);
+      });
+    }
+
+    renderBookBatch(books.slice(0, 6), resultsEl, null);
+
+    // Show more — paginated, always fetches fresh next page
+    let _page = 1;
+    const _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
+    const _seen = new Set(books.map(b => b.title.toLowerCase() + '||' + b.author.toLowerCase()));
+
+    function addShowMoreBtn() {
+      const moreBtn = document.createElement('button');
+      moreBtn.className = 'btn';
+      moreBtn.textContent = 'Show more results';
+      moreBtn.style.marginBottom = '10px';
+      moreBtn.onclick = async () => {
+        moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
+        _page++;
+        try {
+          let more = [];
+          if (_hasNonLatin) {
+            const startIndex = (_page - 1) * 6;
+            more = await fetchGoogleBooks(_gbQuery, 6, startIndex);
+          } else {
+            more = await fetchOpenLibrary(_olQuery, _page * 6 + 6);
+            more = more.filter(b => !_seen.has(b.title.toLowerCase() + '||' + b.author.toLowerCase()));
+          }
+          const fresh = more.filter(b => {
+            const k = b.title.toLowerCase() + '||' + b.author.toLowerCase();
+            if (_seen.has(k)) return false;
+            _seen.add(k); return true;
+          });
+          // remove btn, insert new results before manual entry
+          const manualEntry = resultsEl.querySelector('.manual-entry');
+          moreBtn.remove();
+          if (fresh.length) {
+            renderBookBatch(fresh, resultsEl, manualEntry || null);
+            if (fresh.length >= 4) addShowMoreBtn();
+          } else {
+            const noMore = document.createElement('p');
+            noMore.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);font-style:italic;margin-bottom:12px';
+            noMore.textContent = 'No more results found.';
+            if (manualEntry) resultsEl.insertBefore(noMore, manualEntry);
+            else resultsEl.appendChild(noMore);
+          }
+        } catch(e) { moreBtn.textContent = 'Show more results'; moreBtn.disabled = false; }
+      };
+      // Insert show more button before manual entry so it stays above it
+      const manualEntry = resultsEl.querySelector('.manual-entry');
+      if (manualEntry) resultsEl.insertBefore(moreBtn, manualEntry);
+      else resultsEl.appendChild(moreBtn);
+    }
+
+    // Show more button if initial results filled a full page
+    if (books.length >= 6) addShowMoreBtn();
+
+    // Author-only refine prompt
+    if (!searchTitle && searchAuthor) {
+      const refineEl = document.createElement('p');
+      refineEl.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);margin-bottom:12px;font-style:italic';
+      refineEl.textContent = `Showing books by "${searchAuthor}". Add a title above to narrow down.`;
+      resultsEl.insertBefore(refineEl, resultsEl.firstChild);
+    }
+
+    renderManualEntry(searchTitle, resultsEl);
+  } catch(e) {
+    statusEl.textContent = 'Search failed — check your connection and try again.';
+    statusEl.className = 'status-msg error'; statusEl.style.display = 'block';
+    // Show more button if there are more than 6 results
+    if (books.length > 6) {
+      const moreBtn = document.createElement('button');
+      moreBtn.className = 'btn';
+      moreBtn.textContent = 'Show more results';
+      moreBtn.style.marginBottom = '10px';
+      const _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
+      moreBtn.onclick = async () => {
+        moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
+        try {
+          const extra = books.slice(6);
+          extra.forEach(book => {
+            const el = document.createElement('div'); el.className = 'book-result';
+            const thumbHtml = book.thumb ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+            el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
+            el.addEventListener('click', () => selectBookWithAgeCheck(book));
+            resultsEl.insertBefore(el, moreBtn);
+          });
+        } catch(e) {}
+        moreBtn.remove();
+      };
+      resultsEl.appendChild(moreBtn);
+    }
+
+    // Author-only refine prompt
+    if (!searchTitle && searchAuthor) {
+      const refineEl = document.createElement('p');
+      refineEl.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);margin-bottom:12px;font-style:italic';
+      refineEl.textContent = `Showing books by "${searchAuthor}". Add a title above to narrow down.`;
+      resultsEl.insertBefore(refineEl, resultsEl.firstChild);
+    }
+
+    renderManualEntry(searchTitle, resultsEl);
+  }
+}
+
+async function fetchOpenLibrary(q, limit=10, offset=0) {
+  const res  = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=${limit}&offset=${offset}&fields=key,title,author_name,first_publish_year`);
+  const data = await res.json();
+  const seen = new Map();
+  (data.docs||[]).forEach(d => {
+    const title = d.title||'Unknown title', author = (d.author_name||['Unknown author'])[0];
+    const k = title.toLowerCase()+'||'+author.toLowerCase(), year = d.first_publish_year||9999;
+    const olid = d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-S.jpg` : '';
+    if (!seen.has(k)||year<seen.get(k).year) seen.set(k,{title,author,year:d.first_publish_year||'',key:d.key||'',source:'Open Library',thumb:olid});
+  });
+  const results = Array.from(seen.values());
+  // Sort: exact title matches first, then by year
+  results.sort((a,b) => {
+    const aq = q.toLowerCase(), at = a.title.toLowerCase(), bt = b.title.toLowerCase();
+    const aExact = at === aq ? 0 : at.startsWith(aq) ? 1 : 2;
+    const bExact = bt === aq ? 0 : bt.startsWith(aq) ? 1 : 2;
+    if (aExact !== bExact) return aExact - bExact;
+    return (a.year||9999) - (b.year||9999);
+  });
+  return results;
+}
+
+async function fetchGoogleBooks(q, maxResults=8, startIndex=0) {
+  const res  = await fetch(`/api/books?q=${encodeURIComponent(q)}&maxResults=${maxResults}&startIndex=${startIndex}`);
+  const data = await res.json();
+  const seen = new Map();
+  (data.items||[]).forEach(item => {
+    const info = item.volumeInfo||{}, title = info.title||'Unknown title', author = (info.authors||['Unknown author'])[0];
+    const k = title.toLowerCase()+'||'+author.toLowerCase();
+    const thumb = info.imageLinks?.smallThumbnail || info.imageLinks?.thumbnail || '';
+    const cats = (info.categories||[]).join(' ').toLowerCase();
+    if (!seen.has(k)) seen.set(k,{title,author,year:info.publishedDate?info.publishedDate.slice(0,4):'',key:item.id||'',source:'Google Books',lang:info.language||'',thumb,cats});
+  });
+  return Array.from(seen.values()).slice(0,6);
+}
+
+function renderManualEntry(prefill, container) {
+  const ex = container.querySelector('.manual-entry'); if (ex) ex.remove();
+  const wrap = document.createElement('div'); wrap.className = 'manual-entry';
+  wrap.innerHTML = `<p style="font-size:0.85rem;color:var(--grey-dark);margin-bottom:14px">Not seeing your book? Enter it manually:</p>
+    <div class="field"><label>Title</label><input type="text" id="manual-title" /></div>
+    <div class="field"><label>Author <span style="font-weight:normal;text-transform:none">(optional)</span></label><input type="text" id="manual-author" placeholder="Author name" /></div>
+    <button class="btn btn-primary" onclick="selectManualBook()">Start companion</button>`;
+  container.appendChild(wrap);
+  const ti = document.getElementById('manual-title'); if (ti) ti.value = prefill||'';
+}
+
+function selectManualBook() {
+  const title = (document.getElementById('manual-title')||{}).value||'';
+  const author = (document.getElementById('manual-author')||{}).value||'';
+  if (!title.trim()) return;
+  selectBook({title:title.trim(),author:author.trim()||'Unknown author',year:'',key:''});
+}
+
+
+// ═══════════════════════════════════════════════════
+//  AGE GATE + T&C
+// ═══════════════════════════════════════════════════
+function acceptTC() {
+  localStorage.setItem('pc_tc_accepted', '1');
+  navigate('key');
+}
+
+function isAdultBook(book) {
+  const ADULT_TAGS = ['erotica','erotic','adult fiction','explicit','mature','sexuality','pornography'];
+  const cats = (book.cats || '').toLowerCase();
+  return ADULT_TAGS.some(t => cats.includes(t));
+}
+
+let _pendingBookForAgeGate = null;
+
+function selectBookWithAgeCheck(book) {
+  if (isAdultBook(book)) {
+    _pendingBookForAgeGate = book;
+    document.getElementById('age-gate-book-name').textContent = '"' + book.title + '"';
+    navigate('age-gate');
+  } else {
+    selectBook(book);
+  }
+}
+
+function confirmAgeGate() {
+  if (_pendingBookForAgeGate) {
+    selectBook(_pendingBookForAgeGate);
+    _pendingBookForAgeGate = null;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  BOOK SELECTION → STATUS → LANGUAGE → COMPANION
+// ═══════════════════════════════════════════════════
+function selectBook(book) {
+  STATE.book = book;
+  STATE.messages = [];
+
+  // ensure lang field is persisted on book object (Bug Fix B)
+  const detectedLang = detectLanguage(book);
+  if (detectedLang) book.detectedLang = detectedLang;
+  localStorage.setItem('pc_last_book', JSON.stringify(book));
+
+  const bk = bookKey(book);
+  const savedStatus = localStorage.getItem('pc_status_' + bk);
+  const savedLang   = localStorage.getItem('pc_lang_'   + bk);
+
+  if (savedStatus) {
+    // returning book — restore ALL language state before launching (Bug Fix A)
+    STATE.readingStatus = savedStatus;
+    STATE.chatLanguage  = savedLang || 'english';
+    STATE.detectedLang  = detectedLang;
+    // restore thinking phrases if native language was chosen
+    if (STATE.chatLanguage === 'native' && detectedLang) {
+      generateThinkingPhrases(detectedLang);
+    }
+    launchCompanion(book);
+  } else {
+    // new book — ask reading status first
+    document.getElementById('status-book-title').textContent =
+      'Where are you with "' + book.title + '"?';
+    navigate('status');
+  }
+}
+
+function setReadingStatus(status) {
+  STATE.readingStatus = status;
+  localStorage.setItem('pc_status_' + bookKey(STATE.book), status);
+
+  // detect if non-English
+  const lang = detectLanguage(STATE.book);
+  STATE.detectedLang = lang;
+
+  const bk = bookKey(STATE.book);
+  const savedLang = localStorage.getItem('pc_lang_' + bk);
+
+  if (lang && !savedLang) {
+    // show language choice
+    document.getElementById('lang-prompt-text').textContent =
+      `This looks like it might be in ${lang}. Would you like to chat in ${lang} or in English?`;
+    document.getElementById('lang-native-btn').textContent = `Chat in ${lang}`;
+    navigate('language');
+  } else {
+    STATE.chatLanguage = savedLang || 'english';
+    launchCompanion(STATE.book);
+  }
+}
+
+function setLanguage(choice) {
+  STATE.chatLanguage = choice;
+  localStorage.setItem('pc_lang_' + bookKey(STATE.book), choice);
+  // if native, generate thinking phrases in that language
+  if (choice === 'native' && STATE.detectedLang) {
+    generateThinkingPhrases(STATE.detectedLang);
+  }
+  launchCompanion(STATE.book);
+}
+
+function detectLanguage(book) {
+  // detect from Google Books language code
+  if (book.lang && book.lang !== 'en') {
+    const LANG_NAMES = { zh:'Chinese', ja:'Japanese', ko:'Korean', fr:'French', de:'German', es:'Spanish', it:'Italian', pt:'Portuguese', ar:'Arabic', ru:'Russian', hi:'Hindi', th:'Thai', vi:'Vietnamese', nl:'Dutch', pl:'Polish', tr:'Turkish' };
+    return LANG_NAMES[book.lang] || null;
+  }
+  // detect from non-ASCII characters in title
+  const hasChinese  = /[\u4e00-\u9fff]/.test(book.title);
+  const hasJapanese = /[\u3040-\u30ff]/.test(book.title);
+  const hasKorean   = /[\uac00-\ud7af]/.test(book.title);
+  const hasArabic   = /[\u0600-\u06ff]/.test(book.title);
+  const hasCyrillic = /[\u0400-\u04ff]/.test(book.title);
+  if (hasChinese)  return 'Chinese';
+  if (hasJapanese) return 'Japanese';
+  if (hasKorean)   return 'Korean';
+  if (hasArabic)   return 'Arabic';
+  if (hasCyrillic) return 'Russian';
+  return null;
+}
+
+function launchCompanion(book) {
+  // assign conversation ID if not set
+  if (!STATE.currentConvId) {
+    STATE.currentConvId   = 'conv_' + Date.now();
+    STATE.currentConvName = null;
+  }
+  // add to shelf
+  if (typeof addBookToShelf === 'function') addBookToShelf(book);
+
+  document.getElementById('book-title-display').textContent  = book.title;
+  document.getElementById('book-author-display').textContent = book.author;
+  document.getElementById('input-book-context').textContent  = book.title + (book.author ? ' · ' + book.author : '');
+  document.getElementById('chat-log').innerHTML = '';
+  document.getElementById('loading-indicator').style.display = 'none';
+  document.getElementById('icebreakers').style.display = 'block';
+  updateStatusDisplay();
+  renderHighlightsPanel();
+  updatePassagesToolbarBtn();
+  populateIcebreakers(book);
+  navigate('companion');
+}
+
+function updateStatusDisplay() {
+  const labels = { considering:'Considering reading', started:'Just started', midway:'Halfway through', finished:'Just finished' };
+  const el = document.getElementById('book-status-display');
+  if (STATE.readingStatus && labels[STATE.readingStatus]) {
+    el.textContent = labels[STATE.readingStatus];
+  } else {
+    el.textContent = '';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  AI-GENERATED THINKING PHRASES
+// ═══════════════════════════════════════════════════
+async function generateThinkingPhrases(language) {
+  const cacheKey = 'pc_thinking_' + language.toLowerCase();
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) { try { STATE.thinkingPhrases = JSON.parse(cached); return; } catch(e) {} }
+
+  const prompt = `Generate 6 short natural "thinking" indicators (like "typing…", "one moment…") in ${language}. Max 3 words each with an ellipsis. Return ONLY a JSON array of 6 strings. No other text.`;
+  try {
+    let text = '';
+    if (STATE.provider === 'anthropic') {
+      const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:120, messages:[{role:'user',content:prompt}] }) });
+      text = (await res.json()).content?.[0]?.text || '';
+    } else if (STATE.provider === 'gemini') {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
+      text = (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '';
+    } else if (STATE.provider === 'groq') {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:120, messages:[{role:'user',content:prompt}] }) });
+      text = (await res.json()).choices?.[0]?.message?.content || '';
+    }
+    const phrases = JSON.parse(text.replace(/```json|```/g,'').trim());
+    if (Array.isArray(phrases) && phrases.length >= 4) {
+      STATE.thinkingPhrases = phrases;
+      localStorage.setItem(cacheKey, JSON.stringify(phrases));
+    }
+  } catch(e) { /* fall back to English */ }
+}
+
+function getThinkingPhrase() {
+  const phrases = STATE.thinkingPhrases || STATIC_THINKING;
+  return phrases[Math.floor(Math.random() * phrases.length)];
+}
+
+// ═══════════════════════════════════════════════════
+//  CLIPPINGS
+// ═══════════════════════════════════════════════════
+function parseClippings(input) {
+  const file = input.files[0]; if (!file) return;
+  document.getElementById('clippings-filename').textContent = file.name;
+  const statusEl = document.getElementById('clippings-status');
+  statusEl.textContent = 'Reading clippings…'; statusEl.style.display = 'block';
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const highlights = parseClippingsText(e.target.result);
+    if (!highlights.length) { statusEl.textContent = 'No highlights found in this file.'; return; }
+    STATE.highlights = highlights;
+    localStorage.setItem('pc_highlights', JSON.stringify(highlights));
+    const n = highlights.length, b = countBooks(highlights);
+    statusEl.textContent = `Loaded ${n} highlight${n!==1?'s':''} from ${b} book${b!==1?'s':''}.`;
+    const top = getMostRecentBook(highlights);
+    if (top) selectBook({title:top.title,author:top.author,year:'',key:''});
+  };
+  reader.readAsText(file);
+}
+
+function parseClippingsText(text) {
+  const out = [];
+  text.split('==========').forEach(entry => {
+    const lines = entry.split('\n').map(l=>l.trim()).filter(Boolean);
+    if (lines.length < 2) return;
+    const content = lines.slice(2).join(' ').trim();
+    if (!content || lines[1].toLowerCase().includes('bookmark')) return;
+    const tm = lines[0].match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+    const dm = lines[1].match(/Added on (.+)$/i);
+    out.push({title:tm?tm[1].trim():lines[0],author:tm?tm[2].trim():'Unknown',text:content,date:dm?dm[1].trim():''});
+  });
+  return out;
+}
+
+function countBooks(h) { return new Set(h.map(x=>x.title)).size; }
+function getMostRecentBook(h) { return h.length ? {title:h[h.length-1].title,author:h[h.length-1].author} : null; }
+
+// ═══════════════════════════════════════════════════
+//  FUZZY HIGHLIGHTS MATCHING
+// ═══════════════════════════════════════════════════
+const STOP_WORDS = new Set(['the','a','an','of','and','in','on','at','to','for','by']);
+
+function significantWords(str) {
+  return str.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(w=>w&&!STOP_WORDS.has(w)).slice(0,3);
+}
+
+function fuzzyMatch(book, highlight) {
+  const bw = significantWords(book.title), cw = significantWords(highlight.title);
+  const titleMatch = bw.some(w=>cw.includes(w));
+  const ba = (book.author||'').toLowerCase().replace(/[^a-z\s]/g,'');
+  const ca = (highlight.author||'').toLowerCase().replace(/[^a-z\s]/g,'');
+  const authorMatch = ba && ca && ba.split(/\s+/).some(w=>w.length>2&&ca.includes(w));
+  return titleMatch || authorMatch;
+}
+
+function getRelevantHighlights(book) { return STATE.highlights.filter(h=>fuzzyMatch(book,h)); }
+
+// ═══════════════════════════════════════════════════
+//  HIGHLIGHTS PANEL
+// ═══════════════════════════════════════════════════
+function renderHighlightsPanel() {
+  const relevant = getRelevantHighlights(STATE.book);
+  const btn = document.getElementById('highlights-toolbar-btn');
+  if (relevant.length) {
+    btn.style.display = 'block'; btn.textContent = `Highlights (${relevant.length})`;
+    document.getElementById('highlights-count').textContent = `${relevant.length} highlight${relevant.length!==1?'s':''} from your Kindle`;
+    document.getElementById('highlights-list').innerHTML = relevant.map(h=>`<p style="border-left:3px solid var(--grey-mid);padding-left:10px;margin-bottom:12px;font-style:italic">"${esc(h.text)}"</p>`).join('');
+  } else { btn.style.display = 'none'; }
+}
+
+function toggleHighlights() {
+  const panel = document.getElementById('highlights-panel'), btn = document.getElementById('highlights-toolbar-btn');
+  panel.classList.toggle('open');
+  document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('font-toolbar-btn').classList.remove('active');
+  btn.classList.toggle('active', panel.classList.contains('open'));
+}
+
+// ═══════════════════════════════════════════════════
+//  ICE BREAKERS
+// ═══════════════════════════════════════════════════
+async function populateIcebreakers(book) {
+  const list = document.getElementById('icebreaker-list');
+  list.innerHTML = '';
+  const loadEl = document.createElement('div');
+  loadEl.className = 'icebreaker-label'; loadEl.style.fontStyle = 'italic';
+  loadEl.textContent = 'Finding the right questions…';
+  list.appendChild(loadEl);
+
+  const cacheKey = 'pc_icebreakers_' + bookKey(book) + '_' + (STATE.readingStatus||'');
+  try { const c = localStorage.getItem(cacheKey); if (c) { renderIcebreakerButtons(JSON.parse(c), list); return; } } catch(e) {}
+
+  let prompts = null;
+  if (STATE.apiKey) {
+    try { prompts = await fetchAIIcebreakers(book); localStorage.setItem(cacheKey, JSON.stringify(prompts)); } catch(e) { prompts = null; }
+  }
+
+  if (!prompts || !prompts.length) {
+    prompts = getStaticPromptsByStatus(STATE.readingStatus);
+  }
+
+  renderIcebreakerButtons(prompts, list);
+}
+
+function getStaticPromptsByStatus(status) {
+  const sets = {
+    considering: ["Is this book for me?","What's the main idea?","Who usually loves this book?","How long does it take to read?"],
+    started:     ["I'm finding my feet with it","Something already caught my attention","I'm not sure I'll finish it","What should I watch out for?"],
+    midway:      ["Something is still on my mind","I want to understand something better","I'm not sure how I feel about it","Something surprised me"],
+    finished:    ["I just finished it","There's a passage I keep thinking about","I gave up — can we talk about why?","I want to know what to read next"],
+  };
+  return (sets[status] || STATIC_PROMPTS).slice(0,4);
+}
+
+async function fetchAIIcebreakers(book) {
+  const statusContext = {
+    considering: 'who is considering whether to read',
+    started:     'who has just started reading',
+    midway:      'who is halfway through reading',
+    finished:    'who has just finished reading',
+  };
+  const ctx = statusContext[STATE.readingStatus] || 'who is reading';
+  const langNote = (STATE.chatLanguage === 'native' && STATE.detectedLang) ? ` Generate the prompts in ${STATE.detectedLang}.` : '';
+  const prompt = `Generate 4 short conversation starter prompts (max 8 words each) for a reader ${ctx} "${book.title}" by ${book.author}.${langNote} Return only a JSON array of 4 strings. No other text.`;
+
+  let text = '';
+  if (STATE.provider === 'anthropic') {
+    const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:150, messages:[{role:'user',content:prompt}] }) });
+    text = (await res.json()).content?.[0]?.text || '';
+  } else if (STATE.provider === 'gemini') {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
+    text = (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '';
+  } else if (STATE.provider === 'groq') {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:150, messages:[{role:'user',content:prompt}] }) });
+    text = (await res.json()).choices?.[0]?.message?.content || '';
+  }
+
+  const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+  if (!Array.isArray(parsed) || parsed.length < 2) throw new Error('bad');
+  return parsed.slice(0,4);
+}
+
+function renderIcebreakerButtons(prompts, list) {
+  list.innerHTML = '';
+  prompts.forEach(text => {
+    const btn = document.createElement('button');
+    btn.className = 'icebreaker-btn'; btn.textContent = text;
+    btn.addEventListener('click', () => { const ta = document.getElementById('chat-input'); ta.value = text; autoGrow(ta); ta.focus(); });
+    list.appendChild(btn);
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  CHAT
+// ═══════════════════════════════════════════════════
+function handleChatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey && window.innerWidth > 600) { e.preventDefault(); sendMessage(); }
+}
+
+function autoGrow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 200)+'px'; }
+
+async function sendMessage(retryText) {
+  const inputEl = document.getElementById('chat-input');
+  const text    = retryText || inputEl.value.trim();
+  if (!text || !STATE.book) return;
+  if (!STATE.apiKey) { navigate('key'); return; }
+
+  if (!navigator.onLine) {
+    queueOfflineMessage(text);
+    if (!retryText) { inputEl.value = ''; inputEl.style.height = 'auto'; }
+    STATE.messages.push({role:'user',content:text});
+    appendBubble('user', text);
+    const w = document.createElement('div'); w.className = 'message companion';
+    const r = document.createElement('div'); r.className = 'message-role'; r.textContent = STATE.companionName;
+    const b = document.createElement('div'); b.className = 'message-bubble'; b.textContent = "Saved for when you're back online. Your companion will reply then.";
+    w.appendChild(r); w.appendChild(b); document.getElementById('chat-log').appendChild(w);
+    scrollBottom(); return;
+  }
+
+  if (!retryText) { inputEl.value = ''; inputEl.style.height = 'auto'; }
+  STATE.lastUserText = text;
+  document.getElementById('icebreakers').style.display = 'none';
+
+  if (!retryText) { STATE.messages.push({role:'user',content:text}); appendBubble('user', text); }
+
+  const loadEl = document.getElementById('loading-indicator');
+  loadEl.textContent = getThinkingPhrase();
+  loadEl.style.display = 'block';
+  scrollBottom();
+
+  try {
+    const reply = await callAI();
+    STATE.messages.push({role:'assistant',content:reply});
+    loadEl.style.display = 'none';
+    const el = appendBubble('companion', reply);
+    scrollToMessage(el);
+    saveCurrentConversation();
+  } catch(err) {
+    loadEl.style.display = 'none';
+    appendError(err);
+    scrollBottom();
+  }
+}
+
+function appendBubble(role, text) {
+  const wrap = document.createElement('div'); wrap.className = `message ${role}`;
+  const roleEl = document.createElement('div'); roleEl.className = 'message-role';
+  roleEl.textContent = role === 'user' ? 'You' : STATE.companionName;
+  const bubble = document.createElement('div'); bubble.className = 'message-bubble'; bubble.innerHTML = formatText(text);
+  wrap.appendChild(roleEl); wrap.appendChild(bubble);
+
+  // Add copy + save actions to companion bubbles only
+  if (role === 'companion') {
+    const actions = document.createElement('div');
+    actions.className = 'bubble-actions';
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'bubble-action-btn';
+    copyBtn.textContent = 'Copy';
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(text).then(() => {
+        copyBtn.textContent = 'Copied';
+        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+      }).catch(() => showToolbarMsg('Copy not available in this browser.'));
+    };
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'bubble-action-btn';
+    saveBtn.textContent = 'Save passage';
+    saveBtn.onclick = () => {
+      savePassage(text, saveBtn);
+    };
+
+    actions.appendChild(copyBtn);
+    actions.appendChild(saveBtn);
+    wrap.appendChild(actions);
+  }
+
+  document.getElementById('chat-log').appendChild(wrap);
+  return wrap;
+}
+
+function appendError(err) {
+  const isNetwork = !navigator.onLine || err.message === 'Failed to fetch' || err.message.includes('fetch');
+  const msg = isNetwork ? "Couldn't reach your companion — poor connection? Try again when you have a better signal." : `Something went wrong: ${err.message}`;
+  const wrap = document.createElement('div'); wrap.className = 'message error-msg';
+  const bubble = document.createElement('div'); bubble.className = 'message-bubble'; bubble.textContent = msg;
+  const retryBtn = document.createElement('button'); retryBtn.className = 'retry-btn'; retryBtn.textContent = 'Try again';
+  retryBtn.onclick = () => { wrap.remove(); if (STATE.messages.length && STATE.messages[STATE.messages.length-1].role==='user') STATE.messages.pop(); sendMessage(STATE.lastUserText); };
+  wrap.appendChild(bubble); wrap.appendChild(retryBtn);
+  document.getElementById('chat-log').appendChild(wrap);
+}
+
+function formatText(t) {
+  return t.replace(/&/g,'&'+'amp;').replace(/</g,'&'+'lt;').replace(/>/g,'&'+'gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/\n\n+/g,'</p><p>').replace(/\n/g,'<br>').replace(/^/,'<p>').replace(/$/,'</p>');
+}
+
+function scrollBottom() { window.scrollTo({top:document.body.scrollHeight,behavior:'instant'}); }
+function scrollToMessage(el) { if (!el) { scrollBottom(); return; } window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-12,behavior:'instant'}); }
+
+// ═══════════════════════════════════════════════════
+//  AI PROVIDERS
+// ═══════════════════════════════════════════════════
+function buildSystemPrompt() {
+  const book = STATE.book;
+  const relevant = getRelevantHighlights(book).slice(-8);
+  const highlightsText = relevant.length ? '\n\nThe reader\'s highlights from this book:\n' + relevant.map(h=>`- "${h.text}"`).join('\n') : '';
+
+  const statusInstructions = {
+    considering: 'The reader is considering whether to read this book. Focus on helping them decide — share what makes it special, who tends to love it, what kind of read it is. No spoilers of any kind.',
+    started:     'The reader has just started this book. Be curious about their first impressions. No spoilers beyond the early pages.',
+    midway:      'The reader is halfway through. Engage with what they\'ve experienced so far. Check before discussing anything from the second half.',
+    finished:    'The reader has just finished this book. Full discussion is welcome — no spoiler restrictions.',
+  };
+
+  const statusNote = statusInstructions[STATE.readingStatus] || 'Be spoiler-aware — ask the reader how far they\'ve got before revealing plot details.';
+
+  const langNote = (STATE.chatLanguage === 'native' && STATE.detectedLang)
+    ? `\n\nRespond entirely in ${STATE.detectedLang}. The reader has chosen to discuss this book in ${STATE.detectedLang}.`
+    : '';
+
+  return `You are a reading companion for "${book.title}" by ${book.author}.
+
+You are warm but not gushing. Curious — you always ask something back at the end. You never summarise the plot unprompted. You offer opinions when asked. You are honest about what you don't know. Literary without being academic. You feel like a well-read friend who has also read this book.
+
+Never say "Great question!" Keep responses concise — this is read on an e-ink screen. Short paragraphs. Always end with a question or an invitation to continue.
+
+${statusNote}
+
+If the conversation drifts away from the book, find a gentle bridge back — connect what the reader said to something in the book rather than refusing or redirecting bluntly. You are a reading companion, not a general assistant.
+
+If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.
+
+Respond in plain prose only. No bullet points. No headers. No lists of any kind.
+
+If there are any signs this reader may be a minor, default to age-appropriate discussion regardless of the book's content rating.${langNote}${highlightsText}`;
+}
+
+async function callAI() {
+  const system = buildSystemPrompt(), messages = STATE.messages.slice(-20);
+  if (STATE.provider === 'anthropic') return callAnthropic(system, messages);
+  if (STATE.provider === 'gemini')    return callGemini(system, messages);
+  if (STATE.provider === 'groq')      return callGroq(system, messages);
+  throw new Error('Unknown provider');
+}
+
+async function callAnthropic(system, messages) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,system,messages}) });
+  if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${res.status}`); }
+  return (await res.json()).content?.[0]?.text || '(No response)';
+}
+
+async function callGemini(system, messages) {
+  const contents = messages.map(m=>({role:m.role==='user'?'user':'model',parts:[{text:m.content}]}));
+  contents.unshift({role:'user',parts:[{text:system}]});
+  contents.splice(1,0,{role:'model',parts:[{text:'Understood. I\'m ready.'}]});
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contents}) });
+  if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${res.status}`); }
+  return (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '(No response)';
+}
+
+async function callGroq(system, messages) {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:600,messages:[{role:'system',content:system},...messages]}) });
+  if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${res.status}`); }
+  return (await res.json()).choices?.[0]?.message?.content || '(No response)';
+}
+
+// ═══════════════════════════════════════════════════
+//  FONT SIZE
+// ═══════════════════════════════════════════════════
+function toggleFontPanel() {
+  const panel = document.getElementById('font-panel'), btn = document.getElementById('font-toolbar-btn');
+  panel.classList.toggle('open');
+  document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  btn.classList.toggle('active', panel.classList.contains('open'));
+}
+
+function applyFontSize(size) {
+  document.documentElement.style.setProperty('--font-size', size+'px');
+  document.querySelectorAll('.font-size-opt').forEach(b=>b.classList.toggle('active', parseInt(b.dataset.size)===size));
+}
+
+function setFontSize(size) { applyFontSize(size); localStorage.setItem('pc_font_size', size); }
+
+// ═══════════════════════════════════════════════════
+//  OTHER OPTIONS
+// ═══════════════════════════════════════════════════
+function showOtherOptions() {
+  const name = prompt('Give your companion a name (leave blank for "Companion"):');
+  if (name === null) return; // cancelled
+  const trimmed = name.trim();
+  STATE.companionName = trimmed || 'Companion';
+  localStorage.setItem('pc_companion_name', STATE.companionName);
+  showToolbarMsg(`Companion name set to "${STATE.companionName}".`);
+}
+
+// ═══════════════════════════════════════════════════
+//  TOOLBAR MESSAGE
+// ═══════════════════════════════════════════════════
+let toolbarMsgTimer = null;
+function showToolbarMsg(text) {
+  const el = document.getElementById('toolbar-msg');
+  el.textContent = text; el.style.display = 'block';
+  if (toolbarMsgTimer) clearTimeout(toolbarMsgTimer);
+  toolbarMsgTimer = setTimeout(()=>{ el.style.display='none'; }, 3000);
+}
+
+// ═══════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════
+function esc(s) { return String(s).replace(/&/g,'&'+'amp;').replace(/</g,'&'+'lt;').replace(/>/g,'&'+'gt;').replace(/"/g,'&'+'quot;'); }
+
+// ═══════════════════════════════════════════════════
+//  YOUR SHELF
+// ═══════════════════════════════════════════════════
+
+// Conversation storage structure:
+// pc_convs_[bookKey] = [ { id, name, status, messages, lastUpdated }, ... ]
+
+function getConvs(book) {
+  try { return JSON.parse(localStorage.getItem('pc_convs_' + bookKey(book)) || '[]'); } catch(e) { return []; }
+}
+
+function saveConvs(book, convs) {
+  localStorage.setItem('pc_convs_' + bookKey(book), JSON.stringify(convs));
+}
+
+function getShelfBooks() {
+  try { return JSON.parse(localStorage.getItem('pc_shelf_books') || '[]'); } catch(e) { return []; }
+}
+
+function addBookToShelf(book) {
+  const books = getShelfBooks();
+  const bk = bookKey(book);
+  if (!books.find(b => bookKey(b) === bk)) {
+    books.unshift({ title: book.title, author: book.author, year: book.year || '', lang: book.lang || '', detectedLang: book.detectedLang || '' });
+    localStorage.setItem('pc_shelf_books', JSON.stringify(books));
+  }
+}
+
+function saveCurrentConversation() {
+  if (!STATE.book || !STATE.messages.length) return;
+  const convs   = getConvs(STATE.book);
+  const convId  = STATE.currentConvId;
+  const existing = convs.find(c => c.id === convId);
+  const name    = STATE.currentConvName ||
+    (STATE.messages[0]?.content || 'Conversation').slice(0, 60);
+
+  if (existing) {
+    existing.messages    = STATE.messages;
+    existing.lastUpdated = Date.now();
+    existing.status      = STATE.readingStatus;
+    existing.name        = STATE.currentConvName || existing.name;
+  } else {
+    convs.unshift({
+      id:          convId,
+      name,
+      status:      STATE.readingStatus,
+      messages:    STATE.messages,
+      lastUpdated: Date.now(),
+    });
+  }
+  saveConvs(STATE.book, convs);
+  addBookToShelf(STATE.book);
+}
+
+function renderShelf() {
+  const books  = getShelfBooks();
+  const listEl = document.getElementById('shelf-list');
+  if (!books.length) {
+    listEl.innerHTML = '<p class="shelf-empty">Your shelf is empty. Start a conversation to add books here.</p>';
+    return;
+  }
+  listEl.innerHTML = '';
+  books.forEach(book => {
+    const convs = getConvs(book);
+    const last  = convs.length ? new Date(convs[0].lastUpdated).toLocaleDateString() : '';
+    const bk    = bookKey(book);
+    const status = localStorage.getItem('pc_status_' + bk) || '';
+    const statusLabel = { considering:'Considering', started:'Just started', midway:'Halfway through', finished:'Finished' }[status] || '';
+
+    const el = document.createElement('div');
+    el.className = 'shelf-book';
+    el.innerHTML = `
+      <div class="shelf-book-title">${esc(book.title)}</div>
+      <div class="shelf-book-author">${esc(book.author)}</div>
+      <div class="shelf-book-meta">${statusLabel ? statusLabel + ' · ' : ''}${convs.length} conversation${convs.length !== 1 ? 's' : ''}${last ? ' · Last: ' + last : ''}</div>`;
+    el.addEventListener('click', () => openBookShelf(book));
+    listEl.appendChild(el);
+  });
+}
+
+function openBookShelf(book) {
+  STATE.book = book;
+  const bk     = bookKey(book);
+  const status = localStorage.getItem('pc_status_' + bk) || '';
+  const statusLabel = { considering:'Considering', started:'Just started', midway:'Halfway through', finished:'Finished' }[status] || '';
+
+  document.getElementById('book-shelf-title').textContent  = book.title;
+  document.getElementById('book-shelf-author').textContent = book.author;
+  document.getElementById('book-shelf-status').textContent = statusLabel;
+
+  renderConvList(book);
+  navigate('book-shelf');
+}
+
+function renderConvList(book) {
+  const convs  = getConvs(book);
+  const listEl = document.getElementById('conv-list');
+
+  if (!convs.length) {
+    listEl.innerHTML = '<p class="shelf-empty">No conversations yet.</p>';
+    return;
+  }
+
+  listEl.innerHTML = '';
+  convs.forEach(conv => {
+    const date  = new Date(conv.lastUpdated).toLocaleDateString();
+    const statusLabel = { considering:'Considering', started:'Just started', midway:'Halfway through', finished:'Finished' }[conv.status] || '';
+    const el = document.createElement('div');
+    el.className = 'conv-item';
+    el.innerHTML = `
+      <div class="conv-item-name">${esc(conv.name)}</div>
+      <div class="conv-item-meta">${statusLabel ? statusLabel + ' · ' : ''}${date}</div>
+      <div class="conv-actions">
+        <button class="conv-btn primary" onclick="continueConversation('${conv.id}')">Continue</button>
+        <button class="conv-btn" onclick="renameConversation('${conv.id}')">Rename</button>
+        <button class="conv-btn danger" onclick="deleteConversation('${conv.id}')">Delete</button>
+      </div>`;
+    listEl.appendChild(el);
+  });
+}
+
+function continueConversation(convId) {
+  const convs = getConvs(STATE.book);
+  const conv  = convs.find(c => c.id === convId);
+  if (!conv) return;
+
+  const bk = bookKey(STATE.book);
+  STATE.readingStatus  = conv.status || localStorage.getItem('pc_status_' + bk) || null;
+  STATE.chatLanguage   = localStorage.getItem('pc_lang_' + bk) || 'english';
+  STATE.detectedLang   = STATE.book.detectedLang || detectLanguage(STATE.book);
+  STATE.messages       = conv.messages || [];
+  STATE.currentConvId  = conv.id;
+  STATE.currentConvName = conv.name;
+
+  if (STATE.chatLanguage === 'native' && STATE.detectedLang) {
+    generateThinkingPhrases(STATE.detectedLang);
+  }
+
+  document.getElementById('book-title-display').textContent  = STATE.book.title;
+  document.getElementById('book-author-display').textContent = STATE.book.author;
+  document.getElementById('input-book-context').textContent  =
+    STATE.book.title + (STATE.book.author ? ' · ' + STATE.book.author : '');
+  document.getElementById('loading-indicator').style.display = 'none';
+  document.getElementById('icebreakers').style.display = 'none';
+  updateStatusDisplay();
+  renderHighlightsPanel();
+
+  // render existing messages
+  const log = document.getElementById('chat-log');
+  log.innerHTML = '';
+  STATE.messages.forEach(m => appendBubble(m.role === 'user' ? 'user' : 'companion', m.content));
+
+  navigate('companion');
+}
+
+function renameConversation(convId) {
+  const convs = getConvs(STATE.book);
+  const conv  = convs.find(c => c.id === convId);
+  if (!conv) return;
+  const newName = prompt('Rename this conversation:', conv.name);
+  if (!newName || !newName.trim()) return;
+  conv.name = newName.trim();
+  if (STATE.currentConvId === convId) STATE.currentConvName = conv.name;
+  saveConvs(STATE.book, convs);
+  renderConvList(STATE.book);
+}
+
+function deleteConversation(convId) {
+  const convs    = getConvs(STATE.book);
+  const filtered = convs.filter(c => c.id !== convId);
+  saveConvs(STATE.book, filtered);
+  renderConvList(STATE.book);
+}
+
+function startNewConversation() {
+  const bk = bookKey(STATE.book);
+  STATE.readingStatus  = localStorage.getItem('pc_status_' + bk) || null;
+  STATE.chatLanguage   = localStorage.getItem('pc_lang_' + bk) || 'english';
+  STATE.detectedLang   = STATE.book.detectedLang || detectLanguage(STATE.book);
+  STATE.messages       = [];
+  STATE.currentConvId  = 'conv_' + Date.now();
+  STATE.currentConvName = null;
+
+  if (STATE.chatLanguage === 'native' && STATE.detectedLang) {
+    generateThinkingPhrases(STATE.detectedLang);
+  }
+
+  launchCompanion(STATE.book);
+}
+
+function updateBookStatus() {
+  document.getElementById('status-book-title').textContent =
+    'Where are you now with "' + STATE.book.title + '"?';
+  navigate('status');
+}
+
+// launchCompanion shelf logic folded into main function below
+
+// shelf render handled inside main handleRoute
+
+// Auto-save is called directly inside sendMessage
+
+
+// ═══════════════════════════════════════════════════
+//  PASSAGES
+// ═══════════════════════════════════════════════════
+function getPassages() {
+  if (!STATE.book) return [];
+  try { return JSON.parse(localStorage.getItem('pc_passages_' + bookKey(STATE.book)) || '[]'); } catch(e) { return []; }
+}
+
+function savePassage(text, btn) {
+  const passages = getPassages();
+  // avoid duplicates
+  if (passages.includes(text)) {
+    btn.textContent = 'Already saved';
+    btn.classList.add('saved');
+    setTimeout(() => { btn.textContent = 'Save passage'; btn.classList.remove('saved'); }, 1500);
+    return;
+  }
+  passages.push(text);
+  localStorage.setItem('pc_passages_' + bookKey(STATE.book), JSON.stringify(passages));
+  btn.textContent = 'Saved ✓';
+  btn.classList.add('saved');
+  setTimeout(() => { btn.textContent = 'Save passage'; btn.classList.remove('saved'); }, 1500);
+  updatePassagesToolbarBtn();
+  renderPassagesPanel();
+}
+
+function updatePassagesToolbarBtn() {
+  const passages = getPassages();
+  const btn = document.getElementById('passages-toolbar-btn');
+  if (!btn) return;
+  if (passages.length) {
+    btn.style.display = 'block';
+    btn.textContent = `Passages (${passages.length})`;
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+function renderPassagesPanel() {
+  const passages = getPassages();
+  const listEl   = document.getElementById('passages-list');
+  const countEl  = document.getElementById('passages-count');
+  if (!passages.length) {
+    countEl.textContent = 'No passages saved yet';
+    listEl.innerHTML = '';
+    return;
+  }
+  countEl.textContent = `${passages.length} passage${passages.length !== 1 ? 's' : ''} saved`;
+  listEl.innerHTML = passages.map((p, i) =>
+    `<div class="passage-item">${formatText(p)}</div>`
+  ).join('');
+}
+
+function togglePassagesPanel() {
+  const panel = document.getElementById('passages-panel');
+  const btn   = document.getElementById('passages-toolbar-btn');
+  panel.classList.toggle('open');
+  document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('font-toolbar-btn').classList.remove('active');
+  document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  btn.classList.toggle('active', panel.classList.contains('open'));
+  if (panel.classList.contains('open')) renderPassagesPanel();
+}
+
+function copyAllPassages() {
+  const passages = getPassages();
+  if (!passages.length) { showToolbarMsg('No passages saved yet.'); return; }
+  const text = passages.map((p, i) => `[${i+1}] ${p}`).join('\n\n');
+  navigator.clipboard.writeText(text).then(() => {
+    showToolbarMsg(`${passages.length} passage${passages.length !== 1 ? 's' : ''} copied to clipboard.`);
+  }).catch(() => showToolbarMsg('Copy not available in this browser.'));
+}
+
+// ═══════════════════════════════════════════════════
+//  END CONVERSATION
+// ═══════════════════════════════════════════════════
+function endConversation() {
+  saveCurrentConversation();
+  navigate('home');
+}
+
+</script>
 </body>
 </html>
