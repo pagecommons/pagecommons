@@ -1433,39 +1433,94 @@ async function populateIcebreakers(book) {
 
 function getStaticPromptsByStatus(status) {
   const sets = {
-    considering: ["Is this book for me?","What's the main idea?","Who usually loves this book?","How long does it take to read?"],
-    started:     ["I'm finding my feet with it","Something already caught my attention","I'm not sure I'll finish it","What should I watch out for?"],
-    midway:      ["Something is still on my mind","I want to understand something better","I'm not sure how I feel about it","Something surprised me"],
-    finished:    ["I just finished it","There's a passage I keep thinking about","I gave up — can we talk about why?","I want to know what to read next"],
+    considering: [
+      "What drew you to this book?",
+      "Are you ready for its themes?",
+      "What made you curious?",
+      "Have you read similar books?",
+    ],
+    started: [
+      "What are your first impressions?",
+      "Which character interests you most?",
+      "Something already surprised me",
+      "I want to know what lies ahead",
+    ],
+    midway: [
+      "Something unexpected happened",
+      "I have a theory about the ending",
+      "A character changed my mind",
+      "I cannot put this down",
+    ],
+    finished: [
+      "I just finished it",
+      "The ending stayed with me",
+      "Something is still on my mind",
+      "What should I read next?",
+    ],
   };
   return (sets[status] || STATIC_PROMPTS).slice(0,4);
 }
 
 async function fetchAIIcebreakers(book) {
-  const statusContext = {
-    considering: 'who is considering whether to read',
-    started:     'who has just started reading',
-    midway:      'who is halfway through reading',
-    finished:    'who has just finished reading',
+  const statusLabels = {
+    considering: 'considering reading',
+    started:     'just started',
+    midway:      'halfway through',
+    finished:    'just finished',
   };
-  const ctx = statusContext[STATE.readingStatus] || 'who is reading';
-  const langNote = (STATE.chatLanguage === 'native' && STATE.detectedLang) ? ` Generate the prompts in ${STATE.detectedLang}.` : '';
-  const prompt = `Generate 4 short conversation starter prompts (max 8 words each) for a reader ${ctx} "${book.title}" by ${book.author}.${langNote} Return only a JSON array of 4 strings. No other text.`;
+  const statusLabel = statusLabels[STATE.readingStatus] || 'reading';
+  const langNote = (STATE.chatLanguage === 'native' && STATE.detectedLang)
+    ? `\nGenerate the prompts in ${STATE.detectedLang}.` : '';
+
+  const prompt = `You are a literary companion helping a reader of "${book.title}" by ${book.author}.
+
+The reader's current status: ${statusLabel}
+
+Generate exactly 4 ice breaker prompts that feel specific to THIS book — its themes, reputation, tone, setting, and what readers typically wonder about.
+
+Rules:
+- Each prompt max 8 words
+- Must feel specific to this exact book
+- NOT generic questions that apply to any book
+- NOT: "Is this book for me?"
+- NOT: "What is the main idea?"
+- NOT: "How long does it take to read?"
+- Tone matches reading status:
+  considering → curiosity, uncertainty, is this worth my time?
+  just started → early impressions, what to expect ahead
+  halfway → tensions building, character observations, predictions
+  just finished → emotional reactions, themes, meaning, what next${langNote}
+
+Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.
+Example format: ["prompt one","prompt two","prompt three","prompt four"]`;
 
   let text = '';
   if (STATE.provider === 'anthropic') {
-    const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:150, messages:[{role:'user',content:prompt}] }) });
+    const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:200, messages:[{role:'user',content:prompt}] }) });
     text = (await res.json()).content?.[0]?.text || '';
   } else if (STATE.provider === 'gemini') {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
     text = (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '';
   } else if (STATE.provider === 'groq') {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:150, messages:[{role:'user',content:prompt}] }) });
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:200, messages:[{role:'user',content:prompt}] }) });
     text = (await res.json()).choices?.[0]?.message?.content || '';
   }
 
-  const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
-  if (!Array.isArray(parsed) || parsed.length < 2) throw new Error('bad');
+  // Clean response and attempt JSON parse
+  const clean = text.replace(/\`\`\`json|\`\`\`/g,'').trim();
+  let parsed = null;
+
+  try {
+    parsed = JSON.parse(clean);
+  } catch(e) {
+    // Try to extract array with regex
+    const match = clean.match(/\[\s*"[^"]*"(?:\s*,\s*"[^"]*")*\s*\]/);
+    if (match) {
+      try { parsed = JSON.parse(match[0]); } catch(e2) { parsed = null; }
+    }
+  }
+
+  if (!Array.isArray(parsed) || parsed.length < 2) throw new Error('bad response');
   return parsed.slice(0,4);
 }
 
