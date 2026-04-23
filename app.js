@@ -5,17 +5,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 // ═══════════════════════════════════════════════════
 //  CANARY — remove once Kobo rendering confirmed
 // ═══════════════════════════════════════════════════
-(function () {
-  var el = document.getElementById('screen-home');
-  if (el) {
-    el.style.display = 'block';
-  }
-  var hdr = document.querySelector('.hall-title');
-  if (hdr) {
-    hdr.textContent = 'JS running — loading app…';
-  }
-})();
-// ═══════════════════════════════════════════════════
+
 
 // ─── POLYFILLS for older WebKit (Kobo/Kindle) ───────────────────────────────
 if (!Array.prototype.includes) {
