@@ -968,6 +968,34 @@
 </div>
 
 <script>
+
+// ─── POLYFILLS for older WebKit (Kobo/Kindle) ───────────────────────────────
+if (!Array.prototype.includes) {
+  Array.prototype.includes = function(val) {
+    for (var i = 0; i < this.length; i++) { if (this[i] === val) return true; }
+    return false;
+  };
+}
+if (!String.prototype.includes) {
+  String.prototype.includes = function(val) { return this.indexOf(val) !== -1; };
+}
+if (!String.prototype.startsWith) {
+  String.prototype.startsWith = function(val) { return this.indexOf(val) === 0; };
+}
+if (!String.prototype.endsWith) {
+  String.prototype.endsWith = function(val) { return this.slice(-val.length) === val; };
+}
+if (!Object.assign) {
+  Object.assign = function(t) {
+    for (var i = 1; i < arguments.length; i++) {
+      var s = arguments[i];
+      for (var k in s) { if (Object.prototype.hasOwnProperty.call(s, k)) t[k] = s[k]; }
+    }
+    return t;
+  };
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 // ═══════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════
@@ -1014,7 +1042,7 @@ function showScreen(id) {
   const target = SCREENS.includes(id) ? id : 'home';
   SCREENS.forEach(s => {
     const el = document.getElementById('screen-'+s);
-    if (el) el.classList.toggle('active', s === target);
+    if (el) { if (s === target) { el.classList.add('active'); } else { el.classList.remove('active'); } }
   });
   window.scrollTo(0,0);
 }
@@ -1144,7 +1172,7 @@ const PROVIDER_CONFIG = {
 function selectProvider(prov) { STATE.provider = prov; localStorage.setItem('pc_provider', prov); applyProviderUI(prov); }
 
 function applyProviderUI(prov) {
-  ['anthropic','gemini','groq'].forEach(p => document.getElementById('prov-'+p).classList.toggle('selected', p === prov));
+  ['anthropic','gemini','groq'].forEach(p => (p === prov ? document.getElementById('prov-'+p).classList.add('selected') : document.getElementById('prov-'+p).classList.remove('selected')));
   const cfg = PROVIDER_CONFIG[prov];
   document.getElementById('api-key-input').placeholder = cfg.placeholder;
   document.getElementById('key-hint').textContent = cfg.hint;
@@ -1788,7 +1816,7 @@ function toggleHighlights() {
   panel.classList.toggle('open');
   document.getElementById('font-panel').classList.remove('open');
   document.getElementById('font-toolbar-btn').classList.remove('active');
-  btn.classList.toggle('active', panel.classList.contains('open'));
+  (panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active'));
 }
 
 // ═══════════════════════════════════════════════════
@@ -2113,12 +2141,12 @@ function toggleFontPanel() {
   panel.classList.toggle('open');
   document.getElementById('highlights-panel').classList.remove('open');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
-  btn.classList.toggle('active', panel.classList.contains('open'));
+  (panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active'));
 }
 
 function applyFontSize(size) {
-  document.documentElement.style.setProperty('--font-size', size+'px');
-  document.querySelectorAll('.font-size-opt').forEach(b=>b.classList.toggle('active', parseInt(b.dataset.size)===size));
+  document.documentElement.style.fontSize = size + 'px';
+  document.querySelectorAll('.font-size-opt').forEach(function(b){ parseInt(b.dataset.size)===size ? b.classList.add('active') : b.classList.remove('active'); });
 }
 
 function setFontSize(size) { applyFontSize(size); localStorage.setItem('pc_font_size', size); }
@@ -2368,14 +2396,14 @@ function toggleLengthPanel() {
   document.getElementById('font-toolbar-btn').classList.remove('active');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('passages-toolbar-btn').classList.remove('active');
-  btn.classList.toggle('active', panel.classList.contains('open'));
+  (panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active'));
 }
 
 function setReplyLength(length) {
   STATE.replyLength = length;
   localStorage.setItem('pc_reply_length', length);
   document.querySelectorAll('.length-opt').forEach(b => {
-    b.classList.toggle('active', b.dataset.length === length);
+    (b.dataset.length === length ? b.classList.add('active') : b.classList.remove('active'));
   });
   showToolbarMsg('Reply length set to ' + length + '.');
 }
@@ -2441,7 +2469,7 @@ function togglePassagesPanel() {
   document.getElementById('highlights-panel').classList.remove('open');
   document.getElementById('font-toolbar-btn').classList.remove('active');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
-  btn.classList.toggle('active', panel.classList.contains('open'));
+  (panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active'));
   if (panel.classList.contains('open')) renderPassagesPanel();
 }
 
@@ -2478,7 +2506,7 @@ function init() {
   const sz = localStorage.getItem('pc_font_size');
   if (sz) applyFontSize(parseInt(sz));
   const rl = localStorage.getItem('pc_reply_length');
-  if (rl) { STATE.replyLength = rl; document.querySelectorAll('.length-opt').forEach(b => b.classList.toggle('active', b.dataset.length === rl)); }
+  if (rl) { STATE.replyLength = rl; document.querySelectorAll('.length-opt').forEach(b => (b.dataset.length === rl ? b.classList.add('active') : b.classList.remove('active'))); }
 
   try {
     const savedBook = JSON.parse(localStorage.getItem('pc_last_book') || 'null');
@@ -2502,7 +2530,15 @@ function init() {
   if (!document.querySelector('.screen.active')) showScreen('home');
 }
 
-init();
+try { init(); } catch(e) {
+  // Fallback: force home screen visible if init fails
+  var fb = document.getElementById('screen-home');
+  if (fb) { fb.style.display = 'flex'; }
+  var err = document.createElement('p');
+  err.style.cssText = 'color:#c00;font-size:0.85rem;padding:12px;';
+  err.textContent = 'Error: ' + e.message;
+  document.querySelector('.page').appendChild(err);
+}
 </script>
 </body>
 </html>
