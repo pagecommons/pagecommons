@@ -2793,15 +2793,16 @@ function showInitError(msg) {
     if (!errDiv) {
       errDiv = document.createElement('div');
       errDiv.id = 'kobo-init-error';
-      errDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#fff;border-bottom:3px solid #000;padding:20px;font-size:18px;font-family:Georgia,serif;color:#000;z-index:9999;';
-      document.body.appendChild(errDiv);
+      errDiv.style.cssText = 'background:#f5f5f5;border:1px solid #111;padding:14px;margin:14px 0;font-size:16px;font-family:Georgia,serif;color:#111;';
+      var page = document.querySelector('.page');
+      if (page) page.insertBefore(errDiv, page.firstChild);
+      else document.body.appendChild(errDiv);
     }
     errDiv.style.display = 'block';
-    errDiv.textContent = 'ERR: ' + msg;
+    errDiv.textContent = 'Error: ' + msg;
   } catch (displayErr) {}
 }
 function init() {
-  if (typeof step === 'function') step('init: settings');
   try {
     var prov = localStorage.getItem('pc_provider');
     if (prov) {
@@ -2822,11 +2823,9 @@ function init() {
   } catch (e) {
     showInitError('settings: ' + e.message);
   }
-  if (typeof step === 'function') step('init: highlights');
   try {
     STATE.highlights = JSON.parse(localStorage.getItem('pc_highlights') || '[]');
   } catch (e) {}
-  if (typeof step === 'function') step('init: font');
   try {
     var sz = localStorage.getItem('pc_font_size');
     if (sz) applyFontSize(parseInt(sz));
@@ -2840,7 +2839,6 @@ function init() {
   } catch (e) {
     showInitError('font: ' + e.message);
   }
-  if (typeof step === 'function') step('init: book restore');
   try {
     var savedBook = JSON.parse(localStorage.getItem('pc_last_book') || 'null');
     if (savedBook) {
@@ -2853,13 +2851,11 @@ function init() {
   } catch (e) {
     showInitError('book restore: ' + e.message);
   }
-  if (typeof step === 'function') step('init: greeting');
   try {
     updateGreeting();
   } catch (e) {
     showInitError('greeting: ' + e.message);
   }
-  if (typeof step === 'function') step('init: routing');
   try {
     if (!localStorage.getItem('pc_tc_accepted')) {
       showScreen('tc');
@@ -2875,25 +2871,9 @@ function init() {
   }
 }
 function runInit() {
-  var _step = document.createElement('div');
-  _step.id = 'kobo-step';
-  _step.style.cssText = 'position:fixed;bottom:60px;left:0;right:0;background:#000;color:#fff;padding:10px;font-size:16px;font-family:Georgia,serif;text-align:center;z-index:9999;';
-  _step.textContent = 'init starting...';
-  document.body.appendChild(_step);
-  function step(msg) { var el = document.getElementById('kobo-step'); if (el) el.textContent = msg; }
   try {
-    step('step 1: settings');
-    var prov = localStorage.getItem('pc_provider');
-    if (prov) { STATE.provider = prov; applyProviderUI(prov); }
-    step('step 2: screen-home');
-    var fb = document.getElementById('screen-home');
-    if (fb) { fb.style.display = 'block'; }
-    step('step 3: calling init');
     init();
-    step('step 4: init done - hiding');
-    setTimeout(function() { var el = document.getElementById('kobo-step'); if (el) el.style.display = 'none'; }, 3000);
   } catch (e) {
-    step('CRASHED: ' + e.message);
     showInitError('crash: ' + e.message);
   }
 }
