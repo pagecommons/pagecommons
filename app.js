@@ -2357,7 +2357,7 @@ function toggleFontPanel() {
 }
 function applyFontSize(size) {
   document.documentElement.style.fontSize = size + 'px';
-  document.querySelectorAll('.font-size-opt').forEach(function (b) {
+  Array.prototype.slice.call(document.querySelectorAll('.font-size-opt')).forEach(function (b) {
     parseInt(b.dataset.size) === size ? b.classList.add('active') : b.classList.remove('active');
   });
 }
@@ -2675,7 +2675,7 @@ function toggleLengthPanel() {
 function setReplyLength(length) {
   STATE.replyLength = length;
   localStorage.setItem('pc_reply_length', length);
-  document.querySelectorAll('.length-opt').forEach(function (b) {
+  Array.prototype.slice.call(document.querySelectorAll('.length-opt')).forEach(function (b) {
     b.dataset.length === length ? b.classList.add('active') : b.classList.remove('active');
   });
   showToolbarMsg('Reply length set to ' + length + '.');
@@ -2818,7 +2818,7 @@ function init() {
     var rl = localStorage.getItem('pc_reply_length');
     if (rl) {
       STATE.replyLength = rl;
-      document.querySelectorAll('.length-opt').forEach(function (b) {
+      Array.prototype.slice.call(document.querySelectorAll('.length-opt')).forEach(function (b) {
         b.dataset.length === rl ? b.classList.add('active') : b.classList.remove('active');
       });
     }
@@ -2857,16 +2857,16 @@ function init() {
   }
 }
 function runInit() {
+  // Force home screen visible BEFORE init so errors are always visible
+  try {
+    var fb = document.getElementById('screen-home');
+    if (fb) { fb.style.display = 'block'; }
+  } catch(e2) {}
+
   try {
     init();
   } catch (e) {
-    showInitError(e.message);
-    try {
-      var fb = document.getElementById('screen-home');
-      if (fb) {
-        fb.style.display = 'flex';
-      }
-    } catch (e2) {}
+    showInitError('crash: ' + e.message);
   }
 }
 if (document.readyState === 'loading') {
