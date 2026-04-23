@@ -1588,10 +1588,18 @@ function init() {
   }
 }
 
-try { init(); } catch(e) {
-  showInitError(e.message);
-  try {
-    var fb = document.getElementById('screen-home');
-    if (fb) { fb.style.display = 'flex'; }
-  } catch(e2) {}
+function runInit() {
+  try { init(); } catch(e) {
+    showInitError(e.message);
+    try {
+      var fb = document.getElementById('screen-home');
+      if (fb) { fb.style.display = 'flex'; }
+    } catch(e2) {}
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', runInit);
+} else {
+  runInit();
 }
