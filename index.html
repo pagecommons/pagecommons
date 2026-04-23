@@ -631,7 +631,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.12</div>
+    <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.12c</div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -998,6 +998,17 @@
 </div>
 
 <script>
+
+// ═══════════════════════════════════════════════════
+//  CANARY — remove once Kobo rendering confirmed
+// ═══════════════════════════════════════════════════
+(function() {
+  var el = document.getElementById('screen-home');
+  if (el) { el.style.display = 'block'; }
+  var hdr = document.querySelector('.hall-title');
+  if (hdr) { hdr.textContent = 'JS running — loading app…'; }
+})();
+// ═══════════════════════════════════════════════════
 
 // ─── POLYFILLS for older WebKit (Kobo/Kindle) ───────────────────────────────
 if (!Array.prototype.includes) {
