@@ -631,7 +631,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.11</div>
+    <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.12</div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -1026,27 +1026,6 @@ if (!Object.assign) {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ─── SAFE PROPERTY ACCESSOR (replaces optional chaining for Kobo compat) ────
-function safeGet(obj, path) {
-  var parts = path.split('.');
-  var cur = obj;
-  for (var i = 0; i < parts.length; i++) {
-    if (cur === null || cur === undefined) return undefined;
-    var part = parts[i];
-    // handle array index notation like [0]
-    var arrMatch = part.match(/^([^\[]*)\[(\d+)\]$/);
-    if (arrMatch) {
-      if (arrMatch[1]) { cur = cur[arrMatch[1]]; }
-      if (cur === null || cur === undefined) return undefined;
-      cur = cur[parseInt(arrMatch[2])];
-    } else {
-      cur = cur[part];
-    }
-  }
-  return cur;
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
 // ═══════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════
@@ -1168,14 +1147,15 @@ async function processOfflineQueue() {
   if (!queue.length || !STATE.apiKey) return;
   showToolbarMsg("You're back online — sending your saved message…");
   clearOfflineQueue();
-  for (const item of queue) {
+  for (var _qi = 0; _qi < queue.length; _qi++) {
+    var item = queue[_qi];
     if (item.book && STATE.book && item.book.title === STATE.book.title) {
       STATE.messages.push({ role: 'user', content: item.text });
       appendBubble('user', item.text);
       try {
-        const reply = await callAI();
+        var reply = await callAI();
         STATE.messages.push({ role: 'assistant', content: reply });
-        const el = appendBubble('companion', reply);
+        var el = appendBubble('companion', reply);
         scrollToMessage(el);
       } catch(err) { appendError(err); }
     }
@@ -1279,18 +1259,18 @@ function looksLikeNaturalLanguage(q) {
 
 async function interpretSearchQuery(q) {
   if (!STATE.apiKey) return { title: q, author: '' };
-  const prompt = `A user is searching for a book with this query: "${q}"\nExtract the most likely book title and author. Return ONLY a JSON object like: {"title":"...","author":"..."}\nIf you cannot determine the author, use an empty string. No other text.`;
+  var prompt = 'A user is searching for a book with this query: "' + q + '"\nExtract the most likely book title and author. Return ONLY a JSON object like: {"title":"...","author":"..."}\nIf you cannot determine the author, use an empty string. No other text.';
   try {
     let text = '';
     if (STATE.provider === 'anthropic') {
       const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:80, messages:[{role:'user',content:prompt}] }) });
-      text = safeGet(await res.json(), 'content.[0].text') || '';
+      text = ( function(j){return j&&j.content&&j.content[0]?j.content[0].text:""; })(await res.json()) || '';
     } else if (STATE.provider === 'gemini') {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
-      text = safeGet(await res.json(), 'candidates.[0].content.parts.[0].text') || '';
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + STATE.apiKey, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
+      text = (function(j){return j&&j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts&&j.candidates[0].content.parts[0]?j.candidates[0].content.parts[0].text:"";})(await res.json()) || '';
     } else if (STATE.provider === 'groq') {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:80, messages:[{role:'user',content:prompt}] }) });
-      text = safeGet(await res.json(), 'choices.[0].message.content') || '';
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + STATE.apiKey}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:80, messages:[{role:'user',content:prompt}] }) });
+      text = (function(j){return j&&j.choices&&j.choices[0]&&j.choices[0].message?j.choices[0].message.content:"";})(await res.json()) || '';
     }
     const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
     if (parsed.title) return { title: parsed.title, author: parsed.author || '' };
@@ -1482,13 +1462,13 @@ async function searchBooks() {
 }
 
 async function fetchOpenLibrary(q, limit=10, offset=0) {
-  const res  = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=${limit}&offset=${offset}&fields=key,title,author_name,first_publish_year`);
+  const res  = await fetch('https://openlibrary.org/search.json?q=' + encodeURIComponent(q) + '&limit=' + limit + '&offset=' + offset + '&fields=key,title,author_name,first_publish_year');
   const data = await res.json();
   const seen = new Map();
   (data.docs||[]).forEach(d => {
     const title = d.title||'Unknown title', author = (d.author_name||['Unknown author'])[0];
     const k = title.toLowerCase()+'||'+author.toLowerCase(), year = d.first_publish_year||9999;
-    const olid = d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-S.jpg` : '';
+    const olid = d.cover_i ? 'https://covers.openlibrary.org/b/id/' + d.cover_i + '-S.jpg' : '';
     if (!seen.has(k)||year<seen.get(k).year) seen.set(k,{title,author,year:d.first_publish_year||'',key:d.key||'',source:'Open Library',thumb:olid});
   });
   const results = Array.from(seen.values());
@@ -1504,7 +1484,7 @@ async function fetchOpenLibrary(q, limit=10, offset=0) {
 }
 
 async function fetchGoogleBooks(q, maxResults=8, startIndex=0) {
-  const res  = await fetch(`/api/books?q=${encodeURIComponent(q)}&maxResults=${maxResults}&startIndex=${startIndex}`);
+  const res  = await fetch('/api/books?q=' + encodeURIComponent(q) + '&maxResults=' + maxResults + '&startIndex=' + startIndex);
   const data = await res.json();
   const seen = new Map();
   (data.items||[]).forEach(item => {
@@ -1520,10 +1500,10 @@ async function fetchGoogleBooks(q, maxResults=8, startIndex=0) {
 function renderManualEntry(prefill, container) {
   const ex = container.querySelector('.manual-entry'); if (ex) ex.remove();
   const wrap = document.createElement('div'); wrap.className = 'manual-entry';
-  wrap.innerHTML = `<p style="font-size:0.85rem;color:#777777;margin-bottom:14px">Not seeing your book? Enter it manually:</p>
-    <div class="field"><label>Title</label><input type="text" id="manual-title" /></div>
-    <div class="field"><label>Author <span style="font-weight:normal;text-transform:none">(optional)</span></label><input type="text" id="manual-author" placeholder="Author name" /></div>
-    <button class="btn btn-primary" onclick="selectManualBook()">Start companion</button>`;
+  wrap.innerHTML = '<p style="font-size:0.85rem;color:#777777;margin-bottom:14px">Not seeing your book? Enter it manually:</p>' +
+    '<div class="field"><label>Title</label><input type="text" id="manual-title" /></div>' +
+    '<div class="field"><label>Author <span style="font-weight:normal;text-transform:none">(optional)</span></label><input type="text" id="manual-author" placeholder="Author name" /></div>' +
+    '<button class="btn btn-primary" onclick="selectManualBook()">Start companion</button>';
   container.appendChild(wrap);
   const ti = document.getElementById('manual-title'); if (ti) ti.value = prefill||'';
 }
@@ -1594,17 +1574,17 @@ async function renderStatusScreen(book) {
       try { options = JSON.parse(cached); } catch(e) {}
     } else {
       try {
-        const prompt = `Translate these 5 reading status options into ${lang}. Return ONLY a JSON array of 5 objects with "label" and "sub" keys, in the same order. No other text.\n${JSON.stringify(STATUS_OPTIONS_EN.map(o => ({label:o.label, sub:o.sub})))}`;
+        var prompt = 'Translate these 5 reading status options into ' + lang + '. Return ONLY a JSON array of 5 objects with "label" and "sub" keys, in the same order. No other text.\n' + JSON.stringify(STATUS_OPTIONS_EN.map(function(o){ return {label:o.label, sub:o.sub}; }));
         let text = '';
         if (STATE.provider === 'anthropic') {
           const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:300, messages:[{role:'user',content:prompt}] }) });
-          text = safeGet(await res.json(), 'content.[0].text') || '';
+          text = ( function(j){return j&&j.content&&j.content[0]?j.content[0].text:""; })(await res.json()) || '';
         } else if (STATE.provider === 'gemini') {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
-          text = safeGet(await res.json(), 'candidates.[0].content.parts.[0].text') || '';
+          const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + STATE.apiKey, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
+          text = (function(j){return j&&j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts&&j.candidates[0].content.parts[0]?j.candidates[0].content.parts[0].text:"";})(await res.json()) || '';
         } else if (STATE.provider === 'groq') {
-          const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:300, messages:[{role:'user',content:prompt}] }) });
-          text = safeGet(await res.json(), 'choices.[0].message.content') || '';
+          const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + STATE.apiKey}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:300, messages:[{role:'user',content:prompt}] }) });
+          text = (function(j){return j&&j.choices&&j.choices[0]&&j.choices[0].message?j.choices[0].message.content:"";})(await res.json()) || '';
         }
         const translated = JSON.parse(text.replace(/```json|```/g,'').trim());
         if (Array.isArray(translated) && translated.length === 5) {
@@ -1623,7 +1603,7 @@ async function renderStatusScreen(book) {
     const btn = document.createElement('button');
     btn.className = 'status-opt';
     btn.onclick = () => setReadingStatus(opt.value);
-    btn.innerHTML = `<span class="status-opt-label">${esc(opt.label)}</span><span class="status-opt-sub">${esc(opt.sub)}</span>`;
+    btn.innerHTML = '<span class="status-opt-label">' + esc(opt.label) + '</span><span class="status-opt-sub">' + esc(opt.sub) + '</span>';
     container.appendChild(btn);
   });
 
@@ -1682,8 +1662,8 @@ async function setReadingStatus(status) {
   if (lang && !savedLang) {
     // show language choice
     document.getElementById('lang-prompt-text').textContent =
-      `This looks like it might be in ${lang}. Would you like to chat in ${lang} or in English?`;
-    document.getElementById('lang-native-btn').textContent = `Chat in ${lang}`;
+      'This looks like it might be in ' + lang + '. Would you like to chat in ' + lang + ' or in English?';
+    document.getElementById('lang-native-btn').textContent = 'Chat in ' + lang;
     navigate('language');
   } else {
     STATE.chatLanguage = savedLang || 'english';
@@ -1764,18 +1744,18 @@ async function generateThinkingPhrases(language) {
   const cached = localStorage.getItem(cacheKey);
   if (cached) { try { STATE.thinkingPhrases = JSON.parse(cached); return; } catch(e) {} }
 
-  const prompt = `Generate 6 short natural "thinking" indicators (like "typing…", "one moment…") in ${language}. Max 3 words each with an ellipsis. Return ONLY a JSON array of 6 strings. No other text.`;
+  var prompt = 'Generate 6 short natural "thinking" indicators (like "typing\u2026", "one moment\u2026") in ' + language + '. Max 3 words each with an ellipsis. Return ONLY a JSON array of 6 strings. No other text.';
   try {
     let text = '';
     if (STATE.provider === 'anthropic') {
       const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:120, messages:[{role:'user',content:prompt}] }) });
-      text = safeGet(await res.json(), 'content.[0].text') || '';
+      text = ( function(j){return j&&j.content&&j.content[0]?j.content[0].text:""; })(await res.json()) || '';
     } else if (STATE.provider === 'gemini') {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
-      text = safeGet(await res.json(), 'candidates.[0].content.parts.[0].text') || '';
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + STATE.apiKey, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
+      text = (function(j){return j&&j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts&&j.candidates[0].content.parts[0]?j.candidates[0].content.parts[0].text:"";})(await res.json()) || '';
     } else if (STATE.provider === 'groq') {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:120, messages:[{role:'user',content:prompt}] }) });
-      text = safeGet(await res.json(), 'choices.[0].message.content') || '';
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + STATE.apiKey}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:120, messages:[{role:'user',content:prompt}] }) });
+      text = (function(j){return j&&j.choices&&j.choices[0]&&j.choices[0].message?j.choices[0].message.content:"";})(await res.json()) || '';
     }
     const phrases = JSON.parse(text.replace(/```json|```/g,'').trim());
     if (Array.isArray(phrases) && phrases.length >= 4) {
@@ -1805,7 +1785,7 @@ function parseClippings(input) {
     STATE.highlights = highlights;
     localStorage.setItem('pc_highlights', JSON.stringify(highlights));
     const n = highlights.length, b = countBooks(highlights);
-    statusEl.textContent = `Loaded ${n} highlight${n!==1?'s':''} from ${b} book${b!==1?'s':''}.`;
+    statusEl.textContent = ('Loaded ' + n + ' highlight' + (n!==1?'s':'') + ' from ' + b + ' book' + (b!==1?'s':'') + '.');
     const top = getMostRecentBook(highlights);
     if (top) selectBook({title:top.title,author:top.author,year:'',key:''});
   };
@@ -1856,9 +1836,9 @@ function renderHighlightsPanel() {
   const relevant = getRelevantHighlights(STATE.book);
   const btn = document.getElementById('highlights-toolbar-btn');
   if (relevant.length) {
-    btn.style.display = 'block'; btn.textContent = `Highlights (${relevant.length})`;
-    document.getElementById('highlights-count').textContent = `${relevant.length} highlight${relevant.length!==1?'s':''} from your Kindle`;
-    document.getElementById('highlights-list').innerHTML = relevant.map(h=>`<p style="border-left:3px solid #d0d0d0;padding-left:10px;margin-bottom:12px;font-style:italic">"${esc(h.text)}"</p>`).join('');
+    btn.style.display = 'block'; btn.textContent = 'Highlights (' + relevant.length + ')';
+    document.getElementById('highlights-count').textContent = relevant.length + ' highlight' + (relevant.length!==1?'s':'') + ' from your Kindle';
+    document.getElementById('highlights-list').innerHTML = relevant.map(h=>'<p style="border-left:3px solid #d0d0d0;padding-left:10px;margin-bottom:12px;font-style:italic">"' + esc(h.text) + '"</p>').join('');
   } else { btn.style.display = 'none'; }
 }
 
@@ -1935,40 +1915,36 @@ async function fetchAIIcebreakers(book) {
   };
   const statusLabel = statusLabels[STATE.readingStatus] || 'reading';
   const langNote = (STATE.chatLanguage === 'native' && STATE.detectedLang)
-    ? `\nGenerate the prompts in ${STATE.detectedLang}.` : '';
+    ? '\nGenerate the prompts in ' + STATE.detectedLang + '.' : '';
 
-  const prompt = `You are a literary companion helping a reader of "${book.title}" by ${book.author}.
-
-The reader's current status: ${statusLabel}
-
-Generate exactly 4 ice breaker prompts that feel specific to THIS book — its themes, reputation, tone, setting, and what readers typically wonder about.
-
-Rules:
-- Each prompt max 8 words
-- Must feel specific to this exact book
-- NOT generic questions that apply to any book
-- NOT: "Is this book for me?"
-- NOT: "What is the main idea?"
-- NOT: "How long does it take to read?"
-- Tone matches reading status:
-  considering: curiosity, uncertainty, is this worth my time?
-  just started: early impressions, what to expect ahead
-  halfway: tensions building, character observations, predictions
-  just finished: emotional reactions, themes, meaning, what next${langNote}
-
-Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.
-Example format: ["prompt one","prompt two","prompt three","prompt four"]`;
+  var prompt = 'You are a literary companion helping a reader of "' + book.title + '" by ' + book.author + '.\n\n' +
+    'The reader\'s current status: ' + statusLabel + '\n\n' +
+    'Generate exactly 4 ice breaker prompts that feel specific to THIS book \u2014 its themes, reputation, tone, setting, and what readers typically wonder about.\n\n' +
+    'Rules:\n' +
+    '- Each prompt max 8 words\n' +
+    '- Must feel specific to this exact book\n' +
+    '- NOT generic questions that apply to any book\n' +
+    '- NOT: "Is this book for me?"\n' +
+    '- NOT: "What is the main idea?"\n' +
+    '- NOT: "How long does it take to read?"\n' +
+    '- Tone matches reading status:\n' +
+    '  considering: curiosity, uncertainty, is this worth my time?\n' +
+    '  just started: early impressions, what to expect ahead\n' +
+    '  halfway: tensions building, character observations, predictions\n' +
+    '  just finished: emotional reactions, themes, meaning, what next' + langNote + '\n\n' +
+    'Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.\n' +
+    'Example format: ["prompt one","prompt two","prompt three","prompt four"]';
 
   let text = '';
   if (STATE.provider === 'anthropic') {
     const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:200, messages:[{role:'user',content:prompt}] }) });
-    text = safeGet(await res.json(), 'content.[0].text') || '';
+    text = ( function(j){return j&&j.content&&j.content[0]?j.content[0].text:""; })(await res.json()) || '';
   } else if (STATE.provider === 'gemini') {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
-    text = safeGet(await res.json(), 'candidates.[0].content.parts.[0].text') || '';
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + STATE.apiKey, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
+    text = (function(j){return j&&j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts&&j.candidates[0].content.parts[0]?j.candidates[0].content.parts[0].text:"";})(await res.json()) || '';
   } else if (STATE.provider === 'groq') {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:200, messages:[{role:'user',content:prompt}] }) });
-    text = safeGet(await res.json(), 'choices.[0].message.content') || '';
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + STATE.apiKey}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:200, messages:[{role:'user',content:prompt}] }) });
+    text = (function(j){return j&&j.choices&&j.choices[0]&&j.choices[0].message?j.choices[0].message.content:"";})(await res.json()) || '';
   }
 
   // Clean response and attempt JSON parse
@@ -2052,7 +2028,7 @@ async function sendMessage(retryText) {
 }
 
 function appendBubble(role, text) {
-  const wrap = document.createElement('div'); wrap.className = `message ${role}`;
+  const wrap = document.createElement('div'); wrap.className = 'message ' + role;
   const roleEl = document.createElement('div'); roleEl.className = 'message-role';
   roleEl.textContent = role === 'user' ? 'You' : STATE.companionName;
   const bubble = document.createElement('div'); bubble.className = 'message-bubble'; bubble.innerHTML = formatText(text);
@@ -2094,7 +2070,7 @@ function appendBubble(role, text) {
 
 function appendError(err) {
   const isNetwork = !navigator.onLine || err.message === 'Failed to fetch' || err.message.includes('fetch');
-  const msg = isNetwork ? "Couldn't reach your companion — poor connection? Try again when you have a better signal." : `Something went wrong: ${err.message}`;
+  const msg = isNetwork ? "Couldn't reach your companion — poor connection? Try again when you have a better signal." : 'Something went wrong: ' + err.message;
   const wrap = document.createElement('div'); wrap.className = 'message error-msg';
   const bubble = document.createElement('div'); bubble.className = 'message-bubble'; bubble.textContent = msg;
   const retryBtn = document.createElement('button'); retryBtn.className = 'retry-btn'; retryBtn.textContent = 'Try again';
@@ -2118,7 +2094,7 @@ function scrollToMessage(el) { if (!el) { scrollBottom(); return; } window.scrol
 function buildSystemPrompt() {
   const book = STATE.book;
   const relevant = getRelevantHighlights(book).slice(-8);
-  const highlightsText = relevant.length ? '\n\nThe reader\'s highlights from this book:\n' + relevant.map(h=>`- "${h.text}"`).join('\n') : '';
+  const highlightsText = relevant.length ? '\n\nThe reader\'s highlights from this book:\n' + relevant.map(h=>'- "' + h.text + '"').join('\n') : '';
 
   const statusInstructions = {
     considering: 'The reader is considering whether to read this book. Focus on helping them decide — share what makes it special, who tends to love it, what kind of read it is. No spoilers of any kind.',
@@ -2131,28 +2107,20 @@ function buildSystemPrompt() {
   const statusNote = statusInstructions[STATE.readingStatus] || 'Be spoiler-aware — ask the reader how far they\'ve got before revealing plot details.';
 
   const langNote = (STATE.chatLanguage === 'native' && STATE.detectedLang)
-    ? `\n\nRespond entirely in ${STATE.detectedLang}. The reader has chosen to discuss this book in ${STATE.detectedLang}.`
+    ? '\n\nRespond entirely in ' + STATE.detectedLang + '. The reader has chosen to discuss this book in ' + STATE.detectedLang + '.'
     : '';
 
-  return `You are a reading companion for "${book.title}" by ${book.author}.
-
-You are warm but not gushing. Curious — you always ask something back at the end. You never summarise the plot unprompted. You offer opinions when asked. You are honest about what you don't know. Literary without being academic. You feel like a well-read friend who has also read this book.
-
-Never say "Great question!" Keep responses concise — this is read on an e-ink screen. Short paragraphs. Always end with a question or an invitation to continue.
-
-${statusNote}
-
-If the conversation drifts away from the book, find a gentle bridge back — connect what the reader said to something in the book rather than refusing or redirecting bluntly. You are a reading companion, not a general assistant.
-
-If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.
-
-${STATE.replyLength === 'short' ? 'Keep your response very brief — 2 to 3 short sentences maximum.' : STATE.replyLength === 'detailed' ? 'You may give fuller, more detailed responses when the topic warrants it.' : 'Keep responses concise — 2 to 4 short paragraphs maximum.'}
-
-Be honest about the limits of your knowledge. If you are not confident about specific details of this book — plot points, character names, themes — say so openly and invite the reader to share what they know. Never confabulate or pretend to know something you are uncertain about. A good reading companion says "I'm not sure about that — what did you make of it?" rather than guessing.
-
-Respond in plain prose only. No bullet points. No headers. No lists of any kind.
-
-If there are any signs this reader may be a minor, default to age-appropriate discussion regardless of the book's content rating.${langNote}${highlightsText}`;
+  var replyLengthNote = STATE.replyLength === 'short' ? "Keep your response very brief — 2 to 3 short sentences maximum." : STATE.replyLength === 'detailed' ? "You may give fuller, more detailed responses when the topic warrants it." : "Keep responses concise — 2 to 4 short paragraphs maximum.";
+  return "You are a reading companion for \"" + book.title + "\" by " + book.author + ".\n\n" +
+    "You are warm but not gushing. Curious — you always ask something back at the end. You never summarise the plot unprompted. You offer opinions when asked. You are honest about what you don't know. Literary without being academic. You feel like a well-read friend who has also read this book.\n\n" +
+    "Never say \"Great question!\" Keep responses concise — this is read on an e-ink screen. Short paragraphs. Always end with a question or an invitation to continue.\n\n" +
+    statusNote + "\n\n" +
+    "If the conversation drifts away from the book, find a gentle bridge back — connect what the reader said to something in the book rather than refusing or redirecting bluntly. You are a reading companion, not a general assistant.\n\n" +
+    "If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.\n\n" +
+    replyLengthNote + "\n\n" +
+    "Be honest about the limits of your knowledge. If you are not confident about specific details of this book — plot points, character names, themes — say so openly and invite the reader to share what they know. Never confabulate or pretend to know something you are uncertain about. A good reading companion says \"I'm not sure about that — what did you make of it?\" rather than guessing.\n\n" +
+    "Respond in plain prose only. No bullet points. No headers. No lists of any kind.\n\n" +
+    "If there are any signs this reader may be a minor, default to age-appropriate discussion regardless of the book's content rating." + langNote + highlightsText;
 }
 
 async function callAI() {
@@ -2166,22 +2134,22 @@ async function callAI() {
 async function callAnthropic(system, messages) {
   const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,system,messages}) });
   if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error((e && e.error && e.error.message ? e.error.message : 'HTTP ' + res.status)); }
-  return safeGet(await res.json(), 'content.[0].text') || '(No response)';
+  return (function(j){return j&&j.content&&j.content[0]?j.content[0].text:"";})(await res.json()) || '(No response)';
 }
 
 async function callGemini(system, messages) {
   const contents = messages.map(m=>({role:m.role==='user'?'user':'model',parts:[{text:m.content}]}));
   contents.unshift({role:'user',parts:[{text:system}]});
   contents.splice(1,0,{role:'model',parts:[{text:'Understood. I\'m ready.'}]});
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contents}) });
+  const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + STATE.apiKey, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contents}) });
   if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error((e && e.error && e.error.message ? e.error.message : 'HTTP ' + res.status)); }
-  return safeGet(await res.json(), 'candidates.[0].content.parts.[0].text') || '(No response)';
+  return (function(j){return j&&j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts&&j.candidates[0].content.parts[0]?j.candidates[0].content.parts[0].text:"";})(await res.json()) || '(No response)';
 }
 
 async function callGroq(system, messages) {
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:600,messages:[{role:'system',content:system}].concat(messages)}) });
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer ' + STATE.apiKey}, body: JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:600,messages:[{role:'system',content:system}].concat(messages)}) });
   if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error((e && e.error && e.error.message ? e.error.message : 'HTTP ' + res.status)); }
-  return safeGet(await res.json(), 'choices.[0].message.content') || '(No response)';
+  return (function(j){return j&&j.choices&&j.choices[0]&&j.choices[0].message?j.choices[0].message.content:"";})(await res.json()) || '(No response)';
 }
 
 // ═══════════════════════════════════════════════════
@@ -2211,7 +2179,7 @@ function showOtherOptions() {
   const trimmed = name.trim();
   STATE.companionName = trimmed || 'Companion';
   localStorage.setItem('pc_companion_name', STATE.companionName);
-  showToolbarMsg(`Companion name set to "${STATE.companionName}".`);
+  showToolbarMsg("Companion name set to \"" + STATE.companionName + "\".");
 }
 
 // ═══════════════════════════════════════════════════
@@ -2301,10 +2269,10 @@ function renderShelf() {
 
     const el = document.createElement('div');
     el.className = 'shelf-book';
-    el.innerHTML = `
-      <div class="shelf-book-title">${esc(book.title)}</div>
-      <div class="shelf-book-author">${esc(book.author)}</div>
-      <div class="shelf-book-meta">${statusLabel ? statusLabel + ' · ' : ''}${convs.length} conversation${convs.length !== 1 ? 's' : ''}${last ? ' · Last: ' + last : ''}</div>`;
+    el.innerHTML =
+      '<div class="shelf-book-title">' + esc(book.title) + '</div>' +
+      '<div class="shelf-book-author">' + esc(book.author) + '</div>' +
+      '<div class="shelf-book-meta">' + (statusLabel ? statusLabel + ' · ' : '') + convs.length + ' conversation' + (convs.length !== 1 ? 's' : '') + (last ? ' · Last: ' + last : '') + '</div>';
     el.addEventListener('click', () => openBookShelf(book));
     listEl.appendChild(el);
   });
@@ -2339,14 +2307,22 @@ function renderConvList(book) {
     const statusLabel = { considering:'Considering', started:'Just started', midway:'Halfway through', finished:'Finished' }[conv.status] || '';
     const el = document.createElement('div');
     el.className = 'conv-item';
-    el.innerHTML = `
-      <div class="conv-item-name">${esc(conv.name)}</div>
-      <div class="conv-item-meta">${statusLabel ? statusLabel + ' · ' : ''}${date}</div>
-      <div class="conv-actions">
-        <button class="conv-btn primary" onclick="continueConversation('${conv.id}')">Continue</button>
-        <button class="conv-btn" onclick="renameConversation('${conv.id}')">Rename</button>
-        <button class="conv-btn danger" onclick="deleteConversation('${conv.id}')">Delete</button>
-      </div>`;
+    var safeId = String(conv.id).replace(/[^a-z0-9_]/gi, "");
+    el.innerHTML =
+      '<div class="conv-item-name">' + esc(conv.name) + '</div>' +
+      '<div class="conv-item-meta">' + (statusLabel ? statusLabel + ' · ' : '') + date + '</div>' +
+      '<div class="conv-actions">' +
+        '<button class="conv-btn primary" data-action="continue" data-id="' + safeId + '">Continue</button>' +
+        '<button class="conv-btn" data-action="rename" data-id="' + safeId + '">Rename</button>' +
+        '<button class="conv-btn danger" data-action="delete" data-id="' + safeId + '">Delete</button>' +
+      '</div>';
+    el.addEventListener('click', function(evt) {
+      var btn = evt.target; var action = btn.getAttribute('data-action'); var id = btn.getAttribute('data-id');
+      if (!action || !id) return;
+      if (action === 'continue') continueConversation(id);
+      else if (action === 'rename') renameConversation(id);
+      else if (action === 'delete') deleteConversation(id);
+    });
     listEl.appendChild(el);
   });
 }
@@ -2491,7 +2467,7 @@ function updatePassagesToolbarBtn() {
   if (!btn) return;
   if (passages.length) {
     btn.style.display = 'block';
-    btn.textContent = `Passages (${passages.length})`;
+    btn.textContent = 'Passages (' + passages.length + ')';
   } else {
     btn.style.display = 'none';
   }
@@ -2506,9 +2482,9 @@ function renderPassagesPanel() {
     listEl.innerHTML = '';
     return;
   }
-  countEl.textContent = `${passages.length} passage${passages.length !== 1 ? 's' : ''} saved`;
+  countEl.textContent = passages.length + ' passage' + (passages.length !== 1 ? 's' : '') + ' saved';
   listEl.innerHTML = passages.map((p, i) =>
-    `<div class="passage-item">${formatText(p)}</div>`
+    '<div class="passage-item">' + formatText(p) + '</div>'
   ).join('');
 }
 
@@ -2527,9 +2503,9 @@ function togglePassagesPanel() {
 function copyAllPassages() {
   const passages = getPassages();
   if (!passages.length) { showToolbarMsg('No passages saved yet.'); return; }
-  const text = passages.map((p, i) => `[${i+1}] ${p}`).join('\n\n');
+  const text = passages.map((p, i) => '[' + (i+1) + '] ' + p).join('\n\n');
   navigator.clipboard.writeText(text).then(() => {
-    showToolbarMsg(`${passages.length} passage${passages.length !== 1 ? 's' : ''} copied to clipboard.`);
+    showToolbarMsg(passages.length + ' passage' + (passages.length !== 1 ? 's' : '') + ' copied to clipboard.');
   }).catch(() => showToolbarMsg('Copy not available in this browser.'));
 }
 
@@ -2543,23 +2519,21 @@ function endConversation() {
 
 
 function showInitError(msg) {
-  // Display error visibly on e-ink screen for debugging
   try {
-    var errDiv = document.getElementById('kobo-error-display');
+    var errDiv = document.getElementById('kobo-init-error');
     if (!errDiv) {
       errDiv = document.createElement('div');
-      errDiv.id = 'kobo-error-display';
-      errDiv.style.cssText = 'background:#f5f5f5;border:1px solid #111;padding:14px;margin:12px 0;font-size:0.85rem;font-family:Georgia,serif;';
+      errDiv.id = 'kobo-init-error';
+      errDiv.style.cssText = 'background:#f5f5f5;border:2px solid #111;padding:16px;margin:16px 0;font-size:16px;font-family:Georgia,serif;color:#111;';
       var page = document.querySelector('.page');
-      if (page) page.insertBefore(errDiv, page.firstChild);
+      if (page) page.insertBefore(errDiv, page.firstChild); else document.body.appendChild(errDiv);
     }
-    errDiv.textContent = 'Init error: ' + msg;
     errDiv.style.display = 'block';
+    errDiv.textContent = 'Page Commons error: ' + msg;
   } catch(displayErr) {}
 }
 
 function init() {
-  // Step 1: Restore provider/key settings
   try {
     var prov = localStorage.getItem('pc_provider');
     if (prov) { STATE.provider = prov; applyProviderUI(prov); }
@@ -2567,20 +2541,17 @@ function init() {
     if (key) { STATE.apiKey = key; document.getElementById('api-key-input').value = key; document.getElementById('key-status-bar').style.display = 'block'; }
     var name = localStorage.getItem('pc_companion_name');
     if (name) { STATE.companionName = name; document.getElementById('companion-name-input').value = name; }
-  } catch(e) { showInitError('settings restore: ' + e.message); }
+  } catch(e) { showInitError('settings: ' + e.message); }
 
-  // Step 2: Restore highlights
   try { STATE.highlights = JSON.parse(localStorage.getItem('pc_highlights') || '[]'); } catch(e) {}
 
-  // Step 3: Restore font size + reply length
   try {
     var sz = localStorage.getItem('pc_font_size');
     if (sz) applyFontSize(parseInt(sz));
     var rl = localStorage.getItem('pc_reply_length');
     if (rl) { STATE.replyLength = rl; document.querySelectorAll('.length-opt').forEach(function(b){ b.dataset.length === rl ? b.classList.add('active') : b.classList.remove('active'); }); }
-  } catch(e) { showInitError('font/length restore: ' + e.message); }
+  } catch(e) { showInitError('font: ' + e.message); }
 
-  // Step 4: Restore last book
   try {
     var savedBook = JSON.parse(localStorage.getItem('pc_last_book') || 'null');
     if (savedBook) {
@@ -2592,35 +2563,26 @@ function init() {
     }
   } catch(e) { showInitError('book restore: ' + e.message); }
 
-  // Step 5: Update greeting
   try { updateGreeting(); } catch(e) { showInitError('greeting: ' + e.message); }
 
-  // Step 6: Route
   try {
     if (!localStorage.getItem('pc_tc_accepted')) {
       showScreen('tc');
     } else {
       handleRoute();
     }
+    if (!document.querySelector('.screen.active')) showScreen('home');
   } catch(e) {
     showInitError('routing: ' + e.message);
     try { showScreen('home'); } catch(e2) {}
   }
-
-  // Safety net: ensure at least one screen is visible
-  try {
-    if (!document.querySelector('.screen.active')) showScreen('home');
-  } catch(e) {}
 }
 
-try {
-  init();
-} catch(e) {
-  // Last-resort fallback
+try { init(); } catch(e) {
+  showInitError(e.message);
   try {
     var fb = document.getElementById('screen-home');
     if (fb) { fb.style.display = 'flex'; }
-    showInitError(e.message);
   } catch(e2) {}
 }
 </script>
