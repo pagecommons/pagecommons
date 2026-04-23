@@ -1,12 +1,21 @@
-// Promise polyfill for older WebKit (Kobo)
-!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?t():"function"==typeof define&&define.amd?define(t):t()}(0,function(){"use strict";function e(e){var t=this.constructor;return this.then(function(n){return t.resolve(e()).then(function(){return n})},function(n){return t.resolve(e()).then(function(){return t.reject(n)})})}function t(e){return new this(function(t,n){function r(e,n){if(n&&("object"==typeof n||"function"==typeof n)){var f=n.then;if("function"==typeof f)return void f.call(n,function(t){r(e,t)},function(n){o[e]={status:"rejected",reason:n},0==--i&&t(o)})}o[e]={status:"fulfilled",value:n},0==--i&&t(o)}if(!e||"undefined"==typeof e.length)return n(new TypeError(typeof e+" "+e+" is not iterable(cannot read property Symbol(Symbol.iterator))"));var o=Array.prototype.slice.call(e);if(0===o.length)return t([]);for(var i=o.length,f=0;o.length>f;f++)r(f,o[f])})}function n(e,t){this.name="AggregateError",this.errors=e,this.message=t||""}function r(e){var t=this;return new t(function(r,o){if(!e||"undefined"==typeof e.length)return o(new TypeError("Promise.any accepts an array"));var i=Array.prototype.slice.call(e);if(0===i.length)return o();for(var f=[],u=0;i.length>u;u++)try{t.resolve(i[u]).then(r)["catch"](function(e){f.push(e),f.length===i.length&&o(new n(f,"All promises were rejected"))})}catch(c){o(c)}})}function o(e){return!(!e||"undefined"==typeof e.length)}function i(){}function f(e){if(!(this instanceof f))throw new TypeError("Promises must be constructed via new");if("function"!=typeof e)throw new TypeError("not a function");this._state=0,this._handled=!1,this._value=undefined,this._deferreds=[],s(e,this)}function u(e,t){for(;3===e._state;)e=e._value;0!==e._state?(e._handled=!0,f._immediateFn(function(){var n=1===e._state?t.onFulfilled:t.onRejected;if(null!==n){var r;try{r=n(e._value)}catch(o){return void a(t.promise,o)}c(t.promise,r)}else(1===e._state?c:a)(t.promise,e._value)})):e._deferreds.push(t)}function c(e,t){try{if(t===e)throw new TypeError("A promise cannot be resolved with itself.");if(t&&("object"==typeof t||"function"==typeof t)){var n=t.then;if(t instanceof f)return e._state=3,e._value=t,void l(e);if("function"==typeof n)return void s(function(e,t){return function(){e.apply(t,arguments)}}(n,t),e)}e._state=1,e._value=t,l(e)}catch(r){a(e,r)}}function a(e,t){e._state=2,e._value=t,l(e)}function l(e){2===e._state&&0===e._deferreds.length&&f._immediateFn(function(){e._handled||f._unhandledRejectionFn(e._value)});for(var t=0,n=e._deferreds.length;n>t;t++)u(e,e._deferreds[t]);e._deferreds=null}function s(e,t){var n=!1;try{e(function(e){n||(n=!0,c(t,e))},function(e){n||(n=!0,a(t,e))})}catch(r){if(n)return;n=!0,a(t,r)}}n.prototype=Error.prototype;var d=setTimeout;f.prototype["catch"]=function(e){return this.then(null,e)},f.prototype.then=function(e,t){var n=new this.constructor(i);return u(this,new function(e,t,n){this.onFulfilled="function"==typeof e?e:null,this.onRejected="function"==typeof t?t:null,this.promise=n}(e,t,n)),n},f.prototype["finally"]=e,f.all=function(e){return new f(function(t,n){function r(e,o){try{if(o&&("object"==typeof o||"function"==typeof o)){var u=o.then;if("function"==typeof u)return void u.call(o,function(t){r(e,t)},n)}i[e]=o,0==--f&&t(i)}catch(c){n(c)}}if(!o(e))return n(new TypeError("Promise.all accepts an array"));var i=Array.prototype.slice.call(e);if(0===i.length)return t([]);for(var f=i.length,u=0;i.length>u;u++)r(u,i[u])})},f.any=r,f.allSettled=t,f.resolve=function(e){return e&&"object"==typeof e&&e.constructor===f?e:new f(function(t){t(e)})},f.reject=function(e){return new f(function(t,n){n(e)})},f.race=function(e){return new f(function(t,n){if(!o(e))return n(new TypeError("Promise.race accepts an array"));for(var r=0,i=e.length;i>r;r++)f.resolve(e[r]).then(t,n)})},f._immediateFn="function"==typeof setImmediate&&function(e){setImmediate(e)}||function(e){d(e,0)},f._unhandledRejectionFn=function(e){void 0!==console&&console&&console.warn("Possible Unhandled Promise Rejection:",e)};var p=function(){if("undefined"!=typeof self)return self;if("undefined"!=typeof window)return window;if("undefined"!=typeof global)return global;throw Error("unable to locate global object")}();"function"!=typeof p.Promise?p.Promise=f:(p.Promise.prototype["finally"]||(p.Promise.prototype["finally"]=e),p.Promise.allSettled||(p.Promise.allSettled=t),p.Promise.any||(p.Promise.any=r))});
-
-
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
-
+// ═══════════════════════════════════════════════════
+//  CANARY — remove once Kobo rendering confirmed
+// ═══════════════════════════════════════════════════
+(function () {
+  var el = document.getElementById('screen-home');
+  if (el) {
+    el.style.display = 'block';
+  }
+  var hdr = document.querySelector('.hall-title');
+  if (hdr) {
+    hdr.textContent = 'JS running — loading app…';
+  }
+})();
+// ═══════════════════════════════════════════════════
 
 // ─── POLYFILLS for older WebKit (Kobo/Kindle) ───────────────────────────────
 if (!Array.prototype.includes) {
@@ -2361,7 +2370,7 @@ function toggleFontPanel() {
 }
 function applyFontSize(size) {
   document.documentElement.style.fontSize = size + 'px';
-  Array.prototype.slice.call(document.querySelectorAll('.font-size-opt')).forEach(function (b) {
+  document.querySelectorAll('.font-size-opt').forEach(function (b) {
     parseInt(b.dataset.size) === size ? b.classList.add('active') : b.classList.remove('active');
   });
 }
@@ -2679,7 +2688,7 @@ function toggleLengthPanel() {
 function setReplyLength(length) {
   STATE.replyLength = length;
   localStorage.setItem('pc_reply_length', length);
-  Array.prototype.slice.call(document.querySelectorAll('.length-opt')).forEach(function (b) {
+  document.querySelectorAll('.length-opt').forEach(function (b) {
     b.dataset.length === length ? b.classList.add('active') : b.classList.remove('active');
   });
   showToolbarMsg('Reply length set to ' + length + '.');
@@ -2784,15 +2793,15 @@ function showInitError(msg) {
     if (!errDiv) {
       errDiv = document.createElement('div');
       errDiv.id = 'kobo-init-error';
-      errDiv.style.cssText = 'background:#f5f5f5;border:2px solid #111;padding:16px;margin:16px 0;font-size:16px;font-family:Georgia,serif;color:#111;';
-      var page = document.querySelector('.page');
-      if (page) page.insertBefore(errDiv, page.firstChild);else document.body.appendChild(errDiv);
+      errDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#fff;border-bottom:3px solid #000;padding:20px;font-size:18px;font-family:Georgia,serif;color:#000;z-index:9999;';
+      document.body.appendChild(errDiv);
     }
     errDiv.style.display = 'block';
-    errDiv.textContent = 'Page Commons error: ' + msg;
+    errDiv.textContent = 'ERR: ' + msg;
   } catch (displayErr) {}
 }
 function init() {
+  if (typeof step === 'function') step('init: settings');
   try {
     var prov = localStorage.getItem('pc_provider');
     if (prov) {
@@ -2813,22 +2822,25 @@ function init() {
   } catch (e) {
     showInitError('settings: ' + e.message);
   }
+  if (typeof step === 'function') step('init: highlights');
   try {
     STATE.highlights = JSON.parse(localStorage.getItem('pc_highlights') || '[]');
   } catch (e) {}
+  if (typeof step === 'function') step('init: font');
   try {
     var sz = localStorage.getItem('pc_font_size');
     if (sz) applyFontSize(parseInt(sz));
     var rl = localStorage.getItem('pc_reply_length');
     if (rl) {
       STATE.replyLength = rl;
-      Array.prototype.slice.call(document.querySelectorAll('.length-opt')).forEach(function (b) {
+      document.querySelectorAll('.length-opt').forEach(function (b) {
         b.dataset.length === rl ? b.classList.add('active') : b.classList.remove('active');
       });
     }
   } catch (e) {
     showInitError('font: ' + e.message);
   }
+  if (typeof step === 'function') step('init: book restore');
   try {
     var savedBook = JSON.parse(localStorage.getItem('pc_last_book') || 'null');
     if (savedBook) {
@@ -2841,11 +2853,13 @@ function init() {
   } catch (e) {
     showInitError('book restore: ' + e.message);
   }
+  if (typeof step === 'function') step('init: greeting');
   try {
     updateGreeting();
   } catch (e) {
     showInitError('greeting: ' + e.message);
   }
+  if (typeof step === 'function') step('init: routing');
   try {
     if (!localStorage.getItem('pc_tc_accepted')) {
       showScreen('tc');
@@ -2861,15 +2875,25 @@ function init() {
   }
 }
 function runInit() {
-  // Force home screen visible BEFORE init so errors are always visible
+  var _step = document.createElement('div');
+  _step.id = 'kobo-step';
+  _step.style.cssText = 'position:fixed;bottom:60px;left:0;right:0;background:#000;color:#fff;padding:10px;font-size:16px;font-family:Georgia,serif;text-align:center;z-index:9999;';
+  _step.textContent = 'init starting...';
+  document.body.appendChild(_step);
+  function step(msg) { var el = document.getElementById('kobo-step'); if (el) el.textContent = msg; }
   try {
+    step('step 1: settings');
+    var prov = localStorage.getItem('pc_provider');
+    if (prov) { STATE.provider = prov; applyProviderUI(prov); }
+    step('step 2: screen-home');
     var fb = document.getElementById('screen-home');
     if (fb) { fb.style.display = 'block'; }
-  } catch(e2) {}
-
-  try {
+    step('step 3: calling init');
     init();
+    step('step 4: init done - hiding');
+    setTimeout(function() { var el = document.getElementById('kobo-step'); if (el) el.style.display = 'none'; }, 3000);
   } catch (e) {
+    step('CRASHED: ' + e.message);
     showInitError('crash: ' + e.message);
   }
 }
