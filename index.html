@@ -61,7 +61,7 @@
     /* === SCREENS === */
     .screen { display: none; }
     .screen.active { display: block; }
-    #screen-home.active { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; min-height: calc(100vh - 90px); }
+    #screen-home.active { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; min-height: 600px; }
 
     /* === TYPOGRAPHY === */
     h1 { font-size: 1.5rem; font-weight: normal; line-height: 1.3; margin-bottom: 20px; }
@@ -172,7 +172,9 @@
     }
 
     /* === PROVIDER SELECTOR === */
-    .provider-options { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .provider-options { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; margin-bottom: 20px; }
+    .provider-options > .provider-opt { margin-bottom: 8px; }
+    .provider-options > .provider-opt:last-child { margin-bottom: 0; }
     .provider-opt {
       display: -webkit-box;
       display: -ms-flexbox;
@@ -192,7 +194,9 @@
     }
     .provider-opt.selected { background: #111111; color: #ffffff; }
     .provider-opt.selected .provider-link { color: #d0d0d0; }
-    .provider-opt-left { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: center; -ms-flex-align: center; align-items: center; gap: 10px; }
+    .provider-opt-left { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: center; -ms-flex-align: center; align-items: center; }
+    .provider-opt-left > * { margin-right: 10px; }
+    .provider-opt-left > *:last-child { margin-right: 0; }
     .provider-opt-name { font-family: Georgia, 'Times New Roman', serif; font-size: 1rem; }
     .provider-link {
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -214,7 +218,9 @@
     }
 
     /* === SEARCH === */
-    .search-row { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: horizontal; -webkit-box-direction: normal; -ms-flex-direction: row; flex-direction: row; gap: 10px; -webkit-box-align: start; -ms-flex-align: start; align-items: flex-start; }
+    .search-row { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: horizontal; -webkit-box-direction: normal; -ms-flex-direction: row; flex-direction: row; -webkit-box-align: start; -ms-flex-align: start; align-items: flex-start; }
+    .search-row > * { margin-right: 10px; }
+    .search-row > *:last-child { margin-right: 0; }
     .search-row input { -webkit-box-flex: 1; -ms-flex: 1; flex: 1; min-width: 0; }
     .search-row .btn  { width: auto; white-space: nowrap; -ms-flex-negative: 0; flex-shrink: 0; }
     #search-results { margin-top: 20px; }
@@ -225,7 +231,9 @@
     .book-result-meta   { font-size: 0.75rem; color: #777777; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 
     /* === READING STATUS === */
-    .status-options { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; gap: 10px; margin-top: 8px; }
+    .status-options { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; margin-top: 8px; }
+    .status-options > .status-opt { margin-bottom: 10px; }
+    .status-options > .status-opt:last-child { margin-bottom: 0; }
     .status-opt {
       border: 1px solid #111111;
       border-radius: 0;
@@ -244,7 +252,9 @@
     .status-opt-sub   { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.8rem; color: #777777; margin-top: 4px; display: block; }
 
     /* === LANGUAGE === */
-    .lang-options { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 10px; margin-top: 8px; }
+    .lang-options { display: -webkit-box; display: -ms-flexbox; display: flex; margin-top: 8px; }
+    .lang-options > .btn { margin-right: 10px; }
+    .lang-options > .btn:last-child { margin-right: 0; }
     .lang-options .btn { -webkit-box-flex: 1; -ms-flex: 1; flex: 1; }
 
     /* === COMPANION NAME === */
@@ -273,7 +283,9 @@
       font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
       color: #777777; margin-bottom: 10px;
     }
-    .icebreaker-prompts { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; gap: 8px; }
+    .icebreaker-prompts { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; }
+    .icebreaker-prompts > .icebreaker-btn { margin-bottom: 8px; }
+    .icebreaker-prompts > .icebreaker-btn:last-child { margin-bottom: 0; }
     .icebreaker-btn {
       border: 1px solid #d0d0d0;
       border-radius: 0;
@@ -331,7 +343,9 @@
       font-size: 0.72rem; color: #777777; margin-bottom: 8px;
       text-transform: uppercase; letter-spacing: 0.05em;
     }
-    .send-row { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 10px; -webkit-box-align: end; -ms-flex-align: end; align-items: flex-end; margin-bottom: 12px; }
+    .send-row { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: end; -ms-flex-align: end; align-items: flex-end; margin-bottom: 12px; }
+    .send-row > textarea { margin-right: 10px; }
+    .send-row > .btn { margin-right: 0; }
     .send-row textarea { -webkit-box-flex: 1; -ms-flex: 1; flex: 1; min-width: 0; }
     .send-row .btn { width: auto; -ms-flex-negative: 0; flex-shrink: 0; -ms-flex-item-align: end; align-self: flex-end; }
 
@@ -382,7 +396,9 @@
       font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
       color: #777777; margin-bottom: 12px;
     }
-    .font-size-options { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 8px; }
+    .font-size-options { display: -webkit-box; display: -ms-flexbox; display: flex; }
+    .font-size-options > .font-size-opt { margin-right: 8px; }
+    .font-size-options > .font-size-opt:last-child { margin-right: 0; }
     .font-size-opt {
       -webkit-box-flex: 1; -ms-flex: 1; flex: 1;
       border: 1px solid #111111;
@@ -434,7 +450,9 @@
       font-size: 1rem; color: #555555; line-height: 1.75;
       margin-bottom: 32px; max-width: 480px;
     }
-    .hall-doors { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .hall-doors { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; margin-bottom: 24px; }
+    .hall-doors > .hall-door { margin-bottom: 12px; }
+    .hall-doors > .hall-door:last-child { margin-bottom: 0; }
     .hall-door {
       border: 1px solid #111111;
       border-radius: 0;
@@ -467,7 +485,9 @@
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       font-size: 0.75rem; color: #999999; line-height: 1.6; padding-bottom: 20px;
     }
-    .hall-footer-links { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 20px; margin-top: 8px; -ms-flex-wrap: wrap; flex-wrap: wrap; }
+    .hall-footer-links { display: -webkit-box; display: -ms-flexbox; display: flex; margin-top: 8px; -ms-flex-wrap: wrap; flex-wrap: wrap; }
+    .hall-footer-links > a { margin-right: 20px; margin-bottom: 4px; }
+    .hall-footer-links > a:last-child { margin-right: 0; }
     .hall-footer-links a {
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       color: #777777; font-size: 0.75rem; text-decoration: underline;
@@ -503,7 +523,9 @@
     .conv-item { border: 1px solid #111111; border-radius: 0; padding: 14px 16px; margin-bottom: 10px; }
     .conv-item-name    { font-size: 1rem; margin-bottom: 3px; }
     .conv-item-meta    { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.75rem; color: #777777; margin-bottom: 10px; }
-    .conv-actions { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 8px; -ms-flex-wrap: wrap; flex-wrap: wrap; }
+    .conv-actions { display: -webkit-box; display: -ms-flexbox; display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap; }
+    .conv-actions > .conv-btn { margin-right: 8px; margin-bottom: 4px; }
+    .conv-actions > .conv-btn:last-child { margin-right: 0; }
     .conv-btn {
       border: 1px solid #111111;
       border-radius: 0;
@@ -527,11 +549,15 @@
       flex-shrink: 0;
       background: #f5f5f5;
     }
-    .book-result-inner { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 12px; -webkit-box-align: start; -ms-flex-align: start; align-items: flex-start; }
+    .book-result-inner { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: start; -ms-flex-align: start; align-items: flex-start; }
+    .book-result-inner > .book-cover-thumb { margin-right: 12px; }
+    .book-result-inner > .book-result-text { margin-right: 0; }
     .book-result-text  { -webkit-box-flex: 1; -ms-flex: 1; flex: 1; min-width: 0; }
 
     /* === BUBBLE ACTIONS === */
-    .bubble-actions { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 8px; margin-top: 6px; padding: 0 4px; }
+    .bubble-actions { display: -webkit-box; display: -ms-flexbox; display: flex; margin-top: 6px; padding: 0 4px; }
+    .bubble-actions > .bubble-action-btn { margin-right: 8px; }
+    .bubble-actions > .bubble-action-btn:last-child { margin-right: 0; }
     .bubble-action-btn {
       background: none; border: none; cursor: pointer;
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -570,7 +596,9 @@
       background: #f5f5f5;
     }
     #length-panel.open { display: block; }
-    .length-options { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 8px; }
+    .length-options { display: -webkit-box; display: -ms-flexbox; display: flex; }
+    .length-options > .length-opt { margin-right: 8px; }
+    .length-options > .length-opt:last-child { margin-right: 0; }
     .length-opt {
       -webkit-box-flex: 1; -ms-flex: 1; flex: 1;
       border: 1px solid #111111;
@@ -590,7 +618,9 @@
     .tc-section { margin-bottom: 20px; }
 
     /* === AGE GATE === */
-    .age-gate-btns { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; gap: 10px; margin-top: 20px; }
+    .age-gate-btns { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; margin-top: 20px; }
+    .age-gate-btns > .btn { margin-bottom: 10px; }
+    .age-gate-btns > .btn:last-child { margin-bottom: 0; }
   </style>
 </head>
 <body>
@@ -958,8 +988,8 @@
     <h1 id="book-shelf-title">—</h1>
     <p id="book-shelf-author" style="font-size:0.88rem;color:#777777;margin-bottom:4px"></p>
     <p id="book-shelf-status" style="font-size:0.78rem;color:#777777;font-style:italic;margin-bottom:20px"></p>
-    <div style="display:flex;gap:10px;margin-bottom:24px">
-      <button class="btn btn-primary btn-small" onclick="startNewConversation()">New conversation</button>
+    <div style="display:-webkit-box;display:-ms-flexbox;display:flex;margin-bottom:24px">
+      <button class="btn btn-primary btn-small" style="margin-right:10px" onclick="startNewConversation()">New conversation</button>
       <button class="btn btn-small" onclick="updateBookStatus()">Update status</button>
     </div>
     <div id="conv-list"></div>
@@ -993,6 +1023,27 @@ if (!Object.assign) {
     }
     return t;
   };
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─── SAFE PROPERTY ACCESSOR (replaces optional chaining for Kobo compat) ────
+function safeGet(obj, path) {
+  var parts = path.split('.');
+  var cur = obj;
+  for (var i = 0; i < parts.length; i++) {
+    if (cur === null || cur === undefined) return undefined;
+    var part = parts[i];
+    // handle array index notation like [0]
+    var arrMatch = part.match(/^([^\[]*)\[(\d+)\]$/);
+    if (arrMatch) {
+      if (arrMatch[1]) { cur = cur[arrMatch[1]]; }
+      if (cur === null || cur === undefined) return undefined;
+      cur = cur[parseInt(arrMatch[2])];
+    } else {
+      cur = cur[part];
+    }
+  }
+  return cur;
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1233,13 +1284,13 @@ async function interpretSearchQuery(q) {
     let text = '';
     if (STATE.provider === 'anthropic') {
       const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:80, messages:[{role:'user',content:prompt}] }) });
-      text = (await res.json()).content?.[0]?.text || '';
+      text = safeGet(await res.json(), 'content.[0].text') || '';
     } else if (STATE.provider === 'gemini') {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
-      text = (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '';
+      text = safeGet(await res.json(), 'candidates.[0].content.parts.[0].text') || '';
     } else if (STATE.provider === 'groq') {
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:80, messages:[{role:'user',content:prompt}] }) });
-      text = (await res.json()).choices?.[0]?.message?.content || '';
+      text = safeGet(await res.json(), 'choices.[0].message.content') || '';
     }
     const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
     if (parsed.title) return { title: parsed.title, author: parsed.author || '' };
@@ -1459,7 +1510,7 @@ async function fetchGoogleBooks(q, maxResults=8, startIndex=0) {
   (data.items||[]).forEach(item => {
     const info = item.volumeInfo||{}, title = info.title||'Unknown title', author = (info.authors||['Unknown author'])[0];
     const k = title.toLowerCase()+'||'+author.toLowerCase();
-    const thumb = info.imageLinks?.smallThumbnail || info.imageLinks?.thumbnail || '';
+    const thumb = (info.imageLinks && info.imageLinks.smallThumbnail ? info.imageLinks.smallThumbnail : (info.imageLinks && info.imageLinks.thumbnail ? info.imageLinks.thumbnail : ''));
     const cats = (info.categories||[]).join(' ').toLowerCase();
     if (!seen.has(k)) seen.set(k,{title,author,year:info.publishedDate?info.publishedDate.slice(0,4):'',key:item.id||'',source:'Google Books',lang:info.language||'',thumb,cats});
   });
@@ -1547,17 +1598,17 @@ async function renderStatusScreen(book) {
         let text = '';
         if (STATE.provider === 'anthropic') {
           const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:300, messages:[{role:'user',content:prompt}] }) });
-          text = (await res.json()).content?.[0]?.text || '';
+          text = safeGet(await res.json(), 'content.[0].text') || '';
         } else if (STATE.provider === 'gemini') {
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
-          text = (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '';
+          text = safeGet(await res.json(), 'candidates.[0].content.parts.[0].text') || '';
         } else if (STATE.provider === 'groq') {
           const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:300, messages:[{role:'user',content:prompt}] }) });
-          text = (await res.json()).choices?.[0]?.message?.content || '';
+          text = safeGet(await res.json(), 'choices.[0].message.content') || '';
         }
         const translated = JSON.parse(text.replace(/```json|```/g,'').trim());
         if (Array.isArray(translated) && translated.length === 5) {
-          options = STATUS_OPTIONS_EN.map((o, i) => ({ ...o, label: translated[i].label || o.label, sub: translated[i].sub || o.sub }));
+          options = STATUS_OPTIONS_EN.map(function(o, i) { return Object.assign({}, o, { label: translated[i].label || o.label, sub: translated[i].sub || o.sub }); });
           localStorage.setItem(cacheKey, JSON.stringify(options));
         }
       } catch(e) { /* fall back to English */ }
@@ -1718,13 +1769,13 @@ async function generateThinkingPhrases(language) {
     let text = '';
     if (STATE.provider === 'anthropic') {
       const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:120, messages:[{role:'user',content:prompt}] }) });
-      text = (await res.json()).content?.[0]?.text || '';
+      text = safeGet(await res.json(), 'content.[0].text') || '';
     } else if (STATE.provider === 'gemini') {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
-      text = (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '';
+      text = safeGet(await res.json(), 'candidates.[0].content.parts.[0].text') || '';
     } else if (STATE.provider === 'groq') {
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:120, messages:[{role:'user',content:prompt}] }) });
-      text = (await res.json()).choices?.[0]?.message?.content || '';
+      text = safeGet(await res.json(), 'choices.[0].message.content') || '';
     }
     const phrases = JSON.parse(text.replace(/```json|```/g,'').trim());
     if (Array.isArray(phrases) && phrases.length >= 4) {
@@ -1911,13 +1962,13 @@ Example format: ["prompt one","prompt two","prompt three","prompt four"]`;
   let text = '';
   if (STATE.provider === 'anthropic') {
     const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:200, messages:[{role:'user',content:prompt}] }) });
-    text = (await res.json()).content?.[0]?.text || '';
+    text = safeGet(await res.json(), 'content.[0].text') || '';
   } else if (STATE.provider === 'gemini') {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
-    text = (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '';
+    text = safeGet(await res.json(), 'candidates.[0].content.parts.[0].text') || '';
   } else if (STATE.provider === 'groq') {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:200, messages:[{role:'user',content:prompt}] }) });
-    text = (await res.json()).choices?.[0]?.message?.content || '';
+    text = safeGet(await res.json(), 'choices.[0].message.content') || '';
   }
 
   // Clean response and attempt JSON parse
@@ -2114,8 +2165,8 @@ async function callAI() {
 
 async function callAnthropic(system, messages) {
   const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,system,messages}) });
-  if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${res.status}`); }
-  return (await res.json()).content?.[0]?.text || '(No response)';
+  if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error((e && e.error && e.error.message ? e.error.message : 'HTTP ' + res.status)); }
+  return safeGet(await res.json(), 'content.[0].text') || '(No response)';
 }
 
 async function callGemini(system, messages) {
@@ -2123,14 +2174,14 @@ async function callGemini(system, messages) {
   contents.unshift({role:'user',parts:[{text:system}]});
   contents.splice(1,0,{role:'model',parts:[{text:'Understood. I\'m ready.'}]});
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contents}) });
-  if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${res.status}`); }
-  return (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '(No response)';
+  if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error((e && e.error && e.error.message ? e.error.message : 'HTTP ' + res.status)); }
+  return safeGet(await res.json(), 'candidates.[0].content.parts.[0].text') || '(No response)';
 }
 
 async function callGroq(system, messages) {
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:600,messages:[{role:'system',content:system},...messages]}) });
-  if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${res.status}`); }
-  return (await res.json()).choices?.[0]?.message?.content || '(No response)';
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:600,messages:[{role:'system',content:system}].concat(messages)}) });
+  if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error((e && e.error && e.error.message ? e.error.message : 'HTTP ' + res.status)); }
+  return safeGet(await res.json(), 'choices.[0].message.content') || '(No response)';
 }
 
 // ═══════════════════════════════════════════════════
@@ -2213,7 +2264,7 @@ function saveCurrentConversation() {
   const convId  = STATE.currentConvId;
   const existing = convs.find(c => c.id === convId);
   const name    = STATE.currentConvName ||
-    (STATE.messages[0]?.content || 'Conversation').slice(0, 60);
+    (STATE.messages[0] && STATE.messages[0].content ? STATE.messages[0].content : 'Conversation').slice(0, 60);
 
   if (existing) {
     existing.messages    = STATE.messages;
@@ -2491,25 +2542,47 @@ function endConversation() {
 }
 
 
+function showInitError(msg) {
+  // Display error visibly on e-ink screen for debugging
+  try {
+    var errDiv = document.getElementById('kobo-error-display');
+    if (!errDiv) {
+      errDiv = document.createElement('div');
+      errDiv.id = 'kobo-error-display';
+      errDiv.style.cssText = 'background:#f5f5f5;border:1px solid #111;padding:14px;margin:12px 0;font-size:0.85rem;font-family:Georgia,serif;';
+      var page = document.querySelector('.page');
+      if (page) page.insertBefore(errDiv, page.firstChild);
+    }
+    errDiv.textContent = 'Init error: ' + msg;
+    errDiv.style.display = 'block';
+  } catch(displayErr) {}
+}
+
 function init() {
-  const prov = localStorage.getItem('pc_provider');
-  if (prov) { STATE.provider = prov; applyProviderUI(prov); }
+  // Step 1: Restore provider/key settings
+  try {
+    var prov = localStorage.getItem('pc_provider');
+    if (prov) { STATE.provider = prov; applyProviderUI(prov); }
+    var key = localStorage.getItem('pc_api_key');
+    if (key) { STATE.apiKey = key; document.getElementById('api-key-input').value = key; document.getElementById('key-status-bar').style.display = 'block'; }
+    var name = localStorage.getItem('pc_companion_name');
+    if (name) { STATE.companionName = name; document.getElementById('companion-name-input').value = name; }
+  } catch(e) { showInitError('settings restore: ' + e.message); }
 
-  const key = localStorage.getItem('pc_api_key');
-  if (key) { STATE.apiKey = key; document.getElementById('api-key-input').value = key; document.getElementById('key-status-bar').style.display = 'block'; }
-
-  const name = localStorage.getItem('pc_companion_name');
-  if (name) { STATE.companionName = name; document.getElementById('companion-name-input').value = name; }
-
+  // Step 2: Restore highlights
   try { STATE.highlights = JSON.parse(localStorage.getItem('pc_highlights') || '[]'); } catch(e) {}
 
-  const sz = localStorage.getItem('pc_font_size');
-  if (sz) applyFontSize(parseInt(sz));
-  const rl = localStorage.getItem('pc_reply_length');
-  if (rl) { STATE.replyLength = rl; document.querySelectorAll('.length-opt').forEach(b => (b.dataset.length === rl ? b.classList.add('active') : b.classList.remove('active'))); }
-
+  // Step 3: Restore font size + reply length
   try {
-    const savedBook = JSON.parse(localStorage.getItem('pc_last_book') || 'null');
+    var sz = localStorage.getItem('pc_font_size');
+    if (sz) applyFontSize(parseInt(sz));
+    var rl = localStorage.getItem('pc_reply_length');
+    if (rl) { STATE.replyLength = rl; document.querySelectorAll('.length-opt').forEach(function(b){ b.dataset.length === rl ? b.classList.add('active') : b.classList.remove('active'); }); }
+  } catch(e) { showInitError('font/length restore: ' + e.message); }
+
+  // Step 4: Restore last book
+  try {
+    var savedBook = JSON.parse(localStorage.getItem('pc_last_book') || 'null');
     if (savedBook) {
       STATE.book          = savedBook;
       STATE.readingStatus = localStorage.getItem('pc_status_' + bookKey(savedBook)) || null;
@@ -2517,27 +2590,38 @@ function init() {
       STATE.detectedLang  = savedBook.detectedLang || null;
       restoreCompanionUI(savedBook);
     }
-  } catch(e) {}
+  } catch(e) { showInitError('book restore: ' + e.message); }
 
-  updateGreeting();
-  // Show T&C on first visit — use showScreen directly, don't override handleRoute
-  if (!localStorage.getItem('pc_tc_accepted')) {
-    showScreen('tc');
-  } else {
-    handleRoute();
+  // Step 5: Update greeting
+  try { updateGreeting(); } catch(e) { showInitError('greeting: ' + e.message); }
+
+  // Step 6: Route
+  try {
+    if (!localStorage.getItem('pc_tc_accepted')) {
+      showScreen('tc');
+    } else {
+      handleRoute();
+    }
+  } catch(e) {
+    showInitError('routing: ' + e.message);
+    try { showScreen('home'); } catch(e2) {}
   }
-  // Safety net for local file opening — ensure at least one screen is visible
-  if (!document.querySelector('.screen.active')) showScreen('home');
+
+  // Safety net: ensure at least one screen is visible
+  try {
+    if (!document.querySelector('.screen.active')) showScreen('home');
+  } catch(e) {}
 }
 
-try { init(); } catch(e) {
-  // Fallback: force home screen visible if init fails
-  var fb = document.getElementById('screen-home');
-  if (fb) { fb.style.display = 'flex'; }
-  var err = document.createElement('p');
-  err.style.cssText = 'color:#c00;font-size:0.85rem;padding:12px;';
-  err.textContent = 'Error: ' + e.message;
-  document.querySelector('.page').appendChild(err);
+try {
+  init();
+} catch(e) {
+  // Last-resort fallback
+  try {
+    var fb = document.getElementById('screen-home');
+    if (fb) { fb.style.display = 'flex'; }
+    showInitError(e.message);
+  } catch(e2) {}
 }
 </script>
 </body>
