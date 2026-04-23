@@ -4,259 +4,593 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Page Commons</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.svg">
   <style>
+    /* === RESET === */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --black: #000000;
-      --white: #ffffff;
-      --grey-light: #f0f0f0;
-      --grey-mid: #d0d0d0;
-      --grey-dark: #666666;
-      --border: 1px solid #000000;
-      --radius: 16px;
-      --radius-sm: 10px;
-      --font-serif: Georgia, 'Times New Roman', serif;
-      --max-width: 600px;
-      --font-size: 18px;
+    /* === BASE === */
+    html { font-size: 18px; }
+    body {
+      background: #ffffff;
+      color: #111111;
+      font-family: Georgia, 'Times New Roman', serif;
+      line-height: 1.65;
+      min-height: 100vh;
     }
 
-    html { font-size: var(--font-size); }
-    body { background: var(--white); color: var(--black); font-family: var(--font-serif); line-height: 1.65; min-height: 100vh; }
+    /* === OFFLINE BANNER === */
+    #offline-banner {
+      display: none;
+      background: #111111;
+      color: #ffffff;
+      text-align: center;
+      padding: 10px;
+      font-size: 0.85rem;
+      letter-spacing: 0.03em;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
 
-    #offline-banner { display: none; background: var(--black); color: var(--white); text-align: center; padding: 10px; font-size: 0.85rem; letter-spacing: 0.03em; }
+    /* === LAYOUT === */
+    .page { max-width: 600px; margin: 0 auto; padding: 0 24px 120px; }
 
-    .page { max-width: var(--max-width); margin: 0 auto; padding: 0 20px 140px; }
+    /* === HEADER === */
+    .site-header {
+      border-bottom: 1px solid #111111;
+      padding: 22px 0 16px;
+      margin-bottom: 32px;
+    }
+    .site-name {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #111111;
+    }
+    .site-name-link { cursor: pointer; text-decoration: none; color: #111111; }
+    .site-tagline {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.72rem;
+      color: #777777;
+      margin-top: 3px;
+      letter-spacing: 0.02em;
+    }
 
-    .site-header { border-bottom: var(--border); padding: 20px 0 14px; margin-bottom: 28px; }
-    .site-name { font-size: 1rem; font-weight: normal; letter-spacing: 0.05em; text-transform: uppercase; }
-    .site-tagline { font-size: 0.8rem; color: var(--grey-dark); margin-top: 2px; }
-
+    /* === SCREENS === */
     .screen { display: none; }
     .screen.active { display: block; }
-    #screen-home.active { display: flex; flex-direction: column; min-height: calc(100vh - 80px); }
+    #screen-home.active { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; min-height: calc(100vh - 90px); }
 
-    h1 { font-size: 1.55rem; font-weight: normal; line-height: 1.3; margin-bottom: 20px; }
-    h2 { font-size: 1.15rem; font-weight: normal; margin-bottom: 14px; }
+    /* === TYPOGRAPHY === */
+    h1 { font-size: 1.5rem; font-weight: normal; line-height: 1.3; margin-bottom: 20px; }
+    h2 { font-size: 1.1rem; font-weight: normal; margin-bottom: 14px; }
     p  { margin-bottom: 14px; }
 
-    label { display: block; font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; color: var(--grey-dark); }
-
-    input[type="text"], input[type="password"], input[type="search"], textarea {
-      width: 100%; border: var(--border); background: var(--white); color: var(--black);
-      font-family: var(--font-serif); font-size: 1rem; padding: 12px 16px;
-      outline: none; -webkit-appearance: none; border-radius: var(--radius-sm);
+    label {
+      display: block;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      color: #777777;
     }
-    input:focus, textarea:focus { outline: 2px solid var(--black); outline-offset: 2px; }
-    textarea { resize: none; min-height: 60px; overflow-y: hidden; }
-    .field { margin-bottom: 18px; }
 
-    .btn { display: inline-block; border: var(--border); background: var(--white); color: var(--black); font-family: var(--font-serif); font-size: 1rem; padding: 12px 24px; cursor: pointer; min-height: 44px; text-align: center; text-decoration: none; -webkit-appearance: none; border-radius: var(--radius-sm); width: 100%; }
-    .btn:active { background: var(--grey-light); }
-    .btn-primary { background: var(--black); color: var(--white); }
-    .btn-primary:active { background: #333; }
+    /* === FORM ELEMENTS === */
+    input[type="text"],
+    input[type="password"],
+    input[type="search"],
+    textarea {
+      width: 100%;
+      border: 1px solid #111111;
+      background: #ffffff;
+      color: #111111;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 1rem;
+      padding: 12px 14px;
+      outline: none;
+      -webkit-appearance: none;
+      border-radius: 0;
+    }
+    input:focus, textarea:focus { outline: 2px solid #111111; outline-offset: 1px; }
+    textarea { resize: none; min-height: 60px; overflow-y: hidden; }
+    .field { margin-bottom: 20px; }
+
+    /* === BUTTONS === */
+    .btn {
+      display: inline-block;
+      border: 1px solid #111111;
+      background: #ffffff;
+      color: #111111;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 1rem;
+      padding: 12px 24px;
+      cursor: pointer;
+      min-height: 48px;
+      text-align: center;
+      text-decoration: none;
+      -webkit-appearance: none;
+      border-radius: 0;
+      width: 100%;
+    }
+    .btn:active { background: #f5f5f5; }
+    .btn-primary { background: #111111; color: #ffffff; }
+    .btn-primary:active { background: #333333; }
     .btn-small { padding: 10px 18px; font-size: 0.9rem; width: auto; min-height: 44px; }
 
+    /* === FILE INPUT === */
     .file-input-wrapper { position: relative; display: block; }
-    .file-input-wrapper input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-    .file-btn-label { display: block; background: var(--black); color: var(--white); font-family: var(--font-serif); font-size: 1rem; padding: 12px 24px; border-radius: var(--radius-sm); text-align: center; cursor: pointer; min-height: 44px; line-height: 1.4; border: var(--border); }
-    #clippings-filename { font-size: 0.85rem; color: var(--grey-dark); margin-top: 8px; font-style: italic; }
-
-    hr { border: none; border-top: var(--border); margin: 24px 0; }
-
-    .note { font-size: 0.85rem; color: var(--grey-dark); border-left: 3px solid var(--grey-mid); padding-left: 12px; margin-bottom: 14px; }
-    .status-msg { font-size: 0.9rem; padding: 4px 0; margin-bottom: 12px; color: var(--grey-dark); font-style: italic; }
-    .status-msg.error { font-style: normal; color: var(--black); background: var(--grey-light); padding: 12px 16px; border-radius: var(--radius-sm); border: var(--border); }
-
-    .back-link { display: inline-block; font-size: 0.9rem; color: var(--black); cursor: pointer; background: none; border: none; font-family: var(--font-serif); text-decoration: underline; margin-bottom: 24px; padding: 0; }
-
-    /* PROVIDER SELECTOR */
-    .provider-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-    .provider-opt { display: flex; align-items: center; justify-content: space-between; border: var(--border); border-radius: var(--radius-sm); padding: 12px 16px; cursor: pointer; min-height: 44px; background: var(--white); }
-    .provider-opt.selected { background: var(--black); color: var(--white); }
-    .provider-opt.selected .provider-link { color: var(--grey-mid); }
-    .provider-opt-left { display: flex; align-items: center; gap: 10px; }
-    .provider-opt-name { font-family: var(--font-serif); font-size: 1rem; }
-    .provider-link { font-size: 0.75rem; color: var(--grey-dark); text-decoration: underline; white-space: nowrap; background: none; border: none; cursor: pointer; font-family: var(--font-serif); padding: 0; }
-
-    #key-hint { font-size: 0.8rem; color: var(--grey-dark); margin-top: 6px; }
-    .key-toggle { background: none; border: none; cursor: pointer; font-size: 0.8rem; color: var(--grey-dark); text-decoration: underline; padding: 0; margin-top: 4px; font-family: var(--font-serif); }
-
-    /* SEARCH */
-    .search-row { display: flex; flex-direction: row; gap: 10px; align-items: flex-start; }
-    .search-row input { flex: 1; min-width: 0; }
-    .search-row .btn  { width: auto; white-space: nowrap; flex-shrink: 0; }
-    #search-results { margin-top: 20px; }
-    .book-result { border: var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 10px; cursor: pointer; }
-    .book-result:active { background: var(--grey-light); }
-    .book-result-title  { font-size: 1.05rem; margin-bottom: 3px; }
-    .book-result-author { font-size: 0.9rem; color: var(--grey-dark); margin-bottom: 3px; }
-    .book-result-meta   { font-size: 0.78rem; color: var(--grey-dark); }
-
-    /* READING STATUS SCREEN */
-    .status-options { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
-    .status-opt {
-      border: var(--border); border-radius: var(--radius);
-      padding: 16px 18px; cursor: pointer; background: var(--white);
-      font-family: var(--font-serif); font-size: 1rem; text-align: left;
-      min-height: 44px; color: var(--black); -webkit-appearance: none;
+    .file-input-wrapper input[type="file"] { position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .file-btn-label {
+      display: block;
+      background: #111111;
+      color: #ffffff;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 1rem;
+      padding: 12px 24px;
+      border-radius: 0;
+      text-align: center;
+      cursor: pointer;
+      min-height: 48px;
+      line-height: 1.4;
+      border: 1px solid #111111;
     }
-    .status-opt:active { background: var(--grey-light); }
+    #clippings-filename { font-size: 0.85rem; color: #777777; margin-top: 8px; font-style: italic; }
+
+    /* === DIVIDERS + UTIL === */
+    hr { border: none; border-top: 1px solid #111111; margin: 24px 0; }
+    .note {
+      font-size: 0.85rem;
+      color: #777777;
+      border-left: 2px solid #d0d0d0;
+      padding-left: 12px;
+      margin-bottom: 14px;
+    }
+    .status-msg { font-size: 0.9rem; padding: 4px 0; margin-bottom: 12px; color: #777777; font-style: italic; }
+    .status-msg.error {
+      font-style: normal;
+      color: #111111;
+      background: #f5f5f5;
+      padding: 12px 14px;
+      border-radius: 0;
+      border: 1px solid #111111;
+    }
+    .back-link {
+      display: inline-block;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      color: #111111;
+      cursor: pointer;
+      background: none;
+      border: none;
+      text-decoration: underline;
+      margin-bottom: 24px;
+      padding: 0;
+    }
+
+    /* === PROVIDER SELECTOR === */
+    .provider-options { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .provider-opt {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-align: center;
+      -ms-flex-align: center;
+      align-items: center;
+      -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+      justify-content: space-between;
+      border: 1px solid #111111;
+      border-radius: 0;
+      padding: 13px 16px;
+      cursor: pointer;
+      min-height: 48px;
+      background: #ffffff;
+    }
+    .provider-opt.selected { background: #111111; color: #ffffff; }
+    .provider-opt.selected .provider-link { color: #d0d0d0; }
+    .provider-opt-left { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: center; -ms-flex-align: center; align-items: center; gap: 10px; }
+    .provider-opt-name { font-family: Georgia, 'Times New Roman', serif; font-size: 1rem; }
+    .provider-link {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.72rem;
+      color: #777777;
+      text-decoration: underline;
+      white-space: nowrap;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    #key-hint { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.78rem; color: #777777; margin-top: 6px; }
+    .key-toggle {
+      background: none; border: none; cursor: pointer;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.78rem; color: #777777; text-decoration: underline; padding: 0; margin-top: 4px;
+    }
+
+    /* === SEARCH === */
+    .search-row { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: horizontal; -webkit-box-direction: normal; -ms-flex-direction: row; flex-direction: row; gap: 10px; -webkit-box-align: start; -ms-flex-align: start; align-items: flex-start; }
+    .search-row input { -webkit-box-flex: 1; -ms-flex: 1; flex: 1; min-width: 0; }
+    .search-row .btn  { width: auto; white-space: nowrap; -ms-flex-negative: 0; flex-shrink: 0; }
+    #search-results { margin-top: 20px; }
+    .book-result { border: 1px solid #111111; border-radius: 0; padding: 16px; margin-bottom: 10px; cursor: pointer; }
+    .book-result:active { background: #f5f5f5; }
+    .book-result-title  { font-size: 1.05rem; margin-bottom: 3px; }
+    .book-result-author { font-size: 0.9rem; color: #777777; margin-bottom: 3px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+    .book-result-meta   { font-size: 0.75rem; color: #777777; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+
+    /* === READING STATUS === */
+    .status-options { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; gap: 10px; margin-top: 8px; }
+    .status-opt {
+      border: 1px solid #111111;
+      border-radius: 0;
+      padding: 16px 18px;
+      cursor: pointer;
+      background: #ffffff;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 1rem;
+      text-align: left;
+      min-height: 48px;
+      color: #111111;
+      -webkit-appearance: none;
+    }
+    .status-opt:active { background: #f5f5f5; }
     .status-opt-label { font-size: 1rem; display: block; }
-    .status-opt-sub   { font-size: 0.82rem; color: var(--grey-dark); margin-top: 3px; display: block; }
+    .status-opt-sub   { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.8rem; color: #777777; margin-top: 4px; display: block; }
 
-    /* LANGUAGE CHOICE */
-    .lang-options { display: flex; gap: 10px; margin-top: 8px; }
-    .lang-options .btn { flex: 1; }
+    /* === LANGUAGE === */
+    .lang-options { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 10px; margin-top: 8px; }
+    .lang-options .btn { -webkit-box-flex: 1; -ms-flex: 1; flex: 1; }
 
-    /* COMPANION NAME */
-    #companion-name-section { margin-top: 20px; border-top: var(--border); padding-top: 20px; }
-    #companion-name-section label { margin-bottom: 8px; }
+    /* === COMPANION NAME === */
+    #companion-name-section { margin-top: 20px; border-top: 1px solid #111111; padding-top: 20px; }
 
-    /* COMPANION SCREEN */
-    #book-header { border: var(--border); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 20px; }
-    #book-title-display  { font-size: 1.1rem; margin-bottom: 2px; }
-    #book-author-display { font-size: 0.88rem; color: var(--grey-dark); }
-    #book-status-display { font-size: 0.78rem; color: var(--grey-dark); margin-top: 4px; font-style: italic; }
-    #change-book-btn { font-size: 0.78rem; color: var(--grey-dark); text-decoration: underline; background: none; border: none; cursor: pointer; margin-top: 6px; font-family: var(--font-serif); padding: 0; }
+    /* === COMPANION SCREEN === */
+    #book-header {
+      border: 1px solid #111111;
+      border-radius: 0;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+    }
+    #book-title-display  { font-size: 1.1rem; margin-bottom: 3px; }
+    #book-author-display { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #777777; }
+    #book-status-display { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.75rem; color: #777777; margin-top: 4px; font-style: italic; }
+    #change-book-btn {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.75rem; color: #777777; text-decoration: underline;
+      background: none; border: none; cursor: pointer; margin-top: 6px; padding: 0;
+    }
 
-    /* ICE BREAKERS */
-    #icebreakers { margin-bottom: 20px; }
-    .icebreaker-label { font-size: 0.78rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--grey-dark); margin-bottom: 10px; }
-    .icebreaker-prompts { display: flex; flex-direction: column; gap: 8px; }
-    .icebreaker-btn { border: var(--border); border-radius: var(--radius); background: var(--white); color: var(--black); font-family: var(--font-serif); font-size: 0.95rem; padding: 12px 18px; text-align: left; cursor: pointer; line-height: 1.4; -webkit-appearance: none; min-height: 44px; }
-    .icebreaker-btn:active { background: var(--grey-light); }
+    /* === ICE BREAKERS === */
+    #icebreakers { margin-bottom: 24px; }
+    .icebreaker-label {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+      color: #777777; margin-bottom: 10px;
+    }
+    .icebreaker-prompts { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; gap: 8px; }
+    .icebreaker-btn {
+      border: 1px solid #d0d0d0;
+      border-radius: 0;
+      background: #ffffff;
+      color: #111111;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 0.95rem;
+      padding: 12px 16px;
+      text-align: left;
+      cursor: pointer;
+      line-height: 1.4;
+      -webkit-appearance: none;
+      min-height: 44px;
+    }
+    .icebreaker-btn:active { background: #f5f5f5; }
 
-    /* CHAT */
+    /* === CHAT === */
     #chat-log { padding-top: 4px; margin-bottom: 8px; }
-    .message { display: flex; flex-direction: column; margin-bottom: 16px; }
-    .message.user      { align-items: flex-end; }
-    .message.companion { align-items: flex-start; }
-    .message-role { font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--grey-dark); margin-bottom: 4px; padding: 0 6px; }
-    .message-bubble { font-size: 1rem; line-height: 1.65; padding: 12px 16px; max-width: 88%; border: var(--border); }
-    .message.user .message-bubble { background: var(--black); color: var(--white); border-radius: var(--radius) var(--radius) 4px var(--radius); }
-    .message.companion .message-bubble { background: var(--white); color: var(--black); border-radius: var(--radius) var(--radius) var(--radius) 4px; }
-    .message.error-msg .message-bubble { background: var(--grey-light); border-radius: var(--radius-sm); max-width: 100%; }
-    .retry-btn { margin-top: 8px; background: none; border: var(--border); border-radius: var(--radius-sm); font-family: var(--font-serif); font-size: 0.88rem; padding: 8px 16px; cursor: pointer; color: var(--black); }
-    .retry-btn:active { background: var(--grey-light); }
+    .message { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; margin-bottom: 20px; }
+    .message.user      { -webkit-box-align: end; -ms-flex-align: end; align-items: flex-end; }
+    .message.companion { -webkit-box-align: start; -ms-flex-align: start; align-items: flex-start; }
+    .message-role {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.68rem; letter-spacing: 0.07em; text-transform: uppercase;
+      color: #777777; margin-bottom: 5px; padding: 0 4px;
+    }
+    .message-bubble { font-size: 1rem; line-height: 1.7; padding: 13px 16px; max-width: 88%; border: 1px solid #111111; }
+    .message.user .message-bubble { background: #111111; color: #ffffff; border-radius: 0; }
+    .message.companion .message-bubble { background: #ffffff; color: #111111; border-radius: 0; }
+    .message.error-msg .message-bubble { background: #f5f5f5; border-radius: 0; max-width: 100%; }
+    .retry-btn {
+      margin-top: 8px;
+      background: none;
+      border: 1px solid #111111;
+      border-radius: 0;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 0.88rem;
+      padding: 8px 16px;
+      cursor: pointer;
+      color: #111111;
+    }
+    .retry-btn:active { background: #f5f5f5; }
 
-    #loading-indicator { display: none; font-size: 0.9rem; color: var(--grey-dark); font-style: italic; padding: 4px 6px; margin-bottom: 12px; }
+    #loading-indicator {
+      display: none;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.85rem; color: #777777; font-style: italic;
+      padding: 4px 4px; margin-bottom: 12px;
+    }
 
-    #chat-input-area { border-top: var(--border); padding-top: 16px; margin-top: 8px; }
-    #input-book-context { font-size: 0.78rem; color: var(--grey-dark); margin-bottom: 8px; font-style: italic; }
-    .send-row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 12px; }
-    .send-row textarea { flex: 1; min-width: 0; }
-    .send-row .btn { width: auto; flex-shrink: 0; align-self: flex-end; }
+    /* === CHAT INPUT === */
+    #chat-input-area { border-top: 1px solid #111111; padding-top: 16px; margin-top: 8px; }
+    #input-book-context {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.72rem; color: #777777; margin-bottom: 8px;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .send-row { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 10px; -webkit-box-align: end; -ms-flex-align: end; align-items: flex-end; margin-bottom: 12px; }
+    .send-row textarea { -webkit-box-flex: 1; -ms-flex: 1; flex: 1; min-width: 0; }
+    .send-row .btn { width: auto; -ms-flex-negative: 0; flex-shrink: 0; -ms-flex-item-align: end; align-self: flex-end; }
 
-    /* TOOLBAR */
-    #reader-toolbar { display: flex; align-items: stretch; border: var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 16px; }
-    .toolbar-btn { flex: 1; background: var(--white); border: none; border-right: var(--border); font-family: var(--font-serif); font-size: 0.95rem; padding: 10px 8px; cursor: pointer; text-align: center; min-height: 44px; color: var(--black); }
+    /* === TOOLBAR === */
+    #reader-toolbar {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+      align-items: stretch;
+      border: 1px solid #111111;
+      border-radius: 0;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .toolbar-btn {
+      -webkit-box-flex: 1;
+      -ms-flex: 1;
+      flex: 1;
+      background: #ffffff;
+      border: none;
+      border-right: 1px solid #111111;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      padding: 10px 6px;
+      cursor: pointer;
+      text-align: center;
+      min-height: 44px;
+      color: #111111;
+    }
     .toolbar-btn:last-child { border-right: none; }
-    .toolbar-btn:active { background: var(--grey-light); }
-    .toolbar-btn.active { background: var(--black); color: var(--white); }
+    .toolbar-btn:active { background: #f5f5f5; }
+    .toolbar-btn.active { background: #111111; color: #ffffff; }
 
-    #font-panel { display: none; border: var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px; background: var(--grey-light); }
+    #font-panel {
+      display: none;
+      border: 1px solid #111111;
+      border-radius: 0;
+      padding: 16px;
+      margin-bottom: 16px;
+      background: #f5f5f5;
+    }
     #font-panel.open { display: block; }
-    .font-panel-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--grey-dark); margin-bottom: 12px; }
-    .font-size-options { display: flex; gap: 8px; }
-    .font-size-opt { flex: 1; border: var(--border); border-radius: var(--radius-sm); background: var(--white); font-family: var(--font-serif); cursor: pointer; padding: 10px 4px; text-align: center; min-height: 44px; color: var(--black); }
-    .font-size-opt.active { background: var(--black); color: var(--white); }
+    .font-panel-label {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
+      color: #777777; margin-bottom: 12px;
+    }
+    .font-size-options { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 8px; }
+    .font-size-opt {
+      -webkit-box-flex: 1; -ms-flex: 1; flex: 1;
+      border: 1px solid #111111;
+      border-radius: 0;
+      background: #ffffff;
+      font-family: Georgia, 'Times New Roman', serif;
+      cursor: pointer;
+      padding: 10px 4px;
+      text-align: center;
+      min-height: 44px;
+      color: #111111;
+    }
+    .font-size-opt.active { background: #111111; color: #ffffff; }
 
-    #highlights-panel { display: none; border: var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px; }
+    #highlights-panel {
+      display: none;
+      border: 1px solid #111111;
+      border-radius: 0;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
     #highlights-panel.open { display: block; }
 
-    #toolbar-msg { display: none; font-size: 0.85rem; color: var(--grey-dark); font-style: italic; padding: 4px 0; margin-bottom: 12px; }
-
-    #key-status-bar { display: none; font-size: 0.78rem; color: var(--grey-dark); border-top: var(--border); padding: 10px 0; margin-top: 24px; }
-
-    .manual-entry { border-top: var(--border); padding-top: 16px; margin-top: 8px; }
-
-    /* LIBRARY HALL */
-    .hall-body { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 40px 0 20px; }
-    .hall-greeting { font-size: 1rem; color: var(--grey-dark); margin-bottom: 6px; font-style: italic; }
-    .hall-title { font-size: 2rem; font-weight: normal; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.01em; }
-    .hall-description { font-size: 1rem; color: var(--grey-dark); line-height: 1.7; margin-bottom: 28px; max-width: 480px; }
-    .hall-doors { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-    .hall-door { border: var(--border); border-radius: var(--radius-sm); padding: 18px 20px; cursor: pointer; background: var(--white); font-family: var(--font-serif); text-align: left; min-height: 44px; -webkit-appearance: none; width: 100%; color: var(--black); }
-    .hall-door:active { background: var(--grey-light); }
-    .hall-door.primary { background: var(--black); color: var(--white); }
-    .hall-door.primary:active { background: #333; }
-    .hall-door.disabled { opacity: 0.45; cursor: default; pointer-events: none; }
-    .hall-door-title { font-size: 1rem; display: block; margin-bottom: 3px; }
-    .hall-door-sub { font-size: 0.8rem; opacity: 0.75; display: block; }
-    .hall-newhero { font-size: 0.85rem; color: var(--grey-dark); margin-bottom: 36px; }
-    .hall-newhero a { color: var(--grey-dark); text-decoration: underline; }
-    .hall-divider { border: none; border-top: var(--border); margin: 0 0 20px; }
-    .hall-footer { font-size: 0.78rem; color: var(--grey-dark); line-height: 1.6; padding-bottom: 20px; }
-    .hall-footer-links { display: flex; gap: 20px; margin-top: 8px; flex-wrap: wrap; }
-    .hall-footer-links a { color: var(--grey-dark); font-size: 0.78rem; text-decoration: underline; }
-
-    /* ABOUT SCREEN */
-    .about-section { margin-bottom: 28px; }
-    .about-section h2 { border-bottom: var(--border); padding-bottom: 8px; margin-bottom: 14px; }
-    .about-feature { border: var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 10px; }
-    .about-feature-title { font-size: 1rem; margin-bottom: 4px; }
-    .about-feature-desc  { font-size: 0.88rem; color: var(--grey-dark); margin: 0; }
-    /* YOUR SHELF */
-    .shelf-empty { font-size: 0.9rem; color: var(--grey-dark); font-style: italic; padding: 20px 0; }
-    .shelf-book {
-      border: var(--border); border-radius: var(--radius-sm);
-      padding: 16px; margin-bottom: 10px; cursor: pointer;
+    #toolbar-msg {
+      display: none;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.82rem; color: #777777; font-style: italic;
+      padding: 4px 0; margin-bottom: 12px;
     }
-    .shelf-book:active { background: var(--grey-light); }
-    .shelf-book-title  { font-size: 1.05rem; margin-bottom: 3px; }
-    .shelf-book-author { font-size: 0.88rem; color: var(--grey-dark); margin-bottom: 3px; }
-    .shelf-book-meta   { font-size: 0.78rem; color: var(--grey-dark); }
+    #key-status-bar {
+      display: none;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.75rem; color: #777777;
+      border-top: 1px solid #d0d0d0;
+      padding: 10px 0; margin-top: 24px;
+    }
 
-    .conv-item { border: var(--border); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 10px; }
+    .manual-entry { border-top: 1px solid #111111; padding-top: 16px; margin-top: 8px; }
+
+    /* === LIBRARY HALL === */
+    .hall-body { -webkit-box-flex: 1; -ms-flex: 1; flex: 1; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; padding: 48px 0 24px; }
+    .hall-greeting {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+      color: #777777; margin-bottom: 12px;
+    }
+    .hall-title { font-size: 2.1rem; font-weight: normal; line-height: 1.25; margin-bottom: 18px; letter-spacing: -0.02em; }
+    .hall-description {
+      font-size: 1rem; color: #555555; line-height: 1.75;
+      margin-bottom: 32px; max-width: 480px;
+    }
+    .hall-doors { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .hall-door {
+      border: 1px solid #111111;
+      border-radius: 0;
+      padding: 18px 20px;
+      cursor: pointer;
+      background: #ffffff;
+      font-family: Georgia, 'Times New Roman', serif;
+      text-align: left;
+      min-height: 48px;
+      -webkit-appearance: none;
+      width: 100%;
+      color: #111111;
+    }
+    .hall-door:active { background: #f5f5f5; }
+    .hall-door.primary { background: #111111; color: #ffffff; }
+    .hall-door.primary:active { background: #333333; }
+    .hall-door.disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+    .hall-door-title { font-size: 1rem; display: block; margin-bottom: 4px; }
+    .hall-door-sub {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.78rem; opacity: 0.75; display: block;
+    }
+    .hall-newhero {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.82rem; color: #777777; margin-bottom: 40px;
+    }
+    .hall-newhero a { color: #777777; text-decoration: underline; }
+    .hall-divider { border: none; border-top: 1px solid #d0d0d0; margin: 0 0 20px; }
+    .hall-footer {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.75rem; color: #999999; line-height: 1.6; padding-bottom: 20px;
+    }
+    .hall-footer-links { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 20px; margin-top: 8px; -ms-flex-wrap: wrap; flex-wrap: wrap; }
+    .hall-footer-links a {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      color: #777777; font-size: 0.75rem; text-decoration: underline;
+    }
+
+    /* === ABOUT === */
+    .about-section { margin-bottom: 28px; }
+    .about-section h2 { border-bottom: 1px solid #111111; padding-bottom: 8px; margin-bottom: 14px; }
+    .about-feature { border: 1px solid #d0d0d0; border-radius: 0; padding: 16px; margin-bottom: 10px; }
+    .about-feature-title { font-size: 1rem; margin-bottom: 4px; }
+    .about-feature-desc  { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #777777; margin: 0; }
+
+    /* === SHELF === */
+    .shelf-empty { font-size: 0.9rem; color: #777777; font-style: italic; padding: 20px 0; }
+    .shelf-book {
+      border: 1px solid #111111;
+      border-radius: 0;
+      padding: 16px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .shelf-book:active { background: #f5f5f5; }
+    .shelf-book-title  { font-size: 1.05rem; margin-bottom: 3px; }
+    .shelf-book-author {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.85rem; color: #777777; margin-bottom: 3px;
+    }
+    .shelf-book-meta {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.75rem; color: #777777;
+    }
+
+    .conv-item { border: 1px solid #111111; border-radius: 0; padding: 14px 16px; margin-bottom: 10px; }
     .conv-item-name    { font-size: 1rem; margin-bottom: 3px; }
-    .conv-item-meta    { font-size: 0.78rem; color: var(--grey-dark); margin-bottom: 10px; }
-    .conv-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-    .conv-btn { border: var(--border); border-radius: var(--radius-sm); background: var(--white); font-family: var(--font-serif); font-size: 0.85rem; padding: 8px 14px; cursor: pointer; color: var(--black); min-height: 44px; }
-    .conv-btn:active { background: var(--grey-light); }
-    .conv-btn.primary { background: var(--black); color: var(--white); }
-    .conv-btn.danger  { color: var(--grey-dark); }
-    /* BOOK COVERS */
-    .book-result { position: relative; }
+    .conv-item-meta    { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.75rem; color: #777777; margin-bottom: 10px; }
+    .conv-actions { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 8px; -ms-flex-wrap: wrap; flex-wrap: wrap; }
+    .conv-btn {
+      border: 1px solid #111111;
+      border-radius: 0;
+      background: #ffffff;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.82rem;
+      padding: 8px 14px;
+      cursor: pointer;
+      color: #111111;
+      min-height: 44px;
+    }
+    .conv-btn:active { background: #f5f5f5; }
+    .conv-btn.primary { background: #111111; color: #ffffff; }
+    .conv-btn.danger  { color: #777777; }
+
+    /* === BOOK COVERS === */
     .book-cover-thumb {
       width: 40px; height: 60px; object-fit: cover;
-      border: var(--border); flex-shrink: 0;
-      background: var(--grey-light);
+      border: 1px solid #111111;
+      -ms-flex-negative: 0;
+      flex-shrink: 0;
+      background: #f5f5f5;
     }
-    .book-result-inner { display: flex; gap: 12px; align-items: flex-start; }
-    .book-result-text  { flex: 1; min-width: 0; }
+    .book-result-inner { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 12px; -webkit-box-align: start; -ms-flex-align: start; align-items: flex-start; }
+    .book-result-text  { -webkit-box-flex: 1; -ms-flex: 1; flex: 1; min-width: 0; }
 
-    /* BUBBLE ACTIONS */
-    .bubble-actions {
-      display: flex; gap: 8px; margin-top: 6px; padding: 0 6px;
-    }
+    /* === BUBBLE ACTIONS === */
+    .bubble-actions { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 8px; margin-top: 6px; padding: 0 4px; }
     .bubble-action-btn {
       background: none; border: none; cursor: pointer;
-      font-family: var(--font-serif); font-size: 0.75rem;
-      color: var(--grey-dark); text-decoration: underline; padding: 0;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.72rem;
+      color: #777777; text-decoration: underline; padding: 0;
       min-height: 32px;
     }
     .bubble-action-btn:active { opacity: 0.5; }
-    .bubble-action-btn.saved  { color: var(--black); font-style: italic; }
+    .bubble-action-btn.saved  { color: #111111; font-style: italic; }
 
-    /* PASSAGES PANEL */
+    /* === PASSAGES PANEL === */
     #passages-panel {
-      display: none; border: var(--border); border-radius: var(--radius-sm);
-      padding: 16px; margin-bottom: 16px;
+      display: none;
+      border: 1px solid #111111;
+      border-radius: 0;
+      padding: 16px;
+      margin-bottom: 16px;
     }
     #passages-panel.open { display: block; }
     .passage-item {
-      border-left: 3px solid var(--grey-mid);
-      padding: 8px 12px; margin-bottom: 12px;
-      font-size: 0.9rem; line-height: 1.6;
+      border-left: 2px solid #d0d0d0;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+      line-height: 1.65;
     }
-    .passages-empty { font-size: 0.9rem; color: var(--grey-dark); font-style: italic; }
+    .passages-empty { font-size: 0.9rem; color: #777777; font-style: italic; }
 
-    /* T&C SCREEN */
+    /* === REPLY LENGTH PANEL === */
+    #length-panel {
+      display: none;
+      border: 1px solid #111111;
+      border-radius: 0;
+      padding: 16px;
+      margin-bottom: 16px;
+      background: #f5f5f5;
+    }
+    #length-panel.open { display: block; }
+    .length-options { display: -webkit-box; display: -ms-flexbox; display: flex; gap: 8px; }
+    .length-opt {
+      -webkit-box-flex: 1; -ms-flex: 1; flex: 1;
+      border: 1px solid #111111;
+      border-radius: 0;
+      background: #ffffff;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      cursor: pointer;
+      padding: 10px 4px;
+      text-align: center;
+      min-height: 44px;
+      color: #111111;
+      font-size: 0.85rem;
+    }
+    .length-opt.active { background: #111111; color: #ffffff; }
+
+    /* === T&C === */
     .tc-section { margin-bottom: 20px; }
 
-    /* AGE GATE */
-    .age-gate-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+    /* === AGE GATE === */
+    .age-gate-btns { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; gap: 10px; margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -266,8 +600,8 @@
 <div class="page">
 
   <header class="site-header">
-    <div class="site-name">Page Commons</div>
-    <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.10</div>
+    <div class="site-name" id="site-name-el">Page Commons</div>
+    <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.11</div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -319,7 +653,7 @@
 
     <div class="about-section">
       <h2>Your reading companion</h2>
-      <p style="font-size:0.9rem;color:var(--grey-dark);margin-bottom:14px">A private AI companion you can talk to about any book — like a well-read friend who has also read it.</p>
+      <p style="font-size:0.9rem;color:#777777;margin-bottom:14px">A private AI companion you can talk to about any book — like a well-read friend who has also read it.</p>
       <div class="about-feature">
         <div class="about-feature-title">Discusses books, not summaries</div>
         <p class="about-feature-desc">Your companion never recites plot points. It asks questions, offers opinions when asked, and follows your lead.</p>
@@ -339,8 +673,8 @@
     </div>
 
     <div class="about-section">
-      <h2>Book rooms <span style="font-size:0.78rem;color:var(--grey-dark);font-weight:normal">(coming soon)</span></h2>
-      <p style="font-size:0.9rem;color:var(--grey-dark);margin-bottom:14px">Each book has a room. Readers leave short notes — like margin notes in a second-hand book.</p>
+      <h2>Book rooms <span style="font-size:0.78rem;color:#777777;font-weight:normal">(coming soon)</span></h2>
+      <p style="font-size:0.9rem;color:#777777;margin-bottom:14px">Each book has a room. Readers leave short notes — like margin notes in a second-hand book.</p>
       <div class="about-feature">
         <div class="about-feature-title">No likes, no rankings</div>
         <p class="about-feature-desc">Notes are shown in reading order, not by popularity. There is no engagement metric to optimise for.</p>
@@ -353,7 +687,7 @@
 
     <div class="about-section">
       <h2>The philosophy</h2>
-      <p style="font-size:0.9rem;color:var(--grey-dark)">Page Commons is built for serious readers who feel underserved by Goodreads and generic AI chatbots. It is open source, privacy-first, and funded by readers — not advertisers.</p>
+      <p style="font-size:0.9rem;color:#777777">Page Commons is built for serious readers who feel underserved by Goodreads and generic AI chatbots. It is open source, privacy-first, and funded by readers — not advertisers.</p>
     </div>
 
     <button class="btn btn-primary" onclick="navigate('home')">Back to the library</button>
@@ -363,7 +697,10 @@
        KEY SCREEN
        ══════════════════════════════════ -->
   <section id="screen-key" class="screen">
-    <button class="back-link" onclick="navigate('home')">← Back</button>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:24px">
+      <button class="back-link" style="margin-bottom:0" onclick="navigate('home')">← Back</button>
+      <button class="back-link" style="margin-bottom:0" onclick="navigate('shelf')">Your shelf →</button>
+    </div>
     <h1>Your companion awaits</h1>
     <p>Choose your AI provider and enter your API key. Your key stays in your browser — it never touches our servers.</p>
 
@@ -396,7 +733,7 @@
     <div id="companion-name-section">
       <label for="companion-name-input">Give your companion a name <span style="font-weight:normal;text-transform:none;font-size:0.85rem">(optional)</span></label>
       <input type="text" id="companion-name-input" placeholder="e.g. Ellis, River, Claude…" autocomplete="off" />
-      <p style="font-size:0.78rem;color:var(--grey-dark);margin-top:6px">Leave blank to use "Companion". You can change this later in More.</p>
+      <p style="font-size:0.78rem;color:#777777;margin-top:6px">Leave blank to use "Companion". You can change this later in More.</p>
     </div>
 
     <hr />
@@ -430,6 +767,7 @@
       </div>
     </div>
 
+    <div class="note" style="margin-bottom:12px">Tip: paste an ISBN (e.g. 9780747532743) to find an exact edition.</div>
     <div id="search-status" class="status-msg" style="display:none"></div>
     <div id="search-results"></div>
 
@@ -469,6 +807,10 @@
         <span class="status-opt-label">Just finished</span>
         <span class="status-opt-sub">Ready to talk about all of it</span>
       </button>
+      <button class="status-opt" onclick="setReadingStatus('revisiting')">
+        <span class="status-opt-label">Read before, revisiting</span>
+        <span class="status-opt-sub">Coming back with fresh eyes</span>
+      </button>
     </div>
   </section>
 
@@ -482,7 +824,7 @@
       <button class="btn btn-primary" id="lang-native-btn" onclick="setLanguage('native')">Chat in the book's language</button>
       <button class="btn" onclick="setLanguage('english')">Chat in English</button>
     </div>
-    <p style="font-size:0.78rem;color:var(--grey-dark);margin-top:16px">You can change this later in More.</p>
+    <p style="font-size:0.78rem;color:#777777;margin-top:16px">You can change this later in More.</p>
   </section>
 
   <!-- ══════════════════════════════════
@@ -521,7 +863,7 @@
         <button class="toolbar-btn" id="passages-toolbar-btn" style="display:none" onclick="togglePassagesPanel()">Passages</button>
         <button class="toolbar-btn" onclick="navigate('shelf')">Shelf</button>
         <button class="toolbar-btn" onclick="endConversation()">Done</button>
-        <button class="toolbar-btn" onclick="showOtherOptions()">More</button>
+        <button class="toolbar-btn" id="length-toolbar-btn" onclick="toggleLengthPanel()">More</button>
       </div>
 
       <div id="toolbar-msg"></div>
@@ -537,13 +879,23 @@
       </div>
 
       <div id="highlights-panel">
-        <div id="highlights-count" style="font-size:0.85rem;color:var(--grey-dark);margin-bottom:10px"></div>
+        <div id="highlights-count" style="font-size:0.85rem;color:#777777;margin-bottom:10px"></div>
         <div id="highlights-list"  style="font-size:0.9rem;line-height:1.6"></div>
+      </div>
+
+      <div id="length-panel">
+        <div class="font-panel-label">Reply length</div>
+        <div class="length-options">
+          <button class="length-opt active" data-length="short"    onclick="setReplyLength('short')">Short</button>
+          <button class="length-opt"        data-length="medium"   onclick="setReplyLength('medium')">Medium</button>
+          <button class="length-opt"        data-length="detailed" onclick="setReplyLength('detailed')">Detailed</button>
+        </div>
+        <p style="font-size:0.78rem;color:#777777;margin-top:10px;margin-bottom:0">Short keeps replies to a few sentences. Detailed allows longer responses.</p>
       </div>
 
       <div id="passages-panel">
         <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
-          <span style="font-size:0.85rem;color:var(--grey-dark)" id="passages-count">No passages saved yet</span>
+          <span style="font-size:0.85rem;color:#777777" id="passages-count">No passages saved yet</span>
           <button class="bubble-action-btn" onclick="copyAllPassages()" style="font-size:0.85rem">Copy all</button>
         </div>
         <div id="passages-list"></div>
@@ -552,7 +904,7 @@
 
     <div id="key-status-bar">
       API key loaded &nbsp;·&nbsp;
-      <button onclick="clearKey()" style="background:none;border:none;cursor:pointer;text-decoration:underline;font-family:var(--font-serif);font-size:0.78rem;color:var(--grey-dark)">Remove</button>
+      <button onclick="clearKey()" style="background:none;border:none;cursor:pointer;text-decoration:underline;font-family:Georgia, 'Times New Roman', serif;font-size:0.78rem;color:#777777">Remove</button>
     </div>
 
   </section>
@@ -577,7 +929,7 @@
       </div>
     </div>
     <button class="btn btn-primary" onclick="acceptTC()">I agree — take me in</button>
-    <p style="font-size:0.78rem;color:var(--grey-dark);margin-top:12px;text-align:center">Your agreement is stored locally in your browser only.</p>
+    <p style="font-size:0.78rem;color:#777777;margin-top:12px;text-align:center">Your agreement is stored locally in your browser only.</p>
   </section>
 
   <!-- AGE GATE -->
@@ -585,7 +937,7 @@
     <h1>Just a moment</h1>
     <p id="age-gate-book-name" style="font-style:italic;margin-bottom:8px"></p>
     <p>This book has been flagged as containing adult content.</p>
-    <p style="font-size:0.88rem;color:var(--grey-dark)">We don't store this confirmation — it is only used at this moment of adding the book.</p>
+    <p style="font-size:0.88rem;color:#777777">We don't store this confirmation — it is only used at this moment of adding the book.</p>
     <div class="age-gate-btns">
       <button class="btn btn-primary" onclick="confirmAgeGate()">I'm 18 or over — continue</button>
       <button class="btn" onclick="navigate('search')">Take me back</button>
@@ -596,7 +948,7 @@
   <section id="screen-shelf" class="screen">
     <button class="back-link" onclick="navigate('home')">← Back</button>
     <h1>Your shelf</h1>
-    <p style="font-size:0.88rem;color:var(--grey-dark);margin-bottom:20px">Books you have discussed with your companion.</p>
+    <p style="font-size:0.88rem;color:#777777;margin-bottom:20px">Books you have discussed with your companion.</p>
     <div id="shelf-list"></div>
   </section>
 
@@ -604,8 +956,8 @@
   <section id="screen-book-shelf" class="screen">
     <button class="back-link" onclick="navigate('shelf')">← Your shelf</button>
     <h1 id="book-shelf-title">—</h1>
-    <p id="book-shelf-author" style="font-size:0.88rem;color:var(--grey-dark);margin-bottom:4px"></p>
-    <p id="book-shelf-status" style="font-size:0.78rem;color:var(--grey-dark);font-style:italic;margin-bottom:20px"></p>
+    <p id="book-shelf-author" style="font-size:0.88rem;color:#777777;margin-bottom:4px"></p>
+    <p id="book-shelf-status" style="font-size:0.78rem;color:#777777;font-style:italic;margin-bottom:20px"></p>
     <div style="display:flex;gap:10px;margin-bottom:24px">
       <button class="btn btn-primary btn-small" onclick="startNewConversation()">New conversation</button>
       <button class="btn btn-small" onclick="updateBookStatus()">Update status</button>
@@ -616,10 +968,34 @@
 </div>
 
 <script>
-window.onerror = function(msg, src, line, col, err) {
-  document.body.innerHTML += '<p style="color:red;padding:20px;font-family:monospace">JS ERROR: ' + msg + ' (line ' + line + ')</p>';
-  return false;
-};
+
+// ─── POLYFILLS for older WebKit (Kobo/Kindle) ───────────────────────────────
+if (!Array.prototype.includes) {
+  Array.prototype.includes = function(val) {
+    for (var i = 0; i < this.length; i++) { if (this[i] === val) return true; }
+    return false;
+  };
+}
+if (!String.prototype.includes) {
+  String.prototype.includes = function(val) { return this.indexOf(val) !== -1; };
+}
+if (!String.prototype.startsWith) {
+  String.prototype.startsWith = function(val) { return this.indexOf(val) === 0; };
+}
+if (!String.prototype.endsWith) {
+  String.prototype.endsWith = function(val) { return this.slice(-val.length) === val; };
+}
+if (!Object.assign) {
+  Object.assign = function(t) {
+    for (var i = 1; i < arguments.length; i++) {
+      var s = arguments[i];
+      for (var k in s) { if (Object.prototype.hasOwnProperty.call(s, k)) t[k] = s[k]; }
+    }
+    return t;
+  };
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 // ═══════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════
@@ -638,7 +1014,8 @@ const STATE = {
   currentConvId:   null,
   currentConvName: null,
   pendingBook:     null,   // held during age gate
-  passages:        [],     // saved passages for current book // cached per language
+  passages:        [],     // saved passages for current book
+  replyLength:     'medium', // 'short' | 'medium' | 'detailed'
 };
 
 const STATIC_PROMPTS = [
@@ -665,7 +1042,7 @@ function showScreen(id) {
   const target = SCREENS.includes(id) ? id : 'home';
   SCREENS.forEach(s => {
     const el = document.getElementById('screen-'+s);
-    if (el) el.classList.toggle('active', s === target);
+    if (el) { if (s === target) { el.classList.add('active'); } else { el.classList.remove('active'); } }
   });
   window.scrollTo(0,0);
 }
@@ -683,6 +1060,7 @@ function handleRoute() {
   const target = SCREENS.includes(hash) ? hash : 'home';
   showScreen(target);
   if (target === 'shelf') renderShelf();
+  updateTitleLink();
 }
 
 function navigate(view) {
@@ -695,6 +1073,26 @@ function navigate(view) {
 }
 
 window.addEventListener('hashchange', handleRoute);
+
+
+// ═══════════════════════════════════════════════════
+//  CLICKABLE TITLE
+// ═══════════════════════════════════════════════════
+// Update title clickability based on current screen
+function updateTitleLink() {
+  const el = document.getElementById('site-name-el');
+  if (!el) return;
+  const hash = window.location.hash.replace('#','') || 'home';
+  const noClick = ['home','key','tc'];
+  if (noClick.includes(hash)) {
+    el.style.cursor = 'default';
+    el.onclick = null;
+  } else {
+    el.style.cursor = 'pointer';
+    el.title = 'Back to library hall';
+    el.onclick = () => navigate('home');
+  }
+}
 
 // ═══════════════════════════════════════════════════
 //  OFFLINE + MESSAGE QUEUE
@@ -774,7 +1172,7 @@ const PROVIDER_CONFIG = {
 function selectProvider(prov) { STATE.provider = prov; localStorage.setItem('pc_provider', prov); applyProviderUI(prov); }
 
 function applyProviderUI(prov) {
-  ['anthropic','gemini','groq'].forEach(p => document.getElementById('prov-'+p).classList.toggle('selected', p === prov));
+  ['anthropic','gemini','groq'].forEach(p => (p === prov ? document.getElementById('prov-'+p).classList.add('selected') : document.getElementById('prov-'+p).classList.remove('selected')));
   const cfg = PROVIDER_CONFIG[prov];
   document.getElementById('api-key-input').placeholder = cfg.placeholder;
   document.getElementById('key-hint').textContent = cfg.hint;
@@ -849,42 +1247,95 @@ async function interpretSearchQuery(q) {
   return { title: q, author: '' };
 }
 
+// ═══════════════════════════════════════════════════
+//  RENDER BOOK BATCH (search results helper)
+// ═══════════════════════════════════════════════════
+function renderBookBatch(batch, container, insertBefore) {
+  const anchor = insertBefore || container.querySelector('.manual-entry') || null;
+  batch.forEach(book => {
+    const el = document.createElement('div'); el.className = 'book-result';
+    const th = book.thumb
+      ? '<img class="book-cover-thumb" src="' + esc(book.thumb) + '" alt="" loading="lazy">'
+      : '';
+    el.innerHTML = '<div class="book-result-inner">' + th +
+      '<div class="book-result-text">' +
+      '<div class="book-result-title">'  + esc(book.title)  + '</div>' +
+      '<div class="book-result-author">' + esc(book.author) + '</div>' +
+      '<div class="book-result-meta">'   + (book.year ? book.year + ' · ' : '') + esc(book.source || 'Open Library') + '</div>' +
+      '</div></div>';
+    el.addEventListener('click', () => selectBookWithAgeCheck(book));
+    if (anchor) container.insertBefore(el, anchor);
+    else container.appendChild(el);
+  });
+}
+
+
 async function searchBooks() {
   const rawTitle  = document.getElementById('book-search-title').value.trim();
   const rawAuthor = document.getElementById('book-search-author').value.trim();
   const raw = rawTitle || rawAuthor;
   if (!raw) return;
+
   const statusEl  = document.getElementById('search-status');
   const resultsEl = document.getElementById('search-results');
   resultsEl.innerHTML = '';
 
+  // ISBN detection
+  const isbnClean = raw.replace(/[-\s]/g, '');
+  if (/^(97[89])?\d{9}[\dXx]$/.test(isbnClean)) {
+    statusEl.textContent = 'Looking up ISBN…'; statusEl.className = 'status-msg'; statusEl.style.display = 'block';
+    try {
+      const isbnUrl = 'https://openlibrary.org/api/books?bibkeys=ISBN:' + isbnClean + '&format=json&jscmd=data';
+      const res  = await fetch(isbnUrl);
+      const data = await res.json();
+      const key  = 'ISBN:' + isbnClean;
+      if (data[key]) {
+        const b = data[key];
+        const book = {
+          title:  b.title || 'Unknown title',
+          author: (b.authors || [{name:'Unknown author'}])[0].name,
+          year:   b.publish_date ? b.publish_date.slice(-4) : '',
+          key: '', source: 'Open Library (ISBN)',
+          thumb: b.cover ? (b.cover.small || '') : '',
+        };
+        statusEl.style.display = 'none';
+        const el = document.createElement('div'); el.className = 'book-result';
+        const th = book.thumb ? '<img class="book-cover-thumb" src="' + esc(book.thumb) + '" alt="" loading="lazy">' : '';
+        el.innerHTML = '<div class="book-result-inner">' + th + '<div class="book-result-text"><div class="book-result-title">' + esc(book.title) + '</div><div class="book-result-author">' + esc(book.author) + '</div><div class="book-result-meta">' + (book.year||'') + (book.year?' · ':'') + esc(book.source) + '</div></div></div>';
+        el.addEventListener('click', () => selectBookWithAgeCheck(book));
+        resultsEl.appendChild(el);
+      } else {
+        statusEl.textContent = 'ISBN not found — try searching by title.';
+        statusEl.style.display = 'block';
+        renderManualEntry(raw, resultsEl);
+      }
+    } catch(e) {
+      statusEl.textContent = 'ISBN lookup failed — check your connection.';
+      statusEl.className = 'status-msg error'; statusEl.style.display = 'block';
+    }
+    return;
+  }
+
+  // Build search terms
   let searchTitle = rawTitle, searchAuthor = rawAuthor;
   statusEl.textContent = 'Searching…'; statusEl.className = 'status-msg'; statusEl.style.display = 'block';
 
-  // Only apply NL interpretation if user filled title field with a descriptive phrase
-  // and left author blank (so we don't mangle explicit author entries)
+  // AI natural language interpretation (title field only, no author given)
   const isNL = !rawAuthor && looksLikeNaturalLanguage(rawTitle);
   if (isNL && STATE.apiKey) {
     statusEl.textContent = 'Understanding your search…';
     const interp = await interpretSearchQuery(rawTitle);
     searchTitle = interp.title;
     searchAuthor = interp.author || rawAuthor;
-    statusEl.textContent = `Searching for "${searchTitle}"${searchAuthor ? ' by ' + searchAuthor : ''}…`;
+    statusEl.textContent = 'Searching for "' + searchTitle + '"' + (searchAuthor ? ' by ' + searchAuthor : '') + '…';
   }
 
-  // Build queries with field qualifiers
-  // Google Books supports intitle: and inauthor: operators
   const gbParts = [];
   if (searchTitle)  gbParts.push('intitle:' + searchTitle);
   if (searchAuthor) gbParts.push('inauthor:' + searchAuthor);
   const gbQuery = gbParts.join('+');
-
-  // Open Library uses plain combined query (no field operators)
   const olQuery = [searchTitle, searchAuthor].filter(Boolean).join(' ');
-  const q = olQuery;
-
-  // Non-Latin script detection — skip Open Library, go straight to Google Books
-  const hasNonLatin = /[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0600-\u06ff\u0400-\u04ff\u0900-\u097f\u0e00-\u0e7f]/.test(q);
+  const hasNonLatin = /[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0600-\u06ff\u0400-\u04ff\u0900-\u097f\u0e00-\u0e7f]/.test(raw);
 
   try {
     let books = [];
@@ -893,7 +1344,17 @@ async function searchBooks() {
       books = await fetchGoogleBooks(gbQuery);
     } else {
       books = await fetchOpenLibrary(olQuery);
-      if (!books.length) { statusEl.textContent = 'Trying Google Books…'; statusEl.style.display = 'block'; books = await fetchGoogleBooks(gbQuery); }
+      if (!books.length && searchTitle && searchAuthor) {
+        statusEl.textContent = 'Trying title only…'; statusEl.style.display = 'block';
+        books = await fetchOpenLibrary(searchTitle);
+      }
+      if (!books.length) {
+        statusEl.textContent = 'Trying Google Books…'; statusEl.style.display = 'block';
+        books = await fetchGoogleBooks(gbQuery);
+      }
+      if (!books.length && searchTitle && searchAuthor) {
+        books = await fetchGoogleBooks('intitle:' + searchTitle);
+      }
     }
 
     statusEl.style.display = 'none';
@@ -901,61 +1362,21 @@ async function searchBooks() {
     if (!books.length) {
       statusEl.textContent = 'No results found — try different keywords or enter manually below.';
       statusEl.style.display = 'block';
-      // Show more button if there are more than 6 results
-    if (books.length > 6) {
-      const moreBtn = document.createElement('button');
-      moreBtn.className = 'btn';
-      moreBtn.textContent = 'Show more results';
-      moreBtn.style.marginBottom = '10px';
-      const _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
-      moreBtn.onclick = async () => {
-        moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
-        try {
-          const extra = books.slice(6);
-          extra.forEach(book => {
-            const el = document.createElement('div'); el.className = 'book-result';
-            const thumbHtml = book.thumb ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
-            el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
-            el.addEventListener('click', () => selectBookWithAgeCheck(book));
-            resultsEl.insertBefore(el, moreBtn);
-          });
-        } catch(e) {}
-        moreBtn.remove();
-      };
-      resultsEl.appendChild(moreBtn);
+      renderManualEntry(searchTitle, resultsEl);
+      return;
     }
 
     // Author-only refine prompt
     if (!searchTitle && searchAuthor) {
       const refineEl = document.createElement('p');
-      refineEl.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);margin-bottom:12px;font-style:italic';
-      refineEl.textContent = `Showing books by "${searchAuthor}". Add a title above to narrow down.`;
-      resultsEl.insertBefore(refineEl, resultsEl.firstChild);
-    }
-
-    renderManualEntry(searchTitle, resultsEl); return;
-    }
-
-    // Render a batch of book results into container
-    function renderBookBatch(batch, container, insertBefore) {
-      // always insert before manual entry if present
-      const manualEntry = container.querySelector('.manual-entry');
-      const anchor = insertBefore || manualEntry || null;
-      batch.forEach(book => {
-        const el = document.createElement('div'); el.className = 'book-result';
-        const thumbHtml = book.thumb
-          ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">`
-          : '';
-        el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
-        el.addEventListener('click', () => selectBookWithAgeCheck(book));
-        if (anchor) container.insertBefore(el, anchor);
-        else container.appendChild(el);
-      });
+      refineEl.style.cssText = 'font-size:0.85rem;color:#777777;margin-bottom:12px;font-style:italic';
+      refineEl.textContent = 'Showing books by "' + searchAuthor + '". Add a title above to narrow down.';
+      resultsEl.appendChild(refineEl);
     }
 
     renderBookBatch(books.slice(0, 6), resultsEl, null);
 
-    // Show more — paginated, always fetches fresh next page
+    // Pagination state
     let _page = 1;
     const _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
     const _seen = new Set(books.map(b => b.title.toLowerCase() + '||' + b.author.toLowerCase()));
@@ -971,18 +1392,15 @@ async function searchBooks() {
         try {
           let more = [];
           if (_hasNonLatin) {
-            const startIndex = (_page - 1) * 6;
-            more = await fetchGoogleBooks(_gbQuery, 6, startIndex);
+            more = await fetchGoogleBooks(_gbQuery, 6, (_page-1)*6);
           } else {
-            more = await fetchOpenLibrary(_olQuery, _page * 6 + 6);
-            more = more.filter(b => !_seen.has(b.title.toLowerCase() + '||' + b.author.toLowerCase()));
+            more = await fetchOpenLibrary(_olQuery, _page*6+6);
           }
           const fresh = more.filter(b => {
             const k = b.title.toLowerCase() + '||' + b.author.toLowerCase();
             if (_seen.has(k)) return false;
             _seen.add(k); return true;
           });
-          // remove btn, insert new results before manual entry
           const manualEntry = resultsEl.querySelector('.manual-entry');
           moreBtn.remove();
           if (fresh.length) {
@@ -990,66 +1408,24 @@ async function searchBooks() {
             if (fresh.length >= 4) addShowMoreBtn();
           } else {
             const noMore = document.createElement('p');
-            noMore.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);font-style:italic;margin-bottom:12px';
+            noMore.style.cssText = 'font-size:0.85rem;color:#777777;font-style:italic;margin-bottom:12px';
             noMore.textContent = 'No more results found.';
             if (manualEntry) resultsEl.insertBefore(noMore, manualEntry);
             else resultsEl.appendChild(noMore);
           }
         } catch(e) { moreBtn.textContent = 'Show more results'; moreBtn.disabled = false; }
       };
-      // Insert show more button before manual entry so it stays above it
       const manualEntry = resultsEl.querySelector('.manual-entry');
       if (manualEntry) resultsEl.insertBefore(moreBtn, manualEntry);
       else resultsEl.appendChild(moreBtn);
     }
 
-    // Show more button if initial results filled a full page
     if (books.length >= 6) addShowMoreBtn();
-
-    // Author-only refine prompt
-    if (!searchTitle && searchAuthor) {
-      const refineEl = document.createElement('p');
-      refineEl.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);margin-bottom:12px;font-style:italic';
-      refineEl.textContent = `Showing books by "${searchAuthor}". Add a title above to narrow down.`;
-      resultsEl.insertBefore(refineEl, resultsEl.firstChild);
-    }
-
     renderManualEntry(searchTitle, resultsEl);
+
   } catch(e) {
     statusEl.textContent = 'Search failed — check your connection and try again.';
     statusEl.className = 'status-msg error'; statusEl.style.display = 'block';
-    // Show more button if there are more than 6 results
-    if (books.length > 6) {
-      const moreBtn = document.createElement('button');
-      moreBtn.className = 'btn';
-      moreBtn.textContent = 'Show more results';
-      moreBtn.style.marginBottom = '10px';
-      const _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
-      moreBtn.onclick = async () => {
-        moreBtn.textContent = 'Loading…'; moreBtn.disabled = true;
-        try {
-          const extra = books.slice(6);
-          extra.forEach(book => {
-            const el = document.createElement('div'); el.className = 'book-result';
-            const thumbHtml = book.thumb ? `<img class="book-cover-thumb" src="${esc(book.thumb)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
-            el.innerHTML = `<div class="book-result-inner">${thumbHtml}<div class="book-result-text"><div class="book-result-title">${esc(book.title)}</div><div class="book-result-author">${esc(book.author)}</div><div class="book-result-meta">${book.year ? book.year+' · ':''} ${esc(book.source||'Open Library')}</div></div></div>`;
-            el.addEventListener('click', () => selectBookWithAgeCheck(book));
-            resultsEl.insertBefore(el, moreBtn);
-          });
-        } catch(e) {}
-        moreBtn.remove();
-      };
-      resultsEl.appendChild(moreBtn);
-    }
-
-    // Author-only refine prompt
-    if (!searchTitle && searchAuthor) {
-      const refineEl = document.createElement('p');
-      refineEl.style.cssText = 'font-size:0.85rem;color:var(--grey-dark);margin-bottom:12px;font-style:italic';
-      refineEl.textContent = `Showing books by "${searchAuthor}". Add a title above to narrow down.`;
-      resultsEl.insertBefore(refineEl, resultsEl.firstChild);
-    }
-
     renderManualEntry(searchTitle, resultsEl);
   }
 }
@@ -1093,7 +1469,7 @@ async function fetchGoogleBooks(q, maxResults=8, startIndex=0) {
 function renderManualEntry(prefill, container) {
   const ex = container.querySelector('.manual-entry'); if (ex) ex.remove();
   const wrap = document.createElement('div'); wrap.className = 'manual-entry';
-  wrap.innerHTML = `<p style="font-size:0.85rem;color:var(--grey-dark);margin-bottom:14px">Not seeing your book? Enter it manually:</p>
+  wrap.innerHTML = `<p style="font-size:0.85rem;color:#777777;margin-bottom:14px">Not seeing your book? Enter it manually:</p>
     <div class="field"><label>Title</label><input type="text" id="manual-title" /></div>
     <div class="field"><label>Author <span style="font-weight:normal;text-transform:none">(optional)</span></label><input type="text" id="manual-author" placeholder="Author name" /></div>
     <button class="btn btn-primary" onclick="selectManualBook()">Start companion</button>`;
@@ -1125,7 +1501,7 @@ function isAdultBook(book) {
 
 let _pendingBookForAgeGate = null;
 
-function selectBookWithAgeCheck(book) {
+async function selectBookWithAgeCheck(book) {
   if (isAdultBook(book)) {
     _pendingBookForAgeGate = book;
     document.getElementById('age-gate-book-name').textContent = '"' + book.title + '"';
@@ -1135,17 +1511,82 @@ function selectBookWithAgeCheck(book) {
   }
 }
 
-function confirmAgeGate() {
+async function confirmAgeGate() {
   if (_pendingBookForAgeGate) {
-    selectBook(_pendingBookForAgeGate);
+    await selectBook(_pendingBookForAgeGate);
     _pendingBookForAgeGate = null;
   }
+}
+
+
+// ═══════════════════════════════════════════════════
+//  STATUS SCREEN TRANSLATION
+// ═══════════════════════════════════════════════════
+const STATUS_OPTIONS_EN = [
+  { value: 'considering', label: 'Thinking about reading it',  sub: "Help me decide if it's for me" },
+  { value: 'started',     label: 'Just started',               sub: "I'm in the early pages" },
+  { value: 'midway',      label: 'Halfway through',            sub: 'Getting into it' },
+  { value: 'finished',    label: 'Just finished',              sub: 'Ready to talk about all of it' },
+  { value: 'revisiting',  label: 'Read before, revisiting',   sub: 'Coming back with fresh eyes' },
+];
+
+async function renderStatusScreen(book) {
+  const lang = STATE.detectedLang;
+  const chatLang = STATE.chatLanguage;
+  let options = STATUS_OPTIONS_EN;
+
+  // Translate if native language chosen and language detected
+  if (chatLang === 'native' && lang && STATE.apiKey) {
+    const cacheKey = 'pc_status_opts_' + lang.toLowerCase();
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try { options = JSON.parse(cached); } catch(e) {}
+    } else {
+      try {
+        const prompt = `Translate these 5 reading status options into ${lang}. Return ONLY a JSON array of 5 objects with "label" and "sub" keys, in the same order. No other text.\n${JSON.stringify(STATUS_OPTIONS_EN.map(o => ({label:o.label, sub:o.sub})))}`;
+        let text = '';
+        if (STATE.provider === 'anthropic') {
+          const res = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':STATE.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:300, messages:[{role:'user',content:prompt}] }) });
+          text = (await res.json()).content?.[0]?.text || '';
+        } else if (STATE.provider === 'gemini') {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STATE.apiKey}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) });
+          text = (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '';
+        } else if (STATE.provider === 'groq') {
+          const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${STATE.apiKey}`}, body: JSON.stringify({ model:'llama-3.3-70b-versatile', max_tokens:300, messages:[{role:'user',content:prompt}] }) });
+          text = (await res.json()).choices?.[0]?.message?.content || '';
+        }
+        const translated = JSON.parse(text.replace(/```json|```/g,'').trim());
+        if (Array.isArray(translated) && translated.length === 5) {
+          options = STATUS_OPTIONS_EN.map((o, i) => ({ ...o, label: translated[i].label || o.label, sub: translated[i].sub || o.sub }));
+          localStorage.setItem(cacheKey, JSON.stringify(options));
+        }
+      } catch(e) { /* fall back to English */ }
+    }
+  }
+
+  // Render buttons dynamically
+  const container = document.querySelector('#screen-status .status-options');
+  if (!container) return;
+  container.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'status-opt';
+    btn.onclick = () => setReadingStatus(opt.value);
+    btn.innerHTML = `<span class="status-opt-label">${esc(opt.label)}</span><span class="status-opt-sub">${esc(opt.sub)}</span>`;
+    container.appendChild(btn);
+  });
+
+  // Update heading
+  const h1 = document.getElementById('status-book-title');
+  if (h1) h1.textContent = lang && chatLang === 'native'
+    ? book.title  // just show title, keep heading neutral
+    : 'Where are you with "' + book.title + '"?';
 }
 
 // ═══════════════════════════════════════════════════
 //  BOOK SELECTION → STATUS → LANGUAGE → COMPANION
 // ═══════════════════════════════════════════════════
-function selectBook(book) {
+async function selectBook(book) {
   STATE.book = book;
   STATE.messages = [];
 
@@ -1165,18 +1606,18 @@ function selectBook(book) {
     STATE.detectedLang  = detectedLang;
     // restore thinking phrases if native language was chosen
     if (STATE.chatLanguage === 'native' && detectedLang) {
-      generateThinkingPhrases(detectedLang);
+      await generateThinkingPhrases(detectedLang);
     }
     launchCompanion(book);
   } else {
-    // new book — ask reading status first
-    document.getElementById('status-book-title').textContent =
-      'Where are you with "' + book.title + '"?';
+    // new book — set detectedLang BEFORE renderStatusScreen so translation works
+    STATE.detectedLang = detectedLang;
+    renderStatusScreen(book);
     navigate('status');
   }
 }
 
-function setReadingStatus(status) {
+async function setReadingStatus(status) {
   STATE.readingStatus = status;
   localStorage.setItem('pc_status_' + bookKey(STATE.book), status);
 
@@ -1199,13 +1640,16 @@ function setReadingStatus(status) {
   }
 }
 
-function setLanguage(choice) {
+async function setLanguage(choice) {
   STATE.chatLanguage = choice;
   localStorage.setItem('pc_lang_' + bookKey(STATE.book), choice);
-  // if native, generate thinking phrases in that language
+  // await thinking phrases before launching so they're ready for first message
   if (choice === 'native' && STATE.detectedLang) {
-    generateThinkingPhrases(STATE.detectedLang);
+    await generateThinkingPhrases(STATE.detectedLang);
   }
+  // Clear cached ice breakers so they regenerate in the chosen language
+  const cacheKey = 'pc_icebreakers_' + bookKey(STATE.book) + '_' + (STATE.readingStatus||'');
+  localStorage.removeItem(cacheKey);
   launchCompanion(STATE.book);
 }
 
@@ -1363,7 +1807,7 @@ function renderHighlightsPanel() {
   if (relevant.length) {
     btn.style.display = 'block'; btn.textContent = `Highlights (${relevant.length})`;
     document.getElementById('highlights-count').textContent = `${relevant.length} highlight${relevant.length!==1?'s':''} from your Kindle`;
-    document.getElementById('highlights-list').innerHTML = relevant.map(h=>`<p style="border-left:3px solid var(--grey-mid);padding-left:10px;margin-bottom:12px;font-style:italic">"${esc(h.text)}"</p>`).join('');
+    document.getElementById('highlights-list').innerHTML = relevant.map(h=>`<p style="border-left:3px solid #d0d0d0;padding-left:10px;margin-bottom:12px;font-style:italic">"${esc(h.text)}"</p>`).join('');
   } else { btn.style.display = 'none'; }
 }
 
@@ -1372,7 +1816,7 @@ function toggleHighlights() {
   panel.classList.toggle('open');
   document.getElementById('font-panel').classList.remove('open');
   document.getElementById('font-toolbar-btn').classList.remove('active');
-  btn.classList.toggle('active', panel.classList.contains('open'));
+  (panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active'));
 }
 
 // ═══════════════════════════════════════════════════
@@ -1580,7 +2024,10 @@ function appendBubble(role, text) {
 
     const saveBtn = document.createElement('button');
     saveBtn.className = 'bubble-action-btn';
-    saveBtn.textContent = 'Save passage';
+    // Check if already saved
+    const alreadySaved = getPassages().includes(text);
+    saveBtn.textContent = alreadySaved ? 'Saved ✓' : 'Save passage';
+    if (alreadySaved) saveBtn.classList.add('saved');
     saveBtn.onclick = () => {
       savePassage(text, saveBtn);
     };
@@ -1627,6 +2074,7 @@ function buildSystemPrompt() {
     started:     'The reader has just started this book. Be curious about their first impressions. No spoilers beyond the early pages.',
     midway:      'The reader is halfway through. Engage with what they\'ve experienced so far. Check before discussing anything from the second half.',
     finished:    'The reader has just finished this book. Full discussion is welcome — no spoiler restrictions.',
+    revisiting:  'The reader has read this book before and is revisiting it. They may have fresh perspectives or notice things they missed first time. Treat them as someone who knows the book well.',
   };
 
   const statusNote = statusInstructions[STATE.readingStatus] || 'Be spoiler-aware — ask the reader how far they\'ve got before revealing plot details.';
@@ -1646,6 +2094,10 @@ ${statusNote}
 If the conversation drifts away from the book, find a gentle bridge back — connect what the reader said to something in the book rather than refusing or redirecting bluntly. You are a reading companion, not a general assistant.
 
 If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.
+
+${STATE.replyLength === 'short' ? 'Keep your response very brief — 2 to 3 short sentences maximum.' : STATE.replyLength === 'detailed' ? 'You may give fuller, more detailed responses when the topic warrants it.' : 'Keep responses concise — 2 to 4 short paragraphs maximum.'}
+
+Be honest about the limits of your knowledge. If you are not confident about specific details of this book — plot points, character names, themes — say so openly and invite the reader to share what they know. Never confabulate or pretend to know something you are uncertain about. A good reading companion says "I'm not sure about that — what did you make of it?" rather than guessing.
 
 Respond in plain prose only. No bullet points. No headers. No lists of any kind.
 
@@ -1689,12 +2141,12 @@ function toggleFontPanel() {
   panel.classList.toggle('open');
   document.getElementById('highlights-panel').classList.remove('open');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
-  btn.classList.toggle('active', panel.classList.contains('open'));
+  (panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active'));
 }
 
 function applyFontSize(size) {
-  document.documentElement.style.setProperty('--font-size', size+'px');
-  document.querySelectorAll('.font-size-opt').forEach(b=>b.classList.toggle('active', parseInt(b.dataset.size)===size));
+  document.documentElement.style.fontSize = size + 'px';
+  document.querySelectorAll('.font-size-opt').forEach(function(b){ parseInt(b.dataset.size)===size ? b.classList.add('active') : b.classList.remove('active'); });
 }
 
 function setFontSize(size) { applyFontSize(size); localStorage.setItem('pc_font_size', size); }
@@ -1848,7 +2300,7 @@ function renderConvList(book) {
   });
 }
 
-function continueConversation(convId) {
+async function continueConversation(convId) {
   const convs = getConvs(STATE.book);
   const conv  = convs.find(c => c.id === convId);
   if (!conv) return;
@@ -1862,7 +2314,7 @@ function continueConversation(convId) {
   STATE.currentConvName = conv.name;
 
   if (STATE.chatLanguage === 'native' && STATE.detectedLang) {
-    generateThinkingPhrases(STATE.detectedLang);
+    await generateThinkingPhrases(STATE.detectedLang);
   }
 
   document.getElementById('book-title-display').textContent  = STATE.book.title;
@@ -1901,7 +2353,7 @@ function deleteConversation(convId) {
   renderConvList(STATE.book);
 }
 
-function startNewConversation() {
+async function startNewConversation() {
   const bk = bookKey(STATE.book);
   STATE.readingStatus  = localStorage.getItem('pc_status_' + bk) || null;
   STATE.chatLanguage   = localStorage.getItem('pc_lang_' + bk) || 'english';
@@ -1911,15 +2363,14 @@ function startNewConversation() {
   STATE.currentConvName = null;
 
   if (STATE.chatLanguage === 'native' && STATE.detectedLang) {
-    generateThinkingPhrases(STATE.detectedLang);
+    await generateThinkingPhrases(STATE.detectedLang);
   }
 
   launchCompanion(STATE.book);
 }
 
 function updateBookStatus() {
-  document.getElementById('status-book-title').textContent =
-    'Where are you now with "' + STATE.book.title + '"?';
+  renderStatusScreen(STATE.book);
   navigate('status');
 }
 
@@ -1929,6 +2380,33 @@ function updateBookStatus() {
 
 // Auto-save is called directly inside sendMessage
 
+
+
+// ═══════════════════════════════════════════════════
+//  REPLY LENGTH
+// ═══════════════════════════════════════════════════
+function toggleLengthPanel() {
+  const panel = document.getElementById('length-panel');
+  const btn   = document.getElementById('length-toolbar-btn');
+  panel.classList.toggle('open');
+  // close other panels
+  document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('passages-panel').classList.remove('open');
+  document.getElementById('font-toolbar-btn').classList.remove('active');
+  document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('passages-toolbar-btn').classList.remove('active');
+  (panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active'));
+}
+
+function setReplyLength(length) {
+  STATE.replyLength = length;
+  localStorage.setItem('pc_reply_length', length);
+  document.querySelectorAll('.length-opt').forEach(b => {
+    (b.dataset.length === length ? b.classList.add('active') : b.classList.remove('active'));
+  });
+  showToolbarMsg('Reply length set to ' + length + '.');
+}
 
 // ═══════════════════════════════════════════════════
 //  PASSAGES
@@ -1991,7 +2469,7 @@ function togglePassagesPanel() {
   document.getElementById('highlights-panel').classList.remove('open');
   document.getElementById('font-toolbar-btn').classList.remove('active');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
-  btn.classList.toggle('active', panel.classList.contains('open'));
+  (panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active'));
   if (panel.classList.contains('open')) renderPassagesPanel();
 }
 
@@ -2027,6 +2505,8 @@ function init() {
 
   const sz = localStorage.getItem('pc_font_size');
   if (sz) applyFontSize(parseInt(sz));
+  const rl = localStorage.getItem('pc_reply_length');
+  if (rl) { STATE.replyLength = rl; document.querySelectorAll('.length-opt').forEach(b => (b.dataset.length === rl ? b.classList.add('active') : b.classList.remove('active'))); }
 
   try {
     const savedBook = JSON.parse(localStorage.getItem('pc_last_book') || 'null');
@@ -2050,7 +2530,15 @@ function init() {
   if (!document.querySelector('.screen.active')) showScreen('home');
 }
 
-init();
+try { init(); } catch(e) {
+  // Fallback: force home screen visible if init fails
+  var fb = document.getElementById('screen-home');
+  if (fb) { fb.style.display = 'flex'; }
+  var err = document.createElement('p');
+  err.style.cssText = 'color:#c00;font-size:0.85rem;padding:12px;';
+  err.textContent = 'Error: ' + e.message;
+  document.querySelector('.page').appendChild(err);
+}
 </script>
 </body>
 </html>
