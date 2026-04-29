@@ -632,7 +632,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.24</div>
+    <div class="site-tagline">A reading companion &nbsp;·&nbsp; v0.25</div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -770,6 +770,22 @@
     <hr />
     <div id="key-error" class="status-msg error" style="display:none"></div>
     <button class="btn btn-primary" onclick="saveKey()">Continue</button>
+
+    <!-- Transfer code entry -->
+    <div id="transfer-section" style="margin-top:20px">
+      <button class="back-link" style="margin-bottom:12px" onclick="toggleTransferSection()">↓ Transferring from another device? Enter a code</button>
+      <div id="transfer-fields" style="display:none">
+        <div class="field">
+          <label for="transfer-code-input">6-digit transfer code</label>
+          <input type="tel" id="transfer-code-input" placeholder="e.g. 482 951" maxlength="7" autocomplete="off" />
+        </div>
+        <div id="transfer-error" class="status-msg error" style="display:none"></div>
+        <div id="transfer-success" class="status-msg" style="display:none;color:#111"></div>
+        <button class="btn" onclick="redeemTransferCode()">Fetch my key</button>
+        <p class="note" style="margin-top:10px">Generate a code at <strong>pagecommons.com/transfer.html</strong> on your phone or desktop.</p>
+      </div>
+    </div>
+
     <hr />
     <p class="note">Your key is stored only in your browser's localStorage. We cannot see it, retrieve it, or use it.</p>
     <p class="note">Free tier with shared access coming soon — no key needed.</p>
