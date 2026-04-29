@@ -25,16 +25,9 @@ Add new items in the appropriate section.
 
 ## PRIORITY 1 — Complete V1 core
 
-- [ ] Google Books API proxy
-      Create /api/books.js serverless function.
-      Proxies Google Books API calls server-side.
-      Keeps GOOGLE_BOOKS_API_KEY secret.
-      Accepts GET ?q= and optional ?maxResults=
-      Returns Google Books JSON response as-is.
-      Sets CORS headers: Access-Control-Allow-Origin: *
-      Replaces all direct Google Books fetch calls
-      in app.js with /api/books?q= instead.
-      Environment variable already set in Vercel.
+- [x] Google Books API proxy
+      /api/books.js exists and integrated.
+      app.js calls /api/books?q= (see fetchGoogleBooks).
 
 - [ ] Free tier shared AI pool
       Use server-side GEMINI_API_KEY for users

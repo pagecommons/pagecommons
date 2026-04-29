@@ -871,6 +871,7 @@ function _fetchGoogleBooks() {
               author = (info.authors || ['Unknown author'])[0];
             var k = title.toLowerCase() + '||' + author.toLowerCase();
             var thumb = info.imageLinks && info.imageLinks.smallThumbnail ? info.imageLinks.smallThumbnail : info.imageLinks && info.imageLinks.thumbnail ? info.imageLinks.thumbnail : '';
+            if (thumb) thumb = thumb.replace('http://', 'https://');
             var cats = (info.categories || []).join(' ').toLowerCase();
             if (!seen.has(k)) seen.set(k, {
               title: title,
@@ -1941,12 +1942,8 @@ function _sendMessage() {
           }
           return _context14.a(2);
         case 1:
-          if (STATE.apiKey) {
-            _context14.n = 2;
-            break;
-          }
-          navigate('key');
-          return _context14.a(2);
+          _context14.n = 2;
+          break;
         case 2:
           if (navigator.onLine) {
             _context14.n = 3;
@@ -2068,7 +2065,7 @@ function appendBubble(role, text) {
 }
 function appendError(err) {
   var isNetwork = !navigator.onLine || err.message === 'Failed to fetch' || err.message.includes('fetch');
-  var msg = isNetwork ? "Couldn't reach your companion — poor connection? Try again when you have a better signal." : 'Something went wrong: ' + err.message;
+  var msg = err.isRateLimit ? err.message : isNetwork ? "Couldn't reach your companion — poor connection? Try again when you have a better signal." : 'Something went wrong: ' + err.message;
   var wrap = document.createElement('div');
   wrap.className = 'message error-msg';
   var bubble = document.createElement('div');
@@ -2124,7 +2121,7 @@ function buildSystemPrompt() {
   };
   var statusNote = statusInstructions[STATE.readingStatus] || 'Be spoiler-aware — ask the reader how far they\'ve got before revealing plot details.';
   var langNote = STATE.chatLanguage === 'native' && STATE.detectedLang ? '\n\nRespond entirely in ' + STATE.detectedLang + '. The reader has chosen to discuss this book in ' + STATE.detectedLang + '.' : '';
-  var replyLengthNote = STATE.replyLength === 'short' ? "Keep your response very brief — 2 to 3 short sentences maximum." : STATE.replyLength === 'detailed' ? "You may give fuller, more detailed responses when the topic warrants it." : "Keep responses concise — 2 to 4 short paragraphs maximum.";
+  var replyLengthNote = STATE.replyLength === 'short' ? "Maximum 2 sentences. Stop after 2 sentences." : STATE.replyLength === 'detailed' ? "You may give fuller, more detailed responses when the topic warrants it." : "Keep responses concise — 2 to 4 short paragraphs maximum.";
   return "You are a reading companion for \"" + book.title + "\" by " + book.author + ".\n\n" + "You are warm but not gushing. Curious — you always ask something back at the end. You never summarise the plot unprompted. You offer opinions when asked. You are honest about what you don't know. Literary without being academic. You feel like a well-read friend who has also read this book.\n\n" + "Never say \"Great question!\" Keep responses concise — this is read on an e-ink screen. Short paragraphs. Always end with a question or an invitation to continue.\n\n" + statusNote + "\n\n" + "If the conversation drifts away from the book, find a gentle bridge back — connect what the reader said to something in the book rather than refusing or redirecting bluntly. You are a reading companion, not a general assistant.\n\n" + "If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.\n\n" + replyLengthNote + "\n\n" + "Be honest about the limits of your knowledge. If you are not confident about specific details of this book — plot points, character names, themes — say so openly and invite the reader to share what they know. Never confabulate or pretend to know something you are uncertain about. A good reading companion says \"I'm not sure about that — what did you make of it?\" rather than guessing.\n\n" + "Respond in plain prose only. No bullet points. No headers. No lists of any kind.\n\n" + "If there are any signs this reader may be a minor, default to age-appropriate discussion regardless of the book's content rating." + langNote + highlightsText;
 }
 function callAI() {
@@ -2137,31 +2134,58 @@ function _callAI() {
       while (1) switch (_context15.n) {
         case 0:
           system = buildSystemPrompt(), messages = STATE.messages.slice(-20);
-          if (!(STATE.provider === 'anthropic')) {
+          if (STATE.apiKey) {
             _context15.n = 1;
             break;
           }
-          return _context15.a(2, callAnthropic(system, messages));
+          return _context15.a(2, callFreeTier(system, messages));
         case 1:
-          if (!(STATE.provider === 'gemini')) {
+          if (!(STATE.provider === 'anthropic')) {
             _context15.n = 2;
             break;
           }
-          return _context15.a(2, callGemini(system, messages));
+          return _context15.a(2, callAnthropic(system, messages));
         case 2:
-          if (!(STATE.provider === 'groq')) {
+          if (!(STATE.provider === 'gemini')) {
             _context15.n = 3;
             break;
           }
-          return _context15.a(2, callGroq(system, messages));
+          return _context15.a(2, callGemini(system, messages));
         case 3:
-          throw new Error('Unknown provider');
+          if (!(STATE.provider === 'groq')) {
+            _context15.n = 4;
+            break;
+          }
+          return _context15.a(2, callGroq(system, messages));
         case 4:
+          throw new Error('Unknown provider');
+        case 5:
           return _context15.a(2);
       }
     }, _callee15);
   }));
   return _callAI.apply(this, arguments);
+}
+function callFreeTier(system, messages) {
+  return fetch('/api/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ system: system, messages: messages })
+  }).then(function(res) {
+    if (res.status === 429) {
+      var rateLimitErr = new Error('Our free companion is busy right now — add your own key for instant access.');
+      rateLimitErr.isRateLimit = true;
+      throw rateLimitErr;
+    }
+    if (!res.ok) {
+      return res.json().catch(function() { return {}; }).then(function(e) {
+        throw new Error(e && e.error ? e.error : 'HTTP ' + res.status);
+      });
+    }
+    return res.json().then(function(data) {
+      return data && data.text ? data.text : '(No response)';
+    });
+  });
 }
 function callAnthropic(_x11, _x12) {
   return _callAnthropic.apply(this, arguments);
@@ -2183,7 +2207,7 @@ function _callAnthropic() {
             },
             body: JSON.stringify({
               model: 'claude-sonnet-4-20250514',
-              max_tokens: 600,
+              max_tokens: STATE.replyLength === 'short' ? 150 : 600,
               system: system,
               messages: messages
             })
