@@ -32,31 +32,22 @@ Add new items in the appropriate section.
       callAI() routes no-key users to callFreeTier(/api/ai).
       429 shows: "Our free companion is busy right now — add your own key."
 
-- [ ] Vercel KV setup for API key transfer
-      Required for 6-digit transfer code feature.
-      Setup: Vercel dashboard → Storage → Create KV.
-      Vercel auto-adds KV_REST_API_URL and
-      KV_REST_API_TOKEN environment variables.
-      See transfer.html task below.
+- [x] Vercel KV setup for API key transfer
+      Upstash Redis via Vercel marketplace.
+      Env vars: KV_REST_API_URL, KV_REST_API_TOKEN.
+      Connected to Production and Preview environments.
 
-- [ ] transfer.html — API key transfer page
-      Desktop/phone side of the key transfer flow.
-      User pastes their API key on desktop/phone.
-      App generates a 6-digit one-time code.
-      Shows 10-minute countdown timer.
-      Must show clear privacy statement:
-      "Your key briefly passes through our servers
-      to complete this transfer. It is deleted
-      immediately after. We never log or store keys."
-      Requires /api/transfer.js endpoint (see below).
+- [x] transfer.html — API key transfer page
+      Standalone page at /transfer.html.
+      User pastes key, gets 6-digit code.
+      10-minute countdown timer.
+      Privacy statement matches app copy.
 
-- [ ] /api/transfer.js serverless function
-      POST: receive key, encrypt, store in Vercel KV
-      with 10-minute TTL. Return 6-digit code.
-      GET: receive code, retrieve key, delete
-      immediately, return key. One-time use enforced.
-      Max 5 failed attempts per code then invalidate.
-      Never log key values. Rate limited.
+- [x] /api/transfer.js serverless function
+      POST: store key in Upstash KV, 10-min TTL,
+      return 6-digit code. Rate limited (10/hr/IP).
+      GET: GETDEL for one-time use, 5-fail lockout.
+      Never logs key values.
 
 - [ ] Kobo highlights import
       Accept KoboReader.sqlite file upload.
