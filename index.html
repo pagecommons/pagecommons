@@ -733,7 +733,7 @@
       <button class="back-link" style="margin-bottom:0" onclick="navigate('shelf')">Your shelf →</button>
     </div>
     <h1>Your companion awaits</h1>
-    <p>Choose your AI provider and enter your API key. Your key stays in your browser — it never touches our servers.</p>
+    <p>Choose your AI provider and enter your API key. Your key stays in your browser and never touches our servers — unless you use the transfer code option to move it from another device.</p>
 
     <div class="field">
       <label>AI Provider</label>
@@ -760,19 +760,8 @@
       <p id="key-hint">Get your key at console.anthropic.com</p>
     </div>
 
-    <!-- Optional companion name -->
-    <div id="companion-name-section">
-      <label for="companion-name-input">Give your companion a name <span style="font-weight:normal;text-transform:none;font-size:0.85rem">(optional)</span></label>
-      <input type="text" id="companion-name-input" placeholder="e.g. Ellis, River, Claude…" autocomplete="off" />
-      <p style="font-size:0.78rem;color:#777777;margin-top:6px">Leave blank to use "Companion". You can change this later in More.</p>
-    </div>
-
-    <hr />
-    <div id="key-error" class="status-msg error" style="display:none"></div>
-    <button class="btn btn-primary" onclick="saveKey()">Continue</button>
-
     <!-- Transfer code entry -->
-    <div id="transfer-section" style="margin-top:20px">
+    <div id="transfer-section" style="margin-bottom:20px">
       <button class="back-link" style="margin-bottom:12px" onclick="toggleTransferSection()">↓ Transferring from another device? Enter a code</button>
       <div id="transfer-fields" style="display:none">
         <div class="field">
@@ -786,9 +775,19 @@
       </div>
     </div>
 
+    <!-- Optional companion name -->
+    <div id="companion-name-section">
+      <label for="companion-name-input">Give your companion a name <span style="font-weight:normal;text-transform:none;font-size:0.85rem">(optional)</span></label>
+      <input type="text" id="companion-name-input" placeholder="e.g. Ellis, River, Claude…" autocomplete="off" />
+      <p style="font-size:0.78rem;color:#777777;margin-top:6px">Leave blank to use "Companion". You can change this later in More.</p>
+    </div>
+
     <hr />
-    <p class="note">Your key is stored only in your browser's localStorage. We cannot see it, retrieve it, or use it.</p>
-    <p class="note">Free tier with shared access coming soon — no key needed.</p>
+    <div id="key-error" class="status-msg error" style="display:none"></div>
+    <button class="btn btn-primary" onclick="saveKey()">Continue</button>
+
+    <hr />
+    <p class="note">Your key is stored in your browser's localStorage only. We cannot see it, retrieve it, or use it. Transfer codes are the one exception — your key briefly passes through our servers during transfer and is deleted immediately after.</p>
   </section>
 
   <!-- ══════════════════════════════════
