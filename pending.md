@@ -102,29 +102,23 @@ Add new items in the appropriate section.
       rendered inline in the chat bubble.
       Tap goes directly to book search results.
 
-- [ ] Reply length enforcement
-      "Short" mode currently not enforced strongly.
-      Strengthen system prompt instruction.
-      Add explicit max token limit for short mode.
-      Target: 2 sentences maximum in short mode.
+- [x] Reply length enforcement
+      Anthropic: max_tokens 150 when short.
+      Gemini: generationConfig.maxOutputTokens 150 when short.
+      Groq: max_tokens 150 when short.
+      System prompt: "Maximum 2 sentences. Stop after 2 sentences."
 
-- [ ] Ice breaker fix for "considering" status
-      "Considering reading" prompts should ask
-      about the reader, not the book content.
-      e.g. "What drew you to this book?"
-      not "What did you think of the ending?"
-      Improved prompt already written — deploy it.
-      Cache key must include reading status:
-      pc_icebreakers_[book_key]_[status]
+- [x] Ice breaker fix for "considering" status
+      Prompt now instructs AI to ask what drew the
+      reader to the book, not about book content.
+      Cache key already included reading status.
 
-- [ ] Hall tagline
-      Change current tagline to:
-      "Just books. No noise."
+- [x] Hall tagline
+      "Just books. No noise." — deployed.
 
-- [ ] Your shelf prominence
-      Move Your Shelf to a more visible location
-      in the Library Hall screen.
-      Currently too buried in the footer.
+- [x] Your shelf prominence
+      Shelf button added to Which book? screen.
+      Home button sub-text updated to mention shelf.
 
 - [ ] Randomised book search heading
       Replace static "Which book?" heading with
@@ -174,14 +168,10 @@ Add new items in the appropriate section.
 
 ## PRIORITY 2 — E-ink compatibility
 
-- [ ] Clippings paste fallback
-      File upload may not work in Kobo/Kindle
-      browser due to sandbox restrictions.
-      Add secondary input method:
-      "Or paste your clippings text here"
-      Large textarea, user pastes directly.
-      Same parser processes pasted text.
-      Always visible alongside file upload option.
+- [x] Clippings paste fallback
+      Textarea added below file upload on search screen.
+      parseClippingsPaste() reads textarea, calls same
+      parseClippingsText() parser, same result handling.
 
 - [ ] XMLHttpRequest fallback for fetch
       If Fetch API unavailable on older devices

@@ -828,6 +828,11 @@
       </div>
       <div id="clippings-filename">No file chosen</div>
     </div>
+    <div class="field" style="margin-top:16px">
+      <label for="clippings-paste">Or paste clippings text</label>
+      <textarea id="clippings-paste" rows="5" placeholder="Paste the full contents of My Clippings.txt here…" style="width:100%;border:1px solid #111111;padding:10px;font-size:0.9rem;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;resize:vertical;border-radius:0;background:#ffffff;color:#111111"></textarea>
+      <button class="btn" style="margin-top:8px" onclick="parseClippingsPaste()">Import pasted text</button>
+    </div>
     <div id="clippings-status" class="status-msg" style="display:none"></div>
   </section>
 

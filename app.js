@@ -1575,6 +1575,30 @@ function parseClippings(input) {
   };
   reader.readAsText(file);
 }
+function parseClippingsPaste() {
+  var textarea = document.getElementById('clippings-paste');
+  var statusEl = document.getElementById('clippings-status');
+  if (!textarea) return;
+  var text = textarea.value.trim();
+  if (!text) {
+    statusEl.textContent = 'Please paste your clippings text first.';
+    statusEl.style.display = 'block';
+    return;
+  }
+  statusEl.textContent = 'Reading clippings…';
+  statusEl.style.display = 'block';
+  var highlights = parseClippingsText(text);
+  if (!highlights.length) {
+    statusEl.textContent = 'No highlights found. Make sure you pasted the full contents of My Clippings.txt.';
+    return;
+  }
+  STATE.highlights = highlights;
+  localStorage.setItem('pc_highlights', JSON.stringify(highlights));
+  var n = highlights.length, b = countBooks(highlights);
+  statusEl.textContent = 'Loaded ' + n + ' highlight' + (n !== 1 ? 's' : '') + ' from ' + b + ' book' + (b !== 1 ? 's' : '') + '.';
+  var top = getMostRecentBook(highlights);
+  if (top) selectBook({ title: top.title, author: top.author, year: '', key: '' });
+}
 function parseClippingsText(text) {
   var out = [];
   text.split('==========').forEach(function (entry) {
@@ -1751,7 +1775,7 @@ function _fetchAIIcebreakers() {
           };
           statusLabel = statusLabels[STATE.readingStatus] || 'reading';
           langNote = STATE.chatLanguage === 'native' && STATE.detectedLang ? '\nGenerate the prompts in ' + STATE.detectedLang + '.' : '';
-          prompt = 'You are a literary companion helping a reader of "' + book.title + '" by ' + book.author + '.\n\n' + 'The reader\'s current status: ' + statusLabel + '\n\n' + "Generate exactly 4 ice breaker prompts that feel specific to THIS book \u2014 its themes, reputation, tone, setting, and what readers typically wonder about.\n\n" + 'Rules:\n' + '- Each prompt max 8 words\n' + '- Must feel specific to this exact book\n' + '- NOT generic questions that apply to any book\n' + '- NOT: "Is this book for me?"\n' + '- NOT: "What is the main idea?"\n' + '- NOT: "How long does it take to read?"\n' + '- Tone matches reading status:\n' + '  considering: curiosity, uncertainty, is this worth my time?\n' + '  just started: early impressions, what to expect ahead\n' + '  halfway: tensions building, character observations, predictions\n' + '  just finished: emotional reactions, themes, meaning, what next' + langNote + '\n\n' + 'Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.\n' + 'Example format: ["prompt one","prompt two","prompt three","prompt four"]';
+          prompt = 'You are a literary companion helping a reader of "' + book.title + '" by ' + book.author + '.\n\n' + 'The reader\'s current status: ' + statusLabel + '\n\n' + "Generate exactly 4 ice breaker prompts that feel specific to THIS book \u2014 its themes, reputation, tone, setting, and what readers typically wonder about.\n\n" + 'Rules:\n' + '- Each prompt max 8 words\n' + '- Must feel specific to this exact book\n' + '- NOT generic questions that apply to any book\n' + '- NOT: "Is this book for me?"\n' + '- NOT: "What is the main idea?"\n' + '- NOT: "How long does it take to read?"\n' + '- Tone matches reading status:\n' + '  considering: ask what drew the READER to this book (curiosity, what they\'ve heard, what appeals) — NOT questions about the book\'s content or plot\n' + '  just started: early impressions, what to expect ahead\n' + '  halfway: tensions building, character observations, predictions\n' + '  just finished: emotional reactions, themes, meaning, what next' + langNote + '\n\n' + 'Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.\n' + 'Example format: ["prompt one","prompt two","prompt three","prompt four"]';
           text = '';
           if (!(STATE.provider === 'anthropic')) {
             _context13.n = 4;
@@ -2282,7 +2306,8 @@ function _callGemini() {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              contents: contents
+              contents: contents,
+              generationConfig: { maxOutputTokens: STATE.replyLength === 'short' ? 150 : 600 }
             })
           });
         case 1:
@@ -2338,7 +2363,7 @@ function _callGroq() {
             },
             body: JSON.stringify({
               model: 'llama-3.3-70b-versatile',
-              max_tokens: 600,
+              max_tokens: STATE.replyLength === 'short' ? 150 : 600,
               messages: [{
                 role: 'system',
                 content: system
