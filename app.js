@@ -2065,7 +2065,8 @@ function appendBubble(role, text) {
 }
 function appendError(err) {
   var isNetwork = !navigator.onLine || err.message === 'Failed to fetch' || err.message.includes('fetch');
-  var msg = err.isRateLimit ? err.message : isNetwork ? "Couldn't reach your companion — poor connection? Try again when you have a better signal." : 'Something went wrong: ' + err.message;
+  var isQuota = err.message && (err.message.toLowerCase().includes('quota') || err.message.toLowerCase().includes('rate limit') || (err.message.includes('429') && !isNetwork));
+  var msg = err.isRateLimit ? err.message : isQuota ? 'Your AI key has hit its rate limit. Wait a moment and try again, or switch to a different provider.' : isNetwork ? "Couldn't reach your companion — poor connection? Try again when you have a better signal." : 'Something went wrong: ' + err.message;
   var wrap = document.createElement('div');
   wrap.className = 'message error-msg';
   var bubble = document.createElement('div');
