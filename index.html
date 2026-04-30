@@ -650,7 +650,7 @@
       <div class="hall-doors">
         <button class="hall-door primary" onclick="navigate('key')">
           <span class="hall-door-title">Talk to your companion</span>
-          <span class="hall-door-sub">A private AI reading companion, just for you</span>
+          <span class="hall-door-sub">Start a new book conversation, or continue one from your shelf</span>
         </button>
         <button class="hall-door disabled">
           <span class="hall-door-title">Enter a book room</span>
@@ -666,7 +666,6 @@
       <div class="hall-footer">
         No ads. No algorithms. No engagement metrics. Just books.
         <div class="hall-footer-links">
-          <a href="#" onclick="navigate('shelf'); return false;">Your shelf</a>
           <a href="#" onclick="navigate('key'); return false;">API key settings</a>
         </div>
       </div>
@@ -795,6 +794,8 @@
   <section id="screen-search" class="screen">
     <button class="back-link" onclick="navigate('home')">← Back</button>
     <h1>Which book?</h1>
+
+    <button class="btn" style="width:100%;margin-bottom:24px" onclick="navigate('shelf')">Your saved books →</button>
 
     <div class="field">
       <label for="book-search-title">Title</label>
