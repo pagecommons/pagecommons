@@ -887,7 +887,8 @@ function _fetchGoogleBooks() {
               source: 'Google Books',
               lang: info.language || '',
               thumb: thumb,
-              cats: cats
+              cats: cats,
+              pageCount: info.pageCount || 0
             });
           });
           return _context6.a(2, Array.from(seen.values()).slice(0, 6));
@@ -1359,6 +1360,16 @@ function launchCompanion(book) {
   if (typeof addBookToShelf === 'function') addBookToShelf(book);
   document.getElementById('book-title-display').textContent = book.title;
   document.getElementById('book-author-display').textContent = book.author;
+  var metaEl = document.getElementById('book-meta-display');
+  if (metaEl) {
+    var metaParts = [];
+    if (book.pageCount) {
+      metaParts.push(book.pageCount + ' pages');
+      var hrs = Math.round(book.pageCount / 60);
+      if (hrs > 0) metaParts.push('~' + hrs + 'h read');
+    }
+    metaEl.textContent = metaParts.join(' · ');
+  }
   document.getElementById('input-book-context').textContent = book.title + (book.author ? ' · ' + book.author : '');
   document.getElementById('chat-log').innerHTML = '';
   document.getElementById('loading-indicator').style.display = 'none';
@@ -1366,6 +1377,7 @@ function launchCompanion(book) {
   updateStatusDisplay();
   renderHighlightsPanel();
   updatePassagesToolbarBtn();
+  updateNotesToolbarBtn();
   populateIcebreakers(book);
   navigate('companion');
 }
@@ -1687,7 +1699,9 @@ function toggleHighlights() {
     btn = document.getElementById('highlights-toolbar-btn');
   panel.classList.toggle('open');
   document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('font-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
 }
 
@@ -2419,7 +2433,9 @@ function toggleFontPanel() {
     btn = document.getElementById('font-toolbar-btn');
   panel.classList.toggle('open');
   document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
 }
 function applyFontSize(size) {
@@ -2501,7 +2517,8 @@ function addBookToShelf(book) {
       author: book.author,
       year: book.year || '',
       lang: book.lang || '',
-      detectedLang: book.detectedLang || ''
+      detectedLang: book.detectedLang || '',
+      pageCount: book.pageCount || 0
     });
     localStorage.setItem('pc_shelf_books', JSON.stringify(books));
   }
@@ -2730,13 +2747,14 @@ function toggleLengthPanel() {
   var panel = document.getElementById('length-panel');
   var btn = document.getElementById('length-toolbar-btn');
   panel.classList.toggle('open');
-  // close other panels
   document.getElementById('font-panel').classList.remove('open');
   document.getElementById('highlights-panel').classList.remove('open');
   document.getElementById('passages-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('font-toolbar-btn').classList.remove('active');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('passages-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
 }
 function setReplyLength(length) {
@@ -2813,10 +2831,106 @@ function togglePassagesPanel() {
   panel.classList.toggle('open');
   document.getElementById('font-panel').classList.remove('open');
   document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('font-toolbar-btn').classList.remove('active');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
   if (panel.classList.contains('open')) renderPassagesPanel();
+}
+function exportConversation() {
+  if (!STATE.messages || !STATE.messages.length) {
+    showToolbarMsg('No conversation to export yet.');
+    return;
+  }
+  var book = STATE.book;
+  var date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  var lines = [
+    'Page Commons — Conversation Export',
+    'Book: ' + (book ? book.title : 'Unknown'),
+    'Author: ' + (book ? book.author : 'Unknown'),
+    'Exported: ' + date,
+    '',
+    '---',
+    ''
+  ];
+  var exchange = 0;
+  STATE.messages.forEach(function(m) {
+    if (m.role === 'user') {
+      exchange++;
+      lines.push('[' + exchange + '] You');
+      lines.push(m.content);
+      lines.push('');
+    } else {
+      lines.push(STATE.companionName || 'Companion');
+      lines.push(m.content);
+      lines.push('');
+    }
+  });
+  var blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = (book ? book.title.replace(/[^a-z0-9]/gi, '-').toLowerCase() : 'conversation') + '-export.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function getNotes(book) {
+  var bk = bookKey(book || STATE.book);
+  return JSON.parse(localStorage.getItem('pc_notes_' + bk) || '[]');
+}
+function saveNoteEntry() {
+  var ta = document.getElementById('note-input');
+  if (!ta || !STATE.book) return;
+  var text = ta.value.trim();
+  if (!text) return;
+  var bk = bookKey(STATE.book);
+  var notes = getNotes(STATE.book);
+  notes.unshift({ text: text, ts: Date.now() });
+  localStorage.setItem('pc_notes_' + bk, JSON.stringify(notes));
+  ta.value = '';
+  renderNotesPanel();
+  updateNotesToolbarBtn();
+}
+function renderNotesPanel() {
+  var list = document.getElementById('notes-list');
+  if (!list || !STATE.book) return;
+  var notes = getNotes(STATE.book);
+  if (!notes.length) {
+    list.innerHTML = '<p class="passages-empty">No notes yet.</p>';
+    return;
+  }
+  list.innerHTML = notes.map(function(n) {
+    var d = new Date(n.ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    return '<div class="note-item"><div class="note-date">' + d + '</div>' + formatText(n.text) + '</div>';
+  }).join('');
+}
+function toggleNotesPanel() {
+  var panel = document.getElementById('notes-panel');
+  var btn = document.getElementById('notes-toolbar-btn');
+  panel.classList.toggle('open');
+  document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('passages-panel').classList.remove('open');
+  document.getElementById('length-panel').classList.remove('open');
+  document.getElementById('font-toolbar-btn').classList.remove('active');
+  document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('passages-toolbar-btn').classList.remove('active');
+  document.getElementById('length-toolbar-btn').classList.remove('active');
+  if (panel.classList.contains('open')) {
+    btn.classList.add('active');
+    renderNotesPanel();
+  } else {
+    btn.classList.remove('active');
+  }
+}
+function updateNotesToolbarBtn() {
+  var btn = document.getElementById('notes-toolbar-btn');
+  if (!btn || !STATE.book) return;
+  var notes = getNotes(STATE.book);
+  btn.textContent = notes.length ? 'Notes (' + notes.length + ')' : 'Notes';
 }
 function copyAllPassages() {
   var passages = getPassages();

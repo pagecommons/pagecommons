@@ -124,16 +124,12 @@ Add new items in the appropriate section.
       e.g. "What are you reading, [name]?"
       Requires Settings page (see below).
 
-- [ ] Personal reflection notes per book
-      The Archivist use case.
-      Free text note input per book.
-      Timestamped entries.
-      Stored in localStorage.
-      Viewable in companion toolbar
-      alongside highlights and passages.
-      Completely separate from AI conversations
-      and saved AI passages.
-      Private — never shared or uploaded.
+- [x] Personal reflection notes per book
+      Notes toolbar button always visible.
+      #notes-panel with textarea + Save note button.
+      Timestamped entries, newest first.
+      pc_notes_[bookKey] in localStorage.
+      Completely separate from AI conversations.
 
 - [ ] Ice breaker prompts enriched with metadata
       Add Open Library genre and subject metadata
@@ -142,11 +138,10 @@ Add new items in the appropriate section.
       Fetch subject data when book is selected.
       Cache alongside ice breakers in localStorage.
 
-- [ ] Conversation export
-      Export full conversation as plain text file.
-      Option to email conversation to self.
-      Numbered exchanges, clean readable format.
-      Available from companion toolbar.
+- [x] Conversation export
+      exportConversation() downloads .txt file.
+      Numbered exchanges, book/author/date header.
+      "Export conversation" in More panel.
 
 - [ ] Reading progress indicator
       Visual progress display not just status label.
@@ -155,11 +150,10 @@ Add new items in the appropriate section.
       Fall back to Kindle location data.
       Simple text indicator — e-ink appropriate.
 
-- [ ] Better book metadata display
-      Show genre, themes, page count where available.
-      Reading time estimate from page count.
-      Source: Google Books API response fields.
-      Display on book header in companion screen.
+- [x] Better book metadata display
+      pageCount added to Google Books results and shelf.
+      Book header shows "N pages · ~Xh read" when available.
+      Gracefully absent for Open Library / no-pageCount books.
 
 ---
 

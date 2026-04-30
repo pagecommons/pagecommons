@@ -567,6 +567,22 @@
     }
     .bubble-action-btn:active { opacity: 0.5; }
     .bubble-action-btn.saved  { color: #111111; font-style: italic; }
+    #book-meta-display { font-size: 0.78rem; color: #777777; margin-top: 2px; }
+    #notes-panel {
+      display: none;
+      border: 1px solid #111111;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    #notes-panel.open { display: block; }
+    .note-item {
+      border-left: 2px solid #d0d0d0;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+      line-height: 1.65;
+    }
+    .note-date { font-size: 0.75rem; color: #777777; margin-bottom: 4px; }
     .recommend-btn {
       display: inline-block;
       border: 1px solid #111111;
@@ -898,6 +914,7 @@
     <div id="book-header">
       <div id="book-title-display">—</div>
       <div id="book-author-display"></div>
+      <div id="book-meta-display"></div>
       <div id="book-status-display"></div>
       <button id="change-book-btn" onclick="navigate('search')">Change book</button>
     </div>
@@ -924,6 +941,7 @@
         <button class="toolbar-btn" id="font-toolbar-btn" onclick="toggleFontPanel()">Aa</button>
         <button class="toolbar-btn" id="highlights-toolbar-btn" style="display:none" onclick="toggleHighlights()">Highlights</button>
         <button class="toolbar-btn" id="passages-toolbar-btn" style="display:none" onclick="togglePassagesPanel()">Passages</button>
+        <button class="toolbar-btn" id="notes-toolbar-btn" onclick="toggleNotesPanel()">Notes</button>
         <button class="toolbar-btn" onclick="navigate('shelf')">Shelf</button>
         <button class="toolbar-btn" onclick="endConversation()">Done</button>
         <button class="toolbar-btn" id="length-toolbar-btn" onclick="toggleLengthPanel()">More</button>
@@ -954,6 +972,15 @@
           <button class="length-opt"        data-length="detailed" onclick="setReplyLength('detailed')">Detailed</button>
         </div>
         <p style="font-size:0.78rem;color:#777777;margin-top:10px;margin-bottom:0">Short keeps replies to a few sentences. Detailed allows longer responses.</p>
+        <hr style="border:none;border-top:1px solid #dddddd;margin:14px 0" />
+        <button class="bubble-action-btn" onclick="exportConversation()" style="font-size:0.85rem">Export conversation</button>
+      </div>
+
+      <div id="notes-panel">
+        <div class="font-panel-label">Your notes</div>
+        <textarea id="note-input" rows="4" placeholder="Write a private note about this book…" style="width:100%;border:1px solid #111111;padding:8px;font-size:0.9rem;font-family:Georgia,'Times New Roman',serif;resize:vertical;border-radius:0;background:#ffffff;color:#111111;margin-bottom:8px"></textarea>
+        <button class="btn btn-primary btn-small" onclick="saveNoteEntry()" style="margin-bottom:16px">Save note</button>
+        <div id="notes-list"></div>
       </div>
 
       <div id="passages-panel">
