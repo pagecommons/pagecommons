@@ -16,10 +16,8 @@ Add new items in the appropriate section.
 
 ## BUGS (fix first)
 
-- [ ] Mixed content warnings
-      Google Books returns http:// cover image URLs.
-      Convert all cover URLs to https:// on fetch.
-      Simple string replace — low effort, high polish.
+- [x] Mixed content warnings
+      Fixed: thumb.replace('http://', 'https://') in fetchGoogleBooks().
 
 ---
 
@@ -29,14 +27,10 @@ Add new items in the appropriate section.
       /api/books.js exists and integrated.
       app.js calls /api/books?q= (see fetchGoogleBooks).
 
-- [ ] Free tier shared AI pool
-      Use server-side GEMINI_API_KEY for users
-      who have not entered their own API key.
-      Route to Gemini Flash when no key present.
-      Rate limit with friendly message when exceeded:
-      "Our free companion is busy right now —
-      add your own key for instant access."
-      Environment variable already set in Vercel.
+- [x] Free tier shared AI pool
+      Implemented: api/ai.js proxies to Gemini Flash using GEMINI_API_KEY.
+      callAI() routes no-key users to callFreeTier(/api/ai).
+      429 shows: "Our free companion is busy right now — add your own key."
 
 - [ ] Vercel KV setup for API key transfer
       Required for 6-digit transfer code feature.
