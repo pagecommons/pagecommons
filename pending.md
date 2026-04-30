@@ -94,13 +94,10 @@ Add new items in the appropriate section.
 
 ## PRIORITY 2 — UX and polish
 
-- [ ] Book recommendations in chat
-      Instruct AI to use structured tag format:
-      [RECOMMEND: Title by Author]
-      when recommending books in conversation.
-      Convert these tags to tappable search buttons
-      rendered inline in the chat bubble.
-      Tap goes directly to book search results.
+- [x] Book recommendations in chat
+      System prompt instructs AI to use [RECOMMEND: Title by Author].
+      appendBubble() post-processes tags into tappable buttons.
+      searchFromRecommend() navigates to search with title pre-filled.
 
 - [x] Reply length enforcement
       Anthropic: max_tokens 150 when short.
