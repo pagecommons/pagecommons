@@ -733,7 +733,7 @@
       <button class="back-link" style="margin-bottom:0" onclick="navigate('shelf')">Your shelf →</button>
     </div>
     <h1>Your companion awaits</h1>
-    <p>Choose your AI provider and enter your API key. Your key stays in your browser and never touches our servers — unless you use the transfer code option to move it from another device.</p>
+    <p>Choose your AI provider and enter your API key. Your key stays in your browser and never touches our servers — unless you use the transfer code option, where your key briefly passes through our servers to complete the transfer and is deleted immediately. No record is kept.</p>
 
     <div class="field">
       <label>AI Provider</label>
@@ -772,6 +772,7 @@
         <div id="transfer-success" class="status-msg" style="display:none;color:#111"></div>
         <button class="btn" onclick="redeemTransferCode()">Fetch my key</button>
         <p class="note" style="margin-top:10px">Generate a code at <strong>pagecommons.com/transfer.html</strong> on your phone or desktop.</p>
+        <p class="note" style="margin-top:8px">Your key briefly passes through our servers to complete this transfer and is deleted immediately. No record is kept.</p>
       </div>
     </div>
 
@@ -786,8 +787,6 @@
     <div id="key-error" class="status-msg error" style="display:none"></div>
     <button class="btn btn-primary" onclick="saveKey()">Continue</button>
 
-    <hr />
-    <p class="note">Your key is stored in your browser's localStorage only. We cannot see it, retrieve it, or use it. Transfer codes are the one exception — your key briefly passes through our servers during transfer and is deleted immediately after.</p>
   </section>
 
   <!-- ══════════════════════════════════
