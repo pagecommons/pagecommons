@@ -1197,8 +1197,7 @@ function _renderStatusScreen() {
 
           // Update heading
           h1 = document.getElementById('status-book-title');
-          if (h1) h1.textContent = lang && chatLang === 'native' ? book.title // just show title, keep heading neutral
-          : 'Where are you with "' + book.title + '"?';
+          if (h1) h1.textContent = (lang || /[\u0080-\uffff]/.test(book.title)) ? book.title : 'Where are you with "' + book.title + '"?';
         case 17:
           return _context9.a(2);
       }
@@ -1791,8 +1790,8 @@ function _populateIcebreakers() {
           prompts = null;
         case 8:
           if (!prompts || !prompts.length) {
-            // skip static prompts for non-English books — they're always in English
-            if (STATE.chatLanguage !== 'native') {
+            // skip English static prompts for non-English books
+            if (!STATE.detectedLang) {
               prompts = getStaticPromptsByStatus(STATE.readingStatus);
             }
           }
@@ -1829,7 +1828,8 @@ function _fetchAIIcebreakers() {
             finished: 'just finished'
           };
           statusLabel = statusLabels[STATE.readingStatus] || 'reading';
-          langNote = STATE.chatLanguage === 'native' && STATE.detectedLang ? 'You must write entirely in ' + STATE.detectedLang + '. Every word of your response must be in ' + STATE.detectedLang + '. Do not use any English.' : '';
+          var _lang = STATE.detectedLang || detectLanguage(book);
+          langNote = _lang ? 'You must write entirely in ' + _lang + '. Every word of your response must be in ' + _lang + '. Do not use any English.' : '';
           var cachedSubjects = localStorage.getItem('pc_subjects_' + bookKey(book));
           var subjectArr = cachedSubjects ? JSON.parse(cachedSubjects) : [];
           var subjectNote = subjectArr.length ? '\nKnown subjects/themes: ' + subjectArr.slice(0, 8).join(', ') + '.' : '';
