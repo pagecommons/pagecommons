@@ -69,7 +69,8 @@ var STATE = {
   // held during age gate
   passages: [],
   // saved passages for current book
-  replyLength: 'medium' // 'short' | 'medium' | 'detailed'
+  replyLength: 'medium', // 'short' | 'medium' | 'detailed'
+  userName: ''
 };
 var STATIC_PROMPTS = ["I just finished it", "Something is still on my mind", "I want to understand something better", "There's a passage I keep thinking about", "I'm not sure how I feel about it", "I gave up — can we talk about why?", "I want to know what to read next", "Something surprised me"];
 var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'Let me think…', 'Hmm…', 'One moment…', 'With you…'];
@@ -77,7 +78,7 @@ var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'L
 // ═══════════════════════════════════════════════════
 //  SCREENS + NAVIGATION
 // ═══════════════════════════════════════════════════
-var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'tc', 'age-gate'];
+var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'tc', 'age-gate', 'settings'];
 
 // navigate() defined above with showScreen
 
@@ -118,6 +119,7 @@ function handleRoute() {
   var target = SCREENS.includes(hash) ? hash : 'home';
   showScreen(target);
   if (target === 'shelf') renderShelf();
+  if (target === 'settings') loadSettingsScreen();
   updateTitleLink();
 }
 function navigate(view) {
@@ -293,7 +295,10 @@ function selectProvider(prov) {
 }
 function applyProviderUI(prov) {
   ['anthropic', 'gemini', 'groq'].forEach(function (p) {
-    return p === prov ? document.getElementById('prov-' + p).classList.add('selected') : document.getElementById('prov-' + p).classList.remove('selected');
+    var keyEl = document.getElementById('prov-' + p);
+    if (keyEl) keyEl.classList[p === prov ? 'add' : 'remove']('selected');
+    var settEl = document.getElementById('settings-prov-' + p);
+    if (settEl) settEl.classList[p === prov ? 'add' : 'remove']('active');
   });
   var cfg = PROVIDER_CONFIG[prov];
   document.getElementById('api-key-input').placeholder = cfg.placeholder;
@@ -1212,6 +1217,7 @@ function _selectBook() {
         case 0:
           STATE.book = book;
           STATE.messages = [];
+          fetchAndCacheSubjects(book);
 
           // ensure lang field is persisted on book object (Bug Fix B)
           detectedLang = detectLanguage(book);
@@ -1369,6 +1375,19 @@ function launchCompanion(book) {
       if (hrs > 0) metaParts.push('~' + hrs + 'h read');
     }
     metaEl.textContent = metaParts.join(' · ');
+  }
+  var progEl = document.getElementById('book-progress-display');
+  if (progEl) {
+    var prog = getReadingProgress(book);
+    if (prog) {
+      var progText = 'Progress: p.' + prog.page;
+      if (book.pageCount && prog.page <= book.pageCount) {
+        progText += ' of ' + book.pageCount + ' (' + Math.round(prog.page / book.pageCount * 100) + '%)';
+      }
+      progEl.textContent = progText;
+    } else {
+      progEl.textContent = '';
+    }
   }
   document.getElementById('input-book-context').textContent = book.title + (book.author ? ' · ' + book.author : '');
   document.getElementById('chat-log').innerHTML = '';
@@ -1580,6 +1599,7 @@ function parseClippings(input) {
     }
     STATE.highlights = highlights;
     localStorage.setItem('pc_highlights', JSON.stringify(highlights));
+    updateProgressFromHighlights(highlights);
     var n = highlights.length,
       b = countBooks(highlights);
     statusEl.textContent = 'Loaded ' + n + ' highlight' + (n !== 1 ? 's' : '') + ' from ' + b + ' book' + (b !== 1 ? 's' : '') + '.';
@@ -1612,6 +1632,7 @@ function parseClippingsPaste() {
   }
   STATE.highlights = highlights;
   localStorage.setItem('pc_highlights', JSON.stringify(highlights));
+  updateProgressFromHighlights(highlights);
   var n = highlights.length, b = countBooks(highlights);
   statusEl.textContent = 'Loaded ' + n + ' highlight' + (n !== 1 ? 's' : '') + ' from ' + b + ' book' + (b !== 1 ? 's' : '') + '.';
   var top = getMostRecentBook(highlights);
@@ -1628,11 +1649,13 @@ function parseClippingsText(text) {
     if (!content || lines[1].toLowerCase().includes('bookmark')) return;
     var tm = lines[0].match(/^(.+?)\s*\(([^)]+)\)\s*$/);
     var dm = lines[1].match(/Added on (.+)$/i);
+    var pm = lines[1].match(/page (\d+)/i);
     out.push({
       title: tm ? tm[1].trim() : lines[0],
       author: tm ? tm[2].trim() : 'Unknown',
       text: content,
-      date: dm ? dm[1].trim() : ''
+      date: dm ? dm[1].trim() : '',
+      page: pm ? parseInt(pm[1], 10) : null
     });
   });
   return out;
@@ -1795,7 +1818,10 @@ function _fetchAIIcebreakers() {
           };
           statusLabel = statusLabels[STATE.readingStatus] || 'reading';
           langNote = STATE.chatLanguage === 'native' && STATE.detectedLang ? '\nGenerate the prompts in ' + STATE.detectedLang + '.' : '';
-          prompt = 'You are a literary companion helping a reader of "' + book.title + '" by ' + book.author + '.\n\n' + 'The reader\'s current status: ' + statusLabel + '\n\n' + "Generate exactly 4 ice breaker prompts that feel specific to THIS book \u2014 its themes, reputation, tone, setting, and what readers typically wonder about.\n\n" + 'Rules:\n' + '- Each prompt max 8 words\n' + '- Must feel specific to this exact book\n' + '- NOT generic questions that apply to any book\n' + '- NOT: "Is this book for me?"\n' + '- NOT: "What is the main idea?"\n' + '- NOT: "How long does it take to read?"\n' + '- Tone matches reading status:\n' + '  considering: ask what drew the READER to this book (curiosity, what they\'ve heard, what appeals) — NOT questions about the book\'s content or plot\n' + '  just started: early impressions, what to expect ahead\n' + '  halfway: tensions building, character observations, predictions\n' + '  just finished: emotional reactions, themes, meaning, what next' + langNote + '\n\n' + 'Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.\n' + 'Example format: ["prompt one","prompt two","prompt three","prompt four"]';
+          var cachedSubjects = localStorage.getItem('pc_subjects_' + bookKey(book));
+          var subjectArr = cachedSubjects ? JSON.parse(cachedSubjects) : [];
+          var subjectNote = subjectArr.length ? '\nKnown subjects/themes: ' + subjectArr.slice(0, 8).join(', ') + '.' : '';
+          prompt = 'You are a literary companion helping a reader of "' + book.title + '" by ' + book.author + '.\n\n' + 'The reader\'s current status: ' + statusLabel + subjectNote + '\n\n' + "Generate exactly 4 ice breaker prompts that feel specific to THIS book \u2014 its themes, reputation, tone, setting, and what readers typically wonder about.\n\n" + 'Rules:\n' + '- Each prompt max 8 words\n' + '- Must feel specific to this exact book\n' + '- NOT generic questions that apply to any book\n' + '- NOT: "Is this book for me?"\n' + '- NOT: "What is the main idea?"\n' + '- NOT: "How long does it take to read?"\n' + '- Tone matches reading status:\n' + '  considering: ask what drew the READER to this book (curiosity, what they\'ve heard, what appeals) — NOT questions about the book\'s content or plot\n' + '  just started: early impressions, what to expect ahead\n' + '  halfway: tensions building, character observations, predictions\n' + '  just finished: emotional reactions, themes, meaning, what next' + langNote + '\n\n' + 'Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.\n' + 'Example format: ["prompt one","prompt two","prompt three","prompt four"]';
           text = '';
           if (!(STATE.provider === 'anthropic')) {
             _context13.n = 4;
@@ -3048,6 +3074,80 @@ function showInitError(msg) {
     errDiv.textContent = 'Error: ' + msg;
   } catch (displayErr) {}
 }
+// ═══════════════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════════════
+function loadSettingsScreen() {
+  var nameEl = document.getElementById('settings-name');
+  if (nameEl) nameEl.value = STATE.userName || '';
+  var cnEl = document.getElementById('settings-companion-name');
+  if (cnEl) cnEl.value = STATE.companionName === 'Companion' ? '' : STATE.companionName;
+  applyProviderUI(STATE.provider);
+  document.querySelectorAll('.length-opt').forEach(function(b) {
+    b.dataset.length === STATE.replyLength ? b.classList.add('active') : b.classList.remove('active');
+  });
+  document.querySelectorAll('.font-size-opt').forEach(function(b) {
+    parseInt(b.dataset.size, 10) === (parseInt(localStorage.getItem('pc_font_size'), 10) || 18) ? b.classList.add('active') : b.classList.remove('active');
+  });
+}
+function saveSettingName() {
+  var val = (document.getElementById('settings-name').value || '').trim();
+  STATE.userName = val;
+  if (val) localStorage.setItem('pc_user_name', val);
+  else localStorage.removeItem('pc_user_name');
+}
+function saveSettingCompanionName() {
+  var val = (document.getElementById('settings-companion-name').value || '').trim();
+  STATE.companionName = val || 'Companion';
+  localStorage.setItem('pc_companion_name', STATE.companionName);
+  var keyInp = document.getElementById('companion-name-input');
+  if (keyInp) keyInp.value = val;
+}
+
+// ═══════════════════════════════════════════════════
+//  READING PROGRESS
+// ═══════════════════════════════════════════════════
+function getReadingProgress(book) {
+  try {
+    return JSON.parse(localStorage.getItem('pc_progress_' + bookKey(book)) || 'null');
+  } catch (e) { return null; }
+}
+function updateProgressFromHighlights(highlights) {
+  var byBook = {};
+  highlights.forEach(function(h) {
+    if (!h.page) return;
+    var bk = bookKey({ title: h.title, author: h.author });
+    if (!byBook[bk] || h.page > byBook[bk]) byBook[bk] = h.page;
+  });
+  Object.keys(byBook).forEach(function(bk) {
+    var existing = getReadingProgress({ title: bk, author: '' });
+    if (!existing || byBook[bk] > (existing.page || 0)) {
+      localStorage.setItem('pc_progress_' + bk, JSON.stringify({ page: byBook[bk], source: 'kindle' }));
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  BOOK SUBJECTS (icebreaker enrichment)
+// ═══════════════════════════════════════════════════
+function fetchAndCacheSubjects(book) {
+  var bk = bookKey(book);
+  var cacheKey = 'pc_subjects_' + bk;
+  if (localStorage.getItem(cacheKey)) return;
+  if (book.key && book.key.indexOf('/works/') === 0) {
+    fetch('https://openlibrary.org' + book.key + '.json')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var subjects = (data.subjects || []).slice(0, 10);
+        localStorage.setItem(cacheKey, JSON.stringify(subjects));
+      })
+      .catch(function() {});
+  } else if (book.cats) {
+    var cats = book.cats.split(/\s+/).filter(Boolean).slice(0, 6);
+    if (cats.length) localStorage.setItem(cacheKey, JSON.stringify(cats));
+  }
+}
+
 function init() {
   try {
     var prov = localStorage.getItem('pc_provider');
@@ -3066,6 +3166,8 @@ function init() {
       STATE.companionName = name;
       document.getElementById('companion-name-input').value = name;
     }
+    var uname = localStorage.getItem('pc_user_name');
+    if (uname) STATE.userName = uname;
   } catch (e) {
     showInitError('settings: ' + e.message);
   }

@@ -138,7 +138,7 @@ Add new items in the appropriate section.
       pc_notes_[bookKey] in localStorage.
       Completely separate from AI conversations.
 
-- [ ] Ice breaker prompts enriched with metadata
+- [x] Ice breaker prompts enriched with metadata
       Add Open Library genre and subject metadata
       to the ice breaker generation prompt.
       Makes prompts more specific to book themes.
@@ -150,7 +150,7 @@ Add new items in the appropriate section.
       Numbered exchanges, book/author/date header.
       "Export conversation" in More panel.
 
-- [ ] Reading progress indicator
+- [x] Reading progress indicator
       Visual progress display not just status label.
       Use ChapterProgress field from Kobo SQLite
       where available (value is 0.0 to 1.0).
@@ -183,7 +183,7 @@ Add new items in the appropriate section.
 
 ## PRIORITY 3 — Settings page
 
-- [ ] Settings screen
+- [x] Settings screen
       New screen: #settings
       Accessible from Library Hall footer.
       Fields:
