@@ -1275,15 +1275,22 @@ function _setReadingStatus() {
           bk = bookKey(STATE.book);
           savedLang = localStorage.getItem('pc_lang_' + bk);
           if (lang && !savedLang) {
-            // show language choice
-            document.getElementById('lang-prompt-text').textContent = 'This looks like it might be in ' + lang + '. Would you like to chat in ' + lang + ' or in English?';
-            document.getElementById('lang-native-btn').textContent = 'Chat in ' + lang;
-            navigate('language');
-          } else {
-            STATE.chatLanguage = savedLang || 'english';
-            launchCompanion(STATE.book);
+            // auto-set to native; user can change via language screen if they want
+            STATE.chatLanguage = 'native';
+            localStorage.setItem('pc_lang_' + bk, 'native');
+            _context1.n = 1;
+            break;
           }
+          STATE.chatLanguage = savedLang || 'english';
+          launchCompanion(STATE.book);
+          _context1.n = 3;
+          break;
         case 1:
+          _context1.n = 2;
+          return generateThinkingPhrases(lang);
+        case 2:
+          launchCompanion(STATE.book);
+        case 3:
           return _context1.a(2);
       }
     }, _callee1);
@@ -1747,7 +1754,7 @@ function _populateIcebreakers() {
           loadEl.style.fontStyle = 'italic';
           loadEl.textContent = 'Finding the right questions…';
           list.appendChild(loadEl);
-          cacheKey = 'pc_icebreakers_' + bookKey(book) + '_' + (STATE.readingStatus || '');
+          cacheKey = 'pc_icebreakers_' + bookKey(book) + '_' + (STATE.readingStatus || '') + '_' + (STATE.chatLanguage || 'english');
           _context12.p = 1;
           c = localStorage.getItem(cacheKey);
           if (!c) {
@@ -1782,9 +1789,12 @@ function _populateIcebreakers() {
           prompts = null;
         case 8:
           if (!prompts || !prompts.length) {
-            prompts = getStaticPromptsByStatus(STATE.readingStatus);
+            // skip static prompts for non-English books — they're always in English
+            if (STATE.chatLanguage !== 'native') {
+              prompts = getStaticPromptsByStatus(STATE.readingStatus);
+            }
           }
-          renderIcebreakerButtons(prompts, list);
+          renderIcebreakerButtons(prompts || [], list);
         case 9:
           return _context12.a(2);
       }
@@ -1817,11 +1827,11 @@ function _fetchAIIcebreakers() {
             finished: 'just finished'
           };
           statusLabel = statusLabels[STATE.readingStatus] || 'reading';
-          langNote = STATE.chatLanguage === 'native' && STATE.detectedLang ? '\nGenerate the prompts in ' + STATE.detectedLang + '.' : '';
+          langNote = STATE.chatLanguage === 'native' && STATE.detectedLang ? 'IMPORTANT: Write all 4 prompts in ' + STATE.detectedLang + '. Every word must be in ' + STATE.detectedLang + '. Do not use English.\n\n' : '';
           var cachedSubjects = localStorage.getItem('pc_subjects_' + bookKey(book));
           var subjectArr = cachedSubjects ? JSON.parse(cachedSubjects) : [];
           var subjectNote = subjectArr.length ? '\nKnown subjects/themes: ' + subjectArr.slice(0, 8).join(', ') + '.' : '';
-          prompt = 'You are a literary companion helping a reader of "' + book.title + '" by ' + book.author + '.\n\n' + 'The reader\'s current status: ' + statusLabel + subjectNote + '\n\n' + "Generate exactly 4 ice breaker prompts that feel specific to THIS book \u2014 its themes, reputation, tone, setting, and what readers typically wonder about.\n\n" + 'Rules:\n' + '- Each prompt max 8 words\n' + '- Must feel specific to this exact book\n' + '- NOT generic questions that apply to any book\n' + '- NOT: "Is this book for me?"\n' + '- NOT: "What is the main idea?"\n' + '- NOT: "How long does it take to read?"\n' + '- Tone matches reading status:\n' + '  considering: ask what drew the READER to this book (curiosity, what they\'ve heard, what appeals) — NOT questions about the book\'s content or plot\n' + '  just started: early impressions, what to expect ahead\n' + '  halfway: tensions building, character observations, predictions\n' + '  just finished: emotional reactions, themes, meaning, what next' + langNote + '\n\n' + 'Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.\n' + 'Example format: ["prompt one","prompt two","prompt three","prompt four"]';
+          prompt = langNote + 'You are a literary companion helping a reader of "' + book.title + '" by ' + book.author + '.\n\n' + 'The reader\'s current status: ' + statusLabel + subjectNote + '\n\n' + "Generate exactly 4 ice breaker prompts that feel specific to THIS book \u2014 its themes, reputation, tone, setting, and what readers typically wonder about.\n\n" + 'Rules:\n' + '- Each prompt max 8 words\n' + '- Must feel specific to this exact book\n' + '- NOT generic questions that apply to any book\n' + '- NOT: "Is this book for me?"\n' + '- NOT: "What is the main idea?"\n' + '- NOT: "How long does it take to read?"\n' + '- Tone matches reading status:\n' + '  considering: ask what drew the READER to this book (curiosity, what they\'ve heard, what appeals) — NOT questions about the book\'s content or plot\n' + '  just started: early impressions, what to expect ahead\n' + '  halfway: tensions building, character observations, predictions\n' + '  just finished: emotional reactions, themes, meaning, what next' + '\n\n' + 'Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.\n' + 'Example format: ["prompt one","prompt two","prompt three","prompt four"]';
           text = '';
           if (!(STATE.provider === 'anthropic')) {
             _context13.n = 4;
@@ -1968,6 +1978,10 @@ function _fetchAIIcebreakers() {
 }
 function renderIcebreakerButtons(prompts, list) {
   list.innerHTML = '';
+  if (!prompts || !prompts.length) {
+    document.getElementById('icebreakers').style.display = 'none';
+    return;
+  }
   prompts.forEach(function (text) {
     var btn = document.createElement('button');
     btn.className = 'icebreaker-btn';
