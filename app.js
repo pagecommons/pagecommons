@@ -2257,7 +2257,7 @@ function _callAnthropic() {
             },
             body: JSON.stringify({
               model: 'claude-sonnet-4-20250514',
-              max_tokens: STATE.replyLength === 'short' ? 150 : 600,
+              max_tokens: STATE.replyLength === 'short' ? 400 : 1500,
               system: system,
               messages: messages
             })
@@ -2277,7 +2277,9 @@ function _callAnthropic() {
           throw new Error(e && e.error && e.error.message ? e.error.message : 'HTTP ' + res.status);
         case 3:
           _t35 = function _t35(j) {
-            return j && j.content && j.content[0] ? j.content[0].text : "";
+            var txt = j && j.content && j.content[0] ? j.content[0].text : '';
+            if (j && j.stop_reason === 'max_tokens') txt += '\n\n[Reply was cut short — switch to Detailed in the toolbar for longer responses.]';
+            return txt || '(No response)';
           };
           _context16.n = 4;
           return res.json();
@@ -2332,7 +2334,7 @@ function _callGemini() {
             },
             body: JSON.stringify({
               contents: contents,
-              generationConfig: { maxOutputTokens: STATE.replyLength === 'short' ? 150 : 600 }
+              generationConfig: { maxOutputTokens: STATE.replyLength === 'short' ? 400 : 1500 }
             })
           });
         case 1:
@@ -2350,7 +2352,9 @@ function _callGemini() {
           throw new Error(e && e.error && e.error.message ? e.error.message : 'HTTP ' + res.status);
         case 3:
           _t37 = function _t37(j) {
-            return j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts && j.candidates[0].content.parts[0] ? j.candidates[0].content.parts[0].text : "";
+            var txt = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts && j.candidates[0].content.parts[0] ? j.candidates[0].content.parts[0].text : '';
+            if (j && j.candidates && j.candidates[0] && j.candidates[0].finishReason === 'MAX_TOKENS') txt += '\n\n[Reply was cut short — switch to Detailed in the toolbar for longer responses.]';
+            return txt || '(No response)';
           };
           _context17.n = 4;
           return res.json();
@@ -2388,7 +2392,7 @@ function _callGroq() {
             },
             body: JSON.stringify({
               model: 'llama-3.3-70b-versatile',
-              max_tokens: STATE.replyLength === 'short' ? 150 : 600,
+              max_tokens: STATE.replyLength === 'short' ? 400 : 1500,
               messages: [{
                 role: 'system',
                 content: system
@@ -2410,7 +2414,9 @@ function _callGroq() {
           throw new Error(e && e.error && e.error.message ? e.error.message : 'HTTP ' + res.status);
         case 3:
           _t39 = function _t39(j) {
-            return j && j.choices && j.choices[0] && j.choices[0].message ? j.choices[0].message.content : "";
+            var txt = j && j.choices && j.choices[0] && j.choices[0].message ? j.choices[0].message.content : '';
+            if (j && j.choices && j.choices[0] && j.choices[0].finish_reason === 'length') txt += '\n\n[Reply was cut short — switch to Detailed in the toolbar for longer responses.]';
+            return txt || '(No response)';
           };
           _context18.n = 4;
           return res.json();

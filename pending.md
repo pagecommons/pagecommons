@@ -19,6 +19,13 @@ Add new items in the appropriate section.
 - [x] Mixed content warnings
       Fixed: thumb.replace('http://', 'https://') in fetchGoogleBooks().
 
+- [x] Truncated AI responses
+      Max token limits were too low (150 short / 600 medium) causing
+      responses to be cut mid-sentence, especially in Chinese/Japanese.
+      Fixed: short 400, medium/detailed 1500 across all three providers.
+      Also added finish_reason detection — truncated replies now append
+      a visible notice prompting the user to switch to Detailed mode.
+
 ---
 
 ## PRIORITY 1 — Complete V1 core
