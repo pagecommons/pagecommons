@@ -1230,10 +1230,11 @@ function _selectBook() {
             _context0.n = 2;
             break;
           }
-          // returning book — restore ALL language state before launching (Bug Fix A)
+          // returning book — always use native for detected non-English books
           STATE.readingStatus = savedStatus;
-          STATE.chatLanguage = savedLang || 'english';
           STATE.detectedLang = detectedLang;
+          STATE.chatLanguage = detectedLang ? 'native' : (savedLang || 'english');
+          if (detectedLang) localStorage.setItem('pc_lang_' + bk, 'native');
           // restore thinking phrases if native language was chosen
           if (!(STATE.chatLanguage === 'native' && detectedLang)) {
             _context0.n = 1;
@@ -1246,8 +1247,9 @@ function _selectBook() {
           _context0.n = 3;
           break;
         case 2:
-          // new book — set detectedLang BEFORE renderStatusScreen so translation works
+          // new book — pre-set language so status screen renders in the right language
           STATE.detectedLang = detectedLang;
+          if (detectedLang) STATE.chatLanguage = 'native';
           renderStatusScreen(book);
           navigate('status');
         case 3:
