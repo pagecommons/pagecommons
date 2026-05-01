@@ -424,13 +424,13 @@ function _interpretSearchQuery() {
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
+            body: JSON.stringify(Object.assign({
               contents: [{
                 parts: [{
                   text: prompt
                 }]
               }]
-            })
+            }, langNote ? { systemInstruction: { parts: [{ text: langNote }] } } : {}))
           });
         case 7:
           _res = _context2.v;
@@ -1827,11 +1827,11 @@ function _fetchAIIcebreakers() {
             finished: 'just finished'
           };
           statusLabel = statusLabels[STATE.readingStatus] || 'reading';
-          langNote = STATE.chatLanguage === 'native' && STATE.detectedLang ? 'IMPORTANT: Write all 4 prompts in ' + STATE.detectedLang + '. Every word must be in ' + STATE.detectedLang + '. Do not use English.\n\n' : '';
+          langNote = STATE.chatLanguage === 'native' && STATE.detectedLang ? 'You must write entirely in ' + STATE.detectedLang + '. Every word of your response must be in ' + STATE.detectedLang + '. Do not use any English.' : '';
           var cachedSubjects = localStorage.getItem('pc_subjects_' + bookKey(book));
           var subjectArr = cachedSubjects ? JSON.parse(cachedSubjects) : [];
           var subjectNote = subjectArr.length ? '\nKnown subjects/themes: ' + subjectArr.slice(0, 8).join(', ') + '.' : '';
-          prompt = langNote + 'You are a literary companion helping a reader of "' + book.title + '" by ' + book.author + '.\n\n' + 'The reader\'s current status: ' + statusLabel + subjectNote + '\n\n' + "Generate exactly 4 ice breaker prompts that feel specific to THIS book \u2014 its themes, reputation, tone, setting, and what readers typically wonder about.\n\n" + 'Rules:\n' + '- Each prompt max 8 words\n' + '- Must feel specific to this exact book\n' + '- NOT generic questions that apply to any book\n' + '- NOT: "Is this book for me?"\n' + '- NOT: "What is the main idea?"\n' + '- NOT: "How long does it take to read?"\n' + '- Tone matches reading status:\n' + '  considering: ask what drew the READER to this book (curiosity, what they\'ve heard, what appeals) — NOT questions about the book\'s content or plot\n' + '  just started: early impressions, what to expect ahead\n' + '  halfway: tensions building, character observations, predictions\n' + '  just finished: emotional reactions, themes, meaning, what next' + '\n\n' + 'Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.\n' + 'Example format: ["prompt one","prompt two","prompt three","prompt four"]';
+          prompt = 'You are a literary companion helping a reader of "' + book.title + '" by ' + book.author + '.\n\n' + 'The reader\'s current status: ' + statusLabel + subjectNote + '\n\n' + "Generate exactly 4 ice breaker prompts that feel specific to THIS book \u2014 its themes, reputation, tone, setting, and what readers typically wonder about.\n\n" + 'Rules:\n' + '- Each prompt max 8 words\n' + '- Must feel specific to this exact book\n' + '- NOT generic questions that apply to any book\n' + '- NOT: "Is this book for me?"\n' + '- NOT: "What is the main idea?"\n' + '- NOT: "How long does it take to read?"\n' + '- Tone matches reading status:\n' + '  considering: ask what drew the READER to this book (curiosity, what they\'ve heard, what appeals) — NOT questions about the book\'s content or plot\n' + '  just started: early impressions, what to expect ahead\n' + '  halfway: tensions building, character observations, predictions\n' + '  just finished: emotional reactions, themes, meaning, what next' + '\n\n' + 'Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.\n' + 'Example format: ["prompt one","prompt two","prompt three","prompt four"]';
           text = '';
           if (!(STATE.provider === 'anthropic')) {
             _context13.n = 4;
@@ -1846,14 +1846,14 @@ function _fetchAIIcebreakers() {
               'anthropic-version': '2023-06-01',
               'anthropic-dangerous-direct-browser-access': 'true'
             },
-            body: JSON.stringify({
+            body: JSON.stringify(Object.assign({
               model: 'claude-sonnet-4-20250514',
               max_tokens: 200,
               messages: [{
                 role: 'user',
                 content: prompt
               }]
-            })
+            }, langNote ? { system: langNote } : {}))
           });
         case 1:
           res = _context13.v;
@@ -1884,13 +1884,13 @@ function _fetchAIIcebreakers() {
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
+            body: JSON.stringify(Object.assign({
               contents: [{
                 parts: [{
                   text: prompt
                 }]
               }]
-            })
+            }, langNote ? { systemInstruction: { parts: [{ text: langNote }] } } : {}))
           });
         case 5:
           _res7 = _context13.v;
@@ -1925,10 +1925,10 @@ function _fetchAIIcebreakers() {
             body: JSON.stringify({
               model: 'llama-3.3-70b-versatile',
               max_tokens: 200,
-              messages: [{
+              messages: (langNote ? [{ role: 'system', content: langNote }] : []).concat([{
                 role: 'user',
                 content: prompt
-              }]
+              }])
             })
           });
         case 9:
