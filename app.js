@@ -58,7 +58,9 @@ var STATE = {
   chatLanguage: 'english',
   // 'english' | 'native'
   detectedLang: null,
-  // language name detected from book, e.g. 'Chinese'
+  // language name detected from book, e.g. 'Traditional Chinese'
+  companionLangOverride: null,
+  // null = auto (match book); string = always use this language
   highlights: [],
   messages: [],
   lastUserText: '',
@@ -1374,6 +1376,10 @@ function detectLanguage(book) {
   if (hasCyrillic) return 'Russian';
   return null;
 }
+function getCompanionLang() {
+  if (STATE.companionLangOverride) return STATE.companionLangOverride;
+  return STATE.detectedLang || null;
+}
 function launchCompanion(book) {
   // assign conversation ID if not set
   if (!STATE.currentConvId) {
@@ -1838,7 +1844,7 @@ function _fetchAIIcebreakers() {
             finished: 'just finished'
           };
           statusLabel = statusLabels[STATE.readingStatus] || 'reading';
-          var _lang = STATE.detectedLang || detectLanguage(book);
+          var _lang = STATE.companionLangOverride || STATE.detectedLang || detectLanguage(book);
           langNote = _lang ? 'You must write entirely in ' + _lang + '. Every word of your response must be in ' + _lang + '. Do not use any English.' : '';
           var cachedSubjects = localStorage.getItem('pc_subjects_' + bookKey(book));
           var subjectArr = cachedSubjects ? JSON.parse(cachedSubjects) : [];
@@ -2222,7 +2228,8 @@ function buildSystemPrompt() {
     revisiting: 'The reader has read this book before and is revisiting it. They may have fresh perspectives or notice things they missed first time. Treat them as someone who knows the book well.'
   };
   var statusNote = statusInstructions[STATE.readingStatus] || 'Be spoiler-aware — ask the reader how far they\'ve got before revealing plot details.';
-  var langNote = STATE.chatLanguage === 'native' && STATE.detectedLang ? '\n\nRespond entirely in ' + STATE.detectedLang + '. The reader has chosen to discuss this book in ' + STATE.detectedLang + '.' : '';
+  var _companionLang = STATE.companionLangOverride || (STATE.chatLanguage === 'native' && STATE.detectedLang ? STATE.detectedLang : null);
+  var langNote = _companionLang ? '\n\nRespond entirely in ' + _companionLang + '. Do not use any other language.' : '';
   var replyLengthNote = STATE.replyLength === 'short' ? "Maximum 2 sentences. Stop after 2 sentences." : STATE.replyLength === 'detailed' ? "You may give fuller, more detailed responses when the topic warrants it." : "Keep responses concise — 2 to 4 short paragraphs maximum.";
   return "You are a reading companion for \"" + book.title + "\" by " + book.author + ".\n\n" + "You are warm but not gushing. Curious — you always ask something back at the end. You never summarise the plot unprompted. You offer opinions when asked. You are honest about what you don't know. Literary without being academic. You feel like a well-read friend who has also read this book.\n\n" + "Never say \"Great question!\" Keep responses concise — this is read on an e-ink screen. Short paragraphs. Always end with a question or an invitation to continue.\n\n" + statusNote + "\n\n" + "If the conversation drifts away from the book, find a gentle bridge back — connect what the reader said to something in the book rather than refusing or redirecting bluntly. You are a reading companion, not a general assistant.\n\n" + "If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.\n\n" + replyLengthNote + "\n\n" + "Be honest about the limits of your knowledge. If you are not confident about specific details of this book — plot points, character names, themes — say so openly and invite the reader to share what they know. Never confabulate or pretend to know something you are uncertain about. A good reading companion says \"I'm not sure about that — what did you make of it?\" rather than guessing.\n\n" + "Respond in plain prose only. No bullet points. No headers. No lists of any kind.\n\n" + "When you mention a specific book you'd recommend, format it exactly as: [RECOMMEND: Title by Author] — this renders as a tappable search button for the reader. Use this only when genuinely recommending a specific title, not for the current book being discussed.\n\n" + "If there are any signs this reader may be a minor, default to age-appropriate discussion regardless of the book's content rating." + langNote + highlightsText;
 }
@@ -3115,6 +3122,13 @@ function loadSettingsScreen() {
   document.querySelectorAll('.font-size-opt').forEach(function(b) {
     parseInt(b.dataset.size, 10) === (parseInt(localStorage.getItem('pc_font_size'), 10) || 18) ? b.classList.add('active') : b.classList.remove('active');
   });
+  var clangEl = document.getElementById('settings-companion-lang');
+  if (clangEl) clangEl.value = STATE.companionLangOverride || '';
+}
+function saveCompanionLangSetting(val) {
+  STATE.companionLangOverride = val || null;
+  if (val) localStorage.setItem('pc_companion_lang', val);
+  else localStorage.removeItem('pc_companion_lang');
 }
 function saveSettingName() {
   var val = (document.getElementById('settings-name').value || '').trim();
@@ -3194,6 +3208,8 @@ function init() {
     }
     var uname = localStorage.getItem('pc_user_name');
     if (uname) STATE.userName = uname;
+    var clang = localStorage.getItem('pc_companion_lang');
+    if (clang) STATE.companionLangOverride = clang;
   } catch (e) {
     showInitError('settings: ' + e.message);
   }
