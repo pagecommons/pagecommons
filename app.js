@@ -1329,10 +1329,15 @@ function _setLanguage() {
   return _setLanguage.apply(this, arguments);
 }
 function detectLanguage(book) {
-  // detect from Google Books language code
-  if (book.lang && book.lang !== 'en') {
+  var lang = book.lang || '';
+  // Traditional Chinese lang codes
+  if (/^zh[-_]?(TW|HK|Hant)/i.test(lang)) return 'Traditional Chinese';
+  // Simplified Chinese lang codes
+  if (/^zh[-_]?(CN|SG|Hans)/i.test(lang)) return 'Simplified Chinese';
+  // bare zh \u2014 distinguish by title characters below
+  var isBareZh = (lang === 'zh');
+  if (!isBareZh && lang && lang !== 'en') {
     var LANG_NAMES = {
-      zh: 'Chinese',
       ja: 'Japanese',
       ko: 'Korean',
       fr: 'French',
@@ -1349,15 +1354,20 @@ function detectLanguage(book) {
       pl: 'Polish',
       tr: 'Turkish'
     };
-    return LANG_NAMES[book.lang] || null;
+    return LANG_NAMES[lang] || null;
   }
   // detect from non-ASCII characters in title
-  var hasChinese = /[\u4e00-\u9fff]/.test(book.title);
-  var hasJapanese = /[\u3040-\u30ff]/.test(book.title);
-  var hasKorean = /[\uac00-\ud7af]/.test(book.title);
-  var hasArabic = /[\u0600-\u06ff]/.test(book.title);
-  var hasCyrillic = /[\u0400-\u04ff]/.test(book.title);
-  if (hasChinese) return 'Chinese';
+  var titleAndAuthor = (book.title || '') + ' ' + (book.author || '');
+  var hasChinese = /[\u4e00-\u9fff]/.test(titleAndAuthor);
+  var hasJapanese = /[\u3040-\u30ff]/.test(titleAndAuthor);
+  var hasKorean = /[\uac00-\ud7af]/.test(titleAndAuthor);
+  var hasArabic = /[\u0600-\u06ff]/.test(titleAndAuthor);
+  var hasCyrillic = /[\u0400-\u04ff]/.test(titleAndAuthor);
+  if (hasChinese || isBareZh) {
+    // Traditional-only characters: \u8aaa\u4f86\u570b\u70ba\u52d5\u7d71\u5011\u6642\u9019\u500b\u5b78\u9ebc
+    var isTraditional = /[\u8aaa\u8aac\u4f86\u570b\u70ba\u52d5\u7d71\u5011\u6642\u9019\u500b\u5b78\u9ebc\u50b3\u9023\u7a2e\u9ede\u5c64\u9928\u91ab\u7522\u6703\u5340\u7d93\u984c\u5c0d\u96fb\u96dc\u6aa2\u8996\u5275\u5c08\u7dda\u98a8\u98db\u8af8\u8acb\u8b6f\u9ad4\u66f8\u9577\u7121\u5f37\u958b\u7d66\u5167\u5bec\u9593\u7e3d]/.test(titleAndAuthor);
+    return isTraditional ? 'Traditional Chinese' : 'Simplified Chinese';
+  }
   if (hasJapanese) return 'Japanese';
   if (hasKorean) return 'Korean';
   if (hasArabic) return 'Arabic';
