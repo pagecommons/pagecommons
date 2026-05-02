@@ -688,7 +688,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">97bac7f+</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">164db08+</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -1098,24 +1098,27 @@
     <div class="settings-section">
       <div class="settings-section-label">Companion language</div>
       <div class="field">
-        <select id="settings-companion-lang" onchange="saveCompanionLangSetting(this.value)" style="width:100%;border:1px solid #111111;background:#ffffff;color:#111111;font-family:Georgia,'Times New Roman',serif;font-size:1rem;padding:12px 14px;outline:none;-webkit-appearance:none;border-radius:0">
-          <option value="">Auto (match book)</option>
-          <option value="English">English</option>
-          <option value="French">French</option>
-          <option value="German">German</option>
-          <option value="Spanish">Spanish</option>
-          <option value="Italian">Italian</option>
-          <option value="Portuguese">Portuguese</option>
-          <option value="Traditional Chinese">Traditional Chinese</option>
-          <option value="Simplified Chinese">Simplified Chinese</option>
-          <option value="Japanese">Japanese</option>
-          <option value="Korean">Korean</option>
-          <option value="Arabic">Arabic</option>
-          <option value="Russian">Russian</option>
-          <option value="Dutch">Dutch</option>
-          <option value="Polish">Polish</option>
-          <option value="Turkish">Turkish</option>
-        </select>
+        <div style="position:relative">
+          <select id="settings-companion-lang" onchange="saveCompanionLangSetting(this.value)" style="width:100%;border:1px solid #111111;background:#ffffff;color:#111111;font-family:Georgia,'Times New Roman',serif;font-size:1rem;padding:12px 14px;padding-right:36px;outline:none;border-radius:0;-webkit-appearance:none;appearance:none">
+            <option value="">Auto (match book)</option>
+            <option value="English">English</option>
+            <option value="French">French</option>
+            <option value="German">German</option>
+            <option value="Spanish">Spanish</option>
+            <option value="Italian">Italian</option>
+            <option value="Portuguese">Portuguese</option>
+            <option value="Traditional Chinese">Traditional Chinese</option>
+            <option value="Simplified Chinese">Simplified Chinese</option>
+            <option value="Japanese">Japanese</option>
+            <option value="Korean">Korean</option>
+            <option value="Arabic">Arabic</option>
+            <option value="Russian">Russian</option>
+            <option value="Dutch">Dutch</option>
+            <option value="Polish">Polish</option>
+            <option value="Turkish">Turkish</option>
+          </select>
+          <span style="position:absolute;right:12px;top:50%;margin-top:-8px;font-size:1rem;line-height:1;pointer-events:none;color:#111111">&#9660;</span>
+        </div>
         <p style="font-size:0.78rem;color:#777777;margin-top:6px">Auto matches the book's language. Override to always chat in your preferred language.</p>
       </div>
     </div>
