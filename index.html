@@ -688,7 +688,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">164db08+</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">d8a0db9+</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -891,6 +891,19 @@
       <button class="btn" style="margin-top:8px" onclick="parseClippingsPaste()">Import pasted text</button>
     </div>
     <div id="clippings-status" class="status-msg" style="display:none"></div>
+
+    <hr style="margin-top:24px" />
+    <h2>Or import from Kobo</h2>
+    <p class="note">Upload your <em>KoboReader.sqlite</em> file to load your highlights and annotations. Find it in the <em>.kobo</em> folder on your device.</p>
+    <p class="note" style="margin-top:6px">Everything is processed locally in your browser. The file is never uploaded.</p>
+    <div class="field">
+      <label>KoboReader.sqlite</label>
+      <div class="file-input-wrapper">
+        <div class="file-btn-label">Choose file</div>
+        <input type="file" id="kobo-file" accept=".sqlite,.db" onchange="parseKoboDatabase(this)" />
+      </div>
+    </div>
+    <div id="kobo-status" class="status-msg" style="display:none"></div>
   </section>
 
   <!-- ══════════════════════════════════

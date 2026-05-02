@@ -56,17 +56,18 @@ Add new items in the appropriate section.
       GET: GETDEL for one-time use, 5-fail lockout.
       Never logs key values.
 
-- [ ] Kobo highlights import
-      Accept KoboReader.sqlite file upload.
-      Parse client-side using sql.js (WebAssembly).
-      Query Bookmark and content tables.
-      Extract: title, author, highlight text,
-      annotation notes, date, chapter progress.
-      Captures: Kobo native books, sideloaded ePubs,
-      Libby books sent via Send to Kobo.
-      Same privacy-first approach as Kindle import.
-      ChapterProgress (0.0–1.0) stored for future
-      reading progress indicator feature.
+- [x] Kobo highlights import
+      KoboReader.sqlite upload on search screen.
+      sql.js (WebAssembly) loaded lazily from CDN.
+      Queries Bookmark JOIN content tables.
+      Extracts: title, author, highlight text,
+      annotation notes, date, chapterProgress.
+      BookTitle preferred over chapter Title.
+      Attribution "By " prefix stripped.
+      source:'kobo' stored per highlight.
+      Highlights panel shows "from your Kobo".
+      ChapterProgress stored on each highlight
+      for future reading progress indicator.
 
 - [ ] Discovery companion mode
       Separate entry point from reading companion.

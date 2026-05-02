@@ -1697,6 +1697,112 @@ function getMostRecentBook(h) {
 }
 
 // ═══════════════════════════════════════════════════
+//  KOBO HIGHLIGHTS IMPORT
+// ═══════════════════════════════════════════════════
+var SQL_JS_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js';
+var SQL_WASM_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.wasm';
+
+function loadSqlJs(callback) {
+  if (typeof initSqlJs !== 'undefined') { callback(null); return; }
+  var script = document.createElement('script');
+  script.src = SQL_JS_CDN;
+  script.onload = function() { callback(null); };
+  script.onerror = function() { callback(new Error('Could not load sql.js — check your internet connection.')); };
+  document.head.appendChild(script);
+}
+
+function parseKoboDatabase(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var statusEl = document.getElementById('kobo-status');
+  statusEl.textContent = 'Loading database reader…';
+  statusEl.style.display = 'block';
+
+  loadSqlJs(function(loadErr) {
+    if (loadErr) { statusEl.textContent = loadErr.message; return; }
+    statusEl.textContent = 'Reading database…';
+    var reader = new FileReader();
+    reader.onerror = function() { statusEl.textContent = 'Could not read the file.'; };
+    reader.onload = function(e) {
+      initSqlJs({ locateFile: function() { return SQL_WASM_CDN; } }).then(function(SQL) {
+        var db;
+        try {
+          db = new SQL.Database(new Uint8Array(e.target.result));
+        } catch(openErr) {
+          statusEl.textContent = 'Not a valid SQLite database: ' + openErr.message;
+          return;
+        }
+        var highlights;
+        try {
+          highlights = processKoboHighlights(db);
+        } catch(queryErr) {
+          db.close();
+          statusEl.textContent = 'Could not read highlights: ' + queryErr.message;
+          return;
+        }
+        db.close();
+
+        if (!highlights.length) {
+          statusEl.textContent = 'No highlights found in this database.';
+          return;
+        }
+
+        STATE.highlights = highlights;
+        localStorage.setItem('pc_highlights', JSON.stringify(highlights));
+        var n = highlights.length, b = countBooks(highlights);
+        statusEl.textContent = 'Loaded ' + n + ' highlight' + (n !== 1 ? 's' : '') + ' from ' + b + ' book' + (b !== 1 ? 's' : '') + '.';
+        var top = getMostRecentBook(highlights);
+        if (top) selectBook({ title: top.title, author: top.author, year: '', key: '' });
+      }).catch(function(wasmErr) {
+        statusEl.textContent = 'Database reader failed to start: ' + wasmErr.message;
+      });
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function processKoboHighlights(db) {
+  var sql = 'SELECT b.Text, b.Annotation, b.DateCreated, b.ChapterProgress, ' +
+    'c.Title, c.Attribution, c.BookTitle ' +
+    'FROM Bookmark b ' +
+    'LEFT JOIN content c ON c.ContentID = b.VolumeID ' +
+    "WHERE b.Hidden = 0 AND b.Text IS NOT NULL AND b.Text != '' " +
+    'ORDER BY b.DateCreated ASC';
+  var results = db.exec(sql);
+  if (!results || !results.length) return [];
+
+  var cols = results[0].columns;
+  var rows = results[0].values;
+  var out = [];
+
+  rows.forEach(function(row) {
+    var obj = {};
+    cols.forEach(function(c, i) { obj[c] = row[i]; });
+
+    var text = (obj.Text || '').trim();
+    if (!text) return;
+
+    var title = ((obj.BookTitle && obj.BookTitle.trim()) || (obj.Title && obj.Title.trim()) || 'Unknown');
+    var author = (obj.Attribution || '').replace(/^By\s+/i, '').trim() || 'Unknown';
+
+    var h = {
+      title: title,
+      author: author,
+      text: text,
+      date: (obj.DateCreated || '').substring(0, 10),
+      page: null,
+      source: 'kobo'
+    };
+    if (obj.Annotation && obj.Annotation.trim()) h.annotation = obj.Annotation.trim();
+    if (obj.ChapterProgress !== null && obj.ChapterProgress !== undefined) {
+      h.chapterProgress = parseFloat(obj.ChapterProgress);
+    }
+    out.push(h);
+  });
+  return out;
+}
+
+// ═══════════════════════════════════════════════════
 //  FUZZY HIGHLIGHTS MATCHING
 // ═══════════════════════════════════════════════════
 var STOP_WORDS = new Set(['the', 'a', 'an', 'of', 'and', 'in', 'on', 'at', 'to', 'for', 'by']);
@@ -1733,7 +1839,8 @@ function renderHighlightsPanel() {
   if (relevant.length) {
     btn.style.display = 'block';
     btn.textContent = 'Highlights (' + relevant.length + ')';
-    document.getElementById('highlights-count').textContent = relevant.length + ' highlight' + (relevant.length !== 1 ? 's' : '') + ' from your Kindle';
+    var _src = (relevant[0] && relevant[0].source === 'kobo') ? 'Kobo' : 'Kindle';
+    document.getElementById('highlights-count').textContent = relevant.length + ' highlight' + (relevant.length !== 1 ? 's' : '') + ' from your ' + _src;
     document.getElementById('highlights-list').innerHTML = relevant.map(function (h) {
       return '<p style="border-left:3px solid #d0d0d0;padding-left:10px;margin-bottom:12px;font-style:italic">"' + esc(h.text) + '"</p>';
     }).join('');
