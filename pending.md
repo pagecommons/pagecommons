@@ -69,13 +69,17 @@ Add new items in the appropriate section.
       ChapterProgress stored on each highlight
       for future reading progress indicator.
 
-- [ ] Discovery companion mode
-      Separate entry point from reading companion.
-      "Is this book for me?" framing.
-      Asks about reader preferences before describing.
-      Surfaces what readers wish they had known.
-      Provides reading time estimate from page count.
-      Leads naturally to affiliate buy links.
+- [x] Discovery companion mode
+      "Is this for me?" button on every search result card.
+      STATE.companionMode = 'discover' — separate from 'reading'.
+      Bypasses status screen, goes straight to companion.
+      Discovery system prompt: asks ONE preference question first,
+      then describes book through that lens.
+      Reading time estimate from pageCount (~50 pages/hour).
+      Static preference-question ice breakers (no AI call).
+      Book not added to shelf in discover mode.
+      Status label shows "Is this for me?" in companion header.
+      Leads naturally to affiliate buy links (future).
 
 - [ ] Surprise Me feature
       Two modes:
@@ -125,12 +129,12 @@ Add new items in the appropriate section.
       Shelf button added to Which book? screen.
       Home button sub-text updated to mention shelf.
 
-- [ ] Randomised book search heading
-      Replace static "Which book?" heading with
-      a randomised pool of headings.
-      Add name personalisation when name is set:
-      e.g. "What are you reading, [name]?"
-      Requires Settings page (see below).
+- [x] Randomised book search heading
+      Pool of 7 headings: "Which book?", "What are you reading?",
+      "What are you lost in?", etc.
+      5 personalised variants when userName is set.
+      updateSearchHeading() called on every navigate('search').
+      id="search-heading" on the h1 in index.html.
 
 - [x] Personal reflection notes per book
       Notes toolbar button always visible.

@@ -52,6 +52,8 @@ var STATE = {
   apiKey: '',
   provider: 'anthropic',
   companionName: 'Companion',
+  companionMode: 'reading',
+  // 'reading' | 'discover'
   book: null,
   readingStatus: null,
   // 'considering' | 'started' | 'midway' | 'finished'
@@ -81,6 +83,30 @@ var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'L
 //  SCREENS + NAVIGATION
 // ═══════════════════════════════════════════════════
 var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'tc', 'age-gate', 'settings'];
+
+var SEARCH_HEADINGS = [
+  'Which book?',
+  'What are you reading?',
+  'What are you lost in?',
+  'What\'s keeping you up?',
+  'What\'s calling to you?',
+  'What\'s in your hands?',
+  'Which world are you in?'
+];
+var SEARCH_HEADINGS_NAMED = [
+  'What are you reading, {name}?',
+  'What are you lost in, {name}?',
+  'What\'s keeping you up, {name}?',
+  'What\'s calling to you, {name}?',
+  'Which world are you in, {name}?'
+];
+function updateSearchHeading() {
+  var el = document.getElementById('search-heading');
+  if (!el) return;
+  var pool = STATE.userName ? SEARCH_HEADINGS_NAMED : SEARCH_HEADINGS;
+  var h = pool[Math.floor(Math.random() * pool.length)];
+  el.textContent = h.replace('{name}', STATE.userName || '');
+}
 
 // navigate() defined above with showScreen
 
@@ -122,6 +148,7 @@ function handleRoute() {
   showScreen(target);
   if (target === 'shelf') renderShelf();
   if (target === 'settings') loadSettingsScreen();
+  if (target === 'search') updateSearchHeading();
   updateTitleLink();
 }
 function navigate(view) {
@@ -521,9 +548,13 @@ function renderBookBatch(batch, container, insertBefore) {
     var el = document.createElement('div');
     el.className = 'book-result';
     var th = book.thumb ? '<img class="book-cover-thumb" src="' + esc(book.thumb) + '" alt="" loading="lazy">' : '';
-    el.innerHTML = '<div class="book-result-inner">' + th + '<div class="book-result-text">' + '<div class="book-result-title">' + esc(book.title) + '</div>' + '<div class="book-result-author">' + esc(book.author) + '</div>' + '<div class="book-result-meta">' + (book.year ? book.year + ' · ' : '') + esc(book.source || 'Open Library') + '</div>' + '</div></div>';
-    el.addEventListener('click', function () {
+    el.innerHTML = '<div class="book-result-inner">' + th + '<div class="book-result-text">' + '<div class="book-result-title">' + esc(book.title) + '</div>' + '<div class="book-result-author">' + esc(book.author) + '</div>' + '<div class="book-result-meta">' + (book.year ? book.year + ' · ' : '') + esc(book.source || 'Open Library') + '</div>' + '</div></div>' + '<div class="book-result-actions"><button class="book-discover-btn">Is this for me?</button></div>';
+    el.querySelector('.book-result-inner').addEventListener('click', function () {
       return selectBookWithAgeCheck(book);
+    });
+    el.querySelector('.book-discover-btn').addEventListener('click', function (e) {
+      e.stopPropagation();
+      discoverBookWithAgeCheck(book);
     });
     if (anchor) container.insertBefore(el, anchor);else container.appendChild(el);
   });
@@ -592,9 +623,13 @@ function _searchBooks() {
             el = document.createElement('div');
             el.className = 'book-result';
             th = book.thumb ? '<img class="book-cover-thumb" src="' + esc(book.thumb) + '" alt="" loading="lazy">' : '';
-            el.innerHTML = '<div class="book-result-inner">' + th + '<div class="book-result-text"><div class="book-result-title">' + esc(book.title) + '</div><div class="book-result-author">' + esc(book.author) + '</div><div class="book-result-meta">' + (book.year || '') + (book.year ? ' · ' : '') + esc(book.source) + '</div></div></div>';
-            el.addEventListener('click', function () {
+            el.innerHTML = '<div class="book-result-inner">' + th + '<div class="book-result-text"><div class="book-result-title">' + esc(book.title) + '</div><div class="book-result-author">' + esc(book.author) + '</div><div class="book-result-meta">' + (book.year || '') + (book.year ? ' · ' : '') + esc(book.source) + '</div></div></div>' + '<div class="book-result-actions"><button class="book-discover-btn">Is this for me?</button></div>';
+            el.querySelector('.book-result-inner').addEventListener('click', function () {
               return selectBookWithAgeCheck(book);
+            });
+            el.querySelector('.book-discover-btn').addEventListener('click', function (e) {
+              e.stopPropagation();
+              discoverBookWithAgeCheck(book);
             });
             resultsEl.appendChild(el);
           } else {
@@ -941,6 +976,7 @@ function isAdultBook(book) {
   });
 }
 var _pendingBookForAgeGate = null;
+var _pendingDiscoverMode = false;
 function selectBookWithAgeCheck(_x4) {
   return _selectBookWithAgeCheck.apply(this, arguments);
 }
@@ -949,6 +985,7 @@ function _selectBookWithAgeCheck() {
     return _regenerator().w(function (_context7) {
       while (1) switch (_context7.n) {
         case 0:
+          _pendingDiscoverMode = false;
           if (isAdultBook(book)) {
             _pendingBookForAgeGate = book;
             document.getElementById('age-gate-book-name').textContent = '"' + book.title + '"';
@@ -962,6 +999,29 @@ function _selectBookWithAgeCheck() {
     }, _callee7);
   }));
   return _selectBookWithAgeCheck.apply(this, arguments);
+}
+function discoverBookWithAgeCheck(book) {
+  _pendingDiscoverMode = true;
+  if (isAdultBook(book)) {
+    _pendingBookForAgeGate = book;
+    document.getElementById('age-gate-book-name').textContent = '"' + book.title + '"';
+    navigate('age-gate');
+  } else {
+    discoverBook(book);
+  }
+}
+function discoverBook(book) {
+  STATE.companionMode = 'discover';
+  STATE.book = book;
+  STATE.readingStatus = 'considering';
+  STATE.messages = [];
+  STATE.currentConvId = 'conv_' + Date.now();
+  STATE.currentConvName = null;
+  var dl = detectLanguage(book);
+  STATE.detectedLang = dl;
+  STATE.chatLanguage = dl ? 'native' : (localStorage.getItem('pc_lang_' + bookKey(book)) || 'english');
+  navigate('companion');
+  launchCompanion(book);
 }
 function confirmAgeGate() {
   return _confirmAgeGate.apply(this, arguments);
@@ -977,10 +1037,15 @@ function _confirmAgeGate() {
             _context8.n = 2;
             break;
           }
-          _context8.n = 1;
-          return selectBook(_pendingBookForAgeGate);
+          if (_pendingDiscoverMode) {
+            discoverBook(_pendingBookForAgeGate);
+          } else {
+            _context8.n = 1;
+            return selectBook(_pendingBookForAgeGate);
+          }
         case 1:
           _pendingBookForAgeGate = null;
+          _pendingDiscoverMode = false;
         case 2:
           return _context8.a(2);
       }
@@ -1217,6 +1282,7 @@ function _selectBook() {
       while (1) switch (_context0.n) {
         case 0:
           STATE.book = book;
+          STATE.companionMode = 'reading';
           STATE.messages = [];
           fetchAndCacheSubjects(book);
 
@@ -1386,8 +1452,8 @@ function launchCompanion(book) {
     STATE.currentConvId = 'conv_' + Date.now();
     STATE.currentConvName = null;
   }
-  // add to shelf
-  if (typeof addBookToShelf === 'function') addBookToShelf(book);
+  // add to shelf (skip in discover mode — user hasn't decided to read it yet)
+  if (STATE.companionMode !== 'discover' && typeof addBookToShelf === 'function') addBookToShelf(book);
   document.getElementById('book-title-display').textContent = book.title;
   document.getElementById('book-author-display').textContent = book.author;
   var metaEl = document.getElementById('book-meta-display');
@@ -1432,7 +1498,9 @@ function updateStatusDisplay() {
     finished: 'Just finished'
   };
   var el = document.getElementById('book-status-display');
-  if (STATE.readingStatus && labels[STATE.readingStatus]) {
+  if (STATE.companionMode === 'discover') {
+    el.textContent = 'Is this for me?';
+  } else if (STATE.readingStatus && labels[STATE.readingStatus]) {
     el.textContent = labels[STATE.readingStatus];
   } else {
     el.textContent = '';
@@ -1873,6 +1941,15 @@ function _populateIcebreakers() {
         case 0:
           list = document.getElementById('icebreaker-list');
           list.innerHTML = '';
+          if (STATE.companionMode === 'discover') {
+            renderIcebreakerButtons([
+              'What kinds of books have you loved lately?',
+              'What mood are you in for reading right now?',
+              'What draws you to this one?',
+              'What would make this perfect for you right now?'
+            ], list);
+            return _context12.a(2);
+          }
           loadEl = document.createElement('div');
           loadEl.className = 'icebreaker-label';
           loadEl.style.fontStyle = 'italic';
@@ -2321,7 +2398,22 @@ function scrollToMessage(el) {
 // ═══════════════════════════════════════════════════
 //  AI PROVIDERS
 // ═══════════════════════════════════════════════════
+function buildDiscoveryPrompt() {
+  var book = STATE.book;
+  var readingTime = book.pageCount ? ' The book is ' + book.pageCount + ' pages — roughly ' + Math.round(book.pageCount / 50) + ' hours for an average reader.' : '';
+  var _companionLang = STATE.companionLangOverride || (STATE.chatLanguage === 'native' && STATE.detectedLang ? STATE.detectedLang : null);
+  var langNote = _companionLang ? '\n\nRespond entirely in ' + _companionLang + '. Do not use any other language.' : '';
+  return 'You are a book discovery companion. The reader is considering whether "' + book.title + '" by ' + book.author + ' is right for them.' + readingTime + '\n\n' +
+    'Your role: help them decide if this book is for them — not summarise or sell it.\n\n' +
+    'Start by asking ONE question about their reading preferences — what they\'ve loved recently, what mood they\'re in, what they\'re looking for right now. Ask only one question. Wait for their answer before describing the book.\n\n' +
+    'Once you know their preferences: describe the book through that lens. What kind of reader tends to love it. The mood and pace it creates. What it asks of the reader. What readers often wish they\'d known before starting — not plot details, but texture and experience.\n\n' +
+    'Never reveal plot details, spoilers, or endings. Never summarise the story. Keep each response short — this is read on an e-ink screen.\n\n' +
+    'Always end with a question or an invitation. Respond in plain prose only. No bullet points. No headers.\n\n' +
+    'When you mention a specific book you\'d recommend, format it exactly as: [RECOMMEND: Title by Author].\n\n' +
+    'If there are any signs this reader may be a minor, default to age-appropriate discussion.' + langNote;
+}
 function buildSystemPrompt() {
+  if (STATE.companionMode === 'discover') return buildDiscoveryPrompt();
   var book = STATE.book;
   var relevant = getRelevantHighlights(book).slice(-8);
   var highlightsText = relevant.length ? '\n\nThe reader\'s highlights from this book:\n' + relevant.map(function (h) {

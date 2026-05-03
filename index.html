@@ -224,11 +224,15 @@
     .search-row input { -webkit-box-flex: 1; -ms-flex: 1; flex: 1; min-width: 0; }
     .search-row .btn  { width: auto; white-space: nowrap; -ms-flex-negative: 0; flex-shrink: 0; }
     #search-results { margin-top: 20px; }
-    .book-result { border: 1px solid #111111; border-radius: 0; padding: 16px; margin-bottom: 10px; cursor: pointer; }
-    .book-result:active { background: #f5f5f5; }
+    .book-result { border: 1px solid #111111; border-radius: 0; margin-bottom: 10px; }
+    .book-result-inner { padding: 16px; cursor: pointer; }
+    .book-result-inner:active { background: #f5f5f5; }
     .book-result-title  { font-size: 1.05rem; margin-bottom: 3px; }
     .book-result-author { font-size: 0.9rem; color: #777777; margin-bottom: 3px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
     .book-result-meta   { font-size: 0.75rem; color: #777777; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+    .book-result-actions { border-top: 1px solid #e0e0e0; padding: 0; }
+    .book-discover-btn { display: block; width: 100%; background: none; border: none; color: #555555; font-family: Georgia, 'Times New Roman', serif; font-size: 0.85rem; font-style: italic; padding: 10px 16px; text-align: left; cursor: pointer; min-height: 44px; }
+    .book-discover-btn:active { background: #f5f5f5; }
 
     /* === READING STATUS === */
     .status-options { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; margin-top: 8px; }
@@ -688,7 +692,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">d8a0db9+</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">36641b5+</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -850,7 +854,7 @@
        ══════════════════════════════════ -->
   <section id="screen-search" class="screen">
     <button class="back-link" onclick="navigate('home')">← Back</button>
-    <h1>Which book?</h1>
+    <h1 id="search-heading">Which book?</h1>
 
     <button class="btn" style="width:100%;margin-bottom:24px" onclick="navigate('shelf')">Your saved books →</button>
 
