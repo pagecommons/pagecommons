@@ -1,17 +1,29 @@
 # Page Commons — Claude Code Context
 
 ## What This Is
-Page Commons (pagecommons.com) is a 
-reading companion web app optimised 
-for e-ink devices (Kindle, Kobo Libra 
-Colour). Open source, privacy-first, 
+Page Commons (pagecommons.com) is a
+reading companion web app optimised
+for e-ink devices (Kindle, Kobo Libra
+Colour). Open source, privacy-first,
 indie project by a solo founder.
 
 ## Live URLs
 - Production: pagecommons.com
 - Repo: github.com/pagecommons/pagecommons
+- Personal GitHub also has collaborator
+  access to this repo
 - Deploy: Vercel auto-deploy from GitHub
   push to main → live in ~30 seconds
+
+## Launch Target
+- June 1 2026 — Reddit launch
+- Target subreddits:
+  r/kobo, r/kindle, r/books,
+  r/selfhosted, r/privacy, r/eink
+- Everything before June 1 is
+  launch preparation only
+- No new features beyond P1 items
+- Polish, stability, device testing
 
 ## Architecture
 - index.html — markup and CSS only
@@ -20,12 +32,17 @@ indie project by a solo founder.
   THIS is what Vercel serves
 - vercel.json — headers config
 - api/books.js — Google Books proxy
+- api/ai.js — free tier Gemini proxy
+- api/transfer.js — key transfer codes
+- transfer.html — desktop key transfer page
 - favicon.svg — dog-ear page icon
 - CLAUDE.md — this file
+- PENDING.md — full feature backlog
+- STATUS.md — current session status
 
 ## CRITICAL BUILD RULE
 Kobo WebKit does not support modern JS.
-ALL JavaScript in app.js must be 
+ALL JavaScript in app.js must be
 transpiled through Babel before deploy.
 
 Target: ie:11
@@ -34,6 +51,13 @@ Includes: Promise polyfill
 
 Never deploy raw app.js to production.
 Always deploy app.transpiled.js.
+
+## CRITICAL — Do Not Remove
+The permanent synchronous IIFE at the
+very top of app.js forces screen-home
+to display:block before init() runs.
+This is required for Kobo to render.
+NEVER remove or move this block.
 
 ## Known Kobo Constraints
 These will break the app on Kobo:
@@ -92,60 +116,84 @@ Single file SPA with hash navigation:
 - #companion — AI chat
 - #shelf — Your shelf
 - #book-shelf — Book conversations
+- #settings — User settings
 - #about — About page
 
-## Five Use Cases (in order of complexity)
-1. The Archivist — highlights + notes only
-2. The Reflective Reader — adds AI companion
-3. The Annotator — shares notes in book rooms
-4. The Correspondent — opts in to be contacted
-5. The Book-mate — deep mutual connection
+## Five Use Cases
+1. The Archivist
+   Highlights + personal notes only
+   No AI, no community needed
+   V1 delivers this ✓
+
+2. The Reflective Reader
+   Everything above + AI companion
+   Saves conversations and passages
+   No real people involved
+   V1 delivers this ✓
+
+3. The Annotator
+   Leaves notes in book rooms
+   Anonymous by default
+   No AI or direct interaction needed
+   V2 delivers this
+
+4. The Correspondent
+   Opts in to show handle on notes
+   Book-scoped contact only
+   V2 delivers this
+
+5. The Book-mate
+   Deep mutual reading connection
+   Triggered by shared shelf
+   Always book-scoped
+   V3 maybe
 
 ## Providers
-- Anthropic Claude Sonnet (primary)
+- Anthropic Claude Sonnet (primary BYOK)
   claude-sonnet-4-20250514
   https://api.anthropic.com/v1/messages
-- Google Gemini Flash (free tier/fallback)
+- Google Gemini Flash (free tier pool)
   gemini-2.0-flash
-- Groq Llama (last resort)
+  Proxied via api/ai.js
+- Groq Llama (BYOK fallback)
 
 ## Environment Variables (Vercel)
 - GOOGLE_BOOKS_API_KEY (sensitive)
 - GEMINI_API_KEY (sensitive)
-- KV_REST_API_URL (for transfer codes)
-- KV_REST_API_TOKEN (for transfer codes)
+- KV_REST_API_URL (Upstash Redis)
+- KV_REST_API_TOKEN (Upstash Redis)
 
 ## Privacy Principles (non-negotiable)
 - No user data ever stored server-side
   in V1 (localStorage only)
 - API keys never logged or retained
 - Transfer codes deleted immediately
-  after retrieval
+  after retrieval (one-time use)
 - Private messages never moderated
 - Block is the only social remedy
+- User owns all their data always
 
-## Current Version
-v0.25 — confirmed working on 
-Kobo Libra Colour device.
-
-## What NOT to change
-- Single HTML + app.js architecture
+## What NOT to Change
+- index.html + app.js architecture
+- Permanent IIFE forcing screen-home visible
 - E-ink design rules
 - Privacy-first approach
 - Batch AI responses (never stream)
 - No author or genre rooms
 - No likes or engagement metrics
 - No CSS variables
-- No modern JS without Babel
+- No modern JS without Babel transpilation
+- vercel.json Content-Type headers
 
 ## Pending Work
 See PENDING.md for full prioritised
 list of what to build next.
+See STATUS.md for current session state.
 
-## End of session routine
+## End of Session Routine
 At the end of every working session
 update STATUS.md with:
-- What was completed
+- What was completed this session
 - What was tested and results
 - Current known issues
 - Recommended next task

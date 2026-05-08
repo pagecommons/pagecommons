@@ -52,13 +52,17 @@ var STATE = {
   apiKey: '',
   provider: 'anthropic',
   companionName: 'Companion',
+  companionMode: 'reading',
+  // 'reading' | 'discover'
   book: null,
   readingStatus: null,
   // 'considering' | 'started' | 'midway' | 'finished'
   chatLanguage: 'english',
   // 'english' | 'native'
   detectedLang: null,
-  // language name detected from book, e.g. 'Chinese'
+  // language name detected from book, e.g. 'Traditional Chinese'
+  companionLangOverride: null,
+  // null = auto (match book); string = always use this language
   highlights: [],
   messages: [],
   lastUserText: '',
@@ -69,7 +73,11 @@ var STATE = {
   // held during age gate
   passages: [],
   // saved passages for current book
-  replyLength: 'medium' // 'short' | 'medium' | 'detailed'
+  replyLength: 'medium', // 'short' | 'medium' | 'detailed'
+  userName: '',
+  surpriseBook: null,
+  surpriseMode: null, // 'random' | 'shelf'
+  surpriseResults: []
 };
 var STATIC_PROMPTS = ["I just finished it", "Something is still on my mind", "I want to understand something better", "There's a passage I keep thinking about", "I'm not sure how I feel about it", "I gave up — can we talk about why?", "I want to know what to read next", "Something surprised me"];
 var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'Let me think…', 'Hmm…', 'One moment…', 'With you…'];
@@ -77,7 +85,31 @@ var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'L
 // ═══════════════════════════════════════════════════
 //  SCREENS + NAVIGATION
 // ═══════════════════════════════════════════════════
-var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'tc', 'age-gate'];
+var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'tc', 'age-gate', 'settings', 'surprise'];
+
+var SEARCH_HEADINGS = [
+  'Which book?',
+  'What are you reading?',
+  'What are you lost in?',
+  'What\'s keeping you up?',
+  'What\'s calling to you?',
+  'What\'s in your hands?',
+  'Which world are you in?'
+];
+var SEARCH_HEADINGS_NAMED = [
+  'What are you reading, {name}?',
+  'What are you lost in, {name}?',
+  'What\'s keeping you up, {name}?',
+  'What\'s calling to you, {name}?',
+  'Which world are you in, {name}?'
+];
+function updateSearchHeading() {
+  var el = document.getElementById('search-heading');
+  if (!el) return;
+  var pool = STATE.userName ? SEARCH_HEADINGS_NAMED : SEARCH_HEADINGS;
+  var h = pool[Math.floor(Math.random() * pool.length)];
+  el.textContent = h.replace('{name}', STATE.userName || '');
+}
 
 // navigate() defined above with showScreen
 
@@ -118,6 +150,9 @@ function handleRoute() {
   var target = SCREENS.includes(hash) ? hash : 'home';
   showScreen(target);
   if (target === 'shelf') renderShelf();
+  if (target === 'settings') loadSettingsScreen();
+  if (target === 'search') updateSearchHeading();
+  if (target === 'surprise') initSurpriseScreen();
   updateTitleLink();
 }
 function navigate(view) {
@@ -293,7 +328,10 @@ function selectProvider(prov) {
 }
 function applyProviderUI(prov) {
   ['anthropic', 'gemini', 'groq'].forEach(function (p) {
-    return p === prov ? document.getElementById('prov-' + p).classList.add('selected') : document.getElementById('prov-' + p).classList.remove('selected');
+    var keyEl = document.getElementById('prov-' + p);
+    if (keyEl) keyEl.classList[p === prov ? 'add' : 'remove']('selected');
+    var settEl = document.getElementById('settings-prov-' + p);
+    if (settEl) settEl.classList[p === prov ? 'add' : 'remove']('active');
   });
   var cfg = PROVIDER_CONFIG[prov];
   document.getElementById('api-key-input').placeholder = cfg.placeholder;
@@ -419,13 +457,13 @@ function _interpretSearchQuery() {
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
+            body: JSON.stringify(Object.assign({
               contents: [{
                 parts: [{
                   text: prompt
                 }]
               }]
-            })
+            }, langNote ? { systemInstruction: { parts: [{ text: langNote }] } } : {}))
           });
         case 7:
           _res = _context2.v;
@@ -514,12 +552,22 @@ function renderBookBatch(batch, container, insertBefore) {
     var el = document.createElement('div');
     el.className = 'book-result';
     var th = book.thumb ? '<img class="book-cover-thumb" src="' + esc(book.thumb) + '" alt="" loading="lazy">' : '';
-    el.innerHTML = '<div class="book-result-inner">' + th + '<div class="book-result-text">' + '<div class="book-result-title">' + esc(book.title) + '</div>' + '<div class="book-result-author">' + esc(book.author) + '</div>' + '<div class="book-result-meta">' + (book.year ? book.year + ' · ' : '') + esc(book.source || 'Open Library') + '</div>' + '</div></div>';
-    el.addEventListener('click', function () {
+    el.innerHTML = '<div class="book-result-inner">' + th + '<div class="book-result-text">' + '<div class="book-result-title">' + esc(book.title) + '</div>' + '<div class="book-result-author">' + esc(book.author) + '</div>' + '<div class="book-result-meta">' + (book.year ? book.year + ' · ' : '') + esc(book.source || 'Open Library') + '</div>' + '</div></div>' + '<div class="book-result-actions"><button class="book-discover-btn">Is this for me?</button></div>';
+    el.querySelector('.book-result-inner').addEventListener('click', function () {
       return selectBookWithAgeCheck(book);
+    });
+    el.querySelector('.book-discover-btn').addEventListener('click', function (e) {
+      e.stopPropagation();
+      discoverBookWithAgeCheck(book);
     });
     if (anchor) container.insertBefore(el, anchor);else container.appendChild(el);
   });
+}
+function searchFromRecommend(query) {
+  navigate('search');
+  var inp = document.getElementById('book-search-title');
+  if (inp) inp.value = query;
+  searchBooks();
 }
 function searchBooks() {
   return _searchBooks.apply(this, arguments);
@@ -579,9 +627,13 @@ function _searchBooks() {
             el = document.createElement('div');
             el.className = 'book-result';
             th = book.thumb ? '<img class="book-cover-thumb" src="' + esc(book.thumb) + '" alt="" loading="lazy">' : '';
-            el.innerHTML = '<div class="book-result-inner">' + th + '<div class="book-result-text"><div class="book-result-title">' + esc(book.title) + '</div><div class="book-result-author">' + esc(book.author) + '</div><div class="book-result-meta">' + (book.year || '') + (book.year ? ' · ' : '') + esc(book.source) + '</div></div></div>';
-            el.addEventListener('click', function () {
+            el.innerHTML = '<div class="book-result-inner">' + th + '<div class="book-result-text"><div class="book-result-title">' + esc(book.title) + '</div><div class="book-result-author">' + esc(book.author) + '</div><div class="book-result-meta">' + (book.year || '') + (book.year ? ' · ' : '') + esc(book.source) + '</div></div></div>' + '<div class="book-result-actions"><button class="book-discover-btn">Is this for me?</button></div>';
+            el.querySelector('.book-result-inner').addEventListener('click', function () {
               return selectBookWithAgeCheck(book);
+            });
+            el.querySelector('.book-discover-btn').addEventListener('click', function (e) {
+              e.stopPropagation();
+              discoverBookWithAgeCheck(book);
             });
             resultsEl.appendChild(el);
           } else {
@@ -871,6 +923,7 @@ function _fetchGoogleBooks() {
               author = (info.authors || ['Unknown author'])[0];
             var k = title.toLowerCase() + '||' + author.toLowerCase();
             var thumb = info.imageLinks && info.imageLinks.smallThumbnail ? info.imageLinks.smallThumbnail : info.imageLinks && info.imageLinks.thumbnail ? info.imageLinks.thumbnail : '';
+            if (thumb) thumb = thumb.replace('http://', 'https://');
             var cats = (info.categories || []).join(' ').toLowerCase();
             if (!seen.has(k)) seen.set(k, {
               title: title,
@@ -880,7 +933,8 @@ function _fetchGoogleBooks() {
               source: 'Google Books',
               lang: info.language || '',
               thumb: thumb,
-              cats: cats
+              cats: cats,
+              pageCount: info.pageCount || 0
             });
           });
           return _context6.a(2, Array.from(seen.values()).slice(0, 6));
@@ -926,6 +980,7 @@ function isAdultBook(book) {
   });
 }
 var _pendingBookForAgeGate = null;
+var _pendingDiscoverMode = false;
 function selectBookWithAgeCheck(_x4) {
   return _selectBookWithAgeCheck.apply(this, arguments);
 }
@@ -934,6 +989,7 @@ function _selectBookWithAgeCheck() {
     return _regenerator().w(function (_context7) {
       while (1) switch (_context7.n) {
         case 0:
+          _pendingDiscoverMode = false;
           if (isAdultBook(book)) {
             _pendingBookForAgeGate = book;
             document.getElementById('age-gate-book-name').textContent = '"' + book.title + '"';
@@ -947,6 +1003,29 @@ function _selectBookWithAgeCheck() {
     }, _callee7);
   }));
   return _selectBookWithAgeCheck.apply(this, arguments);
+}
+function discoverBookWithAgeCheck(book) {
+  _pendingDiscoverMode = true;
+  if (isAdultBook(book)) {
+    _pendingBookForAgeGate = book;
+    document.getElementById('age-gate-book-name').textContent = '"' + book.title + '"';
+    navigate('age-gate');
+  } else {
+    discoverBook(book);
+  }
+}
+function discoverBook(book) {
+  STATE.companionMode = 'discover';
+  STATE.book = book;
+  STATE.readingStatus = 'considering';
+  STATE.messages = [];
+  STATE.currentConvId = 'conv_' + Date.now();
+  STATE.currentConvName = null;
+  var dl = detectLanguage(book);
+  STATE.detectedLang = dl;
+  STATE.chatLanguage = dl ? 'native' : (localStorage.getItem('pc_lang_' + bookKey(book)) || 'english');
+  navigate('companion');
+  launchCompanion(book);
 }
 function confirmAgeGate() {
   return _confirmAgeGate.apply(this, arguments);
@@ -962,10 +1041,15 @@ function _confirmAgeGate() {
             _context8.n = 2;
             break;
           }
-          _context8.n = 1;
-          return selectBook(_pendingBookForAgeGate);
+          if (_pendingDiscoverMode) {
+            discoverBook(_pendingBookForAgeGate);
+          } else {
+            _context8.n = 1;
+            return selectBook(_pendingBookForAgeGate);
+          }
         case 1:
           _pendingBookForAgeGate = null;
+          _pendingDiscoverMode = false;
         case 2:
           return _context8.a(2);
       }
@@ -1184,8 +1268,7 @@ function _renderStatusScreen() {
 
           // Update heading
           h1 = document.getElementById('status-book-title');
-          if (h1) h1.textContent = lang && chatLang === 'native' ? book.title // just show title, keep heading neutral
-          : 'Where are you with "' + book.title + '"?';
+          if (h1) h1.textContent = (lang || /[\u0080-\uffff]/.test(book.title)) ? book.title : 'Where are you with "' + book.title + '"?';
         case 17:
           return _context9.a(2);
       }
@@ -1203,7 +1286,9 @@ function _selectBook() {
       while (1) switch (_context0.n) {
         case 0:
           STATE.book = book;
+          STATE.companionMode = 'reading';
           STATE.messages = [];
+          fetchAndCacheSubjects(book);
 
           // ensure lang field is persisted on book object (Bug Fix B)
           detectedLang = detectLanguage(book);
@@ -1216,10 +1301,11 @@ function _selectBook() {
             _context0.n = 2;
             break;
           }
-          // returning book — restore ALL language state before launching (Bug Fix A)
+          // returning book — always use native for detected non-English books
           STATE.readingStatus = savedStatus;
-          STATE.chatLanguage = savedLang || 'english';
           STATE.detectedLang = detectedLang;
+          STATE.chatLanguage = detectedLang ? 'native' : (savedLang || 'english');
+          if (detectedLang) localStorage.setItem('pc_lang_' + bk, 'native');
           // restore thinking phrases if native language was chosen
           if (!(STATE.chatLanguage === 'native' && detectedLang)) {
             _context0.n = 1;
@@ -1232,8 +1318,9 @@ function _selectBook() {
           _context0.n = 3;
           break;
         case 2:
-          // new book — set detectedLang BEFORE renderStatusScreen so translation works
+          // new book — pre-set language so status screen renders in the right language
           STATE.detectedLang = detectedLang;
+          if (detectedLang) STATE.chatLanguage = 'native';
           renderStatusScreen(book);
           navigate('status');
         case 3:
@@ -1261,15 +1348,22 @@ function _setReadingStatus() {
           bk = bookKey(STATE.book);
           savedLang = localStorage.getItem('pc_lang_' + bk);
           if (lang && !savedLang) {
-            // show language choice
-            document.getElementById('lang-prompt-text').textContent = 'This looks like it might be in ' + lang + '. Would you like to chat in ' + lang + ' or in English?';
-            document.getElementById('lang-native-btn').textContent = 'Chat in ' + lang;
-            navigate('language');
-          } else {
-            STATE.chatLanguage = savedLang || 'english';
-            launchCompanion(STATE.book);
+            // auto-set to native; user can change via language screen if they want
+            STATE.chatLanguage = 'native';
+            localStorage.setItem('pc_lang_' + bk, 'native');
+            _context1.n = 1;
+            break;
           }
+          STATE.chatLanguage = savedLang || 'english';
+          launchCompanion(STATE.book);
+          _context1.n = 3;
+          break;
         case 1:
+          _context1.n = 2;
+          return generateThinkingPhrases(lang);
+        case 2:
+          launchCompanion(STATE.book);
+        case 3:
           return _context1.a(2);
       }
     }, _callee1);
@@ -1307,10 +1401,15 @@ function _setLanguage() {
   return _setLanguage.apply(this, arguments);
 }
 function detectLanguage(book) {
-  // detect from Google Books language code
-  if (book.lang && book.lang !== 'en') {
+  var lang = book.lang || '';
+  // Traditional Chinese lang codes
+  if (/^zh[-_]?(TW|HK|Hant)/i.test(lang)) return 'Traditional Chinese';
+  // Simplified Chinese lang codes
+  if (/^zh[-_]?(CN|SG|Hans)/i.test(lang)) return 'Simplified Chinese';
+  // bare zh \u2014 distinguish by title characters below
+  var isBareZh = (lang === 'zh');
+  if (!isBareZh && lang && lang !== 'en') {
     var LANG_NAMES = {
-      zh: 'Chinese',
       ja: 'Japanese',
       ko: 'Korean',
       fr: 'French',
@@ -1327,20 +1426,29 @@ function detectLanguage(book) {
       pl: 'Polish',
       tr: 'Turkish'
     };
-    return LANG_NAMES[book.lang] || null;
+    return LANG_NAMES[lang] || null;
   }
   // detect from non-ASCII characters in title
-  var hasChinese = /[\u4e00-\u9fff]/.test(book.title);
-  var hasJapanese = /[\u3040-\u30ff]/.test(book.title);
-  var hasKorean = /[\uac00-\ud7af]/.test(book.title);
-  var hasArabic = /[\u0600-\u06ff]/.test(book.title);
-  var hasCyrillic = /[\u0400-\u04ff]/.test(book.title);
-  if (hasChinese) return 'Chinese';
+  var titleAndAuthor = (book.title || '') + ' ' + (book.author || '');
+  var hasChinese = /[\u4e00-\u9fff]/.test(titleAndAuthor);
+  var hasJapanese = /[\u3040-\u30ff]/.test(titleAndAuthor);
+  var hasKorean = /[\uac00-\ud7af]/.test(titleAndAuthor);
+  var hasArabic = /[\u0600-\u06ff]/.test(titleAndAuthor);
+  var hasCyrillic = /[\u0400-\u04ff]/.test(titleAndAuthor);
+  if (hasChinese || isBareZh) {
+    // Traditional-only characters: \u8aaa\u4f86\u570b\u70ba\u52d5\u7d71\u5011\u6642\u9019\u500b\u5b78\u9ebc
+    var isTraditional = /[\u8aaa\u8aac\u4f86\u570b\u70ba\u52d5\u7d71\u5011\u6642\u9019\u500b\u5b78\u9ebc\u50b3\u9023\u7a2e\u9ede\u5c64\u9928\u91ab\u7522\u6703\u5340\u7d93\u984c\u5c0d\u96fb\u96dc\u6aa2\u8996\u5275\u5c08\u7dda\u98a8\u98db\u8af8\u8acb\u8b6f\u9ad4\u66f8\u9577\u7121\u5f37\u958b\u7d66\u5167\u5bec\u9593\u7e3d]/.test(titleAndAuthor);
+    return isTraditional ? 'Traditional Chinese' : 'Simplified Chinese';
+  }
   if (hasJapanese) return 'Japanese';
   if (hasKorean) return 'Korean';
   if (hasArabic) return 'Arabic';
   if (hasCyrillic) return 'Russian';
   return null;
+}
+function getCompanionLang() {
+  if (STATE.companionLangOverride) return STATE.companionLangOverride;
+  return STATE.detectedLang || null;
 }
 function launchCompanion(book) {
   // assign conversation ID if not set
@@ -1348,10 +1456,33 @@ function launchCompanion(book) {
     STATE.currentConvId = 'conv_' + Date.now();
     STATE.currentConvName = null;
   }
-  // add to shelf
-  if (typeof addBookToShelf === 'function') addBookToShelf(book);
+  // add to shelf (skip in discover mode — user hasn't decided to read it yet)
+  if (STATE.companionMode !== 'discover' && typeof addBookToShelf === 'function') addBookToShelf(book);
   document.getElementById('book-title-display').textContent = book.title;
   document.getElementById('book-author-display').textContent = book.author;
+  var metaEl = document.getElementById('book-meta-display');
+  if (metaEl) {
+    var metaParts = [];
+    if (book.pageCount) {
+      metaParts.push(book.pageCount + ' pages');
+      var hrs = Math.round(book.pageCount / 60);
+      if (hrs > 0) metaParts.push('~' + hrs + 'h read');
+    }
+    metaEl.textContent = metaParts.join(' · ');
+  }
+  var progEl = document.getElementById('book-progress-display');
+  if (progEl) {
+    var prog = getReadingProgress(book);
+    if (prog) {
+      var progText = 'Progress: p.' + prog.page;
+      if (book.pageCount && prog.page <= book.pageCount) {
+        progText += ' of ' + book.pageCount + ' (' + Math.round(prog.page / book.pageCount * 100) + '%)';
+      }
+      progEl.textContent = progText;
+    } else {
+      progEl.textContent = '';
+    }
+  }
   document.getElementById('input-book-context').textContent = book.title + (book.author ? ' · ' + book.author : '');
   document.getElementById('chat-log').innerHTML = '';
   document.getElementById('loading-indicator').style.display = 'none';
@@ -1359,6 +1490,7 @@ function launchCompanion(book) {
   updateStatusDisplay();
   renderHighlightsPanel();
   updatePassagesToolbarBtn();
+  updateNotesToolbarBtn();
   populateIcebreakers(book);
   navigate('companion');
 }
@@ -1370,10 +1502,217 @@ function updateStatusDisplay() {
     finished: 'Just finished'
   };
   var el = document.getElementById('book-status-display');
-  if (STATE.readingStatus && labels[STATE.readingStatus]) {
-    el.textContent = labels[STATE.readingStatus];
+  var ctaEl = document.getElementById('discover-convert-bar');
+  if (STATE.companionMode === 'discover') {
+    if (el) el.textContent = 'Is this for me?';
+    if (ctaEl) ctaEl.style.display = 'block';
   } else {
-    el.textContent = '';
+    if (el && STATE.readingStatus && labels[STATE.readingStatus]) {
+      el.textContent = labels[STATE.readingStatus];
+    } else if (el) {
+      el.textContent = '';
+    }
+    if (ctaEl) ctaEl.style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  DISCOVER → READING CONVERSION
+// ═══════════════════════════════════════════════════
+function startReadingFromDiscover() {
+  if (!STATE.book) return;
+  STATE.companionMode = 'reading';
+  STATE.messages = [];
+  STATE.currentConvId = null;
+  STATE.currentConvName = null;
+  var ctaEl = document.getElementById('discover-convert-bar');
+  if (ctaEl) ctaEl.style.display = 'none';
+  renderStatusScreen(STATE.book);
+  navigate('status');
+}
+
+// ═══════════════════════════════════════════════════
+//  SURPRISE ME
+// ═══════════════════════════════════════════════════
+var SURPRISE_SUBJECTS = ['fiction', 'mystery', 'history', 'biography', 'science', 'philosophy', 'fantasy', 'science_fiction', 'thriller', 'romance', 'poetry'];
+var _surpriseSeenKeys = [];
+
+var LANG_NAME_TO_CODE = {
+  'French': 'fr', 'German': 'de', 'Spanish': 'es', 'Italian': 'it',
+  'Japanese': 'ja', 'Korean': 'ko', 'Traditional Chinese': 'zh',
+  'Simplified Chinese': 'zh', 'Portuguese': 'pt', 'Arabic': 'ar',
+  'Russian': 'ru', 'Dutch': 'nl', 'Polish': 'pl', 'Turkish': 'tr',
+  'Hindi': 'hi', 'Thai': 'th', 'Vietnamese': 'vi'
+};
+
+function initSurpriseScreen() {
+  var shelfBtn = document.getElementById('surprise-shelf-btn');
+  if (shelfBtn) {
+    shelfBtn.style.display = getShelfBooks().length > 0 ? 'block' : 'none';
+  }
+  document.getElementById('surprise-modes').style.display = 'block';
+  document.getElementById('surprise-result').style.display = 'none';
+  document.getElementById('surprise-loading').style.display = 'none';
+}
+
+function surpriseFetchForLanguage(lang) {
+  var subj = SURPRISE_SUBJECTS[Math.floor(Math.random() * SURPRISE_SUBJECTS.length)];
+  var langCode = LANG_NAME_TO_CODE[lang] || null;
+  var promise;
+
+  if (langCode && langCode !== 'en') {
+    var startIndex = Math.floor(Math.random() * 10);
+    promise = fetch('/api/books?q=' + encodeURIComponent('subject:' + subj) + '&maxResults=40&startIndex=' + startIndex + '&langRestrict=' + encodeURIComponent(langCode))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var items = data.items || [];
+        if (!items.length) return null;
+        var item = items[Math.floor(Math.random() * items.length)];
+        var vi = item.volumeInfo || {};
+        if (!vi.title) return null;
+        var thumb = (vi.imageLinks && vi.imageLinks.thumbnail) ? vi.imageLinks.thumbnail.replace('http://', 'https://') : '';
+        return {
+          title: vi.title || '',
+          author: (vi.authors && vi.authors[0]) ? vi.authors[0] : '',
+          year: vi.publishedDate ? vi.publishedDate.substring(0, 4) : '',
+          key: item.id || '',
+          source: 'Google Books',
+          coverUrl: thumb,
+          pageCount: vi.pageCount || 0,
+          lang: vi.language || langCode,
+          language: lang
+        };
+      })
+      .catch(function() { return null; });
+  } else {
+    promise = Promise.resolve(null);
+  }
+
+  return promise.then(function(gbResult) {
+    if (gbResult) return gbResult;
+    return fetch('https://openlibrary.org/subjects/' + subj + '.json?limit=50')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var works = data.works || [];
+        if (!works.length) return null;
+        var work = works[Math.floor(Math.random() * works.length)];
+        var authorName = (work.authors && work.authors[0] && work.authors[0].name) ? work.authors[0].name : '';
+        return {
+          title: work.title,
+          author: authorName,
+          year: work.first_publish_year ? String(work.first_publish_year) : '',
+          key: work.key || '',
+          source: 'Open Library',
+          coverUrl: work.cover_id ? 'https://covers.openlibrary.org/b/id/' + work.cover_id + '-M.jpg' : '',
+          pageCount: 0,
+          language: lang
+        };
+      })
+      .catch(function() { return null; });
+  });
+}
+
+function surpriseRandom() {
+  STATE.surpriseMode = 'random';
+  var loadEl = document.getElementById('surprise-loading');
+  var resultEl = document.getElementById('surprise-result');
+  loadEl.textContent = 'Finding a book…';
+  loadEl.style.display = 'block';
+  resultEl.style.display = 'none';
+  document.getElementById('surprise-modes').style.display = 'none';
+
+  var langs = getReadingLanguages();
+  if (!langs.length) {
+    langs = ['English'];
+  }
+
+  var promises = langs.map(function(lang) {
+    return surpriseFetchForLanguage(lang);
+  });
+
+  Promise.all(promises).then(function(results) {
+    loadEl.style.display = 'none';
+    var validResults = results.filter(function(r) { return r !== null; });
+    if (!validResults.length) {
+      document.getElementById('surprise-modes').style.display = 'block';
+      return;
+    }
+    STATE.surpriseResults = validResults;
+    displaySurpriseResults();
+  }).catch(function() {
+    loadEl.style.display = 'none';
+    document.getElementById('surprise-modes').style.display = 'block';
+  });
+}
+
+function surpriseFromShelf() {
+  STATE.surpriseMode = 'shelf';
+  var books = getShelfBooks();
+  if (!books.length) return;
+  var currentKey = STATE.book ? bookKey(STATE.book) : null;
+  var candidates = books.filter(function(b) {
+    var k = bookKey(b);
+    return k !== currentKey && _surpriseSeenKeys.indexOf(k) === -1;
+  });
+  if (!candidates.length) {
+    _surpriseSeenKeys = [];
+    candidates = books.filter(function(b) { return bookKey(b) !== currentKey; });
+    if (!candidates.length) candidates = books;
+  }
+  var book = candidates[Math.floor(Math.random() * candidates.length)];
+  _surpriseSeenKeys.push(bookKey(book));
+  STATE.surpriseResults = [book];
+  displaySurpriseResults();
+}
+
+function displaySurpriseResults() {
+  var resultEl = document.getElementById('surprise-result');
+  if (!resultEl) return;
+  var results = STATE.surpriseResults || [];
+  var html = '';
+  results.forEach(function(book, idx) {
+    var metaParts = [];
+    if (book.year) metaParts.push(book.year);
+    if (book.source) metaParts.push(book.source);
+    html += '<div style="border:1px solid #111111;padding:16px;margin-bottom:20px">' +
+      '<div style="font-size:1.1rem;margin-bottom:4px">' + (book.title || '') + '</div>' +
+      '<div style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:0.85rem;color:#777777;margin-bottom:4px">' + (book.author || '') + '</div>' +
+      '<div style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:0.75rem;color:#777777;margin-bottom:12px">' + metaParts.join(' · ') + '</div>' +
+      '<div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">' +
+      '<button class="btn btn-primary" style="margin-bottom:10px" onclick="startBookFromSurpriseIdx(' + idx + ')">Start reading →</button>' +
+      '<button class="btn" style="margin-bottom:10px" onclick="discoverBookFromSurpriseIdx(' + idx + ')">Is this for me?</button>' +
+      '<button class="btn" onclick="refreshSurpriseCard(' + idx + ')">Not for me — try again</button>' +
+      '</div></div>';
+  });
+  resultEl.innerHTML = html;
+  document.getElementById('surprise-modes').style.display = 'none';
+  resultEl.style.display = 'block';
+}
+
+function refreshSurpriseCard(idx) {
+  var lang = (STATE.surpriseResults && STATE.surpriseResults[idx] && STATE.surpriseResults[idx].language) ? STATE.surpriseResults[idx].language : 'English';
+  var loadEl = document.getElementById('surprise-loading');
+  loadEl.style.display = 'block';
+  surpriseFetchForLanguage(lang).then(function(book) {
+    if (book && STATE.surpriseResults && STATE.surpriseResults[idx]) {
+      STATE.surpriseResults[idx] = book;
+      displaySurpriseResults();
+    }
+    loadEl.style.display = 'none';
+  });
+}
+
+function startBookFromSurpriseIdx(idx) {
+  var results = STATE.surpriseResults || [];
+  if (results[idx]) {
+    selectBookWithAgeCheck(results[idx]);
+  }
+}
+
+function discoverBookFromSurpriseIdx(idx) {
+  var results = STATE.surpriseResults || [];
+  if (results[idx]) {
+    discoverBookWithAgeCheck(results[idx]);
   }
 }
 
@@ -1561,6 +1900,7 @@ function parseClippings(input) {
     }
     STATE.highlights = highlights;
     localStorage.setItem('pc_highlights', JSON.stringify(highlights));
+    updateProgressFromHighlights(highlights);
     var n = highlights.length,
       b = countBooks(highlights);
     statusEl.textContent = 'Loaded ' + n + ' highlight' + (n !== 1 ? 's' : '') + ' from ' + b + ' book' + (b !== 1 ? 's' : '') + '.';
@@ -1574,6 +1914,31 @@ function parseClippings(input) {
   };
   reader.readAsText(file);
 }
+function parseClippingsPaste() {
+  var textarea = document.getElementById('clippings-paste');
+  var statusEl = document.getElementById('clippings-status');
+  if (!textarea) return;
+  var text = textarea.value.trim();
+  if (!text) {
+    statusEl.textContent = 'Please paste your clippings text first.';
+    statusEl.style.display = 'block';
+    return;
+  }
+  statusEl.textContent = 'Reading clippings…';
+  statusEl.style.display = 'block';
+  var highlights = parseClippingsText(text);
+  if (!highlights.length) {
+    statusEl.textContent = 'No highlights found. Make sure you pasted the full contents of My Clippings.txt.';
+    return;
+  }
+  STATE.highlights = highlights;
+  localStorage.setItem('pc_highlights', JSON.stringify(highlights));
+  updateProgressFromHighlights(highlights);
+  var n = highlights.length, b = countBooks(highlights);
+  statusEl.textContent = 'Loaded ' + n + ' highlight' + (n !== 1 ? 's' : '') + ' from ' + b + ' book' + (b !== 1 ? 's' : '') + '.';
+  var top = getMostRecentBook(highlights);
+  if (top) selectBook({ title: top.title, author: top.author, year: '', key: '' });
+}
 function parseClippingsText(text) {
   var out = [];
   text.split('==========').forEach(function (entry) {
@@ -1585,11 +1950,13 @@ function parseClippingsText(text) {
     if (!content || lines[1].toLowerCase().includes('bookmark')) return;
     var tm = lines[0].match(/^(.+?)\s*\(([^)]+)\)\s*$/);
     var dm = lines[1].match(/Added on (.+)$/i);
+    var pm = lines[1].match(/page (\d+)/i);
     out.push({
       title: tm ? tm[1].trim() : lines[0],
       author: tm ? tm[2].trim() : 'Unknown',
       text: content,
-      date: dm ? dm[1].trim() : ''
+      date: dm ? dm[1].trim() : '',
+      page: pm ? parseInt(pm[1], 10) : null
     });
   });
   return out;
@@ -1604,6 +1971,112 @@ function getMostRecentBook(h) {
     title: h[h.length - 1].title,
     author: h[h.length - 1].author
   } : null;
+}
+
+// ═══════════════════════════════════════════════════
+//  KOBO HIGHLIGHTS IMPORT
+// ═══════════════════════════════════════════════════
+var SQL_JS_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js';
+var SQL_WASM_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.wasm';
+
+function loadSqlJs(callback) {
+  if (typeof initSqlJs !== 'undefined') { callback(null); return; }
+  var script = document.createElement('script');
+  script.src = SQL_JS_CDN;
+  script.onload = function() { callback(null); };
+  script.onerror = function() { callback(new Error('Could not load sql.js — check your internet connection.')); };
+  document.head.appendChild(script);
+}
+
+function parseKoboDatabase(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var statusEl = document.getElementById('kobo-status');
+  statusEl.textContent = 'Loading database reader…';
+  statusEl.style.display = 'block';
+
+  loadSqlJs(function(loadErr) {
+    if (loadErr) { statusEl.textContent = loadErr.message; return; }
+    statusEl.textContent = 'Reading database…';
+    var reader = new FileReader();
+    reader.onerror = function() { statusEl.textContent = 'Could not read the file.'; };
+    reader.onload = function(e) {
+      initSqlJs({ locateFile: function() { return SQL_WASM_CDN; } }).then(function(SQL) {
+        var db;
+        try {
+          db = new SQL.Database(new Uint8Array(e.target.result));
+        } catch(openErr) {
+          statusEl.textContent = 'Not a valid SQLite database: ' + openErr.message;
+          return;
+        }
+        var highlights;
+        try {
+          highlights = processKoboHighlights(db);
+        } catch(queryErr) {
+          db.close();
+          statusEl.textContent = 'Could not read highlights: ' + queryErr.message;
+          return;
+        }
+        db.close();
+
+        if (!highlights.length) {
+          statusEl.textContent = 'No highlights found in this database.';
+          return;
+        }
+
+        STATE.highlights = highlights;
+        localStorage.setItem('pc_highlights', JSON.stringify(highlights));
+        var n = highlights.length, b = countBooks(highlights);
+        statusEl.textContent = 'Loaded ' + n + ' highlight' + (n !== 1 ? 's' : '') + ' from ' + b + ' book' + (b !== 1 ? 's' : '') + '.';
+        var top = getMostRecentBook(highlights);
+        if (top) selectBook({ title: top.title, author: top.author, year: '', key: '' });
+      }).catch(function(wasmErr) {
+        statusEl.textContent = 'Database reader failed to start: ' + wasmErr.message;
+      });
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function processKoboHighlights(db) {
+  var sql = 'SELECT b.Text, b.Annotation, b.DateCreated, b.ChapterProgress, ' +
+    'c.Title, c.Attribution, c.BookTitle ' +
+    'FROM Bookmark b ' +
+    'LEFT JOIN content c ON c.ContentID = b.VolumeID ' +
+    "WHERE b.Hidden = 0 AND b.Text IS NOT NULL AND b.Text != '' " +
+    'ORDER BY b.DateCreated ASC';
+  var results = db.exec(sql);
+  if (!results || !results.length) return [];
+
+  var cols = results[0].columns;
+  var rows = results[0].values;
+  var out = [];
+
+  rows.forEach(function(row) {
+    var obj = {};
+    cols.forEach(function(c, i) { obj[c] = row[i]; });
+
+    var text = (obj.Text || '').trim();
+    if (!text) return;
+
+    var title = ((obj.BookTitle && obj.BookTitle.trim()) || (obj.Title && obj.Title.trim()) || 'Unknown');
+    var author = (obj.Attribution || '').replace(/^By\s+/i, '').trim() || 'Unknown';
+
+    var h = {
+      title: title,
+      author: author,
+      text: text,
+      date: (obj.DateCreated || '').substring(0, 10),
+      page: null,
+      source: 'kobo'
+    };
+    if (obj.Annotation && obj.Annotation.trim()) h.annotation = obj.Annotation.trim();
+    if (obj.ChapterProgress !== null && obj.ChapterProgress !== undefined) {
+      h.chapterProgress = parseFloat(obj.ChapterProgress);
+    }
+    out.push(h);
+  });
+  return out;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1643,7 +2116,8 @@ function renderHighlightsPanel() {
   if (relevant.length) {
     btn.style.display = 'block';
     btn.textContent = 'Highlights (' + relevant.length + ')';
-    document.getElementById('highlights-count').textContent = relevant.length + ' highlight' + (relevant.length !== 1 ? 's' : '') + ' from your Kindle';
+    var _src = (relevant[0] && relevant[0].source === 'kobo') ? 'Kobo' : 'Kindle';
+    document.getElementById('highlights-count').textContent = relevant.length + ' highlight' + (relevant.length !== 1 ? 's' : '') + ' from your ' + _src;
     document.getElementById('highlights-list').innerHTML = relevant.map(function (h) {
       return '<p style="border-left:3px solid #d0d0d0;padding-left:10px;margin-bottom:12px;font-style:italic">"' + esc(h.text) + '"</p>';
     }).join('');
@@ -1656,7 +2130,9 @@ function toggleHighlights() {
     btn = document.getElementById('highlights-toolbar-btn');
   panel.classList.toggle('open');
   document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('font-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
 }
 
@@ -1674,12 +2150,21 @@ function _populateIcebreakers() {
         case 0:
           list = document.getElementById('icebreaker-list');
           list.innerHTML = '';
+          if (STATE.companionMode === 'discover') {
+            renderIcebreakerButtons([
+              'What kinds of books have you loved lately?',
+              'What mood are you in for reading right now?',
+              'What draws you to this one?',
+              'What would make this perfect for you right now?'
+            ], list);
+            return _context12.a(2);
+          }
           loadEl = document.createElement('div');
           loadEl.className = 'icebreaker-label';
           loadEl.style.fontStyle = 'italic';
           loadEl.textContent = 'Finding the right questions…';
           list.appendChild(loadEl);
-          cacheKey = 'pc_icebreakers_' + bookKey(book) + '_' + (STATE.readingStatus || '');
+          cacheKey = 'pc_icebreakers_' + bookKey(book) + '_' + (STATE.readingStatus || '') + '_' + (STATE.chatLanguage || 'english');
           _context12.p = 1;
           c = localStorage.getItem(cacheKey);
           if (!c) {
@@ -1714,9 +2199,12 @@ function _populateIcebreakers() {
           prompts = null;
         case 8:
           if (!prompts || !prompts.length) {
-            prompts = getStaticPromptsByStatus(STATE.readingStatus);
+            // skip English static prompts for non-English books
+            if (!STATE.detectedLang) {
+              prompts = getStaticPromptsByStatus(STATE.readingStatus);
+            }
           }
-          renderIcebreakerButtons(prompts, list);
+          renderIcebreakerButtons(prompts || [], list);
         case 9:
           return _context12.a(2);
       }
@@ -1749,8 +2237,12 @@ function _fetchAIIcebreakers() {
             finished: 'just finished'
           };
           statusLabel = statusLabels[STATE.readingStatus] || 'reading';
-          langNote = STATE.chatLanguage === 'native' && STATE.detectedLang ? '\nGenerate the prompts in ' + STATE.detectedLang + '.' : '';
-          prompt = 'You are a literary companion helping a reader of "' + book.title + '" by ' + book.author + '.\n\n' + 'The reader\'s current status: ' + statusLabel + '\n\n' + "Generate exactly 4 ice breaker prompts that feel specific to THIS book \u2014 its themes, reputation, tone, setting, and what readers typically wonder about.\n\n" + 'Rules:\n' + '- Each prompt max 8 words\n' + '- Must feel specific to this exact book\n' + '- NOT generic questions that apply to any book\n' + '- NOT: "Is this book for me?"\n' + '- NOT: "What is the main idea?"\n' + '- NOT: "How long does it take to read?"\n' + '- Tone matches reading status:\n' + '  considering: curiosity, uncertainty, is this worth my time?\n' + '  just started: early impressions, what to expect ahead\n' + '  halfway: tensions building, character observations, predictions\n' + '  just finished: emotional reactions, themes, meaning, what next' + langNote + '\n\n' + 'Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.\n' + 'Example format: ["prompt one","prompt two","prompt three","prompt four"]';
+          var _lang = STATE.companionLangOverride || STATE.detectedLang || detectLanguage(book);
+          langNote = _lang ? 'You must write entirely in ' + _lang + '. Every word of your response must be in ' + _lang + '. Do not use any English.' : '';
+          var cachedSubjects = localStorage.getItem('pc_subjects_' + bookKey(book));
+          var subjectArr = cachedSubjects ? JSON.parse(cachedSubjects) : [];
+          var subjectNote = subjectArr.length ? '\nKnown subjects/themes: ' + subjectArr.slice(0, 8).join(', ') + '.' : '';
+          prompt = 'You are a literary companion helping a reader of "' + book.title + '" by ' + book.author + '.\n\n' + 'The reader\'s current status: ' + statusLabel + subjectNote + '\n\n' + "Generate exactly 4 ice breaker prompts that feel specific to THIS book \u2014 its themes, reputation, tone, setting, and what readers typically wonder about.\n\n" + 'Rules:\n' + '- Each prompt max 8 words\n' + '- Must feel specific to this exact book\n' + '- NOT generic questions that apply to any book\n' + '- NOT: "Is this book for me?"\n' + '- NOT: "What is the main idea?"\n' + '- NOT: "How long does it take to read?"\n' + '- Tone matches reading status:\n' + '  considering: ask what drew the READER to this book (curiosity, what they\'ve heard, what appeals) — NOT questions about the book\'s content or plot\n' + '  just started: early impressions, what to expect ahead\n' + '  halfway: tensions building, character observations, predictions\n' + '  just finished: emotional reactions, themes, meaning, what next' + '\n\n' + 'Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.\n' + 'Example format: ["prompt one","prompt two","prompt three","prompt four"]';
           text = '';
           if (!(STATE.provider === 'anthropic')) {
             _context13.n = 4;
@@ -1765,14 +2257,14 @@ function _fetchAIIcebreakers() {
               'anthropic-version': '2023-06-01',
               'anthropic-dangerous-direct-browser-access': 'true'
             },
-            body: JSON.stringify({
+            body: JSON.stringify(Object.assign({
               model: 'claude-sonnet-4-20250514',
               max_tokens: 200,
               messages: [{
                 role: 'user',
                 content: prompt
               }]
-            })
+            }, langNote ? { system: langNote } : {}))
           });
         case 1:
           res = _context13.v;
@@ -1803,13 +2295,13 @@ function _fetchAIIcebreakers() {
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
+            body: JSON.stringify(Object.assign({
               contents: [{
                 parts: [{
                   text: prompt
                 }]
               }]
-            })
+            }, langNote ? { systemInstruction: { parts: [{ text: langNote }] } } : {}))
           });
         case 5:
           _res7 = _context13.v;
@@ -1844,10 +2336,10 @@ function _fetchAIIcebreakers() {
             body: JSON.stringify({
               model: 'llama-3.3-70b-versatile',
               max_tokens: 200,
-              messages: [{
+              messages: (langNote ? [{ role: 'system', content: langNote }] : []).concat([{
                 role: 'user',
                 content: prompt
-              }]
+              }])
             })
           });
         case 9:
@@ -1897,6 +2389,10 @@ function _fetchAIIcebreakers() {
 }
 function renderIcebreakerButtons(prompts, list) {
   list.innerHTML = '';
+  if (!prompts || !prompts.length) {
+    document.getElementById('icebreakers').style.display = 'none';
+    return;
+  }
   prompts.forEach(function (text) {
     var btn = document.createElement('button');
     btn.className = 'icebreaker-btn';
@@ -1941,12 +2437,8 @@ function _sendMessage() {
           }
           return _context14.a(2);
         case 1:
-          if (STATE.apiKey) {
-            _context14.n = 2;
-            break;
-          }
-          navigate('key');
-          return _context14.a(2);
+          _context14.n = 2;
+          break;
         case 2:
           if (navigator.onLine) {
             _context14.n = 3;
@@ -2029,7 +2521,12 @@ function appendBubble(role, text) {
   roleEl.textContent = role === 'user' ? 'You' : STATE.companionName;
   var bubble = document.createElement('div');
   bubble.className = 'message-bubble';
-  bubble.innerHTML = formatText(text);
+  var html = formatText(text);
+  html = html.replace(/\[RECOMMEND:\s*([^\]]+)\]/g, function(match, q) {
+    var safe = q.trim().replace(/'/g, '&#39;');
+    return '<button class="recommend-btn" onclick="searchFromRecommend(\'' + safe + '\')">' + safe + '</button>';
+  });
+  bubble.innerHTML = html;
   wrap.appendChild(roleEl);
   wrap.appendChild(bubble);
 
@@ -2068,7 +2565,8 @@ function appendBubble(role, text) {
 }
 function appendError(err) {
   var isNetwork = !navigator.onLine || err.message === 'Failed to fetch' || err.message.includes('fetch');
-  var msg = isNetwork ? "Couldn't reach your companion — poor connection? Try again when you have a better signal." : 'Something went wrong: ' + err.message;
+  var isQuota = err.message && (err.message.toLowerCase().includes('quota') || err.message.toLowerCase().includes('rate limit') || (err.message.includes('429') && !isNetwork));
+  var msg = err.isRateLimit ? err.message : isQuota ? 'Your AI key has hit its rate limit. Wait a moment and try again, or switch to a different provider.' : isNetwork ? "Couldn't reach your companion — poor connection? Try again when you have a better signal." : 'Something went wrong: ' + err.message;
   var wrap = document.createElement('div');
   wrap.className = 'message error-msg';
   var bubble = document.createElement('div');
@@ -2109,7 +2607,22 @@ function scrollToMessage(el) {
 // ═══════════════════════════════════════════════════
 //  AI PROVIDERS
 // ═══════════════════════════════════════════════════
+function buildDiscoveryPrompt() {
+  var book = STATE.book;
+  var readingTime = book.pageCount ? ' The book is ' + book.pageCount + ' pages — roughly ' + Math.round(book.pageCount / 50) + ' hours for an average reader.' : '';
+  var _companionLang = STATE.companionLangOverride || (STATE.chatLanguage === 'native' && STATE.detectedLang ? STATE.detectedLang : null);
+  var langNote = _companionLang ? '\n\nRespond entirely in ' + _companionLang + '. Do not use any other language.' : '';
+  return 'You are a book discovery companion. The reader is considering whether "' + book.title + '" by ' + book.author + ' is right for them.' + readingTime + '\n\n' +
+    'Your role: help them decide if this book is for them — not summarise or sell it.\n\n' +
+    'Start by asking ONE question about their reading preferences — what they\'ve loved recently, what mood they\'re in, what they\'re looking for right now. Ask only one question. Wait for their answer before describing the book.\n\n' +
+    'Once you know their preferences: describe the book through that lens. What kind of reader tends to love it. The mood and pace it creates. What it asks of the reader. What readers often wish they\'d known before starting — not plot details, but texture and experience.\n\n' +
+    'Never reveal plot details, spoilers, or endings. Never summarise the story. Keep each response short — this is read on an e-ink screen.\n\n' +
+    'Always end with a question or an invitation. Respond in plain prose only. No bullet points. No headers.\n\n' +
+    'When you mention a specific book you\'d recommend, format it exactly as: [RECOMMEND: Title by Author].\n\n' +
+    'If there are any signs this reader may be a minor, default to age-appropriate discussion.' + langNote;
+}
 function buildSystemPrompt() {
+  if (STATE.companionMode === 'discover') return buildDiscoveryPrompt();
   var book = STATE.book;
   var relevant = getRelevantHighlights(book).slice(-8);
   var highlightsText = relevant.length ? '\n\nThe reader\'s highlights from this book:\n' + relevant.map(function (h) {
@@ -2123,9 +2636,10 @@ function buildSystemPrompt() {
     revisiting: 'The reader has read this book before and is revisiting it. They may have fresh perspectives or notice things they missed first time. Treat them as someone who knows the book well.'
   };
   var statusNote = statusInstructions[STATE.readingStatus] || 'Be spoiler-aware — ask the reader how far they\'ve got before revealing plot details.';
-  var langNote = STATE.chatLanguage === 'native' && STATE.detectedLang ? '\n\nRespond entirely in ' + STATE.detectedLang + '. The reader has chosen to discuss this book in ' + STATE.detectedLang + '.' : '';
-  var replyLengthNote = STATE.replyLength === 'short' ? "Keep your response very brief — 2 to 3 short sentences maximum." : STATE.replyLength === 'detailed' ? "You may give fuller, more detailed responses when the topic warrants it." : "Keep responses concise — 2 to 4 short paragraphs maximum.";
-  return "You are a reading companion for \"" + book.title + "\" by " + book.author + ".\n\n" + "You are warm but not gushing. Curious — you always ask something back at the end. You never summarise the plot unprompted. You offer opinions when asked. You are honest about what you don't know. Literary without being academic. You feel like a well-read friend who has also read this book.\n\n" + "Never say \"Great question!\" Keep responses concise — this is read on an e-ink screen. Short paragraphs. Always end with a question or an invitation to continue.\n\n" + statusNote + "\n\n" + "If the conversation drifts away from the book, find a gentle bridge back — connect what the reader said to something in the book rather than refusing or redirecting bluntly. You are a reading companion, not a general assistant.\n\n" + "If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.\n\n" + replyLengthNote + "\n\n" + "Be honest about the limits of your knowledge. If you are not confident about specific details of this book — plot points, character names, themes — say so openly and invite the reader to share what they know. Never confabulate or pretend to know something you are uncertain about. A good reading companion says \"I'm not sure about that — what did you make of it?\" rather than guessing.\n\n" + "Respond in plain prose only. No bullet points. No headers. No lists of any kind.\n\n" + "If there are any signs this reader may be a minor, default to age-appropriate discussion regardless of the book's content rating." + langNote + highlightsText;
+  var _companionLang = STATE.companionLangOverride || (STATE.chatLanguage === 'native' && STATE.detectedLang ? STATE.detectedLang : null);
+  var langNote = _companionLang ? '\n\nRespond entirely in ' + _companionLang + '. Do not use any other language.' : '';
+  var replyLengthNote = STATE.replyLength === 'short' ? "Maximum 2 sentences. Stop after 2 sentences." : STATE.replyLength === 'detailed' ? "You may give fuller, more detailed responses when the topic warrants it." : "Keep responses concise — 2 to 4 short paragraphs maximum.";
+  return "You are a reading companion for \"" + book.title + "\" by " + book.author + ".\n\n" + "You are warm but not gushing. Curious — you always ask something back at the end. You never summarise the plot unprompted. You offer opinions when asked. You are honest about what you don't know. Literary without being academic. You feel like a well-read friend who has also read this book.\n\n" + "Never say \"Great question!\" Keep responses concise — this is read on an e-ink screen. Short paragraphs. Always end with a question or an invitation to continue.\n\n" + statusNote + "\n\n" + "If the conversation drifts away from the book, find a gentle bridge back — connect what the reader said to something in the book rather than refusing or redirecting bluntly. You are a reading companion, not a general assistant.\n\n" + "If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.\n\n" + replyLengthNote + "\n\n" + "Be honest about the limits of your knowledge. If you are not confident about specific details of this book — plot points, character names, themes — say so openly and invite the reader to share what they know. Never confabulate or pretend to know something you are uncertain about. A good reading companion says \"I'm not sure about that — what did you make of it?\" rather than guessing.\n\n" + "Respond in plain prose only. No bullet points. No headers. No lists of any kind.\n\n" + "When you mention a specific book you'd recommend, format it exactly as: [RECOMMEND: Title by Author] — this renders as a tappable search button for the reader. Use this only when genuinely recommending a specific title, not for the current book being discussed.\n\n" + "If there are any signs this reader may be a minor, default to age-appropriate discussion regardless of the book's content rating." + langNote + highlightsText;
 }
 function callAI() {
   return _callAI.apply(this, arguments);
@@ -2137,31 +2651,58 @@ function _callAI() {
       while (1) switch (_context15.n) {
         case 0:
           system = buildSystemPrompt(), messages = STATE.messages.slice(-20);
-          if (!(STATE.provider === 'anthropic')) {
+          if (STATE.apiKey) {
             _context15.n = 1;
             break;
           }
-          return _context15.a(2, callAnthropic(system, messages));
+          return _context15.a(2, callFreeTier(system, messages));
         case 1:
-          if (!(STATE.provider === 'gemini')) {
+          if (!(STATE.provider === 'anthropic')) {
             _context15.n = 2;
             break;
           }
-          return _context15.a(2, callGemini(system, messages));
+          return _context15.a(2, callAnthropic(system, messages));
         case 2:
-          if (!(STATE.provider === 'groq')) {
+          if (!(STATE.provider === 'gemini')) {
             _context15.n = 3;
             break;
           }
-          return _context15.a(2, callGroq(system, messages));
+          return _context15.a(2, callGemini(system, messages));
         case 3:
-          throw new Error('Unknown provider');
+          if (!(STATE.provider === 'groq')) {
+            _context15.n = 4;
+            break;
+          }
+          return _context15.a(2, callGroq(system, messages));
         case 4:
+          throw new Error('Unknown provider');
+        case 5:
           return _context15.a(2);
       }
     }, _callee15);
   }));
   return _callAI.apply(this, arguments);
+}
+function callFreeTier(system, messages) {
+  return fetch('/api/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ system: system, messages: messages })
+  }).then(function(res) {
+    if (res.status === 429) {
+      var rateLimitErr = new Error('Our free companion is busy right now — add your own key for instant access.');
+      rateLimitErr.isRateLimit = true;
+      throw rateLimitErr;
+    }
+    if (!res.ok) {
+      return res.json().catch(function() { return {}; }).then(function(e) {
+        throw new Error(e && e.error ? e.error : 'HTTP ' + res.status);
+      });
+    }
+    return res.json().then(function(data) {
+      return data && data.text ? data.text : '(No response)';
+    });
+  });
 }
 function callAnthropic(_x11, _x12) {
   return _callAnthropic.apply(this, arguments);
@@ -2183,7 +2724,7 @@ function _callAnthropic() {
             },
             body: JSON.stringify({
               model: 'claude-sonnet-4-20250514',
-              max_tokens: 600,
+              max_tokens: STATE.replyLength === 'short' ? 400 : 1500,
               system: system,
               messages: messages
             })
@@ -2203,7 +2744,9 @@ function _callAnthropic() {
           throw new Error(e && e.error && e.error.message ? e.error.message : 'HTTP ' + res.status);
         case 3:
           _t35 = function _t35(j) {
-            return j && j.content && j.content[0] ? j.content[0].text : "";
+            var txt = j && j.content && j.content[0] ? j.content[0].text : '';
+            if (j && j.stop_reason === 'max_tokens') txt += '\n\n[Reply was cut short — switch to Detailed in the toolbar for longer responses.]';
+            return txt || '(No response)';
           };
           _context16.n = 4;
           return res.json();
@@ -2257,7 +2800,8 @@ function _callGemini() {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              contents: contents
+              contents: contents,
+              generationConfig: { maxOutputTokens: STATE.replyLength === 'short' ? 400 : 1500 }
             })
           });
         case 1:
@@ -2275,7 +2819,9 @@ function _callGemini() {
           throw new Error(e && e.error && e.error.message ? e.error.message : 'HTTP ' + res.status);
         case 3:
           _t37 = function _t37(j) {
-            return j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts && j.candidates[0].content.parts[0] ? j.candidates[0].content.parts[0].text : "";
+            var txt = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts && j.candidates[0].content.parts[0] ? j.candidates[0].content.parts[0].text : '';
+            if (j && j.candidates && j.candidates[0] && j.candidates[0].finishReason === 'MAX_TOKENS') txt += '\n\n[Reply was cut short — switch to Detailed in the toolbar for longer responses.]';
+            return txt || '(No response)';
           };
           _context17.n = 4;
           return res.json();
@@ -2313,7 +2859,7 @@ function _callGroq() {
             },
             body: JSON.stringify({
               model: 'llama-3.3-70b-versatile',
-              max_tokens: 600,
+              max_tokens: STATE.replyLength === 'short' ? 400 : 1500,
               messages: [{
                 role: 'system',
                 content: system
@@ -2335,7 +2881,9 @@ function _callGroq() {
           throw new Error(e && e.error && e.error.message ? e.error.message : 'HTTP ' + res.status);
         case 3:
           _t39 = function _t39(j) {
-            return j && j.choices && j.choices[0] && j.choices[0].message ? j.choices[0].message.content : "";
+            var txt = j && j.choices && j.choices[0] && j.choices[0].message ? j.choices[0].message.content : '';
+            if (j && j.choices && j.choices[0] && j.choices[0].finish_reason === 'length') txt += '\n\n[Reply was cut short — switch to Detailed in the toolbar for longer responses.]';
+            return txt || '(No response)';
           };
           _context18.n = 4;
           return res.json();
@@ -2358,7 +2906,9 @@ function toggleFontPanel() {
     btn = document.getElementById('font-toolbar-btn');
   panel.classList.toggle('open');
   document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
 }
 function applyFontSize(size) {
@@ -2440,7 +2990,8 @@ function addBookToShelf(book) {
       author: book.author,
       year: book.year || '',
       lang: book.lang || '',
-      detectedLang: book.detectedLang || ''
+      detectedLang: book.detectedLang || '',
+      pageCount: book.pageCount || 0
     });
     localStorage.setItem('pc_shelf_books', JSON.stringify(books));
   }
@@ -2669,13 +3220,14 @@ function toggleLengthPanel() {
   var panel = document.getElementById('length-panel');
   var btn = document.getElementById('length-toolbar-btn');
   panel.classList.toggle('open');
-  // close other panels
   document.getElementById('font-panel').classList.remove('open');
   document.getElementById('highlights-panel').classList.remove('open');
   document.getElementById('passages-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('font-toolbar-btn').classList.remove('active');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('passages-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
 }
 function setReplyLength(length) {
@@ -2752,10 +3304,106 @@ function togglePassagesPanel() {
   panel.classList.toggle('open');
   document.getElementById('font-panel').classList.remove('open');
   document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('font-toolbar-btn').classList.remove('active');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
   if (panel.classList.contains('open')) renderPassagesPanel();
+}
+function exportConversation() {
+  if (!STATE.messages || !STATE.messages.length) {
+    showToolbarMsg('No conversation to export yet.');
+    return;
+  }
+  var book = STATE.book;
+  var date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  var lines = [
+    'Page Commons — Conversation Export',
+    'Book: ' + (book ? book.title : 'Unknown'),
+    'Author: ' + (book ? book.author : 'Unknown'),
+    'Exported: ' + date,
+    '',
+    '---',
+    ''
+  ];
+  var exchange = 0;
+  STATE.messages.forEach(function(m) {
+    if (m.role === 'user') {
+      exchange++;
+      lines.push('[' + exchange + '] You');
+      lines.push(m.content);
+      lines.push('');
+    } else {
+      lines.push(STATE.companionName || 'Companion');
+      lines.push(m.content);
+      lines.push('');
+    }
+  });
+  var blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = (book ? book.title.replace(/[^a-z0-9]/gi, '-').toLowerCase() : 'conversation') + '-export.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function getNotes(book) {
+  var bk = bookKey(book || STATE.book);
+  return JSON.parse(localStorage.getItem('pc_notes_' + bk) || '[]');
+}
+function saveNoteEntry() {
+  var ta = document.getElementById('note-input');
+  if (!ta || !STATE.book) return;
+  var text = ta.value.trim();
+  if (!text) return;
+  var bk = bookKey(STATE.book);
+  var notes = getNotes(STATE.book);
+  notes.unshift({ text: text, ts: Date.now() });
+  localStorage.setItem('pc_notes_' + bk, JSON.stringify(notes));
+  ta.value = '';
+  renderNotesPanel();
+  updateNotesToolbarBtn();
+}
+function renderNotesPanel() {
+  var list = document.getElementById('notes-list');
+  if (!list || !STATE.book) return;
+  var notes = getNotes(STATE.book);
+  if (!notes.length) {
+    list.innerHTML = '<p class="passages-empty">No notes yet.</p>';
+    return;
+  }
+  list.innerHTML = notes.map(function(n) {
+    var d = new Date(n.ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    return '<div class="note-item"><div class="note-date">' + d + '</div>' + formatText(n.text) + '</div>';
+  }).join('');
+}
+function toggleNotesPanel() {
+  var panel = document.getElementById('notes-panel');
+  var btn = document.getElementById('notes-toolbar-btn');
+  panel.classList.toggle('open');
+  document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('passages-panel').classList.remove('open');
+  document.getElementById('length-panel').classList.remove('open');
+  document.getElementById('font-toolbar-btn').classList.remove('active');
+  document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('passages-toolbar-btn').classList.remove('active');
+  document.getElementById('length-toolbar-btn').classList.remove('active');
+  if (panel.classList.contains('open')) {
+    btn.classList.add('active');
+    renderNotesPanel();
+  } else {
+    btn.classList.remove('active');
+  }
+}
+function updateNotesToolbarBtn() {
+  var btn = document.getElementById('notes-toolbar-btn');
+  if (!btn || !STATE.book) return;
+  var notes = getNotes(STATE.book);
+  btn.textContent = notes.length ? 'Notes (' + notes.length + ')' : 'Notes';
 }
 function copyAllPassages() {
   var passages = getPassages();
@@ -2867,6 +3515,126 @@ function showInitError(msg) {
     errDiv.textContent = 'Error: ' + msg;
   } catch (displayErr) {}
 }
+// ═══════════════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════════════
+function loadSettingsScreen() {
+  var nameEl = document.getElementById('settings-name');
+  if (nameEl) nameEl.value = STATE.userName || '';
+  var cnEl = document.getElementById('settings-companion-name');
+  if (cnEl) cnEl.value = STATE.companionName === 'Companion' ? '' : STATE.companionName;
+  applyProviderUI(STATE.provider);
+  document.querySelectorAll('.length-opt').forEach(function(b) {
+    b.dataset.length === STATE.replyLength ? b.classList.add('active') : b.classList.remove('active');
+  });
+  document.querySelectorAll('.font-size-opt').forEach(function(b) {
+    parseInt(b.dataset.size, 10) === (parseInt(localStorage.getItem('pc_font_size'), 10) || 18) ? b.classList.add('active') : b.classList.remove('active');
+  });
+  var clangEl = document.getElementById('settings-companion-lang');
+  if (clangEl) clangEl.value = STATE.companionLangOverride || '';
+  renderReadingLanguages();
+}
+function saveCompanionLangSetting(val) {
+  STATE.companionLangOverride = val || null;
+  if (val) localStorage.setItem('pc_companion_lang', val);
+  else localStorage.removeItem('pc_companion_lang');
+}
+
+var READING_LANGS_AVAILABLE = ['English', 'French', 'German', 'Spanish', 'Italian', 'Portuguese', 'Traditional Chinese', 'Simplified Chinese', 'Japanese', 'Korean', 'Arabic', 'Russian', 'Dutch', 'Polish', 'Turkish'];
+
+function getReadingLanguages() {
+  try {
+    return JSON.parse(localStorage.getItem('pc_reading_langs') || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveReadingLanguages() {
+  var selected = [];
+  READING_LANGS_AVAILABLE.forEach(function(lang) {
+    var cb = document.getElementById('reading-lang-' + lang);
+    if (cb && cb.checked) {
+      selected.push(lang);
+    }
+  });
+  if (selected.length > 3) {
+    selected = selected.slice(0, 3);
+  }
+  localStorage.setItem('pc_reading_langs', JSON.stringify(selected));
+}
+
+function renderReadingLanguages() {
+  var container = document.getElementById('reading-langs-list');
+  if (!container) return;
+  var selected = getReadingLanguages();
+  var html = '';
+  READING_LANGS_AVAILABLE.forEach(function(lang) {
+    var isChecked = selected.indexOf(lang) !== -1;
+    var disabled = !isChecked && selected.length >= 3 ? 'disabled' : '';
+    html += '<div style="margin-bottom:8px"><label style="display:block;cursor:pointer"><input type="checkbox" id="reading-lang-' + lang + '" ' + (isChecked ? 'checked' : '') + ' ' + disabled + ' onchange="saveReadingLanguages(); renderReadingLanguages()" style="margin-right:6px;cursor:pointer" /><span style="font-size:0.95rem">' + lang + '</span></label></div>';
+  });
+  container.innerHTML = html;
+}
+
+function saveSettingName() {
+  var val = (document.getElementById('settings-name').value || '').trim();
+  STATE.userName = val;
+  if (val) localStorage.setItem('pc_user_name', val);
+  else localStorage.removeItem('pc_user_name');
+}
+function saveSettingCompanionName() {
+  var val = (document.getElementById('settings-companion-name').value || '').trim();
+  STATE.companionName = val || 'Companion';
+  localStorage.setItem('pc_companion_name', STATE.companionName);
+  var keyInp = document.getElementById('companion-name-input');
+  if (keyInp) keyInp.value = val;
+}
+
+// ═══════════════════════════════════════════════════
+//  READING PROGRESS
+// ═══════════════════════════════════════════════════
+function getReadingProgress(book) {
+  try {
+    return JSON.parse(localStorage.getItem('pc_progress_' + bookKey(book)) || 'null');
+  } catch (e) { return null; }
+}
+function updateProgressFromHighlights(highlights) {
+  var byBook = {};
+  highlights.forEach(function(h) {
+    if (!h.page) return;
+    var bk = bookKey({ title: h.title, author: h.author });
+    if (!byBook[bk] || h.page > byBook[bk]) byBook[bk] = h.page;
+  });
+  Object.keys(byBook).forEach(function(bk) {
+    var existing = getReadingProgress({ title: bk, author: '' });
+    if (!existing || byBook[bk] > (existing.page || 0)) {
+      localStorage.setItem('pc_progress_' + bk, JSON.stringify({ page: byBook[bk], source: 'kindle' }));
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  BOOK SUBJECTS (icebreaker enrichment)
+// ═══════════════════════════════════════════════════
+function fetchAndCacheSubjects(book) {
+  var bk = bookKey(book);
+  var cacheKey = 'pc_subjects_' + bk;
+  if (localStorage.getItem(cacheKey)) return;
+  if (book.key && book.key.indexOf('/works/') === 0) {
+    fetch('https://openlibrary.org' + book.key + '.json')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var subjects = (data.subjects || []).slice(0, 10);
+        localStorage.setItem(cacheKey, JSON.stringify(subjects));
+      })
+      .catch(function() {});
+  } else if (book.cats) {
+    var cats = book.cats.split(/\s+/).filter(Boolean).slice(0, 6);
+    if (cats.length) localStorage.setItem(cacheKey, JSON.stringify(cats));
+  }
+}
+
 function init() {
   try {
     var prov = localStorage.getItem('pc_provider');
@@ -2885,6 +3653,10 @@ function init() {
       STATE.companionName = name;
       document.getElementById('companion-name-input').value = name;
     }
+    var uname = localStorage.getItem('pc_user_name');
+    if (uname) STATE.userName = uname;
+    var clang = localStorage.getItem('pc_companion_lang');
+    if (clang) STATE.companionLangOverride = clang;
   } catch (e) {
     showInitError('settings: ' + e.message);
   }
