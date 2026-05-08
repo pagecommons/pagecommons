@@ -1594,7 +1594,7 @@ function surpriseRandom() {
 
   var langCode = getSurpriseLangCode();
   if (langCode) {
-    var startIndex = Math.floor(Math.random() * 5);
+    var startIndex = Math.floor(Math.random() * 10);
     fetch('/api/books?q=' + encodeURIComponent('subject:' + subj) + '&maxResults=40&startIndex=' + startIndex + '&langRestrict=' + encodeURIComponent(langCode))
       .then(function(r) { return r.json(); })
       .then(function(data) {
