@@ -1587,8 +1587,13 @@ function buildBookFromGoogleItem(item, lang, langCode) {
 
 function filterByLanguage(items, baseLang) {
   return items.filter(function(item) {
-    var vl = item.volumeInfo && item.volumeInfo.language;
-    return vl && (vl === baseLang || vl.split('-')[0] === baseLang);
+    var vi = item.volumeInfo || {};
+    if (!vi.title) return false;
+    var vl = vi.language;
+    // Accept items with no language field — trust langRestrict did its job.
+    // Only reject if the field is present and explicitly wrong.
+    if (!vl) return true;
+    return vl === baseLang || vl.split('-')[0] === baseLang;
   });
 }
 
@@ -1632,8 +1637,9 @@ function surpriseFetchForLanguage(lang) {
       if (matched.length) {
         return buildBookFromGoogleItem(matched[Math.floor(Math.random() * matched.length)], lang, langCode);
       }
-      // No subject match — try a broader query at startIndex 0
-      return fetch('/api/books?q=fiction&maxResults=40&langRestrict=' + encodeURIComponent(baseLang))
+      // No subject match — try a keyword search (no subject: prefix) at startIndex 0
+      var altSubj = SURPRISE_SUBJECTS[Math.floor(Math.random() * SURPRISE_SUBJECTS.length)];
+      return fetch('/api/books?q=' + encodeURIComponent(altSubj) + '&maxResults=40&langRestrict=' + encodeURIComponent(baseLang))
         .then(function(r2) { return r2.json(); })
         .then(function(data2) {
           var matched2 = filterByLanguage(data2.items || [], baseLang);
