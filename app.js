@@ -1690,7 +1690,8 @@ function selectSurpriseLanguage(lang) {
 
   callFreeTier(system, [{role: 'user', content: userMessage}]).then(function(response) {
     try {
-      var json = JSON.parse(response);
+      var cleaned = response.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+      var json = JSON.parse(cleaned);
       STATE.surpriseResult = {
         title: json.title || 'Unknown',
         author: json.author || 'Unknown author',
@@ -1700,12 +1701,16 @@ function selectSurpriseLanguage(lang) {
       };
       displaySurpriseResult();
     } catch(e) {
-      document.getElementById('surprise-loading').style.display = 'none';
-      document.getElementById('surprise-language-step').style.display = 'block';
+      var loadEl2 = document.getElementById('surprise-loading');
+      var stepEl2 = document.getElementById('surprise-language-step');
+      if (loadEl2) loadEl2.style.display = 'none';
+      if (stepEl2) stepEl2.style.display = 'block';
     }
   }).catch(function() {
-    document.getElementById('surprise-loading').style.display = 'none';
-    document.getElementById('surprise-language-step').style.display = 'block';
+    var loadEl3 = document.getElementById('surprise-loading');
+    var stepEl3 = document.getElementById('surprise-language-step');
+    if (loadEl3) loadEl3.style.display = 'none';
+    if (stepEl3) stepEl3.style.display = 'block';
   });
 }
 
