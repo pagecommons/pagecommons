@@ -1785,9 +1785,23 @@ function selectSurpriseGenre(genre) {
   document.getElementById('surprise-genre-step').style.display = 'none';
   document.getElementById('surprise-language-step').style.display = 'block';
 }
+var GENRE_QUERIES = {
+  'fiction': 'literary fiction novel',
+  'mystery': 'mystery detective crime',
+  'romance': 'romance novel love',
+  'scifi': 'science fiction',
+  'fantasy': 'fantasy novel',
+  'nonfiction': 'popular nonfiction',
+  'biography': 'biography memoir',
+  'poetry': 'poetry poems'
+};
 function selectSurpriseLanguage(lang) {
   var genre = STATE.surpriseGenre;
   var langCode = lang === 'English' ? 'en' : LANG_NAME_TO_CODE[lang] || 'en';
+  var baseLang = langCode.split('-')[0];
+  document.getElementById('surprise-loading').style.display = 'block';
+  document.getElementById('surprise-language-step').style.display = 'none';
+  document.getElementById('surprise-result').style.display = 'none';
   var shelf = getShelfBooks();
   var shelfText = '';
   shelf.slice(0, 10).forEach(function (book) {
@@ -1796,36 +1810,74 @@ function selectSurpriseLanguage(lang) {
   if (!shelfText) shelfText = 'No books yet';
   var system = 'You are a helpful book recommendation assistant. Based on the user genre preference and reading shelf, recommend a single book they might not have heard of. Return ONLY valid JSON with no extra text: {"title":"...","author":"...","reason":"one sentence"}';
   var userMessage = 'Genre: ' + genre + '\nLanguage: ' + lang + '\nMy shelf: ' + shelfText;
-  document.getElementById('surprise-loading').style.display = 'block';
-  document.getElementById('surprise-language-step').style.display = 'none';
-  document.getElementById('surprise-result').style.display = 'none';
   callFreeTier(system, [{
     role: 'user',
     content: userMessage
   }]).then(function (response) {
-    try {
-      var cleaned = response.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-      var json = JSON.parse(cleaned);
-      STATE.surpriseResult = {
-        title: json.title || 'Unknown',
-        author: json.author || 'Unknown author',
-        reason: json.reason || '',
-        genre: genre,
-        language: lang
-      };
-      displaySurpriseResult();
-    } catch (e) {
-      var loadEl2 = document.getElementById('surprise-loading');
-      var stepEl2 = document.getElementById('surprise-language-step');
-      if (loadEl2) loadEl2.style.display = 'none';
-      if (stepEl2) stepEl2.style.display = 'block';
-    }
+    var cleaned = response.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+    var json = JSON.parse(cleaned);
+    STATE.surpriseResult = {
+      title: json.title || 'Unknown',
+      author: json.author || 'Unknown author',
+      reason: json.reason || '',
+      genre: genre,
+      language: lang
+    };
+    displaySurpriseResult();
   }).catch(function () {
-    var loadEl3 = document.getElementById('surprise-loading');
-    var stepEl3 = document.getElementById('surprise-language-step');
-    if (loadEl3) loadEl3.style.display = 'none';
-    if (stepEl3) stepEl3.style.display = 'block';
+    surpriseFallbackSearch(genre, lang, baseLang);
   });
+}
+function surpriseFallbackSearch(genre, lang, baseLang) {
+  var query = GENRE_QUERIES[genre] || genre;
+  var startIndex = Math.floor(Math.random() * 10);
+  var url = '/api/books?q=' + encodeURIComponent(query) + '&startIndex=' + startIndex;
+  if (baseLang !== 'en') url += '&langRestrict=' + baseLang;
+  fetch(url).then(function (r) {
+    return r.json();
+  }).then(function (data) {
+    var items = data.items || [];
+    if (baseLang !== 'en') items = filterByLanguage(items, baseLang);
+    if (!items.length) {
+      return fetch('/api/books?q=' + encodeURIComponent(query) + '&startIndex=' + Math.floor(Math.random() * 10)).then(function (r2) {
+        return r2.json();
+      }).then(function (d2) {
+        return d2.items || [];
+      });
+    }
+    return items;
+  }).then(function (items) {
+    if (!items || !items.length) {
+      surpriseFallbackError();
+      return;
+    }
+    var item = items[Math.floor(Math.random() * items.length)];
+    var vi = item.volumeInfo || {};
+    STATE.surpriseResult = {
+      title: vi.title || 'Unknown',
+      author: vi.authors && vi.authors[0] || 'Unknown author',
+      reason: '',
+      genre: genre,
+      language: lang
+    };
+    displaySurpriseResult();
+  }).catch(function () {
+    surpriseFallbackError();
+  });
+}
+function surpriseFallbackError() {
+  var loadEl = document.getElementById('surprise-loading');
+  var stepEl = document.getElementById('surprise-language-step');
+  if (loadEl) {
+    loadEl.textContent = 'Could not find a book. Try again.';
+  }
+  setTimeout(function () {
+    if (loadEl) {
+      loadEl.style.display = 'none';
+      loadEl.textContent = 'Finding a book…';
+    }
+    if (stepEl) stepEl.style.display = 'block';
+  }, 2000);
 }
 function displaySurpriseResult() {
   var result = STATE.surpriseResult;
