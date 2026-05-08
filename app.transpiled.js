@@ -1,11 +1,141 @@
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
-function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
-function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
-function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _regenerator() {
+  /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */var e,
+    t,
+    r = "function" == typeof Symbol ? Symbol : {},
+    n = r.iterator || "@@iterator",
+    o = r.toStringTag || "@@toStringTag";
+  function i(r, n, o, i) {
+    var c = n && n.prototype instanceof Generator ? n : Generator,
+      u = Object.create(c.prototype);
+    return _regeneratorDefine2(u, "_invoke", function (r, n, o) {
+      var i,
+        c,
+        u,
+        f = 0,
+        p = o || [],
+        y = !1,
+        G = {
+          p: 0,
+          n: 0,
+          v: e,
+          a: d,
+          f: d.bind(e, 4),
+          d: function d(t, r) {
+            return i = t, c = 0, u = e, G.n = r, a;
+          }
+        };
+      function d(r, n) {
+        for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) {
+          var o,
+            i = p[t],
+            d = G.p,
+            l = i[2];
+          r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0));
+        }
+        if (o || r > 1) return a;
+        throw y = !0, n;
+      }
+      return function (o, p, l) {
+        if (f > 1) throw TypeError("Generator is already running");
+        for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) {
+          i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u);
+          try {
+            if (f = 2, i) {
+              if (c || (o = "next"), t = i[o]) {
+                if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object");
+                if (!t.done) return t;
+                u = t.value, c < 2 && (c = 0);
+              } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1);
+              i = e;
+            } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break;
+          } catch (t) {
+            i = e, c = 1, u = t;
+          } finally {
+            f = 1;
+          }
+        }
+        return {
+          value: t,
+          done: y
+        };
+      };
+    }(r, o, i), !0), u;
+  }
+  var a = {};
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+  t = Object.getPrototypeOf;
+  var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () {
+      return this;
+    }), t),
+    u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c);
+  function f(e) {
+    return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e;
+  }
+  return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () {
+    return this;
+  }), _regeneratorDefine2(u, "toString", function () {
+    return "[object Generator]";
+  }), (_regenerator = function _regenerator() {
+    return {
+      w: i,
+      m: f
+    };
+  })();
+}
+function _regeneratorDefine2(e, r, n, t) {
+  var i = Object.defineProperty;
+  try {
+    i({}, "", {});
+  } catch (e) {
+    i = 0;
+  }
+  _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) {
+    function o(r, n) {
+      _regeneratorDefine2(e, r, function (e) {
+        return this._invoke(r, n, e);
+      });
+    }
+    r ? i ? i(e, r, {
+      value: n,
+      enumerable: !t,
+      configurable: !t,
+      writable: !t
+    }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2));
+  }, _regeneratorDefine2(e, r, n, t);
+}
+function asyncGeneratorStep(n, t, e, r, o, a, c) {
+  try {
+    var i = n[a](c),
+      u = i.value;
+  } catch (n) {
+    return void e(n);
+  }
+  i.done ? t(u) : Promise.resolve(u).then(r, o);
+}
+function _asyncToGenerator(n) {
+  return function () {
+    var t = this,
+      e = arguments;
+    return new Promise(function (r, o) {
+      var a = n.apply(t, e);
+      function _next(n) {
+        asyncGeneratorStep(a, r, o, _next, _throw, "next", n);
+      }
+      function _throw(n) {
+        asyncGeneratorStep(a, r, o, _next, _throw, "throw", n);
+      }
+      _next(void 0);
+    });
+  };
+}
 // Force home screen visible immediately (required for Kobo WebKit)
-(function() {
+(function () {
   var el = document.getElementById('screen-home');
-  if (el) { el.style.display = 'block'; }
+  if (el) {
+    el.style.display = 'block';
+  }
 })();
 
 // ─── POLYFILLS for older WebKit (Kobo/Kindle) ───────────────────────────────
@@ -73,10 +203,12 @@ var STATE = {
   // held during age gate
   passages: [],
   // saved passages for current book
-  replyLength: 'medium', // 'short' | 'medium' | 'detailed'
+  replyLength: 'medium',
+  // 'short' | 'medium' | 'detailed'
   userName: '',
   surpriseBook: null,
-  surpriseMode: null, // 'random' | 'shelf'
+  surpriseMode: null,
+  // 'random' | 'shelf'
   surpriseResults: []
 };
 var STATIC_PROMPTS = ["I just finished it", "Something is still on my mind", "I want to understand something better", "There's a passage I keep thinking about", "I'm not sure how I feel about it", "I gave up — can we talk about why?", "I want to know what to read next", "Something surprised me"];
@@ -86,23 +218,8 @@ var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'L
 //  SCREENS + NAVIGATION
 // ═══════════════════════════════════════════════════
 var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'book-detail', 'tc', 'age-gate', 'settings', 'surprise'];
-
-var SEARCH_HEADINGS = [
-  'Which book?',
-  'What are you reading?',
-  'What are you lost in?',
-  'What\'s keeping you up?',
-  'What\'s calling to you?',
-  'What\'s in your hands?',
-  'Which world are you in?'
-];
-var SEARCH_HEADINGS_NAMED = [
-  'What are you reading, {name}?',
-  'What are you lost in, {name}?',
-  'What\'s keeping you up, {name}?',
-  'What\'s calling to you, {name}?',
-  'Which world are you in, {name}?'
-];
+var SEARCH_HEADINGS = ['Which book?', 'What are you reading?', 'What are you lost in?', 'What\'s keeping you up?', 'What\'s calling to you?', 'What\'s in your hands?', 'Which world are you in?'];
+var SEARCH_HEADINGS_NAMED = ['What are you reading, {name}?', 'What are you lost in, {name}?', 'What\'s keeping you up, {name}?', 'What\'s calling to you, {name}?', 'Which world are you in, {name}?'];
 function updateSearchHeading() {
   var el = document.getElementById('search-heading');
   if (!el) return;
@@ -120,7 +237,7 @@ function showScreen(id) {
     if (el) {
       if (s === target) {
         el.classList.add('active');
-        el.style.display = (s === 'home') ? 'block' : 'block';
+        el.style.display = s === 'home' ? 'block' : 'block';
       } else {
         el.classList.remove('active');
         el.style.display = 'none';
@@ -464,7 +581,13 @@ function _interpretSearchQuery() {
                   text: prompt
                 }]
               }]
-            }, langNote ? { systemInstruction: { parts: [{ text: langNote }] } } : {}))
+            }, langNote ? {
+              systemInstruction: {
+                parts: [{
+                  text: langNote
+                }]
+              }
+            } : {}))
           });
         case 7:
           _res = _context2.v;
@@ -564,7 +687,6 @@ function renderBookBatch(batch, container, insertBefore) {
     if (anchor) container.insertBefore(el, anchor);else container.appendChild(el);
   });
 }
-
 function toggleBookAbout(id) {
   var el = document.getElementById(id);
   if (!el) return;
@@ -957,7 +1079,7 @@ function renderManualEntry(prefill, container) {
   var wrap = document.createElement('div');
   wrap.className = 'manual-entry';
   var langOptions = '<option value="">Select language...</option>';
-  Object.keys(LANG_NAME_TO_CODE).forEach(function(name) {
+  Object.keys(LANG_NAME_TO_CODE).forEach(function (name) {
     langOptions += '<option value="' + LANG_NAME_TO_CODE[name] + '">' + name + '</option>';
   });
   wrap.innerHTML = '<p style="font-size:0.85rem;color:#777777;margin-bottom:14px">Not seeing your book? Enter it manually:</p>' + '<div class="field"><label>Title</label><input type="text" id="manual-title" /></div>' + '<div class="field"><label>Author <span style="font-weight:normal;text-transform:none">(optional)</span></label><input type="text" id="manual-author" placeholder="Author name" /></div>' + '<div class="field"><label>Language <span style="font-weight:normal;text-transform:none">(optional)</span></label><select id="manual-language">' + langOptions + '</select></div>' + '<div class="field"><label>Year <span style="font-weight:normal;text-transform:none">(optional)</span></label><input type="text" id="manual-year" placeholder="e.g. 2024" /></div>' + '<button class="btn btn-primary" onclick="lookupManualBook()">Find this book</button>';
@@ -973,33 +1095,32 @@ function lookupManualBook() {
   if (!title.trim()) return;
   var query = title.trim();
   if (author.trim()) query += ' ' + author.trim();
-  fetch('/api/books?q=' + encodeURIComponent(query) + (lang ? '&langRestrict=' + lang : ''))
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      var book = null;
-      if (data && data.items && data.items[0]) {
-        var item = data.items[0];
-        var langCode = lang || (item.volumeInfo.language || 'en');
-        book = buildBookFromGoogleItem(item, LANG_NAMES[langCode] || item.volumeInfo.language || 'English', langCode);
-      } else {
-        book = {
-          title: title.trim(),
-          author: author.trim() || 'Unknown author',
-          year: year.trim() || '',
-          key: ''
-        };
-      }
-      showBookDetail(book);
-    })
-    .catch(function() {
-      var book = {
+  fetch('/api/books?q=' + encodeURIComponent(query) + (lang ? '&langRestrict=' + lang : '')).then(function (res) {
+    return res.json();
+  }).then(function (data) {
+    var book = null;
+    if (data && data.items && data.items[0]) {
+      var item = data.items[0];
+      var langCode = lang || item.volumeInfo.language || 'en';
+      book = buildBookFromGoogleItem(item, LANG_NAMES[langCode] || item.volumeInfo.language || 'English', langCode);
+    } else {
+      book = {
         title: title.trim(),
         author: author.trim() || 'Unknown author',
         year: year.trim() || '',
         key: ''
       };
-      showBookDetail(book);
-    });
+    }
+    showBookDetail(book);
+  }).catch(function () {
+    var book = {
+      title: title.trim(),
+      author: author.trim() || 'Unknown author',
+      year: year.trim() || '',
+      key: ''
+    };
+    showBookDetail(book);
+  });
 }
 function selectManualBook() {
   var title = (document.getElementById('manual-title') || {}).value || '';
@@ -1071,7 +1192,7 @@ function discoverBook(book) {
   STATE.currentConvName = null;
   var dl = detectLanguage(book);
   STATE.detectedLang = dl;
-  STATE.chatLanguage = dl ? 'native' : (localStorage.getItem('pc_lang_' + bookKey(book)) || 'english');
+  STATE.chatLanguage = dl ? 'native' : localStorage.getItem('pc_lang_' + bookKey(book)) || 'english';
   navigate('companion');
   launchCompanion(book);
 }
@@ -1316,7 +1437,7 @@ function _renderStatusScreen() {
 
           // Update heading
           h1 = document.getElementById('status-book-title');
-          if (h1) h1.textContent = (lang || /[\u0080-\uffff]/.test(book.title)) ? book.title : 'Where are you with "' + book.title + '"?';
+          if (h1) h1.textContent = lang || /[\u0080-\uffff]/.test(book.title) ? book.title : 'Where are you with "' + book.title + '"?';
         case 17:
           return _context9.a(2);
       }
@@ -1334,7 +1455,7 @@ function loadBookDetailScreen() {
   if (!book) return;
   var container = document.getElementById('book-detail-content');
   if (!container) return;
-  var meta = (book.year || book.pageCount) ? book.year + (book.pageCount ? ' · ' + book.pageCount + ' pages' : '') : '';
+  var meta = book.year || book.pageCount ? book.year + (book.pageCount ? ' · ' + book.pageCount + ' pages' : '') : '';
   var desc = book.description || '';
   var truncated = desc.length > 300 ? desc.substring(0, 300) + '…' : desc;
   var descHTML = truncated ? '<p class="book-detail-description">' + truncated + '</p>' : '<p class="book-detail-description" style="color:#aaaaaa;font-style:italic;">No description available — the companion can still help you explore this book.</p>';
@@ -1368,7 +1489,7 @@ function _selectBook() {
           // returning book — always use native for detected non-English books
           STATE.readingStatus = savedStatus;
           STATE.detectedLang = detectedLang;
-          STATE.chatLanguage = detectedLang ? 'native' : (savedLang || 'english');
+          STATE.chatLanguage = detectedLang ? 'native' : savedLang || 'english';
           if (detectedLang) localStorage.setItem('pc_lang_' + bk, 'native');
           // restore thinking phrases if native language was chosen
           if (!(STATE.chatLanguage === 'native' && detectedLang)) {
@@ -1471,7 +1592,7 @@ function detectLanguage(book) {
   // Simplified Chinese lang codes
   if (/^zh[-_]?(CN|SG|Hans)/i.test(lang)) return 'Simplified Chinese';
   // bare zh \u2014 distinguish by title characters below
-  var isBareZh = (lang === 'zh');
+  var isBareZh = lang === 'zh';
   if (!isBareZh && lang && lang !== 'en') {
     var LANG_NAMES = {
       ja: 'Japanese',
@@ -1600,7 +1721,6 @@ function startReadingFromDiscover() {
 // ═══════════════════════════════════════════════════
 var SURPRISE_SUBJECTS = ['fiction', 'mystery', 'history', 'biography', 'science', 'philosophy', 'fantasy', 'science_fiction', 'thriller', 'romance', 'poetry'];
 var _surpriseSeenKeys = [];
-
 var LANG_NAME_TO_CODE = {
   'French': 'fr',
   'German': 'de',
@@ -1620,7 +1740,6 @@ var LANG_NAME_TO_CODE = {
   'Thai': 'th',
   'Vietnamese': 'vi'
 };
-
 function initSurpriseScreen() {
   var shelfBtn = document.getElementById('surprise-shelf-btn');
   if (shelfBtn) {
@@ -1630,15 +1749,14 @@ function initSurpriseScreen() {
   document.getElementById('surprise-result').style.display = 'none';
   document.getElementById('surprise-loading').style.display = 'none';
 }
-
 function buildBookFromGoogleItem(item, lang, langCode) {
   if (!item) return null;
   var vi = item.volumeInfo || {};
   if (!vi.title) return null;
-  var thumb = (vi.imageLinks && vi.imageLinks.thumbnail) ? vi.imageLinks.thumbnail.replace('http://', 'https://') : '';
+  var thumb = vi.imageLinks && vi.imageLinks.thumbnail ? vi.imageLinks.thumbnail.replace('http://', 'https://') : '';
   return {
     title: vi.title,
-    author: (vi.authors && vi.authors[0]) ? vi.authors[0] : '',
+    author: vi.authors && vi.authors[0] ? vi.authors[0] : '',
     year: vi.publishedDate ? vi.publishedDate.substring(0, 4) : '',
     key: item.id || '',
     source: 'Google Books',
@@ -1648,9 +1766,8 @@ function buildBookFromGoogleItem(item, lang, langCode) {
     language: lang
   };
 }
-
 function filterByLanguage(items, baseLang) {
-  return items.filter(function(item) {
+  return items.filter(function (item) {
     var vi = item.volumeInfo || {};
     if (!vi.title) return false;
     var vl = vi.language;
@@ -1660,7 +1777,6 @@ function filterByLanguage(items, baseLang) {
     return vl === baseLang || vl.split('-')[0] === baseLang;
   });
 }
-
 function startSurpriseMe() {
   STATE.surpriseGenre = null;
   navigate('surprise');
@@ -1669,42 +1785,39 @@ function startSurpriseMe() {
   document.getElementById('surprise-loading').style.display = 'none';
   document.getElementById('surprise-result').style.display = 'none';
 }
-
 function selectSurpriseGenre(genre) {
   STATE.surpriseGenre = genre;
   document.getElementById('surprise-genre-step').style.display = 'none';
   document.getElementById('surprise-language-step').style.display = 'block';
   renderSurpriseLanguageOptions();
 }
-
 function renderSurpriseLanguageOptions() {
   var container = document.getElementById('surprise-language-options');
   if (!container) return;
   var html = '';
-  Object.keys(LANG_NAME_TO_CODE).forEach(function(name) {
+  Object.keys(LANG_NAME_TO_CODE).forEach(function (name) {
     html += '<button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage(' + JSON.stringify(name) + ')">' + name + '</button>';
   });
   container.innerHTML = html;
 }
-
 function selectSurpriseLanguage(lang) {
   var genre = STATE.surpriseGenre;
   var langCode = LANG_NAME_TO_CODE[lang] || 'en';
   var shelf = getShelfBooks();
   var shelfText = '';
-  shelf.slice(0, 10).forEach(function(book) {
+  shelf.slice(0, 10).forEach(function (book) {
     shelfText += book.title + ' by ' + book.author + ', ';
   });
   if (!shelfText) shelfText = 'No books yet';
-
   var system = 'You are a helpful book recommendation assistant. Based on the user genre preference and reading shelf, recommend a single book they might not have heard of. Return ONLY valid JSON with no extra text: {"title":"...","author":"...","reason":"one sentence"}';
   var userMessage = 'Genre: ' + genre + '\nLanguage: ' + lang + '\nMy shelf: ' + shelfText;
-
   document.getElementById('surprise-loading').style.display = 'block';
   document.getElementById('surprise-language-step').style.display = 'none';
   document.getElementById('surprise-result').style.display = 'none';
-
-  callFreeTier(system, [{role: 'user', content: userMessage}]).then(function(response) {
+  callFreeTier(system, [{
+    role: 'user',
+    content: userMessage
+  }]).then(function (response) {
     try {
       var json = JSON.parse(response);
       STATE.surpriseResult = {
@@ -1715,35 +1828,24 @@ function selectSurpriseLanguage(lang) {
         language: lang
       };
       displaySurpriseResult();
-    } catch(e) {
+    } catch (e) {
       document.getElementById('surprise-loading').style.display = 'none';
       document.getElementById('surprise-language-step').style.display = 'block';
     }
-  }).catch(function() {
+  }).catch(function () {
     document.getElementById('surprise-loading').style.display = 'none';
     document.getElementById('surprise-language-step').style.display = 'block';
   });
 }
-
 function displaySurpriseResult() {
   var result = STATE.surpriseResult;
   if (!result) return;
-
   var resultEl = document.getElementById('surprise-result');
   if (!resultEl) return;
-  resultEl.innerHTML = '<div style="border:1px solid #111111;padding:16px;margin-bottom:20px">' +
-    '<div style="font-size:1.1rem;margin-bottom:4px">' + result.title + '</div>' +
-    '<div style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:0.85rem;color:#777777;margin-bottom:12px">' + result.author + '</div>' +
-    (result.reason ? '<div style="font-size:0.95rem;margin-bottom:12px">' + result.reason + '</div>' : '') +
-    '<div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">' +
-    '<button class="btn btn-primary" style="margin-bottom:10px" onclick="surpriseResultFindOutIfForMe()">Find out if it' + "'" + 's for me →</button>' +
-    '<button class="btn" onclick="surpriseResultNotForMe()">Not for me</button>' +
-    '</div></div>';
-
+  resultEl.innerHTML = '<div style="border:1px solid #111111;padding:16px;margin-bottom:20px">' + '<div style="font-size:1.1rem;margin-bottom:4px">' + result.title + '</div>' + '<div style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:0.85rem;color:#777777;margin-bottom:12px">' + result.author + '</div>' + (result.reason ? '<div style="font-size:0.95rem;margin-bottom:12px">' + result.reason + '</div>' : '') + '<div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">' + '<button class="btn btn-primary" style="margin-bottom:10px" onclick="surpriseResultFindOutIfForMe()">Find out if it' + "'" + 's for me →</button>' + '<button class="btn" onclick="surpriseResultNotForMe()">Not for me</button>' + '</div></div>';
   document.getElementById('surprise-loading').style.display = 'none';
   document.getElementById('surprise-result').style.display = 'block';
 }
-
 function surpriseResultFindOutIfForMe() {
   var result = STATE.surpriseResult;
   if (!result) return;
@@ -1756,7 +1858,6 @@ function surpriseResultFindOutIfForMe() {
   STATE.book = book;
   setReadingStatus('considering');
 }
-
 function surpriseResultNotForMe() {
   var result = STATE.surpriseResult;
   if (!result) return;
@@ -1981,10 +2082,16 @@ function parseClippingsPaste() {
   STATE.highlights = highlights;
   localStorage.setItem('pc_highlights', JSON.stringify(highlights));
   updateProgressFromHighlights(highlights);
-  var n = highlights.length, b = countBooks(highlights);
+  var n = highlights.length,
+    b = countBooks(highlights);
   statusEl.textContent = 'Loaded ' + n + ' highlight' + (n !== 1 ? 's' : '') + ' from ' + b + ' book' + (b !== 1 ? 's' : '') + '.';
   var top = getMostRecentBook(highlights);
-  if (top) selectBook({ title: top.title, author: top.author, year: '', key: '' });
+  if (top) selectBook({
+    title: top.title,
+    author: top.author,
+    year: '',
+    key: ''
+  });
 }
 function parseClippingsText(text) {
   var out = [];
@@ -2025,90 +2132,98 @@ function getMostRecentBook(h) {
 // ═══════════════════════════════════════════════════
 var SQL_JS_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js';
 var SQL_WASM_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.wasm';
-
 function loadSqlJs(callback) {
-  if (typeof initSqlJs !== 'undefined') { callback(null); return; }
+  if (typeof initSqlJs !== 'undefined') {
+    callback(null);
+    return;
+  }
   var script = document.createElement('script');
   script.src = SQL_JS_CDN;
-  script.onload = function() { callback(null); };
-  script.onerror = function() { callback(new Error('Could not load sql.js — check your internet connection.')); };
+  script.onload = function () {
+    callback(null);
+  };
+  script.onerror = function () {
+    callback(new Error('Could not load sql.js — check your internet connection.'));
+  };
   document.head.appendChild(script);
 }
-
 function parseKoboDatabase(input) {
   var file = input.files[0];
   if (!file) return;
   var statusEl = document.getElementById('kobo-status');
   statusEl.textContent = 'Loading database reader…';
   statusEl.style.display = 'block';
-
-  loadSqlJs(function(loadErr) {
-    if (loadErr) { statusEl.textContent = loadErr.message; return; }
+  loadSqlJs(function (loadErr) {
+    if (loadErr) {
+      statusEl.textContent = loadErr.message;
+      return;
+    }
     statusEl.textContent = 'Reading database…';
     var reader = new FileReader();
-    reader.onerror = function() { statusEl.textContent = 'Could not read the file.'; };
-    reader.onload = function(e) {
-      initSqlJs({ locateFile: function() { return SQL_WASM_CDN; } }).then(function(SQL) {
+    reader.onerror = function () {
+      statusEl.textContent = 'Could not read the file.';
+    };
+    reader.onload = function (e) {
+      initSqlJs({
+        locateFile: function locateFile() {
+          return SQL_WASM_CDN;
+        }
+      }).then(function (SQL) {
         var db;
         try {
           db = new SQL.Database(new Uint8Array(e.target.result));
-        } catch(openErr) {
+        } catch (openErr) {
           statusEl.textContent = 'Not a valid SQLite database: ' + openErr.message;
           return;
         }
         var highlights;
         try {
           highlights = processKoboHighlights(db);
-        } catch(queryErr) {
+        } catch (queryErr) {
           db.close();
           statusEl.textContent = 'Could not read highlights: ' + queryErr.message;
           return;
         }
         db.close();
-
         if (!highlights.length) {
           statusEl.textContent = 'No highlights found in this database.';
           return;
         }
-
         STATE.highlights = highlights;
         localStorage.setItem('pc_highlights', JSON.stringify(highlights));
-        var n = highlights.length, b = countBooks(highlights);
+        var n = highlights.length,
+          b = countBooks(highlights);
         statusEl.textContent = 'Loaded ' + n + ' highlight' + (n !== 1 ? 's' : '') + ' from ' + b + ' book' + (b !== 1 ? 's' : '') + '.';
         var top = getMostRecentBook(highlights);
-        if (top) selectBook({ title: top.title, author: top.author, year: '', key: '' });
-      }).catch(function(wasmErr) {
+        if (top) selectBook({
+          title: top.title,
+          author: top.author,
+          year: '',
+          key: ''
+        });
+      }).catch(function (wasmErr) {
         statusEl.textContent = 'Database reader failed to start: ' + wasmErr.message;
       });
     };
     reader.readAsArrayBuffer(file);
   });
 }
-
 function processKoboHighlights(db) {
-  var sql = 'SELECT b.Text, b.Annotation, b.DateCreated, b.ChapterProgress, ' +
-    'c.Title, c.Attribution, c.BookTitle ' +
-    'FROM Bookmark b ' +
-    'LEFT JOIN content c ON c.ContentID = b.VolumeID ' +
-    "WHERE b.Hidden = 0 AND b.Text IS NOT NULL AND b.Text != '' " +
-    'ORDER BY b.DateCreated ASC';
+  var sql = 'SELECT b.Text, b.Annotation, b.DateCreated, b.ChapterProgress, ' + 'c.Title, c.Attribution, c.BookTitle ' + 'FROM Bookmark b ' + 'LEFT JOIN content c ON c.ContentID = b.VolumeID ' + "WHERE b.Hidden = 0 AND b.Text IS NOT NULL AND b.Text != '' " + 'ORDER BY b.DateCreated ASC';
   var results = db.exec(sql);
   if (!results || !results.length) return [];
-
   var cols = results[0].columns;
   var rows = results[0].values;
   var out = [];
-
-  rows.forEach(function(row) {
+  rows.forEach(function (row) {
     var obj = {};
-    cols.forEach(function(c, i) { obj[c] = row[i]; });
-
+    cols.forEach(function (c, i) {
+      obj[c] = row[i];
+    });
     var text = (obj.Text || '').trim();
     if (!text) return;
-
-    var title = ((obj.BookTitle && obj.BookTitle.trim()) || (obj.Title && obj.Title.trim()) || 'Unknown');
+    var title = obj.BookTitle && obj.BookTitle.trim() || obj.Title && obj.Title.trim() || 'Unknown';
     var author = (obj.Attribution || '').replace(/^By\s+/i, '').trim() || 'Unknown';
-
     var h = {
       title: title,
       author: author,
@@ -2163,7 +2278,7 @@ function renderHighlightsPanel() {
   if (relevant.length) {
     btn.style.display = 'block';
     btn.textContent = 'Highlights (' + relevant.length + ')';
-    var _src = (relevant[0] && relevant[0].source === 'kobo') ? 'Kobo' : 'Kindle';
+    var _src = relevant[0] && relevant[0].source === 'kobo' ? 'Kobo' : 'Kindle';
     document.getElementById('highlights-count').textContent = relevant.length + ' highlight' + (relevant.length !== 1 ? 's' : '') + ' from your ' + _src;
     document.getElementById('highlights-list').innerHTML = relevant.map(function (h) {
       return '<p style="border-left:3px solid #d0d0d0;padding-left:10px;margin-bottom:12px;font-style:italic">"' + esc(h.text) + '"</p>';
@@ -2198,12 +2313,7 @@ function _populateIcebreakers() {
           list = document.getElementById('icebreaker-list');
           list.innerHTML = '';
           if (STATE.companionMode === 'discover') {
-            renderIcebreakerButtons([
-              'What kinds of books have you loved lately?',
-              'What mood are you in for reading right now?',
-              'What draws you to this one?',
-              'What would make this perfect for you right now?'
-            ], list);
+            renderIcebreakerButtons(['What kinds of books have you loved lately?', 'What mood are you in for reading right now?', 'What draws you to this one?', 'What would make this perfect for you right now?'], list);
             return _context12.a(2);
           }
           loadEl = document.createElement('div');
@@ -2311,7 +2421,9 @@ function _fetchAIIcebreakers() {
                 role: 'user',
                 content: prompt
               }]
-            }, langNote ? { system: langNote } : {}))
+            }, langNote ? {
+              system: langNote
+            } : {}))
           });
         case 1:
           res = _context13.v;
@@ -2348,7 +2460,13 @@ function _fetchAIIcebreakers() {
                   text: prompt
                 }]
               }]
-            }, langNote ? { systemInstruction: { parts: [{ text: langNote }] } } : {}))
+            }, langNote ? {
+              systemInstruction: {
+                parts: [{
+                  text: langNote
+                }]
+              }
+            } : {}))
           });
         case 5:
           _res7 = _context13.v;
@@ -2383,7 +2501,10 @@ function _fetchAIIcebreakers() {
             body: JSON.stringify({
               model: 'llama-3.3-70b-versatile',
               max_tokens: 200,
-              messages: (langNote ? [{ role: 'system', content: langNote }] : []).concat([{
+              messages: (langNote ? [{
+                role: 'system',
+                content: langNote
+              }] : []).concat([{
                 role: 'user',
                 content: prompt
               }])
@@ -2569,7 +2690,7 @@ function appendBubble(role, text) {
   var bubble = document.createElement('div');
   bubble.className = 'message-bubble';
   var html = formatText(text);
-  html = html.replace(/\[RECOMMEND:\s*([^\]]+)\]/g, function(match, q) {
+  html = html.replace(/\[RECOMMEND:\s*([^\]]+)\]/g, function (match, q) {
     var safe = q.trim().replace(/'/g, '&#39;');
     return '<button class="recommend-btn" onclick="searchFromRecommend(\'' + safe + '\')">' + safe + '</button>';
   });
@@ -2612,7 +2733,7 @@ function appendBubble(role, text) {
 }
 function appendError(err) {
   var isNetwork = !navigator.onLine || err.message === 'Failed to fetch' || err.message.includes('fetch');
-  var isQuota = err.message && (err.message.toLowerCase().includes('quota') || err.message.toLowerCase().includes('rate limit') || (err.message.includes('429') && !isNetwork));
+  var isQuota = err.message && (err.message.toLowerCase().includes('quota') || err.message.toLowerCase().includes('rate limit') || err.message.includes('429') && !isNetwork);
   var msg = err.isRateLimit ? err.message : isQuota ? 'Your AI key has hit its rate limit. Wait a moment and try again, or switch to a different provider.' : isNetwork ? "Couldn't reach your companion — poor connection? Try again when you have a better signal." : 'Something went wrong: ' + err.message;
   var wrap = document.createElement('div');
   wrap.className = 'message error-msg';
@@ -2659,14 +2780,7 @@ function buildDiscoveryPrompt() {
   var readingTime = book.pageCount ? ' The book is ' + book.pageCount + ' pages — roughly ' + Math.round(book.pageCount / 50) + ' hours for an average reader.' : '';
   var _companionLang = STATE.companionLangOverride || (STATE.chatLanguage === 'native' && STATE.detectedLang ? STATE.detectedLang : null);
   var langNote = _companionLang ? '\n\nRespond entirely in ' + _companionLang + '. Do not use any other language.' : '';
-  return 'You are a book discovery companion. The reader is considering whether "' + book.title + '" by ' + book.author + ' is right for them.' + readingTime + '\n\n' +
-    'Your role: help them decide if this book is for them — not summarise or sell it.\n\n' +
-    'Start by asking ONE question about their reading preferences — what they\'ve loved recently, what mood they\'re in, what they\'re looking for right now. Ask only one question. Wait for their answer before describing the book.\n\n' +
-    'Once you know their preferences: describe the book through that lens. What kind of reader tends to love it. The mood and pace it creates. What it asks of the reader. What readers often wish they\'d known before starting — not plot details, but texture and experience.\n\n' +
-    'Never reveal plot details, spoilers, or endings. Never summarise the story. Keep each response short — this is read on an e-ink screen.\n\n' +
-    'Always end with a question or an invitation. Respond in plain prose only. No bullet points. No headers.\n\n' +
-    'When you mention a specific book you\'d recommend, format it exactly as: [RECOMMEND: Title by Author].\n\n' +
-    'If there are any signs this reader may be a minor, default to age-appropriate discussion.' + langNote;
+  return 'You are a book discovery companion. The reader is considering whether "' + book.title + '" by ' + book.author + ' is right for them.' + readingTime + '\n\n' + 'Your role: help them decide if this book is for them — not summarise or sell it.\n\n' + 'Start by asking ONE question about their reading preferences — what they\'ve loved recently, what mood they\'re in, what they\'re looking for right now. Ask only one question. Wait for their answer before describing the book.\n\n' + 'Once you know their preferences: describe the book through that lens. What kind of reader tends to love it. The mood and pace it creates. What it asks of the reader. What readers often wish they\'d known before starting — not plot details, but texture and experience.\n\n' + 'Never reveal plot details, spoilers, or endings. Never summarise the story. Keep each response short — this is read on an e-ink screen.\n\n' + 'Always end with a question or an invitation. Respond in plain prose only. No bullet points. No headers.\n\n' + 'When you mention a specific book you\'d recommend, format it exactly as: [RECOMMEND: Title by Author].\n\n' + 'If there are any signs this reader may be a minor, default to age-appropriate discussion.' + langNote;
 }
 function buildSystemPrompt() {
   if (STATE.companionMode === 'discover') return buildDiscoveryPrompt();
@@ -2733,20 +2847,27 @@ function _callAI() {
 function callFreeTier(system, messages) {
   return fetch('/api/ai', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ system: system, messages: messages })
-  }).then(function(res) {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      system: system,
+      messages: messages
+    })
+  }).then(function (res) {
     if (res.status === 429) {
       var rateLimitErr = new Error('Our free companion is busy right now — add your own key for instant access.');
       rateLimitErr.isRateLimit = true;
       throw rateLimitErr;
     }
     if (!res.ok) {
-      return res.json().catch(function() { return {}; }).then(function(e) {
+      return res.json().catch(function () {
+        return {};
+      }).then(function (e) {
         throw new Error(e && e.error ? e.error : 'HTTP ' + res.status);
       });
     }
-    return res.json().then(function(data) {
+    return res.json().then(function (data) {
       return data && data.text ? data.text : '(No response)';
     });
   });
@@ -2848,7 +2969,9 @@ function _callGemini() {
             },
             body: JSON.stringify({
               contents: contents,
-              generationConfig: { maxOutputTokens: STATE.replyLength === 'short' ? 400 : 1500 }
+              generationConfig: {
+                maxOutputTokens: STATE.replyLength === 'short' ? 400 : 1500
+              }
             })
           });
         case 1:
@@ -3364,18 +3487,14 @@ function exportConversation() {
     return;
   }
   var book = STATE.book;
-  var date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  var lines = [
-    'Page Commons — Conversation Export',
-    'Book: ' + (book ? book.title : 'Unknown'),
-    'Author: ' + (book ? book.author : 'Unknown'),
-    'Exported: ' + date,
-    '',
-    '---',
-    ''
-  ];
+  var date = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+  var lines = ['Page Commons — Conversation Export', 'Book: ' + (book ? book.title : 'Unknown'), 'Author: ' + (book ? book.author : 'Unknown'), 'Exported: ' + date, '', '---', ''];
   var exchange = 0;
-  STATE.messages.forEach(function(m) {
+  STATE.messages.forEach(function (m) {
     if (m.role === 'user') {
       exchange++;
       lines.push('[' + exchange + '] You');
@@ -3387,7 +3506,9 @@ function exportConversation() {
       lines.push('');
     }
   });
-  var blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  var blob = new Blob([lines.join('\n')], {
+    type: 'text/plain'
+  });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
@@ -3408,7 +3529,10 @@ function saveNoteEntry() {
   if (!text) return;
   var bk = bookKey(STATE.book);
   var notes = getNotes(STATE.book);
-  notes.unshift({ text: text, ts: Date.now() });
+  notes.unshift({
+    text: text,
+    ts: Date.now()
+  });
   localStorage.setItem('pc_notes_' + bk, JSON.stringify(notes));
   ta.value = '';
   renderNotesPanel();
@@ -3422,8 +3546,12 @@ function renderNotesPanel() {
     list.innerHTML = '<p class="passages-empty">No notes yet.</p>';
     return;
   }
-  list.innerHTML = notes.map(function(n) {
-    var d = new Date(n.ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  list.innerHTML = notes.map(function (n) {
+    var d = new Date(n.ts).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
     return '<div class="note-item"><div class="note-date">' + d + '</div>' + formatText(n.text) + '</div>';
   }).join('');
 }
@@ -3493,60 +3621,61 @@ function toggleTransferSection() {
     if (btn) btn.textContent = '↓ Transferring from another device? Enter a code';
   }
 }
-
 function redeemTransferCode() {
   var input = document.getElementById('transfer-code-input');
   var errEl = document.getElementById('transfer-error');
-  var okEl  = document.getElementById('transfer-success');
+  var okEl = document.getElementById('transfer-success');
   if (!input) return;
 
   // Strip spaces and validate
   var code = input.value.replace(/\s/g, '');
   errEl.style.display = 'none';
-  okEl.style.display  = 'none';
-
+  okEl.style.display = 'none';
   if (!/^\d{6}$/.test(code)) {
     errEl.textContent = 'Please enter the 6-digit code exactly as shown.';
     errEl.style.display = 'block';
     return;
   }
-
   var btn = document.querySelector('#transfer-fields .btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Fetching…'; }
-
-  fetch('/api/transfer?code=' + code)
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-      if (btn) { btn.disabled = false; btn.textContent = 'Fetch my key'; }
-      if (data.error) {
-        errEl.textContent = data.error === 'Code not found or expired'
-          ? 'Code not found or expired. Generate a new one and try again.'
-          : 'Error: ' + data.error;
-        errEl.style.display = 'block';
-        return;
-      }
-      // Save the key
-      STATE.apiKey = data.key;
-      localStorage.setItem('pc_api_key', data.key);
-      var keyInput = document.getElementById('api-key-input');
-      if (keyInput) keyInput.value = data.key;
-      var statusBar = document.getElementById('key-status-bar');
-      if (statusBar) statusBar.style.display = 'block';
-      // Show success
-      okEl.textContent = 'Key transferred successfully! Tap Continue.';
-      okEl.style.display = 'block';
-      input.value = '';
-      // Hide the transfer fields
-      var fields = document.getElementById('transfer-fields');
-      if (fields) fields.style.display = 'none';
-    })
-    .catch(function(err) {
-      if (btn) { btn.disabled = false; btn.textContent = 'Fetch my key'; }
-      errEl.textContent = 'Network error — please check your connection and try again.';
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Fetching…';
+  }
+  fetch('/api/transfer?code=' + code).then(function (res) {
+    return res.json();
+  }).then(function (data) {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Fetch my key';
+    }
+    if (data.error) {
+      errEl.textContent = data.error === 'Code not found or expired' ? 'Code not found or expired. Generate a new one and try again.' : 'Error: ' + data.error;
       errEl.style.display = 'block';
-    });
+      return;
+    }
+    // Save the key
+    STATE.apiKey = data.key;
+    localStorage.setItem('pc_api_key', data.key);
+    var keyInput = document.getElementById('api-key-input');
+    if (keyInput) keyInput.value = data.key;
+    var statusBar = document.getElementById('key-status-bar');
+    if (statusBar) statusBar.style.display = 'block';
+    // Show success
+    okEl.textContent = 'Key transferred successfully! Tap Continue.';
+    okEl.style.display = 'block';
+    input.value = '';
+    // Hide the transfer fields
+    var fields = document.getElementById('transfer-fields');
+    if (fields) fields.style.display = 'none';
+  }).catch(function (err) {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Fetch my key';
+    }
+    errEl.textContent = 'Network error — please check your connection and try again.';
+    errEl.style.display = 'block';
+  });
 }
-
 function showInitError(msg) {
   try {
     var errDiv = document.getElementById('kobo-init-error');
@@ -3555,8 +3684,7 @@ function showInitError(msg) {
       errDiv.id = 'kobo-init-error';
       errDiv.style.cssText = 'background:#f5f5f5;border:1px solid #111;padding:14px;margin:14px 0;font-size:16px;font-family:Georgia,serif;color:#111;';
       var page = document.querySelector('.page');
-      if (page) page.insertBefore(errDiv, page.firstChild);
-      else document.body.appendChild(errDiv);
+      if (page) page.insertBefore(errDiv, page.firstChild);else document.body.appendChild(errDiv);
     }
     errDiv.style.display = 'block';
     errDiv.textContent = 'Error: ' + msg;
@@ -3571,10 +3699,10 @@ function loadSettingsScreen() {
   var cnEl = document.getElementById('settings-companion-name');
   if (cnEl) cnEl.value = STATE.companionName === 'Companion' ? '' : STATE.companionName;
   applyProviderUI(STATE.provider);
-  document.querySelectorAll('.length-opt').forEach(function(b) {
+  document.querySelectorAll('.length-opt').forEach(function (b) {
     b.dataset.length === STATE.replyLength ? b.classList.add('active') : b.classList.remove('active');
   });
-  document.querySelectorAll('.font-size-opt').forEach(function(b) {
+  document.querySelectorAll('.font-size-opt').forEach(function (b) {
     parseInt(b.dataset.size, 10) === (parseInt(localStorage.getItem('pc_font_size'), 10) || 18) ? b.classList.add('active') : b.classList.remove('active');
   });
   var clangEl = document.getElementById('settings-companion-lang');
@@ -3582,16 +3710,12 @@ function loadSettingsScreen() {
 }
 function saveCompanionLangSetting(val) {
   STATE.companionLangOverride = val || null;
-  if (val) localStorage.setItem('pc_companion_lang', val);
-  else localStorage.removeItem('pc_companion_lang');
+  if (val) localStorage.setItem('pc_companion_lang', val);else localStorage.removeItem('pc_companion_lang');
 }
-
-
 function saveSettingName() {
   var val = (document.getElementById('settings-name').value || '').trim();
   STATE.userName = val;
-  if (val) localStorage.setItem('pc_user_name', val);
-  else localStorage.removeItem('pc_user_name');
+  if (val) localStorage.setItem('pc_user_name', val);else localStorage.removeItem('pc_user_name');
 }
 function saveSettingCompanionName() {
   var val = (document.getElementById('settings-companion-name').value || '').trim();
@@ -3607,19 +3731,30 @@ function saveSettingCompanionName() {
 function getReadingProgress(book) {
   try {
     return JSON.parse(localStorage.getItem('pc_progress_' + bookKey(book)) || 'null');
-  } catch (e) { return null; }
+  } catch (e) {
+    return null;
+  }
 }
 function updateProgressFromHighlights(highlights) {
   var byBook = {};
-  highlights.forEach(function(h) {
+  highlights.forEach(function (h) {
     if (!h.page) return;
-    var bk = bookKey({ title: h.title, author: h.author });
+    var bk = bookKey({
+      title: h.title,
+      author: h.author
+    });
     if (!byBook[bk] || h.page > byBook[bk]) byBook[bk] = h.page;
   });
-  Object.keys(byBook).forEach(function(bk) {
-    var existing = getReadingProgress({ title: bk, author: '' });
+  Object.keys(byBook).forEach(function (bk) {
+    var existing = getReadingProgress({
+      title: bk,
+      author: ''
+    });
     if (!existing || byBook[bk] > (existing.page || 0)) {
-      localStorage.setItem('pc_progress_' + bk, JSON.stringify({ page: byBook[bk], source: 'kindle' }));
+      localStorage.setItem('pc_progress_' + bk, JSON.stringify({
+        page: byBook[bk],
+        source: 'kindle'
+      }));
     }
   });
 }
@@ -3632,19 +3767,17 @@ function fetchAndCacheSubjects(book) {
   var cacheKey = 'pc_subjects_' + bk;
   if (localStorage.getItem(cacheKey)) return;
   if (book.key && book.key.indexOf('/works/') === 0) {
-    fetch('https://openlibrary.org' + book.key + '.json')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        var subjects = (data.subjects || []).slice(0, 10);
-        localStorage.setItem(cacheKey, JSON.stringify(subjects));
-      })
-      .catch(function() {});
+    fetch('https://openlibrary.org' + book.key + '.json').then(function (r) {
+      return r.json();
+    }).then(function (data) {
+      var subjects = (data.subjects || []).slice(0, 10);
+      localStorage.setItem(cacheKey, JSON.stringify(subjects));
+    }).catch(function () {});
   } else if (book.cats) {
     var cats = book.cats.split(/\s+/).filter(Boolean).slice(0, 6);
     if (cats.length) localStorage.setItem(cacheKey, JSON.stringify(cats));
   }
 }
-
 function init() {
   try {
     var prov = localStorage.getItem('pc_provider');
@@ -3729,7 +3862,7 @@ function runInit() {
       homeEl.classList.add('active');
       homeEl.style.display = 'block';
     }
-  } catch(e) {}
+  } catch (e) {}
   try {
     init();
   } catch (e) {
