@@ -1567,41 +1567,37 @@ function initSurpriseScreen() {
   document.getElementById('surprise-loading').style.display = 'none';
 }
 
+function buildBookFromGoogleItem(item, lang, langCode) {
+  if (!item) return null;
+  var vi = item.volumeInfo || {};
+  if (!vi.title) return null;
+  var thumb = (vi.imageLinks && vi.imageLinks.thumbnail) ? vi.imageLinks.thumbnail.replace('http://', 'https://') : '';
+  return {
+    title: vi.title,
+    author: (vi.authors && vi.authors[0]) ? vi.authors[0] : '',
+    year: vi.publishedDate ? vi.publishedDate.substring(0, 4) : '',
+    key: item.id || '',
+    source: 'Google Books',
+    coverUrl: thumb,
+    pageCount: vi.pageCount || 0,
+    lang: vi.language || langCode,
+    language: lang
+  };
+}
+
+function filterByLanguage(items, baseLang) {
+  return items.filter(function(item) {
+    var vl = item.volumeInfo && item.volumeInfo.language;
+    return vl && (vl === baseLang || vl.split('-')[0] === baseLang);
+  });
+}
+
 function surpriseFetchForLanguage(lang) {
   var subj = SURPRISE_SUBJECTS[Math.floor(Math.random() * SURPRISE_SUBJECTS.length)];
   var langCode = LANG_NAME_TO_CODE[lang] || null;
-  var promise;
 
-  if (langCode && langCode !== 'en') {
-    var startIndex = Math.floor(Math.random() * 10);
-    promise = fetch('/api/books?q=' + encodeURIComponent('subject:' + subj) + '&maxResults=40&startIndex=' + startIndex + '&langRestrict=' + encodeURIComponent(langCode))
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        var items = data.items || [];
-        if (!items.length) return null;
-        var item = items[Math.floor(Math.random() * items.length)];
-        var vi = item.volumeInfo || {};
-        if (!vi.title) return null;
-        var thumb = (vi.imageLinks && vi.imageLinks.thumbnail) ? vi.imageLinks.thumbnail.replace('http://', 'https://') : '';
-        return {
-          title: vi.title || '',
-          author: (vi.authors && vi.authors[0]) ? vi.authors[0] : '',
-          year: vi.publishedDate ? vi.publishedDate.substring(0, 4) : '',
-          key: item.id || '',
-          source: 'Google Books',
-          coverUrl: thumb,
-          pageCount: vi.pageCount || 0,
-          lang: vi.language || langCode,
-          language: lang
-        };
-      })
-      .catch(function() { return null; });
-  } else {
-    promise = Promise.resolve(null);
-  }
-
-  return promise.then(function(gbResult) {
-    if (gbResult) return gbResult;
+  if (!langCode) {
+    // English path: Open Library only
     return fetch('https://openlibrary.org/subjects/' + subj + '.json?limit=50')
       .then(function(r) { return r.json(); })
       .then(function(data) {
@@ -1621,7 +1617,34 @@ function surpriseFetchForLanguage(lang) {
         };
       })
       .catch(function() { return null; });
-  });
+  }
+
+  // Non-English path: Google Books only, no Open Library fallback.
+  // Use base lang code (zh not zh-TW) for langRestrict, then
+  // verify results actually match target language.
+  var baseLang = langCode.split('-')[0];
+  var startIndex = Math.floor(Math.random() * 5);
+
+  return fetch('/api/books?q=' + encodeURIComponent('subject:' + subj) + '&maxResults=40&startIndex=' + startIndex + '&langRestrict=' + encodeURIComponent(baseLang))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var matched = filterByLanguage(data.items || [], baseLang);
+      if (matched.length) {
+        return buildBookFromGoogleItem(matched[Math.floor(Math.random() * matched.length)], lang, langCode);
+      }
+      // No subject match — try a broader query at startIndex 0
+      return fetch('/api/books?q=fiction&maxResults=40&langRestrict=' + encodeURIComponent(baseLang))
+        .then(function(r2) { return r2.json(); })
+        .then(function(data2) {
+          var matched2 = filterByLanguage(data2.items || [], baseLang);
+          if (matched2.length) {
+            return buildBookFromGoogleItem(matched2[Math.floor(Math.random() * matched2.length)], lang, langCode);
+          }
+          return null;
+        })
+        .catch(function() { return null; });
+    })
+    .catch(function() { return null; });
 }
 
 function surpriseRandom() {
