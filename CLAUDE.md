@@ -141,3 +141,12 @@ Kobo Libra Colour device.
 ## Pending Work
 See PENDING.md for full prioritised
 list of what to build next.
+
+## End of session routine
+At the end of every working session
+update STATUS.md with:
+- What was completed
+- What was tested and results
+- Current known issues
+- Recommended next task
+- Current version number
