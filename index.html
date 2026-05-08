@@ -1150,6 +1150,12 @@
     </div>
 
     <div class="settings-section">
+      <div class="settings-section-label">Reading languages</div>
+      <div id="reading-langs-list"></div>
+      <p style="font-size:0.78rem;color:#777777;margin-top:6px">Select 1–3 languages. Surprise me will suggest one book per language. First selected is your preferred.</p>
+    </div>
+
+    <div class="settings-section">
       <div class="settings-section-label">AI provider</div>
       <div class="settings-radio-options">
         <button class="settings-radio" id="settings-prov-anthropic" onclick="selectProvider('anthropic')">Anthropic Claude</button>
@@ -1198,19 +1204,7 @@
 
     <div id="surprise-loading" class="status-msg" style="display:none">Finding a book…</div>
 
-    <div id="surprise-result" style="display:none">
-      <div style="border:1px solid #111111;padding:16px;margin-bottom:20px">
-        <div id="surprise-title" style="font-size:1.1rem;margin-bottom:4px"></div>
-        <div id="surprise-author" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:0.85rem;color:#777777;margin-bottom:4px"></div>
-        <div id="surprise-meta" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:0.75rem;color:#777777"></div>
-      </div>
-      <div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">
-        <button class="btn btn-primary" style="margin-bottom:10px" onclick="startBookFromSurprise()">Start reading →</button>
-        <button class="btn" style="margin-bottom:10px" onclick="discoverBookFromSurprise()">Is this for me?</button>
-        <button class="btn" style="margin-bottom:10px" onclick="surpriseAgain()">Not for me — try again</button>
-        <button class="btn" onclick="surpriseAgain()">Already read it — try again</button>
-      </div>
-    </div>
+    <div id="surprise-result" style="display:none"></div>
   </section>
 
   <!-- BOOK CONVERSATIONS -->

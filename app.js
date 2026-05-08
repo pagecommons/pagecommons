@@ -76,7 +76,8 @@ var STATE = {
   replyLength: 'medium', // 'short' | 'medium' | 'detailed'
   userName: '',
   surpriseBook: null,
-  surpriseMode: null // 'random' | 'shelf'
+  surpriseMode: null, // 'random' | 'shelf'
+  surpriseResults: []
 };
 var STATIC_PROMPTS = ["I just finished it", "Something is still on my mind", "I want to understand something better", "There's a passage I keep thinking about", "I'm not sure how I feel about it", "I gave up — can we talk about why?", "I want to know what to read next", "Something surprised me"];
 var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'Let me think…', 'Hmm…', 'One moment…', 'With you…'];
@@ -1544,34 +1545,6 @@ var LANG_NAME_TO_CODE = {
   'Hindi': 'hi', 'Thai': 'th', 'Vietnamese': 'vi'
 };
 
-function getSurpriseLangCode() {
-  if (STATE.companionLangOverride && LANG_NAME_TO_CODE[STATE.companionLangOverride]) {
-    return LANG_NAME_TO_CODE[STATE.companionLangOverride];
-  }
-  var books = getShelfBooks();
-  if (!books.length) return null;
-  var counts = {};
-  books.forEach(function(b) {
-    var code = null;
-    if (b.lang && b.lang !== 'en') {
-      code = b.lang.split(/[-_]/)[0].toLowerCase();
-    }
-    if (!code && b.detectedLang && LANG_NAME_TO_CODE[b.detectedLang]) {
-      code = LANG_NAME_TO_CODE[b.detectedLang];
-    }
-    if (code && code !== 'en') {
-      counts[code] = (counts[code] || 0) + 1;
-    }
-  });
-  var dominant = null;
-  var max = 0;
-  Object.keys(counts).forEach(function(k) {
-    if (counts[k] > max) { max = counts[k]; dominant = k; }
-  });
-  if (dominant && (max >= 2 || max / books.length >= 0.4)) return dominant;
-  return null;
-}
-
 function initSurpriseScreen() {
   var shelfBtn = document.getElementById('surprise-shelf-btn');
   if (shelfBtn) {
@@ -1582,35 +1555,23 @@ function initSurpriseScreen() {
   document.getElementById('surprise-loading').style.display = 'none';
 }
 
-function surpriseRandom() {
-  STATE.surpriseMode = 'random';
+function surpriseFetchForLanguage(lang) {
   var subj = SURPRISE_SUBJECTS[Math.floor(Math.random() * SURPRISE_SUBJECTS.length)];
-  var loadEl = document.getElementById('surprise-loading');
-  var resultEl = document.getElementById('surprise-result');
-  loadEl.textContent = 'Finding a book…';
-  loadEl.style.display = 'block';
-  resultEl.style.display = 'none';
-  document.getElementById('surprise-modes').style.display = 'none';
+  var langCode = LANG_NAME_TO_CODE[lang] || null;
+  var promise;
 
-  var langCode = getSurpriseLangCode();
-  if (langCode) {
+  if (langCode && langCode !== 'en') {
     var startIndex = Math.floor(Math.random() * 10);
-    fetch('/api/books?q=' + encodeURIComponent('subject:' + subj) + '&maxResults=40&startIndex=' + startIndex + '&langRestrict=' + encodeURIComponent(langCode))
+    promise = fetch('/api/books?q=' + encodeURIComponent('subject:' + subj) + '&maxResults=40&startIndex=' + startIndex + '&langRestrict=' + encodeURIComponent(langCode))
       .then(function(r) { return r.json(); })
       .then(function(data) {
         var items = data.items || [];
-        if (!items.length) {
-          surpriseRandomOpenLibrary(subj, loadEl);
-          return;
-        }
+        if (!items.length) return null;
         var item = items[Math.floor(Math.random() * items.length)];
         var vi = item.volumeInfo || {};
-        if (!vi.title) {
-          surpriseRandomOpenLibrary(subj, loadEl);
-          return;
-        }
+        if (!vi.title) return null;
         var thumb = (vi.imageLinks && vi.imageLinks.thumbnail) ? vi.imageLinks.thumbnail.replace('http://', 'https://') : '';
-        var book = {
+        return {
           title: vi.title || '',
           author: (vi.authors && vi.authors[0]) ? vi.authors[0] : '',
           year: vi.publishedDate ? vi.publishedDate.substring(0, 4) : '',
@@ -1618,47 +1579,70 @@ function surpriseRandom() {
           source: 'Google Books',
           coverUrl: thumb,
           pageCount: vi.pageCount || 0,
-          lang: vi.language || langCode
+          lang: vi.language || langCode,
+          language: lang
         };
-        loadEl.style.display = 'none';
-        showSurpriseResult(book);
       })
-      .catch(function() {
-        surpriseRandomOpenLibrary(subj, loadEl);
-      });
+      .catch(function() { return null; });
   } else {
-    surpriseRandomOpenLibrary(subj, loadEl);
+    promise = Promise.resolve(null);
   }
+
+  return promise.then(function(gbResult) {
+    if (gbResult) return gbResult;
+    return fetch('https://openlibrary.org/subjects/' + subj + '.json?limit=50')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var works = data.works || [];
+        if (!works.length) return null;
+        var work = works[Math.floor(Math.random() * works.length)];
+        var authorName = (work.authors && work.authors[0] && work.authors[0].name) ? work.authors[0].name : '';
+        return {
+          title: work.title,
+          author: authorName,
+          year: work.first_publish_year ? String(work.first_publish_year) : '',
+          key: work.key || '',
+          source: 'Open Library',
+          coverUrl: work.cover_id ? 'https://covers.openlibrary.org/b/id/' + work.cover_id + '-M.jpg' : '',
+          pageCount: 0,
+          language: lang
+        };
+      })
+      .catch(function() { return null; });
+  });
 }
 
-function surpriseRandomOpenLibrary(subj, loadEl) {
-  fetch('https://openlibrary.org/subjects/' + subj + '.json?limit=50')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var works = data.works || [];
-      if (!works.length) {
-        loadEl.style.display = 'none';
-        document.getElementById('surprise-modes').style.display = 'block';
-        return;
-      }
-      var work = works[Math.floor(Math.random() * works.length)];
-      var authorName = (work.authors && work.authors[0] && work.authors[0].name) ? work.authors[0].name : '';
-      var book = {
-        title: work.title,
-        author: authorName,
-        year: work.first_publish_year ? String(work.first_publish_year) : '',
-        key: work.key || '',
-        source: 'Open Library',
-        coverUrl: work.cover_id ? 'https://covers.openlibrary.org/b/id/' + work.cover_id + '-M.jpg' : '',
-        pageCount: 0
-      };
-      loadEl.style.display = 'none';
-      showSurpriseResult(book);
-    })
-    .catch(function() {
-      loadEl.textContent = 'Could not fetch a suggestion — try again?';
+function surpriseRandom() {
+  STATE.surpriseMode = 'random';
+  var loadEl = document.getElementById('surprise-loading');
+  var resultEl = document.getElementById('surprise-result');
+  loadEl.textContent = 'Finding a book…';
+  loadEl.style.display = 'block';
+  resultEl.style.display = 'none';
+  document.getElementById('surprise-modes').style.display = 'none';
+
+  var langs = getReadingLanguages();
+  if (!langs.length) {
+    langs = ['English'];
+  }
+
+  var promises = langs.map(function(lang) {
+    return surpriseFetchForLanguage(lang);
+  });
+
+  Promise.all(promises).then(function(results) {
+    loadEl.style.display = 'none';
+    var validResults = results.filter(function(r) { return r !== null; });
+    if (!validResults.length) {
       document.getElementById('surprise-modes').style.display = 'block';
-    });
+      return;
+    }
+    STATE.surpriseResults = validResults;
+    displaySurpriseResults();
+  }).catch(function() {
+    loadEl.style.display = 'none';
+    document.getElementById('surprise-modes').style.display = 'block';
+  });
 }
 
 function surpriseFromShelf() {
@@ -1677,37 +1661,59 @@ function surpriseFromShelf() {
   }
   var book = candidates[Math.floor(Math.random() * candidates.length)];
   _surpriseSeenKeys.push(bookKey(book));
-  showSurpriseResult(book);
+  STATE.surpriseResults = [book];
+  displaySurpriseResults();
 }
 
-function showSurpriseResult(book) {
-  STATE.surpriseBook = book;
-  document.getElementById('surprise-title').textContent = book.title;
-  document.getElementById('surprise-author').textContent = book.author || '';
-  var metaParts = [];
-  if (book.year) metaParts.push(book.year);
-  if (book.source) metaParts.push(book.source);
-  document.getElementById('surprise-meta').textContent = metaParts.join(' · ');
+function displaySurpriseResults() {
+  var resultEl = document.getElementById('surprise-result');
+  if (!resultEl) return;
+  var results = STATE.surpriseResults || [];
+  var html = '';
+  results.forEach(function(book, idx) {
+    var metaParts = [];
+    if (book.year) metaParts.push(book.year);
+    if (book.source) metaParts.push(book.source);
+    html += '<div style="border:1px solid #111111;padding:16px;margin-bottom:20px">' +
+      '<div style="font-size:1.1rem;margin-bottom:4px">' + (book.title || '') + '</div>' +
+      '<div style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:0.85rem;color:#777777;margin-bottom:4px">' + (book.author || '') + '</div>' +
+      '<div style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:0.75rem;color:#777777;margin-bottom:12px">' + metaParts.join(' · ') + '</div>' +
+      '<div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">' +
+      '<button class="btn btn-primary" style="margin-bottom:10px" onclick="startBookFromSurpriseIdx(' + idx + ')">Start reading →</button>' +
+      '<button class="btn" style="margin-bottom:10px" onclick="discoverBookFromSurpriseIdx(' + idx + ')">Is this for me?</button>' +
+      '<button class="btn" onclick="refreshSurpriseCard(' + idx + ')">Not for me — try again</button>' +
+      '</div></div>';
+  });
+  resultEl.innerHTML = html;
   document.getElementById('surprise-modes').style.display = 'none';
-  document.getElementById('surprise-result').style.display = 'block';
+  resultEl.style.display = 'block';
 }
 
-function surpriseAgain() {
-  if (STATE.surpriseMode === 'shelf') {
-    surpriseFromShelf();
-  } else {
-    surpriseRandom();
+function refreshSurpriseCard(idx) {
+  var lang = (STATE.surpriseResults && STATE.surpriseResults[idx] && STATE.surpriseResults[idx].language) ? STATE.surpriseResults[idx].language : 'English';
+  var loadEl = document.getElementById('surprise-loading');
+  loadEl.style.display = 'block';
+  surpriseFetchForLanguage(lang).then(function(book) {
+    if (book && STATE.surpriseResults && STATE.surpriseResults[idx]) {
+      STATE.surpriseResults[idx] = book;
+      displaySurpriseResults();
+    }
+    loadEl.style.display = 'none';
+  });
+}
+
+function startBookFromSurpriseIdx(idx) {
+  var results = STATE.surpriseResults || [];
+  if (results[idx]) {
+    selectBookWithAgeCheck(results[idx]);
   }
 }
 
-function startBookFromSurprise() {
-  if (!STATE.surpriseBook) return;
-  selectBookWithAgeCheck(STATE.surpriseBook);
-}
-
-function discoverBookFromSurprise() {
-  if (!STATE.surpriseBook) return;
-  discoverBookWithAgeCheck(STATE.surpriseBook);
+function discoverBookFromSurpriseIdx(idx) {
+  var results = STATE.surpriseResults || [];
+  if (results[idx]) {
+    discoverBookWithAgeCheck(results[idx]);
+  }
 }
 
 // ═══════════════════════════════════════════════════
@@ -3526,12 +3532,51 @@ function loadSettingsScreen() {
   });
   var clangEl = document.getElementById('settings-companion-lang');
   if (clangEl) clangEl.value = STATE.companionLangOverride || '';
+  renderReadingLanguages();
 }
 function saveCompanionLangSetting(val) {
   STATE.companionLangOverride = val || null;
   if (val) localStorage.setItem('pc_companion_lang', val);
   else localStorage.removeItem('pc_companion_lang');
 }
+
+var READING_LANGS_AVAILABLE = ['English', 'French', 'German', 'Spanish', 'Italian', 'Portuguese', 'Traditional Chinese', 'Simplified Chinese', 'Japanese', 'Korean', 'Arabic', 'Russian', 'Dutch', 'Polish', 'Turkish'];
+
+function getReadingLanguages() {
+  try {
+    return JSON.parse(localStorage.getItem('pc_reading_langs') || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveReadingLanguages() {
+  var selected = [];
+  READING_LANGS_AVAILABLE.forEach(function(lang) {
+    var cb = document.getElementById('reading-lang-' + lang);
+    if (cb && cb.checked) {
+      selected.push(lang);
+    }
+  });
+  if (selected.length > 3) {
+    selected = selected.slice(0, 3);
+  }
+  localStorage.setItem('pc_reading_langs', JSON.stringify(selected));
+}
+
+function renderReadingLanguages() {
+  var container = document.getElementById('reading-langs-list');
+  if (!container) return;
+  var selected = getReadingLanguages();
+  var html = '';
+  READING_LANGS_AVAILABLE.forEach(function(lang) {
+    var isChecked = selected.indexOf(lang) !== -1;
+    var disabled = !isChecked && selected.length >= 3 ? 'disabled' : '';
+    html += '<div style="margin-bottom:8px"><label style="display:block;cursor:pointer"><input type="checkbox" id="reading-lang-' + lang + '" ' + (isChecked ? 'checked' : '') + ' ' + disabled + ' onchange="saveReadingLanguages(); renderReadingLanguages()" style="margin-right:6px;cursor:pointer" /><span style="font-size:0.95rem">' + lang + '</span></label></div>';
+  });
+  container.innerHTML = html;
+}
+
 function saveSettingName() {
   var val = (document.getElementById('settings-name').value || '').trim();
   STATE.userName = val;
