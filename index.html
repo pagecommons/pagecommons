@@ -683,6 +683,7 @@
     .age-gate-btns > .btn:last-child { margin-bottom: 0; }
   </style>
   <script src="app.js" defer></script>
+  <script defer data-domain="pagecommons.com" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
 
@@ -715,6 +716,10 @@
         <button class="hall-door disabled">
           <span class="hall-door-title">Enter a book room</span>
           <span class="hall-door-sub">Coming soon — read notes from other readers</span>
+        </button>
+        <button class="hall-door" onclick="navigate('surprise')">
+          <span class="hall-door-title">Surprise me</span>
+          <span class="hall-door-sub">Discover your next book, or revisit your shelf</span>
         </button>
       </div>
 
@@ -966,6 +971,10 @@
       <button id="change-book-btn" onclick="navigate('search')">Change book</button>
     </div>
 
+    <div id="discover-convert-bar" style="display:none;margin-bottom:24px">
+      <button class="btn btn-primary" onclick="startReadingFromDiscover()">I want to read this</button>
+    </div>
+
     <div id="icebreakers">
       <div class="icebreaker-label">Start here, or write your own below</div>
       <div class="icebreaker-prompts" id="icebreaker-list"></div>
@@ -1171,6 +1180,37 @@
       </div>
     </div>
 
+  </section>
+
+  <!-- ══════════════════════════════════
+       SURPRISE ME
+       ══════════════════════════════════ -->
+  <section id="screen-surprise" class="screen">
+    <button class="back-link" onclick="navigate('home')">← Back</button>
+    <h1>Surprise me</h1>
+
+    <div id="surprise-modes">
+      <div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">
+        <button class="btn btn-primary" style="margin-bottom:10px" onclick="surpriseRandom()">Find me something new</button>
+        <button class="btn" id="surprise-shelf-btn" onclick="surpriseFromShelf()">Revisit my shelf</button>
+      </div>
+    </div>
+
+    <div id="surprise-loading" class="status-msg" style="display:none">Finding a book…</div>
+
+    <div id="surprise-result" style="display:none">
+      <div style="border:1px solid #111111;padding:16px;margin-bottom:20px">
+        <div id="surprise-title" style="font-size:1.1rem;margin-bottom:4px"></div>
+        <div id="surprise-author" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:0.85rem;color:#777777;margin-bottom:4px"></div>
+        <div id="surprise-meta" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:0.75rem;color:#777777"></div>
+      </div>
+      <div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">
+        <button class="btn btn-primary" style="margin-bottom:10px" onclick="startBookFromSurprise()">Start reading →</button>
+        <button class="btn" style="margin-bottom:10px" onclick="discoverBookFromSurprise()">Is this for me?</button>
+        <button class="btn" style="margin-bottom:10px" onclick="surpriseAgain()">Not for me — try again</button>
+        <button class="btn" onclick="surpriseAgain()">Already read it — try again</button>
+      </div>
+    </div>
   </section>
 
   <!-- BOOK CONVERSATIONS -->

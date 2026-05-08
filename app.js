@@ -74,7 +74,9 @@ var STATE = {
   passages: [],
   // saved passages for current book
   replyLength: 'medium', // 'short' | 'medium' | 'detailed'
-  userName: ''
+  userName: '',
+  surpriseBook: null,
+  surpriseMode: null // 'random' | 'shelf'
 };
 var STATIC_PROMPTS = ["I just finished it", "Something is still on my mind", "I want to understand something better", "There's a passage I keep thinking about", "I'm not sure how I feel about it", "I gave up — can we talk about why?", "I want to know what to read next", "Something surprised me"];
 var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'Let me think…', 'Hmm…', 'One moment…', 'With you…'];
@@ -82,7 +84,7 @@ var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'L
 // ═══════════════════════════════════════════════════
 //  SCREENS + NAVIGATION
 // ═══════════════════════════════════════════════════
-var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'tc', 'age-gate', 'settings'];
+var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'tc', 'age-gate', 'settings', 'surprise'];
 
 var SEARCH_HEADINGS = [
   'Which book?',
@@ -149,6 +151,7 @@ function handleRoute() {
   if (target === 'shelf') renderShelf();
   if (target === 'settings') loadSettingsScreen();
   if (target === 'search') updateSearchHeading();
+  if (target === 'surprise') initSurpriseScreen();
   updateTitleLink();
 }
 function navigate(view) {
@@ -1498,13 +1501,137 @@ function updateStatusDisplay() {
     finished: 'Just finished'
   };
   var el = document.getElementById('book-status-display');
+  var ctaEl = document.getElementById('discover-convert-bar');
   if (STATE.companionMode === 'discover') {
-    el.textContent = 'Is this for me?';
-  } else if (STATE.readingStatus && labels[STATE.readingStatus]) {
-    el.textContent = labels[STATE.readingStatus];
+    if (el) el.textContent = 'Is this for me?';
+    if (ctaEl) ctaEl.style.display = 'block';
   } else {
-    el.textContent = '';
+    if (el && STATE.readingStatus && labels[STATE.readingStatus]) {
+      el.textContent = labels[STATE.readingStatus];
+    } else if (el) {
+      el.textContent = '';
+    }
+    if (ctaEl) ctaEl.style.display = 'none';
   }
+}
+
+// ═══════════════════════════════════════════════════
+//  DISCOVER → READING CONVERSION
+// ═══════════════════════════════════════════════════
+function startReadingFromDiscover() {
+  if (!STATE.book) return;
+  STATE.companionMode = 'reading';
+  STATE.messages = [];
+  STATE.currentConvId = null;
+  STATE.currentConvName = null;
+  var ctaEl = document.getElementById('discover-convert-bar');
+  if (ctaEl) ctaEl.style.display = 'none';
+  renderStatusScreen(STATE.book);
+  navigate('status');
+}
+
+// ═══════════════════════════════════════════════════
+//  SURPRISE ME
+// ═══════════════════════════════════════════════════
+var SURPRISE_SUBJECTS = ['fiction', 'mystery', 'history', 'biography', 'science', 'philosophy', 'classic_literature', 'fantasy', 'science_fiction', 'thriller', 'romance', 'poetry'];
+var _surpriseSeenKeys = [];
+
+function initSurpriseScreen() {
+  var shelfBtn = document.getElementById('surprise-shelf-btn');
+  if (shelfBtn) {
+    shelfBtn.style.display = getShelfBooks().length > 0 ? 'block' : 'none';
+  }
+  document.getElementById('surprise-modes').style.display = 'block';
+  document.getElementById('surprise-result').style.display = 'none';
+  document.getElementById('surprise-loading').style.display = 'none';
+}
+
+function surpriseRandom() {
+  STATE.surpriseMode = 'random';
+  var subj = SURPRISE_SUBJECTS[Math.floor(Math.random() * SURPRISE_SUBJECTS.length)];
+  var loadEl = document.getElementById('surprise-loading');
+  var resultEl = document.getElementById('surprise-result');
+  loadEl.textContent = 'Finding a book…';
+  loadEl.style.display = 'block';
+  resultEl.style.display = 'none';
+  document.getElementById('surprise-modes').style.display = 'none';
+
+  fetch('https://openlibrary.org/subjects/' + subj + '.json?limit=50')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var works = data.works || [];
+      if (!works.length) {
+        loadEl.style.display = 'none';
+        document.getElementById('surprise-modes').style.display = 'block';
+        return;
+      }
+      var work = works[Math.floor(Math.random() * works.length)];
+      var authorName = (work.authors && work.authors[0] && work.authors[0].name) ? work.authors[0].name : '';
+      var book = {
+        title: work.title,
+        author: authorName,
+        year: work.first_publish_year ? String(work.first_publish_year) : '',
+        key: work.key || '',
+        source: 'Open Library',
+        coverUrl: work.cover_id ? 'https://covers.openlibrary.org/b/id/' + work.cover_id + '-M.jpg' : '',
+        pageCount: 0
+      };
+      loadEl.style.display = 'none';
+      showSurpriseResult(book);
+    })
+    .catch(function() {
+      loadEl.textContent = 'Could not fetch a suggestion — try again?';
+      document.getElementById('surprise-modes').style.display = 'block';
+    });
+}
+
+function surpriseFromShelf() {
+  STATE.surpriseMode = 'shelf';
+  var books = getShelfBooks();
+  if (!books.length) return;
+  var currentKey = STATE.book ? bookKey(STATE.book) : null;
+  var candidates = books.filter(function(b) {
+    var k = bookKey(b);
+    return k !== currentKey && _surpriseSeenKeys.indexOf(k) === -1;
+  });
+  if (!candidates.length) {
+    _surpriseSeenKeys = [];
+    candidates = books.filter(function(b) { return bookKey(b) !== currentKey; });
+    if (!candidates.length) candidates = books;
+  }
+  var book = candidates[Math.floor(Math.random() * candidates.length)];
+  _surpriseSeenKeys.push(bookKey(book));
+  showSurpriseResult(book);
+}
+
+function showSurpriseResult(book) {
+  STATE.surpriseBook = book;
+  document.getElementById('surprise-title').textContent = book.title;
+  document.getElementById('surprise-author').textContent = book.author || '';
+  var metaParts = [];
+  if (book.year) metaParts.push(book.year);
+  if (book.source) metaParts.push(book.source);
+  document.getElementById('surprise-meta').textContent = metaParts.join(' · ');
+  document.getElementById('surprise-modes').style.display = 'none';
+  document.getElementById('surprise-result').style.display = 'block';
+}
+
+function surpriseAgain() {
+  if (STATE.surpriseMode === 'shelf') {
+    surpriseFromShelf();
+  } else {
+    surpriseRandom();
+  }
+}
+
+function startBookFromSurprise() {
+  if (!STATE.surpriseBook) return;
+  selectBookWithAgeCheck(STATE.surpriseBook);
+}
+
+function discoverBookFromSurprise() {
+  if (!STATE.surpriseBook) return;
+  discoverBookWithAgeCheck(STATE.surpriseBook);
 }
 
 // ═══════════════════════════════════════════════════
