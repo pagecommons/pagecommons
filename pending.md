@@ -1,7 +1,8 @@
 # Page Commons — Pending Work
 
-Last updated: April 2026
-Current version: v0.25
+Last updated: May 2026
+Current version: v0.25 (v0.26 next deploy)
+Launch target: June 1 2026 — Reddit
 
 ---
 
@@ -11,20 +12,21 @@ This is the master backlog for Page Commons.
 Work through items in priority order.
 Mark items complete with [x] when done.
 Add new items in the appropriate section.
+Do not work on Priority 4+ before launch.
 
 ---
 
 ## BUGS (fix first)
 
 - [x] Mixed content warnings
-      Fixed: thumb.replace('http://', 'https://') in fetchGoogleBooks().
+      Fixed: thumb.replace('http://', 'https://')
+      in fetchGoogleBooks().
 
 - [x] Truncated AI responses
-      Max token limits were too low (150 short / 600 medium) causing
-      responses to be cut mid-sentence, especially in Chinese/Japanese.
-      Fixed: short 400, medium/detailed 1500 across all three providers.
-      Also added finish_reason detection — truncated replies now append
-      a visible notice prompting the user to switch to Detailed mode.
+      Max token limits were too low.
+      Fixed: short 400, medium/detailed 1500
+      across all three providers.
+      Truncated replies append visible notice.
 
 ---
 
@@ -32,17 +34,21 @@ Add new items in the appropriate section.
 
 - [x] Google Books API proxy
       /api/books.js exists and integrated.
-      app.js calls /api/books?q= (see fetchGoogleBooks).
+      app.js calls /api/books?q=
 
 - [x] Free tier shared AI pool
-      Implemented: api/ai.js proxies to Gemini Flash using GEMINI_API_KEY.
-      callAI() routes no-key users to callFreeTier(/api/ai).
-      429 shows: "Our free companion is busy right now — add your own key."
+      api/ai.js proxies to Gemini Flash
+      using server-side GEMINI_API_KEY.
+      callAI() routes no-key users to
+      callFreeTier(/api/ai).
+      429 shows friendly message with
+      prompt to add own key.
 
 - [x] Vercel KV setup for API key transfer
       Upstash Redis via Vercel marketplace.
-      Env vars: KV_REST_API_URL, KV_REST_API_TOKEN.
-      Connected to Production and Preview environments.
+      Env vars: KV_REST_API_URL,
+      KV_REST_API_TOKEN.
+      Connected to Production and Preview.
 
 - [x] transfer.html — API key transfer page
       Standalone page at /transfer.html.
@@ -51,9 +57,11 @@ Add new items in the appropriate section.
       Privacy statement matches app copy.
 
 - [x] /api/transfer.js serverless function
-      POST: store key in Upstash KV, 10-min TTL,
-      return 6-digit code. Rate limited (10/hr/IP).
-      GET: GETDEL for one-time use, 5-fail lockout.
+      POST: store key in Upstash KV,
+      10-min TTL, return 6-digit code.
+      Rate limited (10/hr/IP).
+      GET: GETDEL for one-time use,
+      5-fail lockout.
       Never logs key values.
 
 - [x] Kobo highlights import
@@ -62,169 +70,190 @@ Add new items in the appropriate section.
       Queries Bookmark JOIN content tables.
       Extracts: title, author, highlight text,
       annotation notes, date, chapterProgress.
-      BookTitle preferred over chapter Title.
-      Attribution "By " prefix stripped.
       source:'kobo' stored per highlight.
-      Highlights panel shows "from your Kobo".
-      ChapterProgress stored on each highlight
-      for future reading progress indicator.
+      ChapterProgress stored for future
+      reading progress indicator.
 
 - [x] Discovery companion mode
-      "Is this for me?" button on every search result card.
-      STATE.companionMode = 'discover' — separate from 'reading'.
-      Bypasses status screen, goes straight to companion.
-      Discovery system prompt: asks ONE preference question first,
-      then describes book through that lens.
-      Reading time estimate from pageCount (~50 pages/hour).
-      Static preference-question ice breakers (no AI call).
+      "Is this for me?" button on every result.
+      STATE.companionMode = 'discover'.
+      Bypasses status screen.
+      Discovery system prompt asks ONE
+      preference question first, then describes
+      book through reader's lens.
+      Reading time estimate from pageCount.
       Book not added to shelf in discover mode.
-      Status label shows "Is this for me?" in companion header.
-      Leads naturally to affiliate buy links (future).
+      KNOWN ISSUE: no "I'll read this" button
+      inside discover mode — user must go back
+      to search to add book to shelf.
+      Consider adding in polish pass.
 
 - [ ] Surprise Me feature
       Two modes:
-      (1) Based on shelf reading history.
-      (2) Completely random from Open Library.
-      Random mode uses adventurous, inviting tone.
+      (1) Shelf-based: picks from STATE.shelf
+          weighted by recency.
+      (2) Random: Open Library random endpoint
+          openlibrary.org/random.json
+      Random mode uses adventurous tone.
       Options after suggestion:
       "Not for me — try again"
       "Already read it — try again"
+      Entry point from Library Hall.
 
 - [ ] Affiliate links
       Show on book selection screen.
+      Also natural fit inside Discovery mode.
       Amazon Associates link.
       Bookshop.org affiliate link.
       Waterstones affiliate link (UK).
-      WorldCat link (free, no affiliate, always shown).
-      Email link option (user emails link to self).
-      Clear disclosure always visible near links:
-      "Buying via these links supports Page Commons
-      at no extra cost to you."
-      Non-affiliate option always shown alongside.
+      WorldCat link (free, always shown).
+      Email link option.
+      Clear disclosure always visible:
+      "Buying via these links supports
+      Page Commons at no extra cost to you."
+      Non-affiliate option always alongside.
 
 ---
 
 ## PRIORITY 2 — UX and polish
 
 - [x] Book recommendations in chat
-      System prompt instructs AI to use [RECOMMEND: Title by Author].
-      appendBubble() post-processes tags into tappable buttons.
-      searchFromRecommend() navigates to search with title pre-filled.
+      System prompt uses [RECOMMEND: Title
+      by Author] tags converted to buttons.
 
 - [x] Reply length enforcement
-      Anthropic: max_tokens 150 when short.
-      Gemini: generationConfig.maxOutputTokens 150 when short.
-      Groq: max_tokens 150 when short.
-      System prompt: "Maximum 2 sentences. Stop after 2 sentences."
+      max_tokens 150 for short mode.
+      System prompt: "Maximum 2 sentences."
 
-- [x] Ice breaker fix for "considering" status
-      Prompt now instructs AI to ask what drew the
-      reader to the book, not about book content.
-      Cache key already included reading status.
+- [x] Ice breaker fix for "considering"
+      Prompt asks what drew reader to book,
+      not about book content.
 
 - [x] Hall tagline
       "Just books. No noise." — deployed.
 
 - [x] Your shelf prominence
-      Shelf button added to Which book? screen.
-      Home button sub-text updated to mention shelf.
+      Shelf button added to search screen.
 
 - [x] Randomised book search heading
-      Pool of 7 headings: "Which book?", "What are you reading?",
-      "What are you lost in?", etc.
-      5 personalised variants when userName is set.
-      updateSearchHeading() called on every navigate('search').
-      id="search-heading" on the h1 in index.html.
+      Pool of 7 headings, 5 personalised
+      variants when userName is set.
 
 - [x] Personal reflection notes per book
-      Notes toolbar button always visible.
-      #notes-panel with textarea + Save note button.
-      Timestamped entries, newest first.
+      Notes panel with timestamped entries.
       pc_notes_[bookKey] in localStorage.
-      Completely separate from AI conversations.
+      Separate from AI conversations.
 
-- [x] Ice breaker prompts enriched with metadata
-      Add Open Library genre and subject metadata
-      to the ice breaker generation prompt.
-      Makes prompts more specific to book themes.
-      Fetch subject data when book is selected.
-      Cache alongside ice breakers in localStorage.
+- [x] Ice breaker prompts enriched
+      Open Library subject metadata added
+      to generation prompt.
 
 - [x] Conversation export
-      exportConversation() downloads .txt file.
-      Numbered exchanges, book/author/date header.
-      "Export conversation" in More panel.
+      Downloads .txt file.
+      Numbered exchanges, book header.
+      Available in More panel.
 
 - [x] Reading progress indicator
-      Visual progress display not just status label.
-      Use ChapterProgress field from Kobo SQLite
-      where available (value is 0.0 to 1.0).
-      Fall back to Kindle location data.
-      Simple text indicator — e-ink appropriate.
+      ChapterProgress from Kobo SQLite.
+      Kindle location as fallback.
 
 - [x] Better book metadata display
-      pageCount added to Google Books results and shelf.
-      Book header shows "N pages · ~Xh read" when available.
-      Gracefully absent for Open Library / no-pageCount books.
+      pageCount shown.
+      Reading time estimate (~50 pages/hr).
+
+- [ ] Discovery mode "I'll read this" button
+      Add button inside discovery companion:
+      "I want to read this"
+      Adds book to shelf, sets status,
+      navigates to reading companion.
+      Removes current friction of going
+      back to search to select book.
+
+- [ ] Personal knowledge organizer
+      Phase 1 (V1.5 — July target):
+        Search across all highlights and notes
+        Filter by book, date, keyword
+        Results shown with book context
+        Copy results to clipboard
+        No AI synthesis yet
+      Phase 2 (V2):
+        Search extends to conversations
+        Highlights + notes + conversations
+        in one result set
+      Phase 3 (V2):
+        AI synthesis across all sources
+        "What have I learned about X?"
+        Export as blog post, email,
+        markdown file
 
 ---
 
 ## PRIORITY 2 — E-ink compatibility
 
 - [x] Clippings paste fallback
-      Textarea added below file upload on search screen.
-      parseClippingsPaste() reads textarea, calls same
-      parseClippingsText() parser, same result handling.
+      Textarea below file upload.
+      Same parser, different input method.
 
 - [ ] XMLHttpRequest fallback for fetch
-      If Fetch API unavailable on older devices
-      AI calls will fail silently.
-      Wrap all fetch calls in try/catch.
-      Fall back to XHR if fetch throws.
-      Implement after real device testing
-      confirms whether this is actually needed.
+      Only implement after real device
+      testing confirms fetch is broken.
+      Do not implement speculatively.
 
 ---
 
 ## PRIORITY 3 — Settings page
 
 - [x] Settings screen
-      New screen: #settings
-      Accessible from Library Hall footer.
-      Fields:
-      - Your name (enables personalised headings)
-      - Default AI provider
-      - Default reply length preference
-      - Font size (persist across sessions)
-      - Companion name preference
+      #settings screen accessible from Hall.
+      Fields: name, provider, reply length,
+      font size, companion name.
       All saved to localStorage.
-      No account required.
+
+- [ ] Companion persona customisation
+      User selects companion personality
+      in Settings screen.
+      Saved to localStorage.
+      Applied to system prompt tone only —
+      core rules unchanged.
+      Starting personas:
+      - The Thoughtful Friend (default)
+        Current personality — warm, curious
+      - The Wit
+        Sharp, playful, finds humour
+        in ideas and contradictions
+      - The Scholar
+        Deep knowledge, cross-references
+        other works naturally
+      - The Everyday Mate
+        Casual, no literary pretension
+        talks about books normally
+      - The Challenger
+        Pushes back, Socratic approach
+        makes you defend your views
+      Can change per book, not just global.
 
 ---
 
 ## PRIORITY 3 — Sync and accounts
 
-- [ ] Export and import (short term)
-      Export all localStorage data as single JSON.
-      Import JSON file to restore on new device.
-      Enables device switching without account.
-      No server needed. Privacy preserved fully.
+- [ ] Export and import localStorage
+      Export all localStorage data as JSON.
+      Import JSON to restore on new device.
       Available from Settings screen.
+      No server needed. Privacy preserved.
+      High value for launch users —
+      enables Kobo + desktop use together.
 
 - [ ] Turso and Clerk sync (medium term)
       Optional account creation via magic link.
-      Syncs shelf and conversations across devices.
-      Clerk for authentication.
-      Turso managed SQLite for storage.
-      User controls exactly what syncs.
+      Syncs shelf and conversations.
       Opt-in only — never default.
+      User controls what syncs.
 
 - [ ] Data privacy for sync
-      Clear plain-language explanation of what
-      is stored server-side when sync is enabled.
-      Delete account deletes all server-side data.
-      Export before delete option always available.
-      Shown before sync is activated.
+      Plain-language explanation before activation.
+      Delete account = delete all server data.
+      Export before delete always available.
 
 ---
 
@@ -232,232 +261,195 @@ Add new items in the appropriate section.
 
 - [ ] Authentication
       Magic link email only. No passwords.
-      Guest mode remains available always.
-      Required before book rooms can be written to.
+      Guest mode always remains available.
       Clerk integration.
 
 - [ ] Book rooms — read only
-      Single random note shown on room entry.
-      Notes organised by reading stage.
+      Single random note on room entry.
+      Notes by reading stage.
       Spoiler gate after "I finished it."
       Language sub-rooms.
       Location filter: region only, opt-in.
-      Time filter: recent / this month / all time.
+      Time filter: recent/month/all time.
       No likes, no rankings, no metrics.
-      Notes feel like margin notes — short, personal.
 
 - [ ] Book rooms — writing
       Requires supporter account.
-      7-day trial with card required.
-      Maximum 5 notes during trial period.
-      Email verification before first note.
-      AI moderation (Claude Haiku) on submission.
-      3 community flags auto-hides a note.
-      No manual review queue — automated only.
+      7-day trial, card required.
+      5 notes max during trial.
+      Email verification required.
+      Claude Haiku moderation on submission.
+      3 flags auto-hides note.
+
+- [ ] Shared highlights and notes
+      Pay it forward feature.
+      Explicit opt-in per highlight.
+      Shown in book rooms alongside notes.
+      Non-fiction primary use case.
+      50 word max per passage (copyright).
+      Buy link always shown alongside.
+      Reader's application note optional.
+      Anonymous by default.
+      Withdrawal honoured at next regeneration.
+      Cold start UX: progress to threshold.
+
+- [ ] Reader Wiki
+      AI-generated living document per book.
+      Generated when book reaches 10 contributors.
+      Regenerated at 10/25/50/100 milestones.
+      One AI call per milestone — cost efficient.
+      Sections:
+        Book in one paragraph
+        What readers found most valuable
+        How readers applied this
+        What readers wish they'd known
+        Passages that changed minds
+        Companion questions
+      Cached and served to all visitors.
+      No account needed to read.
+      Free account needed to contribute.
+      Attribution: collective only.
+      Always prominent buy links.
 
 - [ ] Opt-in reader reachability
       The Correspondent use case.
-      Two visibility states only:
-      Ghost (default):
-        Shown as "a reader in [city]"
-        No handle displayed. Cannot be contacted.
-      Reader (opt-in):
-        Handle shown on notes.
-        Can be contacted about this book only.
-        Book-scoped thread, not general DM.
-        First message pre-filled with book title.
-      Adults only. Age verified at account creation.
-      Block always visible and always works.
-      No moderation of private messages ever.
-      Block is the only remedy.
-      Safety reminder shown on first contact:
-      "Keep conversations about books.
-      Do not share personal information."
-      Supporter tier can initiate contact.
-      Free accounts can receive contact only.
-      Never presented as a matching feature.
-      Discovered naturally through notes.
+      Ghost (default): "a reader in [city]"
+      Reader (opt-in): handle shown,
+        contactable about this book only.
+      Adults only. Age verified.
+      Book-scoped threads not DMs.
+      Block always available.
+      No moderation of private messages.
+      Safety reminder on first contact.
+      Supporter tier initiates only.
 
 - [ ] Reading pulse
-      Show live reader activity count per book.
-      Example: "34 readers this week"
-      No note required to count as a reader.
-      Warmth signal only — not a metric.
+      Live reader activity per book.
+      "34 readers this week"
+      No note needed to count.
+      Warmth signal only.
 
 - [ ] Libby annotation import
       Parse Libby email export format.
-      Plain text format, different to Kobo SQLite.
-      Edge case — implement after Kobo import done.
+      After Kobo import confirmed stable.
 
 ---
 
 ## PRIORITY 5 — Sustainability (V2)
 
 - [ ] Stripe subscription
-      Supporter tier: £3-5/month.
-      Annual option with discount.
-      7-day free trial, card required.
-      Trial unlocks full book room writing access.
-      Auto-lock on cancellation or chargeback.
-      Webhook handles payment events.
+      £3-5/month supporter tier.
+      7-day trial, card required.
+      Unlocks book room writing.
+      Auto-lock on cancellation.
 
 - [ ] Plausible analytics
-      Privacy-respecting analytics.
+      Single script tag addition.
       No cookies. No personal data.
-      Simple script addition to index.html.
-      pagecommons.com domain setup in Plausible.
+      Privacy respecting.
+      Add before launch if possible —
+      useful signal from day one.
 
 - [ ] Resend email
-      Transactional email for magic links.
-      Trial expiry nudge emails.
-      Affiliate link emails.
-      3,000 free emails per month on free tier.
+      Magic links for auth.
+      Trial expiry nudges.
+      3,000 free/month.
 
 - [ ] Honest sustainability page
-      Plain explanation of how Page Commons
-      is funded and stays independent.
-      Affiliate link disclosure.
+      How Page Commons stays independent.
+      Affiliate disclosure.
       Full model explained openly.
-      No spin. Readers appreciate honesty.
 
 ---
 
 ## PRIORITY 6 — Book-mates (V3, maybe)
 
-Only build this if Correspondent use case
-is stable and accepted by users first.
+Only build if Correspondent use case
+is stable and accepted first.
 
 - [ ] Book-mates feature
-      Created by mutual consent only.
-      Both users must agree — no one-sided follows.
-      Earned through existing book conversation.
-      Never through search or algorithmic matching.
-      Users are never searchable.
-      No public profiles ever.
-      Shared shelf trigger:
-        When a book-mate adds a book you have,
-        quiet notification appears:
-        "Your book-mate [handle] also has this book"
-        Option to start a new conversation appears.
-        Only at this moment — not proactively pushed.
-      User-set threshold:
-        Minimum books in common before
-        book-mate suggestion can appear.
-        Default: 2 books in common.
-        User sets their own number.
-      All conversation is book-scoped.
-      No general chat thread ever.
-      New book = new conversation thread.
+      Mutual consent only — both agree.
+      Earned through existing conversation.
+      Users never searchable.
+      No public profiles.
+      Shared shelf trigger notification.
+      User-set books-in-common threshold
+      (default: 2).
+      All conversation book-scoped.
+      No general chat ever.
       Adults only.
-      No moderation of private messages.
       Block always available.
-      Never marketed as a social feature.
 
 ---
 
 ## PRIORITY 7 — Platform maturity (V3)
 
+- [ ] Cloudflare Pages migration
+      Better cost certainty at scale.
+      Unlimited bandwidth.
+      3M free function calls/month vs
+      100K on Vercel free tier.
+      Functions use different format:
+        /functions/api/ not /api/
+        onRequest not export default
+        context.env not process.env
+      Do after June 1 launch —
+      not before.
+
 - [ ] Self-hosted Docker release
       Single command deployment.
-      Plain SQLite file instead of Turso.
-      No social features in self-hosted version.
-      Clear README with setup instructions.
-      AGPL-3.0 licence enforced.
+      Plain SQLite not Turso.
+      No social features in self-hosted.
+      AGPL-3.0 enforced.
 
 - [ ] PWA capability
-      Add to home screen on mobile and e-ink.
+      Add to home screen.
       Offline-first operation.
-      Service worker for asset caching.
-      Especially valuable for Kindle users.
+      Service worker for caching.
+      Especially valuable for Kindle.
 
 - [ ] Non-English UI languages
-      Interface language separate from book language.
-      French, Spanish, German as first wave.
+      French, Spanish, German first.
       Community-contributed translations.
 
 - [ ] API for integrations
-      Public API for third-party book clubs.
-      Developer documentation.
+      Third-party book clubs.
       Rate limited. Auth required.
 
 ---
 
 ## USE CASES — reference
 
-These define who Page Commons is for.
-Every feature should serve at least one.
-
 1. The Archivist
-   Uploads highlights and writes personal notes.
-   Builds a private reading journal.
-   No AI, no community needed.
-   V1 delivers this.
+   Highlights + personal notes.
+   Private reading journal.
+   No AI, no community.
+   V1 delivers this ✓
 
 2. The Reflective Reader
-   Everything The Archivist has.
-   Adds AI companion for deeper discussion.
+   Everything above + AI companion.
    Clips and saves AI conversations.
    No real people involved.
-   V1 delivers this.
+   V1 delivers this ✓
 
 3. The Annotator
-   Leaves notes in book rooms for strangers.
-   Reads what others have left.
+   Leaves notes in book rooms.
    Anonymous by default.
-   No AI or direct interaction needed.
    V2 delivers this.
 
 4. The Correspondent
-   Opts in to show their handle on notes.
-   Open to book-scoped contact from other readers.
-   Wants human resonance around shared books.
+   Opts in to handle on notes.
+   Book-scoped contact.
    V2 delivers this.
 
 5. The Book-mate
-   Deep ongoing reading connection.
-   Mutual consent to link.
-   Triggered by shared shelf discoveries.
-   Always book-scoped. Never general chat.
-   V3 maybe delivers this.
+   Deep mutual connection.
+   Earned through reading.
+   V3 maybe.
 
 ---
 
 ## DECISIONS MADE — do not revisit
 
-- Single index.html + external app.js architecture
-  External app.js required for Kobo WebKit
-- All JS must be Babel transpiled (ie:11 target)
-  Regenerator runtime included
-  Never deploy raw modern JS to production
-- Permanent IIFE at top of app.js
-  Forces screen-home display:block before init()
-  Required for Kobo render — do not remove
-- vercel.json required for Content-Type headers
-  application/javascript for app.js
-  no-store cache control
-- No CSS variables — hardcoded hex values only
-- No border-radius — all zero
-- No flexbox gap: — margin-based spacing only
-- No calc() — hardcoded pixel values only
-- Webkit vendor prefixes on all flexbox
-- No author or genre rooms
-- No likes or engagement metrics ever
-- No streaming AI responses — batch only
-- Bring your own key from day one
-- API key tip: store in Apple Notes or Google Keep
-  copy/paste on e-reader — no server involvement
-- 6-digit transfer code available as alternative
-  with clear statement that key briefly passes
-  through Page Commons servers
-  deleted immediately after transfer
-- No server-side key storage beyond transfer TTL
-- 7-day trial period (not 30-day)
-- Read-only free tier for book rooms
-- AI moderation not manual review (solo founder)
-- Block only — no content reporting mechanism
-- Private messages never moderated
-- No general DMs — book-scoped threads only
-- Level 2 social (open reachability) deferred
-  until Level 1 Correspondent proven
-- Book-mates deferred until Correspondent proven
-- Kobo KoboRoot.tgz sync deferred to V2 minimum
+- index.html + external app.js architecture
+- Per
