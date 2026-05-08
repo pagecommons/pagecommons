@@ -132,6 +132,18 @@ Do not work on Priority 4+ before launch.
 - [x] Hall tagline
       "Just books. No noise." — deployed.
 
+- [ ] Move tagline inline with site name
+      Render "Just books. No noise." on the
+      same line to the right of "PAGE COMMONS"
+      rather than below it.
+      Saves one line of screen height on
+      small devices (Kindle Basic, Kobo Mini).
+      Align tagline to the right edge,
+      site name stays left-aligned.
+      Use flexbox justify-content:space-between.
+      Check at narrow widths — if it wraps,
+      fall back to current stacked layout.
+
 - [x] Your shelf prominence
       Shelf button added to search screen.
 
