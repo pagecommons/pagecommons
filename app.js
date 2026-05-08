@@ -1538,11 +1538,23 @@ var SURPRISE_SUBJECTS = ['fiction', 'mystery', 'history', 'biography', 'science'
 var _surpriseSeenKeys = [];
 
 var LANG_NAME_TO_CODE = {
-  'French': 'fr', 'German': 'de', 'Spanish': 'es', 'Italian': 'it',
-  'Japanese': 'ja', 'Korean': 'ko', 'Traditional Chinese': 'zh',
-  'Simplified Chinese': 'zh', 'Portuguese': 'pt', 'Arabic': 'ar',
-  'Russian': 'ru', 'Dutch': 'nl', 'Polish': 'pl', 'Turkish': 'tr',
-  'Hindi': 'hi', 'Thai': 'th', 'Vietnamese': 'vi'
+  'French': 'fr',
+  'German': 'de',
+  'Spanish': 'es',
+  'Italian': 'it',
+  'Japanese': 'ja',
+  'Korean': 'ko',
+  'Traditional Chinese': 'zh-TW',
+  'Simplified Chinese': 'zh-CN',
+  'Portuguese': 'pt',
+  'Arabic': 'ar',
+  'Russian': 'ru',
+  'Dutch': 'nl',
+  'Polish': 'pl',
+  'Turkish': 'tr',
+  'Hindi': 'hi',
+  'Thai': 'th',
+  'Vietnamese': 'vi'
 };
 
 function initSurpriseScreen() {
