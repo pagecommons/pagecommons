@@ -1,131 +1,152 @@
-# Page Commons — Status
+# Page Commons — Current Status
+
+Last updated: 2026-05-08
+Current version: v0.25
+Next version: v0.26 (bump on next deploy)
+Branch: claude/review-and-plan-HPGDI
+(needs merging to main)
 
 ---
 
-## Session ending 2026-05-08
-
-**Branch:** `claude/review-and-plan-HPGDI`
-**Build marker:** `36641b5+` (visible in hall tagline, bottom right)
-**Declared version:** v0.25 (not bumped this session — suggest v0.26 on next release)
-
----
-
-### Completed this session
+## What was completed recently
 
 **Language detection overhaul**
-- Companion now auto-detects the book's language and responds in it
-- `detectLanguage()` extended to distinguish Traditional Chinese from Simplified:
-  - `zh-TW`, `zh-HK`, `zh-Hant` → Traditional Chinese
-  - `zh-CN`, `zh-SG`, `zh-Hans` → Simplified Chinese
-  - Bare `zh` or no lang code → scans title + author for 50+ Traditional-only Unicode
-    code points (傳, 連, 種, 說, 來, 國, 為, 時, …)
-- Language instruction sent as system message (not user prompt) across all three
-  AI providers — the only way to reliably enforce it
-- Language state refactored: `STATE.detectedLang` set synchronously in `selectBook`
-  so it's available before any async steps; removed dependency on fragile
-  `STATE.chatLanguage === 'native'` checks threading through async chains
-- Ice breaker cache key includes language to prevent stale English prompts
-  being served for non-English books
-- Status screen heading uses Unicode character detection rather than language
-  state, so it renders correctly regardless of async order
+- Auto-detects book language and
+  responds in it
+- Distinguishes Traditional vs
+  Simplified Chinese correctly
+- Language instruction sent as
+  system message across all providers
+- Ice breaker cache key includes language
 
 **Companion language setting**
-- New dropdown in Settings: "Auto (match book)" (default) or any specific language
-- Stored as `pc_companion_lang` in localStorage; `STATE.companionLangOverride`
-- Feeds `getCompanionLang()` helper used by both `buildSystemPrompt` and
-  `fetchAIIcebreakers`
-- Initial render used `-webkit-appearance:none` without a custom arrow indicator —
-  fixed with a `▼` overlay inside a relative wrapper
+- Dropdown in Settings:
+  Auto (match book) or specific language
+- Stored as pc_companion_lang
+- Custom arrow overlay fix applied
 
 **Kobo highlights import**
-- New section on search screen: upload `KoboReader.sqlite` from the `.kobo` folder
-- sql.js (WebAssembly) loaded lazily from CDN — no overhead for non-Kobo users
-- Queries `Bookmark JOIN content` tables; extracts title, author, highlight text,
-  annotation notes, date, ChapterProgress (0.0–1.0)
-- Prefers `BookTitle` over chapter `Title`; strips `"By "` prefix from Attribution
-- `source: 'kobo'` tagged per highlight; panel shows "from your Kobo" not "Kindle"
-- `chapterProgress` stored on each highlight for future reading progress indicator
-- File never leaves the browser
+- KoboReader.sqlite upload working
+- sql.js WebAssembly loaded lazily
+- Queries Bookmark JOIN content tables
+- ChapterProgress stored per highlight
+- File never leaves browser
 
 **Randomised search heading**
-- Static "Which book?" replaced with a pool of 7 variants
-- 5 personalised variants when a name is set in Settings (e.g. "What are you
-  reading, Alex?")
-- Picked fresh on every navigate to the search screen
+- Pool of 7 variants
+- 5 personalised with name from Settings
 
 **Discovery companion mode**
-- "Is this for me?" button added below every search result card (italic, secondary)
-- `STATE.companionMode = 'discover'` — completely separate from reading mode
-- Bypasses status screen; goes straight to companion
-- Book is NOT added to shelf in discover mode
-- Static preference-question ice breakers ("What kinds of books have you loved
-  lately?", "What mood are you in?", etc.) — no AI call needed
-- Discovery system prompt: asks ONE preference question first, then describes the
-  book through the reader's lens (pace, texture, what readers wish they'd known)
-  — never plot, never spoilers; includes reading time estimate from pageCount
-- Companion header shows "Is this for me?" as status label
-- Age gate wired up for discover flow via `_pendingDiscoverMode` flag
-- Normal book selection (`selectBook`) always resets mode to 'reading'
+- "Is this for me?" on every search result
+- Separate system prompt and flow
+- Book not added to shelf in discover mode
+- Reading time estimate from pageCount
 
 ---
 
-### Tested by user
+## Confirmed working on device
 
-- ✓ Language auto-detection working on Traditional Chinese books
-  (倪匡傳：哈哈哈哈, 連城訣, 第二種人)
-- ✓ Build marker visible in hall tagline
-- ✓ Status screen rendering in book language (not English)
-- ✗ Initial fix had Simplified/Traditional mismatch: status screen showed
-  Simplified, ice breakers showed Traditional — root cause was `detectLanguage`
-  returning generic 'Chinese' for all zh variants. Fixed by distinguishing variants.
-- ✗ Companion language dropdown not visible — root cause was `-webkit-appearance:none`
-  hiding native select arrow with no replacement. Fixed with custom `▼` overlay.
-
-### Not yet tested by user
-
-- Discovery companion mode (no user feedback received)
-- Kobo highlights import on a real device (sql.js WASM dependency is a risk on
-  older Kobo WebKit — Libra Colour should be fine, older models uncertain)
-- Companion language override setting (dropdown fix not yet confirmed)
-- Randomised search heading
+- Kobo Libra Colour: v0.25 ✓
+  Loads, renders, scrolls, taps respond
+  Navigation works
+  Home screen displays correctly
+- Desktop/mobile browser: ✓
+- Kindle: not yet tested
+  (device expected — test when arrives)
 
 ---
 
-### Known issues / watch points
+## Current known issues
 
-- **Kobo WebAssembly**: sql.js requires WASM support. Kobo Libra Colour (the
-  target device) runs a modern enough browser, but any device older than ~2020
-  may silently fail. The error message surfaces in `#kobo-status` — worth testing
-  on device before shipping to users.
-- **Discovery mode and shelf**: if a user starts in discover mode then decides
-  they want to read the book, they need to go back to search and select it via
-  the main card tap. There is no "I'll read this" button inside the discover
-  companion. Could be a friction point.
-- **Companion language for returning books**: the `chatLanguage` flow for books
-  already on the shelf reads from `pc_lang_[bookKey]` in localStorage. The global
-  `companionLangOverride` correctly takes precedence in `buildSystemPrompt` and
-  `fetchAIIcebreakers`, but ice breaker cache keys still include `chatLanguage`
-  — so cached ice breakers from before the override was set may be served. Clears
-  itself naturally as cache expires; not a breaking issue.
+- Discovery mode missing "I'll read this"
+  button — user must go back to search
+  to add book to shelf after discovery.
+  Add in next polish pass.
+
+- Kobo WebAssembly for sql.js:
+  Kobo Libra Colour should be fine.
+  Older Kobo models uncertain.
+  Error surfaces in #kobo-status.
+  Test on device before shipping.
+
+- Companion language for returning books:
+  Cached ice breakers from before
+  override was set may be served.
+  Clears naturally as cache expires.
+  Not breaking.
+
+- Branch not yet merged to main:
+  claude/review-and-plan-HPGDI
+  Merge before next device test.
 
 ---
 
-### Next up (in priority order)
+## What to tackle next
 
-1. **Surprise Me** (Priority 1) — two modes: shelf-based and random Open Library.
-   Open Library has a random works endpoint: `openlibrary.org/random.json`
-   (redirects to a work). Shelf mode picks from `STATE.shelf` weighted by recency.
+In priority order:
 
-2. **Affiliate links** (Priority 1) — show on book selection. Amazon Associates,
-   Bookshop.org, Waterstones (UK), WorldCat (always free). Clear disclosure copy.
-   Natural fit to show inside the Discovery companion flow too.
+1. Surprise Me feature (Priority 1)
+   Open Library random endpoint:
+   openlibrary.org/random.json
+   Two modes: shelf-based and random
+   Entry point from Library Hall
 
-3. **Export / import localStorage** (Priority 3) — single JSON dump of all
-   `pc_*` keys. Restore on new device. No server needed. In Settings screen.
-   Highest-value sync option before accounts exist.
+2. Affiliate links (Priority 1)
+   On book selection screen
+   Also inside Discovery mode flow
+   Amazon, Bookshop.org, Waterstones,
+   WorldCat (always free)
+   Clear disclosure copy
 
-4. **XHR fallback for fetch** (Priority 2) — deferred until real device testing
-   confirms fetch is broken on a target device. Don't implement speculatively.
+3. Export/import localStorage (Priority 3)
+   Single JSON dump of all pc_* keys
+   Restore on new device
+   High value for launch users
+   Available from Settings screen
 
-5. **Plausible analytics** (Priority 5) — single script tag, no cookies, no
-   personal data. Easy to ship, useful signal once real users arrive.
+4. Plausible analytics (Priority 5)
+   Single script tag
+   No cookies, no personal data
+   Add before launch for day-one signal
+
+5. Discovery mode "I'll read this" button
+   Remove current friction point
+   Add to polish pass
+
+6. Merge branch to main
+   Test on Kobo after merge
+   Bump to v0.26
+
+---
+
+## Infrastructure status
+
+- Vercel: active, auto-deploying from
+  pagecommons/pagecommons main branch
+- Upstash Redis: connected via Vercel KV
+  Transfer codes working
+- Google Books API proxy: working
+- Free tier Gemini pool: working
+- Cloudflare DNS: active
+- pagecommons.com: live
+
+## Post-launch infrastructure (do not do before June 1)
+- Migrate to Cloudflare Pages
+- GitHub account restructuring
+
+---
+
+## Launch checklist (June 1 target)
+
+- [ ] Surprise Me feature
+- [ ] Affiliate links
+- [ ] Export/import localStorage
+- [ ] Plausible analytics added
+- [ ] Discovery "I'll read this" button
+- [ ] Branch merged to main
+- [ ] Tested on Kobo Libra Colour
+- [ ] Tested on Kindle (when arrives)
+- [ ] Version bumped to v0.26+
+- [ ] README.md created
+- [ ] About page polished
+- [ ] Reddit post drafted
