@@ -1594,7 +1594,8 @@ function surpriseRandom() {
 
   var langCode = getSurpriseLangCode();
   if (langCode) {
-    fetch('/api/books?q=' + encodeURIComponent('subject:' + subj) + '&maxResults=40&langRestrict=' + encodeURIComponent(langCode))
+    var startIndex = Math.floor(Math.random() * 5);
+    fetch('/api/books?q=' + encodeURIComponent('subject:' + subj) + '&maxResults=40&startIndex=' + startIndex + '&langRestrict=' + encodeURIComponent(langCode))
       .then(function(r) { return r.json(); })
       .then(function(data) {
         var items = data.items || [];
@@ -1604,6 +1605,10 @@ function surpriseRandom() {
         }
         var item = items[Math.floor(Math.random() * items.length)];
         var vi = item.volumeInfo || {};
+        if (!vi.title) {
+          surpriseRandomOpenLibrary(subj, loadEl);
+          return;
+        }
         var thumb = (vi.imageLinks && vi.imageLinks.thumbnail) ? vi.imageLinks.thumbnail.replace('http://', 'https://') : '';
         var book = {
           title: vi.title || '',
