@@ -706,7 +706,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.27-0849727</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.27-a1b2c3d</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -1222,7 +1222,21 @@
 
     <div id="surprise-language-step" style="display:none">
       <h1>Which language?</h1>
-      <div id="surprise-language-options" style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column"></div>
+      <div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('English')">English</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Traditional Chinese')">Traditional Chinese</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Simplified Chinese')">Simplified Chinese</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Japanese')">Japanese</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Korean')">Korean</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('French')">French</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Spanish')">Spanish</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('German')">German</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Portuguese')">Portuguese</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Italian')">Italian</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Arabic')">Arabic</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Russian')">Russian</button>
+        <button class="btn" style="text-align:left" onclick="selectSurpriseLanguage('Hindi')">Hindi</button>
+      </div>
     </div>
 
     <div id="surprise-loading" class="status-msg" style="display:none">Finding a book…</div>

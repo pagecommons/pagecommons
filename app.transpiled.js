@@ -1784,21 +1784,10 @@ function selectSurpriseGenre(genre) {
   STATE.surpriseGenre = genre;
   document.getElementById('surprise-genre-step').style.display = 'none';
   document.getElementById('surprise-language-step').style.display = 'block';
-  renderSurpriseLanguageOptions();
-}
-function renderSurpriseLanguageOptions() {
-  var container = document.getElementById('surprise-language-options');
-  if (!container) return;
-  var html = '';
-  Object.keys(LANG_NAME_TO_CODE).forEach(function (name) {
-    var escaped = name.replace(/'/g, "\\'");
-    html += '<button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage(\'' + escaped + '\')">' + name + '</button>';
-  });
-  container.innerHTML = html;
 }
 function selectSurpriseLanguage(lang) {
   var genre = STATE.surpriseGenre;
-  var langCode = LANG_NAME_TO_CODE[lang] || 'en';
+  var langCode = lang === 'English' ? 'en' : LANG_NAME_TO_CODE[lang] || 'en';
   var shelf = getShelfBooks();
   var shelfText = '';
   shelf.slice(0, 10).forEach(function (book) {
