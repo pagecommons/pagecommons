@@ -1677,7 +1677,8 @@ function renderSurpriseLanguageOptions() {
   if (!container) return;
   var html = '';
   Object.keys(LANG_NAME_TO_CODE).forEach(function(name) {
-    html += '<button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage(' + JSON.stringify(name) + ')">' + name + '</button>';
+    var escaped = name.replace(/'/g, "\\'");
+    html += '<button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage(\'' + escaped + '\')">' + name + '</button>';
   });
   container.innerHTML = html;
 }
