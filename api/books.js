@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { q, maxResults = 10, startIndex = 0 } = req.query;
+  const { q, maxResults = 10, startIndex = 0, langRestrict } = req.query;
 
   if (!q) {
     return res.status(400).json({ error: 'Missing required parameter: q' });
@@ -18,7 +18,8 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'API key not configured' });
   }
 
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=${maxResults}&startIndex=${startIndex}&key=${apiKey}`;
+  let url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=${maxResults}&startIndex=${startIndex}&key=${apiKey}`;
+  if (langRestrict) url += `&langRestrict=${encodeURIComponent(langRestrict)}`;
 
   try {
     const response = await fetch(url);

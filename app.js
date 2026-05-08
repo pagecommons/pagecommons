@@ -1533,8 +1533,44 @@ function startReadingFromDiscover() {
 // ═══════════════════════════════════════════════════
 //  SURPRISE ME
 // ═══════════════════════════════════════════════════
-var SURPRISE_SUBJECTS = ['fiction', 'mystery', 'history', 'biography', 'science', 'philosophy', 'classic_literature', 'fantasy', 'science_fiction', 'thriller', 'romance', 'poetry'];
+var SURPRISE_SUBJECTS = ['fiction', 'mystery', 'history', 'biography', 'science', 'philosophy', 'fantasy', 'science_fiction', 'thriller', 'romance', 'poetry'];
 var _surpriseSeenKeys = [];
+
+var LANG_NAME_TO_CODE = {
+  'French': 'fr', 'German': 'de', 'Spanish': 'es', 'Italian': 'it',
+  'Japanese': 'ja', 'Korean': 'ko', 'Traditional Chinese': 'zh',
+  'Simplified Chinese': 'zh', 'Portuguese': 'pt', 'Arabic': 'ar',
+  'Russian': 'ru', 'Dutch': 'nl', 'Polish': 'pl', 'Turkish': 'tr',
+  'Hindi': 'hi', 'Thai': 'th', 'Vietnamese': 'vi'
+};
+
+function getSurpriseLangCode() {
+  if (STATE.companionLangOverride && LANG_NAME_TO_CODE[STATE.companionLangOverride]) {
+    return LANG_NAME_TO_CODE[STATE.companionLangOverride];
+  }
+  var books = getShelfBooks();
+  if (!books.length) return null;
+  var counts = {};
+  books.forEach(function(b) {
+    var code = null;
+    if (b.lang && b.lang !== 'en') {
+      code = b.lang.split(/[-_]/)[0].toLowerCase();
+    }
+    if (!code && b.detectedLang && LANG_NAME_TO_CODE[b.detectedLang]) {
+      code = LANG_NAME_TO_CODE[b.detectedLang];
+    }
+    if (code && code !== 'en') {
+      counts[code] = (counts[code] || 0) + 1;
+    }
+  });
+  var dominant = null;
+  var max = 0;
+  Object.keys(counts).forEach(function(k) {
+    if (counts[k] > max) { max = counts[k]; dominant = k; }
+  });
+  if (dominant && (max >= 2 || max / books.length >= 0.4)) return dominant;
+  return null;
+}
 
 function initSurpriseScreen() {
   var shelfBtn = document.getElementById('surprise-shelf-btn');
@@ -1556,6 +1592,41 @@ function surpriseRandom() {
   resultEl.style.display = 'none';
   document.getElementById('surprise-modes').style.display = 'none';
 
+  var langCode = getSurpriseLangCode();
+  if (langCode) {
+    fetch('/api/books?q=' + encodeURIComponent('subject:' + subj) + '&maxResults=40&langRestrict=' + encodeURIComponent(langCode))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var items = data.items || [];
+        if (!items.length) {
+          surpriseRandomOpenLibrary(subj, loadEl);
+          return;
+        }
+        var item = items[Math.floor(Math.random() * items.length)];
+        var vi = item.volumeInfo || {};
+        var thumb = (vi.imageLinks && vi.imageLinks.thumbnail) ? vi.imageLinks.thumbnail.replace('http://', 'https://') : '';
+        var book = {
+          title: vi.title || '',
+          author: (vi.authors && vi.authors[0]) ? vi.authors[0] : '',
+          year: vi.publishedDate ? vi.publishedDate.substring(0, 4) : '',
+          key: item.id || '',
+          source: 'Google Books',
+          coverUrl: thumb,
+          pageCount: vi.pageCount || 0,
+          lang: vi.language || langCode
+        };
+        loadEl.style.display = 'none';
+        showSurpriseResult(book);
+      })
+      .catch(function() {
+        surpriseRandomOpenLibrary(subj, loadEl);
+      });
+  } else {
+    surpriseRandomOpenLibrary(subj, loadEl);
+  }
+}
+
+function surpriseRandomOpenLibrary(subj, loadEl) {
   fetch('https://openlibrary.org/subjects/' + subj + '.json?limit=50')
     .then(function(r) { return r.json(); })
     .then(function(data) {
