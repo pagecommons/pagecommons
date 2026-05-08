@@ -1741,11 +1741,10 @@ var LANG_NAME_TO_CODE = {
   'Vietnamese': 'vi'
 };
 function initSurpriseScreen() {
-  var shelfBtn = document.getElementById('surprise-shelf-btn');
-  if (shelfBtn) {
-    shelfBtn.style.display = getShelfBooks().length > 0 ? 'block' : 'none';
-  }
-  document.getElementById('surprise-modes').style.display = 'block';
+  // Reset surprise screen to genre selection
+  STATE.surpriseGenre = null;
+  document.getElementById('surprise-genre-step').style.display = 'block';
+  document.getElementById('surprise-language-step').style.display = 'none';
   document.getElementById('surprise-result').style.display = 'none';
   document.getElementById('surprise-loading').style.display = 'none';
 }
@@ -1780,10 +1779,6 @@ function filterByLanguage(items, baseLang) {
 function startSurpriseMe() {
   STATE.surpriseGenre = null;
   navigate('surprise');
-  document.getElementById('surprise-genre-step').style.display = 'block';
-  document.getElementById('surprise-language-step').style.display = 'none';
-  document.getElementById('surprise-loading').style.display = 'none';
-  document.getElementById('surprise-result').style.display = 'none';
 }
 function selectSurpriseGenre(genre) {
   STATE.surpriseGenre = genre;
