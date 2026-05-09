@@ -1598,8 +1598,6 @@ function startReadingFromDiscover() {
 // ═══════════════════════════════════════════════════
 //  SURPRISE ME
 // ═══════════════════════════════════════════════════
-var SURPRISE_SUBJECTS = ['fiction', 'mystery', 'history', 'biography', 'science', 'philosophy', 'fantasy', 'science_fiction', 'thriller', 'romance', 'poetry'];
-var _surpriseSeenKeys = [];
 
 var LANG_NAME_TO_CODE = {
   'French': 'fr',
@@ -1619,6 +1617,18 @@ var LANG_NAME_TO_CODE = {
   'Hindi': 'hi',
   'Thai': 'th',
   'Vietnamese': 'vi'
+};
+
+var LANG_PROMPT_MAP = {
+  'English': 'available in English',
+  'Traditional Chinese': 'available in Traditional Chinese — original or translation',
+  'Simplified Chinese': 'available in Simplified Chinese — original or translation',
+  'Japanese': 'available in Japanese — original or translation',
+  'French': 'available in French — original or translation',
+  'Spanish': 'available in Spanish — original or translation',
+  'German': 'available in German — original or translation',
+  'Portuguese': 'available in Portuguese — original or translation',
+  'Korean': 'available in Korean — original or translation'
 };
 
 function initSurpriseScreen() {
@@ -1648,18 +1658,6 @@ function buildBookFromGoogleItem(item, lang, langCode) {
   };
 }
 
-function filterByLanguage(items, baseLang) {
-  return items.filter(function(item) {
-    var vi = item.volumeInfo || {};
-    if (!vi.title) return false;
-    var vl = vi.language;
-    // Accept items with no language field — trust langRestrict did its job.
-    // Only reject if the field is present and explicitly wrong.
-    if (!vl) return true;
-    return vl === baseLang || vl.split('-')[0] === baseLang;
-  });
-}
-
 function startSurpriseMe() {
   STATE.surpriseGenre = null;
   navigate('surprise');
@@ -1671,131 +1669,177 @@ function selectSurpriseGenre(genre) {
   document.getElementById('surprise-language-step').style.display = 'block';
 }
 
-var GENRE_QUERIES = {
-  'fiction': 'literary fiction novel',
-  'mystery': 'mystery detective crime',
-  'romance': 'romance novel love',
-  'scifi': 'science fiction',
-  'fantasy': 'fantasy novel',
-  'nonfiction': 'popular nonfiction',
-  'biography': 'biography memoir',
-  'poetry': 'poetry poems'
-};
-
 function selectSurpriseLanguage(lang) {
   var genre = STATE.surpriseGenre;
-  var langCode = lang === 'English' ? 'en' : (LANG_NAME_TO_CODE[lang] || 'en');
-  var baseLang = langCode.split('-')[0];
+  var langInstruction = LANG_PROMPT_MAP[lang] || ('available in ' + lang);
 
-  document.getElementById('surprise-loading').style.display = 'block';
+  var loadEl = document.getElementById('surprise-loading');
+  loadEl.textContent = 'Finding a book…';
+  loadEl.style.display = 'block';
   document.getElementById('surprise-language-step').style.display = 'none';
   document.getElementById('surprise-result').style.display = 'none';
 
   var shelf = getShelfBooks();
-  var shelfText = '';
-  shelf.slice(0, 10).forEach(function(book) {
-    shelfText += book.title + ' by ' + book.author + ', ';
-  });
-  if (!shelfText) shelfText = 'No books yet';
+  var shelfContext = '';
+  if (shelf && shelf.length > 0) {
+    var shelfParts = [];
+    var limit = shelf.length < 20 ? shelf.length : 20;
+    for (var i = 0; i < limit; i++) {
+      shelfParts.push(shelf[i].title + ' by ' + shelf[i].author);
+    }
+    shelfContext = 'The user has already read: ' + shelfParts.join(', ') + '.';
+  } else {
+    shelfContext = 'The user has not read any books yet.';
+  }
 
-  var system = 'You are a helpful book recommendation assistant. Based on the user genre preference and reading shelf, recommend a single book they might not have heard of. Return ONLY valid JSON with no extra text: {"title":"...","author":"...","reason":"one sentence"}';
-  var userMessage = 'Genre: ' + genre + '\nLanguage: ' + lang + '\nMy shelf: ' + shelfText;
+  var system = 'You are a book recommendation assistant.\n' +
+    'You MUST suggest a book that is ' + langInstruction + '.\n' +
+    'The user will be reading it in ' + lang + '.\n' +
+    'Do NOT suggest a book that is not available in ' + lang + '.\n' +
+    'Respond with JSON only.\n' +
+    'No explanation. No markdown. No code fences.\n' +
+    'Raw JSON only, nothing else.';
+
+  var userMessage = 'Suggest one ' + genre + ' book for a reader who wants to read in ' + lang + '.\n' +
+    'The book MUST be ' + langInstruction + '.\n' +
+    'Do not suggest any book that is not available in ' + lang + '.\n' +
+    shelfContext + '\n' +
+    'Respond with exactly this JSON format:\n' +
+    '{"title":"book title","author":"author name","reason":"one sentence why"}';
 
   callFreeTier(system, [{role: 'user', content: userMessage}]).then(function(response) {
-    var cleaned = response.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-    var json = JSON.parse(cleaned);
-    STATE.surpriseResult = {
-      title: json.title || 'Unknown',
-      author: json.author || 'Unknown author',
-      reason: json.reason || '',
-      genre: genre,
-      language: lang
-    };
-    displaySurpriseResult();
+    var cleaned = response.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+    var json = null;
+    try {
+      json = JSON.parse(cleaned);
+    } catch (e) {
+      surpriseParseError(lang);
+      return;
+    }
+    if (!json || !json.title) {
+      surpriseParseError(lang);
+      return;
+    }
+    var q = json.title + ' ' + (json.author || '');
+    fetch('/api/books?q=' + encodeURIComponent(q.trim()))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var meta = {description: '', coverUrl: '', pageCount: 0, year: ''};
+        if (data && data.items && data.items[0]) {
+          var vi = data.items[0].volumeInfo || {};
+          var desc = vi.description || '';
+          meta.description = desc.length > 300 ? desc.substring(0, 300) + '…' : desc;
+          meta.coverUrl = (vi.imageLinks && vi.imageLinks.thumbnail)
+            ? vi.imageLinks.thumbnail.replace('http://', 'https://')
+            : '';
+          meta.pageCount = vi.pageCount || 0;
+          meta.year = vi.publishedDate ? vi.publishedDate.substring(0, 4) : '';
+        }
+        displaySurpriseResult({
+          title: json.title,
+          author: json.author || '',
+          reason: json.reason || '',
+          genre: genre,
+          language: lang,
+          description: meta.description,
+          coverUrl: meta.coverUrl,
+          pageCount: meta.pageCount,
+          year: meta.year
+        });
+      })
+      .catch(function() {
+        displaySurpriseResult({
+          title: json.title,
+          author: json.author || '',
+          reason: json.reason || '',
+          genre: genre,
+          language: lang,
+          description: '',
+          coverUrl: '',
+          pageCount: 0,
+          year: ''
+        });
+      });
   }).catch(function() {
-    surpriseFallbackSearch(genre, lang, baseLang);
+    surpriseParseError(lang);
   });
 }
 
-function surpriseFallbackSearch(genre, lang, baseLang) {
-  var query = GENRE_QUERIES[genre] || genre;
-  var startIndex = Math.floor(Math.random() * 10);
-  var url = '/api/books?q=' + encodeURIComponent(query) + '&startIndex=' + startIndex;
-  if (baseLang !== 'en') url += '&langRestrict=' + baseLang;
-
-  fetch(url)
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      var items = data.items || [];
-      if (baseLang !== 'en') items = filterByLanguage(items, baseLang);
-      if (!items.length) {
-        return fetch('/api/books?q=' + encodeURIComponent(query) + '&startIndex=' + Math.floor(Math.random() * 10))
-          .then(function(r2) { return r2.json(); })
-          .then(function(d2) { return d2.items || []; });
-      }
-      return items;
-    })
-    .then(function(items) {
-      if (!items || !items.length) { surpriseFallbackError(); return; }
-      var item = items[Math.floor(Math.random() * items.length)];
-      var vi = item.volumeInfo || {};
-      STATE.surpriseResult = {
-        title: vi.title || 'Unknown',
-        author: (vi.authors && vi.authors[0]) || 'Unknown author',
-        reason: '',
-        genre: genre,
-        language: lang
-      };
-      displaySurpriseResult();
-    })
-    .catch(function() { surpriseFallbackError(); });
-}
-
-function surpriseFallbackError() {
+function surpriseParseError(lang) {
   var loadEl = document.getElementById('surprise-loading');
-  var stepEl = document.getElementById('surprise-language-step');
-  if (loadEl) { loadEl.textContent = 'Could not find a book. Try again.'; }
-  setTimeout(function() {
-    if (loadEl) { loadEl.style.display = 'none'; loadEl.textContent = 'Finding a book…'; }
-    if (stepEl) stepEl.style.display = 'block';
-  }, 2000);
+  if (loadEl) {
+    loadEl.innerHTML = 'Could not get a suggestion — try again? ' +
+      '<div style="margin-top:10px">' +
+      '<button class="btn" onclick="selectSurpriseLanguage(\'' + lang + '\')">Retry</button>' +
+      '</div>';
+  }
 }
 
-function displaySurpriseResult() {
-  var result = STATE.surpriseResult;
-  if (!result) return;
+function displaySurpriseResult(result) {
+  STATE.surpriseResult = result;
+  STATE.surpriseBook = {
+    title: result.title,
+    author: result.author,
+    year: result.year || '',
+    coverUrl: result.coverUrl || '',
+    pageCount: result.pageCount || 0,
+    source: 'AI suggestion',
+    key: ''
+  };
 
   var resultEl = document.getElementById('surprise-result');
   if (!resultEl) return;
-  resultEl.innerHTML = '<div style="border:1px solid #111111;padding:16px;margin-bottom:20px">' +
-    '<div style="font-size:1.1rem;margin-bottom:4px">' + result.title + '</div>' +
-    '<div style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:0.85rem;color:#777777;margin-bottom:12px">' + result.author + '</div>' +
-    (result.reason ? '<div style="font-size:0.95rem;margin-bottom:12px">' + result.reason + '</div>' : '') +
+
+  var coverHtml = result.coverUrl
+    ? '<img src="' + result.coverUrl + '" alt="Cover" style="max-width:80px;display:block;margin-bottom:12px">'
+    : '';
+
+  var metaParts = [];
+  if (result.year) metaParts.push(result.year);
+  if (result.pageCount) metaParts.push(result.pageCount + ' pages');
+  var metaHtml = metaParts.length
+    ? '<div style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:0.8rem;color:#777777;margin-bottom:10px">' + metaParts.join(' · ') + '</div>'
+    : '';
+
+  var bodyText = result.description || result.reason || '';
+  var bodyHtml = bodyText
+    ? '<div style="font-size:0.95rem;margin-bottom:14px">' + bodyText + '</div>'
+    : '';
+
+  resultEl.innerHTML =
+    '<div style="border:1px solid #111111;padding:16px;margin-bottom:20px">' +
+      coverHtml +
+      '<div style="font-size:1.1rem;font-family:Georgia,serif;margin-bottom:4px">' + result.title + '</div>' +
+      '<div style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:0.85rem;color:#777777;margin-bottom:10px">' + result.author + '</div>' +
+      metaHtml +
+      bodyHtml +
+    '</div>' +
     '<div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">' +
-    '<button class="btn btn-primary" style="margin-bottom:10px" onclick="surpriseResultFindOutIfForMe()">Find out if it' + "'" + 's for me →</button>' +
-    '<button class="btn" onclick="surpriseResultNotForMe()">Not for me</button>' +
-    '</div></div>';
+      '<button class="btn btn-primary" style="min-height:44px;margin-bottom:10px;width:100%" onclick="surpriseDiscover()">Find out if it\'s for me &#8594;</button>' +
+      '<button class="btn btn-primary" style="min-height:44px;margin-bottom:10px;width:100%" onclick="surpriseSelect()">I\'ll read this &#8594;</button>' +
+      '<button class="btn" style="min-height:44px;width:100%" onclick="surpriseNotForMe()">Not for me &#8212; suggest another</button>' +
+    '</div>';
 
   document.getElementById('surprise-loading').style.display = 'none';
-  document.getElementById('surprise-result').style.display = 'block';
+  resultEl.style.display = 'block';
 }
 
-function surpriseResultFindOutIfForMe() {
-  var result = STATE.surpriseResult;
-  if (!result) return;
-  var book = {
-    title: result.title,
-    author: result.author,
-    year: '',
-    key: ''
-  };
-  STATE.book = book;
-  setReadingStatus('considering');
+function surpriseDiscover() {
+  var book = STATE.surpriseBook;
+  if (!book) return;
+  discoverBookWithAgeCheck(book);
 }
 
-function surpriseResultNotForMe() {
+function surpriseSelect() {
+  var book = STATE.surpriseBook;
+  if (!book) return;
+  selectBookWithAgeCheck(book);
+}
+
+function surpriseNotForMe() {
   var result = STATE.surpriseResult;
   if (!result) return;
+  document.getElementById('surprise-result').style.display = 'none';
   selectSurpriseLanguage(result.language);
 }
 

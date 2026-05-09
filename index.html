@@ -706,7 +706,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.27-ae93edd</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.27-building</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -1207,16 +1207,16 @@
     <button class="back-link" onclick="navigate('search')">← Back</button>
 
     <div id="surprise-genre-step" style="display:block">
-      <h1>What kind of book?</h1>
+      <h1>What do you feel like reading?</h1>
       <div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('fiction')">Fiction</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('mystery')">Mystery</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('romance')">Romance</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('scifi')">Science Fiction</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('fantasy')">Fantasy</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('nonfiction')">Non-Fiction</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('biography')">Biography</button>
-        <button class="btn" style="text-align:left" onclick="selectSurpriseGenre('poetry')">Poetry</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Literary Fiction')">Literary Fiction</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Mystery &amp; Thriller')">Mystery &amp; Thriller</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Science Fiction &amp; Fantasy')">Science Fiction &amp; Fantasy</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('History &amp; Biography')">History &amp; Biography</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Science &amp; Ideas')">Science &amp; Ideas</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Philosophy &amp; Spirituality')">Philosophy &amp; Spirituality</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Poetry &amp; Essays')">Poetry &amp; Essays</button>
+        <button class="btn" style="text-align:left" onclick="selectSurpriseGenre('Surprise me anyway')">Surprise me anyway</button>
       </div>
     </div>
 
@@ -1227,19 +1227,15 @@
         <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Traditional Chinese')">Traditional Chinese</button>
         <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Simplified Chinese')">Simplified Chinese</button>
         <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Japanese')">Japanese</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Korean')">Korean</button>
         <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('French')">French</button>
         <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Spanish')">Spanish</button>
         <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('German')">German</button>
         <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Portuguese')">Portuguese</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Italian')">Italian</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Arabic')">Arabic</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Russian')">Russian</button>
-        <button class="btn" style="text-align:left" onclick="selectSurpriseLanguage('Hindi')">Hindi</button>
+        <button class="btn" style="text-align:left" onclick="selectSurpriseLanguage('Korean')">Korean</button>
       </div>
     </div>
 
-    <div id="surprise-loading" class="status-msg" style="display:none">Finding a book…</div>
+    <div id="surprise-loading" style="display:none;font-size:1rem;padding:16px 0">Finding a book&#8230;</div>
 
     <div id="surprise-result" style="display:none"></div>
   </section>
