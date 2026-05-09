@@ -1708,16 +1708,19 @@ function selectSurpriseLanguage(lang) {
     '{"title":"book title","author":"author name","reason":"one sentence why"}';
 
   callFreeTier(system, [{role: 'user', content: userMessage}]).then(function(response) {
-    var cleaned = response.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+    // Extract JSON object from response — handles markdown fences and surrounding text
     var json = null;
-    try {
-      json = JSON.parse(cleaned);
-    } catch (e) {
-      surpriseParseError(lang);
-      return;
+    var jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try { json = JSON.parse(jsonMatch[0]); } catch(e) {}
+    }
+    if (!json) {
+      var stripped = response.replace(/```[a-z]*/gi, '').replace(/```/g, '').trim();
+      try { json = JSON.parse(stripped); } catch(e) {}
     }
     if (!json || !json.title) {
-      surpriseParseError(lang);
+      console.error('[Surprise Me] Parse failed. Raw response:', response);
+      surpriseParseError(lang, 'Bad response from AI — try again?');
       return;
     }
     var q = json.title + ' ' + (json.author || '');
@@ -1760,15 +1763,18 @@ function selectSurpriseLanguage(lang) {
           year: ''
         });
       });
-  }).catch(function() {
-    surpriseParseError(lang);
+  }).catch(function(err) {
+    console.error('[Surprise Me] API call failed:', err && err.message ? err.message : err);
+    var msg = (err && err.message) ? err.message : 'Could not reach AI — try again?';
+    surpriseParseError(lang, msg);
   });
 }
 
-function surpriseParseError(lang) {
+function surpriseParseError(lang, msg) {
   var loadEl = document.getElementById('surprise-loading');
   if (loadEl) {
-    loadEl.innerHTML = 'Could not get a suggestion — try again? ' +
+    var text = msg || 'Could not get a suggestion — try again?';
+    loadEl.innerHTML = text +
       '<div style="margin-top:10px">' +
       '<button class="btn" onclick="selectSurpriseLanguage(\'' + lang + '\')">Retry</button>' +
       '</div>';
