@@ -1707,7 +1707,17 @@ function selectSurpriseLanguage(lang) {
     'Respond with exactly this JSON format:\n' +
     '{"title":"book title","author":"author name","reason":"one sentence why"}';
 
-  callFreeTier(system, [{role: 'user', content: userMessage}]).then(function(response) {
+  var msgs = [{role: 'user', content: userMessage}];
+  var aiCall;
+  if (STATE.apiKey) {
+    if (STATE.provider === 'gemini') { aiCall = callGemini(system, msgs); }
+    else if (STATE.provider === 'groq') { aiCall = callGroq(system, msgs); }
+    else { aiCall = callAnthropic(system, msgs); }
+  } else {
+    aiCall = callFreeTier(system, msgs);
+  }
+
+  aiCall.then(function(response) {
     // Extract JSON object from response — handles markdown fences and surrounding text
     var json = null;
     var jsonMatch = response.match(/\{[\s\S]*\}/);
