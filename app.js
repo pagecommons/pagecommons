@@ -2298,6 +2298,62 @@ function toggleHighlights() {
 // ═══════════════════════════════════════════════════
 //  ICE BREAKERS
 // ═══════════════════════════════════════════════════
+var DISCOVER_PROMPTS = {
+  'English': [
+    'What kinds of books have you loved lately?',
+    'What mood are you in for reading right now?',
+    'What draws you to this one?',
+    'What would make this perfect for you right now?'
+  ],
+  'Traditional Chinese': [
+    '你最近喜歡什麼類型的書？',
+    '你現在的閱讀心情是什麼？',
+    '這本書的哪些地方吸引了你？',
+    '什麼會讓這本書現在特別適合你？'
+  ],
+  'Simplified Chinese': [
+    '你最近喜欢什么类型的书？',
+    '你现在的阅读心情是什么？',
+    '这本书的哪些地方吸引了你？',
+    '什么会让这本书现在特别适合你？'
+  ],
+  'Japanese': [
+    '最近どんな本を楽しみましたか？',
+    '今どんな気分で読みたいですか？',
+    'この本のどこに引かれましたか？',
+    '今のあなたにとって最高の一冊とは？'
+  ],
+  'Korean': [
+    '요즘 어떤 책이 좋으셨나요?',
+    '지금 어떤 기분으로 읽고 싶으세요?',
+    '이 책의 어떤 점이 끝렸나요?',
+    '지금 이 책이 답일 것 같은 이유는요?'
+  ],
+  'French': [
+    'Quels livres avez-vous aimés récemment ?',
+    'Quelle est votre humeur de lecture en ce moment ?',
+    'Qu’est-ce qui vous attire vers ce livre ?',
+    'Qu’est-ce qui le rendrait parfait pour vous maintenant ?'
+  ],
+  'Spanish': [
+    '¿Qué libros te han gustado últimamente?',
+    '¿En qué estado de ánimo estás para leer ahora?',
+    '¿Qué te atrae de este libro?',
+    '¿Qué lo haría perfecto para ti ahora?'
+  ],
+  'German': [
+    'Welche Bücher haben Sie zuletzt geliebt?',
+    'In welcher Lesestimmung sind Sie gerade?',
+    'Was zieht Sie zu diesem Buch?',
+    'Was würde es jetzt perfekt für Sie machen?'
+  ],
+  'Portuguese': [
+    'Que livros você amou ultimamente?',
+    'Qual é seu humor de leitura agora?',
+    'O que te atrai neste livro?',
+    'O que o tornaria perfeito para você agora?'
+  ]
+};
 function populateIcebreakers(_x0) {
   return _populateIcebreakers.apply(this, arguments);
 }
@@ -2310,12 +2366,9 @@ function _populateIcebreakers() {
           list = document.getElementById('icebreaker-list');
           list.innerHTML = '';
           if (STATE.companionMode === 'discover') {
-            renderIcebreakerButtons([
-              'What kinds of books have you loved lately?',
-              'What mood are you in for reading right now?',
-              'What draws you to this one?',
-              'What would make this perfect for you right now?'
-            ], list);
+            var discoverLang = STATE.detectedLang || 'English';
+            var discoverSet = DISCOVER_PROMPTS[discoverLang] || DISCOVER_PROMPTS['English'];
+            renderIcebreakerButtons(discoverSet, list);
             return _context12.a(2);
           }
           loadEl = document.createElement('div');
