@@ -1800,7 +1800,10 @@ function displaySurpriseResult(result) {
     coverUrl: result.coverUrl || '',
     pageCount: result.pageCount || 0,
     source: 'AI suggestion',
-    key: ''
+    key: '',
+    lang: result.language && result.language !== 'English'
+      ? (LANG_NAME_TO_CODE[result.language] || '')
+      : 'en'
   };
 
   var resultEl = document.getElementById('surprise-result');
