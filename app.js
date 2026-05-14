@@ -1875,6 +1875,19 @@ function surpriseNotForMe() {
   selectSurpriseLanguage(result.language);
 }
 
+function tryAnotherBook() {
+  var result = STATE.surpriseResult;
+  if (!result) return;
+  navigate('surprise');
+  var chatLog = document.getElementById('chat-log');
+  var inputArea = document.getElementById('chat-input-area');
+  var icebreakers = document.getElementById('icebreakers');
+  if (chatLog) chatLog.innerHTML = '';
+  if (inputArea) inputArea.style.display = 'none';
+  if (icebreakers) icebreakers.style.display = 'none';
+  selectSurpriseLanguage(result.language);
+}
+
 // ═══════════════════════════════════════════════════
 //  AI-GENERATED THINKING PHRASES
 // ═══════════════════════════════════════════════════
