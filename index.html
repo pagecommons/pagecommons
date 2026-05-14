@@ -989,9 +989,9 @@
       <button id="change-book-btn" onclick="navigate('search')">Change book</button>
     </div>
 
-    <div id="discover-convert-bar" style="display:none;margin-bottom:24px">
-      <button class="btn" style="width:48%;margin-right:4%;min-height:44px" onclick="tryAnotherBook()">Try another book</button>
-      <button class="btn btn-primary" style="width:48%;min-height:44px" onclick="startReadingFromDiscover()">I want to read this</button>
+    <div id="discover-convert-bar" style="display:none;margin-bottom:24px;display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">
+      <button class="btn" style="width:100%;min-height:44px;margin-bottom:12px" onclick="tryAnotherBook()">Try another book</button>
+      <button class="btn btn-primary" style="width:100%;min-height:44px" onclick="startReadingFromDiscover()">I want to read this</button>
     </div>
 
     <div id="icebreakers">
@@ -1217,6 +1217,7 @@
         <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Science &amp; Ideas')">Science &amp; Ideas</button>
         <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Philosophy &amp; Spirituality')">Philosophy &amp; Spirituality</button>
         <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Poetry &amp; Essays')">Poetry &amp; Essays</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Business &amp; Investment')">Business &amp; Investment</button>
         <button class="btn" style="text-align:left" onclick="selectSurpriseGenre('Surprise me anyway')">Surprise me anyway</button>
       </div>
     </div>
