@@ -1719,8 +1719,7 @@ function startReadingFromDiscover() {
 // ═══════════════════════════════════════════════════
 //  SURPRISE ME
 // ═══════════════════════════════════════════════════
-var SURPRISE_SUBJECTS = ['fiction', 'mystery', 'history', 'biography', 'science', 'philosophy', 'fantasy', 'science_fiction', 'thriller', 'romance', 'poetry'];
-var _surpriseSeenKeys = [];
+
 var LANG_NAME_TO_CODE = {
   'French': 'fr',
   'German': 'de',
@@ -1740,9 +1739,20 @@ var LANG_NAME_TO_CODE = {
   'Thai': 'th',
   'Vietnamese': 'vi'
 };
+var LANG_PROMPT_MAP = {
+  'English': 'available in English',
+  'Traditional Chinese': 'available in Traditional Chinese — original or translation',
+  'Simplified Chinese': 'available in Simplified Chinese — original or translation',
+  'Japanese': 'available in Japanese — original or translation',
+  'French': 'available in French — original or translation',
+  'Spanish': 'available in Spanish — original or translation',
+  'German': 'available in German — original or translation',
+  'Portuguese': 'available in Portuguese — original or translation',
+  'Korean': 'available in Korean — original or translation'
+};
 function initSurpriseScreen() {
-  // Reset surprise screen to genre selection
   STATE.surpriseGenre = null;
+  STATE.surpriseSeen = [];
   document.getElementById('surprise-genre-step').style.display = 'block';
   document.getElementById('surprise-language-step').style.display = 'none';
   document.getElementById('surprise-result').style.display = 'none';
@@ -1765,17 +1775,6 @@ function buildBookFromGoogleItem(item, lang, langCode) {
     language: lang
   };
 }
-function filterByLanguage(items, baseLang) {
-  return items.filter(function (item) {
-    var vi = item.volumeInfo || {};
-    if (!vi.title) return false;
-    var vl = vi.language;
-    // Accept items with no language field — trust langRestrict did its job.
-    // Only reject if the field is present and explicitly wrong.
-    if (!vl) return true;
-    return vl === baseLang || vl.split('-')[0] === baseLang;
-  });
-}
 function startSurpriseMe() {
   STATE.surpriseGenre = null;
   navigate('surprise');
@@ -1785,124 +1784,184 @@ function selectSurpriseGenre(genre) {
   document.getElementById('surprise-genre-step').style.display = 'none';
   document.getElementById('surprise-language-step').style.display = 'block';
 }
-var GENRE_QUERIES = {
-  'fiction': 'literary fiction novel',
-  'mystery': 'mystery detective crime',
-  'romance': 'romance novel love',
-  'scifi': 'science fiction',
-  'fantasy': 'fantasy novel',
-  'nonfiction': 'popular nonfiction',
-  'biography': 'biography memoir',
-  'poetry': 'poetry poems'
-};
 function selectSurpriseLanguage(lang) {
   var genre = STATE.surpriseGenre;
-  var langCode = lang === 'English' ? 'en' : LANG_NAME_TO_CODE[lang] || 'en';
-  var baseLang = langCode.split('-')[0];
-  document.getElementById('surprise-loading').style.display = 'block';
+  var langInstruction = LANG_PROMPT_MAP[lang] || 'available in ' + lang;
+  var loadEl = document.getElementById('surprise-loading');
+  loadEl.textContent = 'Finding a book…';
+  loadEl.style.display = 'block';
   document.getElementById('surprise-language-step').style.display = 'none';
   document.getElementById('surprise-result').style.display = 'none';
   var shelf = getShelfBooks();
-  var shelfText = '';
-  shelf.slice(0, 10).forEach(function (book) {
-    shelfText += book.title + ' by ' + book.author + ', ';
-  });
-  if (!shelfText) shelfText = 'No books yet';
-  var system = 'You are a helpful book recommendation assistant. Based on the user genre preference and reading shelf, recommend a single book they might not have heard of. Return ONLY valid JSON with no extra text: {"title":"...","author":"...","reason":"one sentence"}';
-  var userMessage = 'Genre: ' + genre + '\nLanguage: ' + lang + '\nMy shelf: ' + shelfText;
-  callFreeTier(system, [{
+  var shelfContext = '';
+  if (shelf && shelf.length > 0) {
+    var shelfParts = [];
+    var limit = shelf.length < 20 ? shelf.length : 20;
+    for (var i = 0; i < limit; i++) {
+      shelfParts.push(shelf[i].title + ' by ' + shelf[i].author);
+    }
+    shelfContext = 'The user has already read: ' + shelfParts.join(', ') + '.';
+  } else {
+    shelfContext = 'The user has not read any books yet.';
+  }
+  var system = 'You are a book recommendation assistant.\n' + 'You MUST suggest a book that is ' + langInstruction + '.\n' + 'The user will be reading it in ' + lang + '.\n' + 'Do NOT suggest a book that is not available in ' + lang + '.\n' + 'Respond with JSON only.\n' + 'No explanation. No markdown. No code fences.\n' + 'Raw JSON only, nothing else.';
+  var seen = STATE.surpriseSeen || [];
+  var seenNote = '';
+  if (seen.length > 0) {
+    var seenTitles = [];
+    for (var j = 0; j < seen.length; j++) {
+      seenTitles.push(seen[j].title + ' by ' + seen[j].author);
+    }
+    seenNote = '\nDo NOT suggest any of these books the user has already seen: ' + seenTitles.join('; ') + '.';
+  }
+  var userMessage = 'Suggest one ' + genre + ' book for a reader who wants to read in ' + lang + '.\n' + 'The book MUST be ' + langInstruction + '.\n' + 'Do not suggest any book that is not available in ' + lang + '.\n' + shelfContext + seenNote + '\n' + 'Respond with exactly this JSON format:\n' + '{"title":"book title","author":"author name","reason":"one sentence why"}';
+  var msgs = [{
     role: 'user',
     content: userMessage
-  }]).then(function (response) {
-    var cleaned = response.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-    var json = JSON.parse(cleaned);
-    STATE.surpriseResult = {
-      title: json.title || 'Unknown',
-      author: json.author || 'Unknown author',
-      reason: json.reason || '',
-      genre: genre,
-      language: lang
-    };
-    displaySurpriseResult();
-  }).catch(function () {
-    surpriseFallbackSearch(genre, lang, baseLang);
-  });
-}
-function surpriseFallbackSearch(genre, lang, baseLang) {
-  var query = GENRE_QUERIES[genre] || genre;
-  var startIndex = Math.floor(Math.random() * 10);
-  var url = '/api/books?q=' + encodeURIComponent(query) + '&startIndex=' + startIndex;
-  if (baseLang !== 'en') url += '&langRestrict=' + baseLang;
-  fetch(url).then(function (r) {
-    return r.json();
-  }).then(function (data) {
-    var items = data.items || [];
-    if (baseLang !== 'en') items = filterByLanguage(items, baseLang);
-    if (!items.length) {
-      return fetch('/api/books?q=' + encodeURIComponent(query) + '&startIndex=' + Math.floor(Math.random() * 10)).then(function (r2) {
-        return r2.json();
-      }).then(function (d2) {
-        return d2.items || [];
-      });
+  }];
+  var aiCall;
+  if (STATE.apiKey) {
+    if (STATE.provider === 'gemini') {
+      aiCall = callGemini(system, msgs);
+    } else if (STATE.provider === 'groq') {
+      aiCall = callGroq(system, msgs);
+    } else {
+      aiCall = callAnthropic(system, msgs);
     }
-    return items;
-  }).then(function (items) {
-    if (!items || !items.length) {
-      surpriseFallbackError();
+  } else {
+    aiCall = callFreeTier(system, msgs);
+  }
+  aiCall.then(function (response) {
+    // Extract JSON object from response — handles markdown fences and surrounding text
+    var json = null;
+    var jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        json = JSON.parse(jsonMatch[0]);
+      } catch (e) {}
+    }
+    if (!json) {
+      var stripped = response.replace(/```[a-z]*/gi, '').replace(/```/g, '').trim();
+      try {
+        json = JSON.parse(stripped);
+      } catch (e) {}
+    }
+    if (!json || !json.title) {
+      console.error('[Surprise Me] Parse failed. Raw response:', response);
+      surpriseParseError(lang, 'Bad response from AI — try again?');
       return;
     }
-    var item = items[Math.floor(Math.random() * items.length)];
-    var vi = item.volumeInfo || {};
-    STATE.surpriseResult = {
-      title: vi.title || 'Unknown',
-      author: vi.authors && vi.authors[0] || 'Unknown author',
-      reason: '',
-      genre: genre,
-      language: lang
-    };
-    displaySurpriseResult();
-  }).catch(function () {
-    surpriseFallbackError();
+    var q = json.title + ' ' + (json.author || '');
+    fetch('/api/books?q=' + encodeURIComponent(q.trim())).then(function (r) {
+      return r.json();
+    }).then(function (data) {
+      var meta = {
+        description: '',
+        coverUrl: '',
+        pageCount: 0,
+        year: ''
+      };
+      if (data && data.items && data.items[0]) {
+        var vi = data.items[0].volumeInfo || {};
+        var desc = vi.description || '';
+        meta.description = desc.length > 300 ? desc.substring(0, 300) + '…' : desc;
+        meta.coverUrl = vi.imageLinks && vi.imageLinks.thumbnail ? vi.imageLinks.thumbnail.replace('http://', 'https://') : '';
+        meta.pageCount = vi.pageCount || 0;
+        meta.year = vi.publishedDate ? vi.publishedDate.substring(0, 4) : '';
+      }
+      displaySurpriseResult({
+        title: json.title,
+        author: json.author || '',
+        reason: json.reason || '',
+        genre: genre,
+        language: lang,
+        description: meta.description,
+        coverUrl: meta.coverUrl,
+        pageCount: meta.pageCount,
+        year: meta.year
+      });
+    }).catch(function () {
+      displaySurpriseResult({
+        title: json.title,
+        author: json.author || '',
+        reason: json.reason || '',
+        genre: genre,
+        language: lang,
+        description: '',
+        coverUrl: '',
+        pageCount: 0,
+        year: ''
+      });
+    });
+  }).catch(function (err) {
+    console.error('[Surprise Me] API call failed:', err && err.message ? err.message : err);
+    var msg = err && err.message ? err.message : 'Could not reach AI — try again?';
+    surpriseParseError(lang, msg);
   });
 }
-function surpriseFallbackError() {
+function surpriseParseError(lang, msg) {
   var loadEl = document.getElementById('surprise-loading');
-  var stepEl = document.getElementById('surprise-language-step');
   if (loadEl) {
-    loadEl.textContent = 'Could not find a book. Try again.';
+    var text = msg || 'Could not get a suggestion — try again?';
+    loadEl.innerHTML = text + '<div style="margin-top:10px">' + '<button class="btn" onclick="selectSurpriseLanguage(\'' + lang + '\')">Retry</button>' + '</div>';
   }
-  setTimeout(function () {
-    if (loadEl) {
-      loadEl.style.display = 'none';
-      loadEl.textContent = 'Finding a book…';
-    }
-    if (stepEl) stepEl.style.display = 'block';
-  }, 2000);
 }
-function displaySurpriseResult() {
-  var result = STATE.surpriseResult;
-  if (!result) return;
-  var resultEl = document.getElementById('surprise-result');
-  if (!resultEl) return;
-  resultEl.innerHTML = '<div style="border:1px solid #111111;padding:16px;margin-bottom:20px">' + '<div style="font-size:1.1rem;margin-bottom:4px">' + result.title + '</div>' + '<div style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:0.85rem;color:#777777;margin-bottom:12px">' + result.author + '</div>' + (result.reason ? '<div style="font-size:0.95rem;margin-bottom:12px">' + result.reason + '</div>' : '') + '<div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">' + '<button class="btn btn-primary" style="margin-bottom:10px" onclick="surpriseResultFindOutIfForMe()">Find out if it' + "'" + 's for me →</button>' + '<button class="btn" onclick="surpriseResultNotForMe()">Not for me</button>' + '</div></div>';
-  document.getElementById('surprise-loading').style.display = 'none';
-  document.getElementById('surprise-result').style.display = 'block';
-}
-function surpriseResultFindOutIfForMe() {
-  var result = STATE.surpriseResult;
-  if (!result) return;
-  var book = {
+function displaySurpriseResult(result) {
+  STATE.surpriseResult = result;
+  if (!STATE.surpriseSeen) STATE.surpriseSeen = [];
+  STATE.surpriseSeen.push({
+    title: result.title,
+    author: result.author
+  });
+  STATE.surpriseBook = {
     title: result.title,
     author: result.author,
-    year: '',
-    key: ''
+    year: result.year || '',
+    coverUrl: result.coverUrl || '',
+    pageCount: result.pageCount || 0,
+    source: 'AI suggestion',
+    key: '',
+    lang: result.language && result.language !== 'English' ? LANG_NAME_TO_CODE[result.language] || '' : 'en'
   };
-  STATE.book = book;
-  setReadingStatus('considering');
+  var resultEl = document.getElementById('surprise-result');
+  if (!resultEl) return;
+  var coverHtml = result.coverUrl ? '<img src="' + result.coverUrl + '" alt="Cover" style="max-width:80px;display:block;margin-bottom:12px">' : '';
+  var metaParts = [];
+  if (result.year) metaParts.push(result.year);
+  if (result.pageCount) metaParts.push(result.pageCount + ' pages');
+  var metaHtml = metaParts.length ? '<div style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:0.8rem;color:#777777;margin-bottom:10px">' + metaParts.join(' · ') + '</div>' : '';
+  var bodyText = result.description || result.reason || '';
+  var bodyHtml = bodyText ? '<div style="font-size:0.95rem;margin-bottom:14px">' + bodyText + '</div>' : '';
+  resultEl.innerHTML = '<div style="border:1px solid #111111;padding:16px;margin-bottom:20px">' + coverHtml + '<div style="font-size:1.1rem;font-family:Georgia,serif;margin-bottom:4px">' + result.title + '</div>' + '<div style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:0.85rem;color:#777777;margin-bottom:10px">' + result.author + '</div>' + metaHtml + bodyHtml + '</div>' + '<div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">' + '<button class="btn btn-primary" style="min-height:44px;margin-bottom:10px;width:100%" onclick="surpriseDiscover()">Find out if it\'s for me &#8594;</button>' + '<button class="btn btn-primary" style="min-height:44px;margin-bottom:10px;width:100%" onclick="surpriseSelect()">I\'ll read this &#8594;</button>' + '<button class="btn" style="min-height:44px;width:100%" onclick="surpriseNotForMe()">Not for me &#8212; suggest another</button>' + '</div>';
+  document.getElementById('surprise-loading').style.display = 'none';
+  resultEl.style.display = 'block';
 }
-function surpriseResultNotForMe() {
+function surpriseDiscover() {
+  var book = STATE.surpriseBook;
+  if (!book) return;
+  discoverBookWithAgeCheck(book);
+}
+function surpriseSelect() {
+  var book = STATE.surpriseBook;
+  if (!book) return;
+  selectBookWithAgeCheck(book);
+}
+function surpriseNotForMe() {
   var result = STATE.surpriseResult;
   if (!result) return;
+  document.getElementById('surprise-result').style.display = 'none';
+  selectSurpriseLanguage(result.language);
+}
+function tryAnotherBook() {
+  var result = STATE.surpriseResult;
+  if (!result) return;
+  navigate('surprise');
+  var chatLog = document.getElementById('chat-log');
+  var inputArea = document.getElementById('chat-input-area');
+  var icebreakers = document.getElementById('icebreakers');
+  if (chatLog) chatLog.innerHTML = '';
+  if (inputArea) inputArea.style.display = 'none';
+  if (icebreakers) icebreakers.style.display = 'none';
   selectSurpriseLanguage(result.language);
 }
 
@@ -2343,6 +2402,17 @@ function toggleHighlights() {
 // ═══════════════════════════════════════════════════
 //  ICE BREAKERS
 // ═══════════════════════════════════════════════════
+var DISCOVER_PROMPTS = {
+  'English': ['What kinds of books have you loved lately?', 'What mood are you in for reading right now?', 'What draws you to this one?', 'What would make this perfect for you right now?'],
+  'Traditional Chinese': ['你最近喜歡什麼類型的書？', '你現在的閱讀心情是什麼？', '這本書的哪些地方吸引了你？', '什麼會讓這本書現在特別適合你？'],
+  'Simplified Chinese': ['你最近喜欢什么类型的书？', '你现在的阅读心情是什么？', '这本书的哪些地方吸引了你？', '什么会让这本书现在特别适合你？'],
+  'Japanese': ['最近どんな本を楽しみましたか？', '今どんな気分で読みたいですか？', 'この本のどこに引かれましたか？', '今のあなたにとって最高の一冊とは？'],
+  'Korean': ['요즘 어떤 책이 좋으셨나요?', '지금 어떤 기분으로 읽고 싶으세요?', '이 책의 어떤 점이 끝렸나요?', '지금 이 책이 답일 것 같은 이유는요?'],
+  'French': ['Quels livres avez-vous aimés récemment ?', 'Quelle est votre humeur de lecture en ce moment ?', 'Qu’est-ce qui vous attire vers ce livre ?', 'Qu’est-ce qui le rendrait parfait pour vous maintenant ?'],
+  'Spanish': ['¿Qué libros te han gustado últimamente?', '¿En qué estado de ánimo estás para leer ahora?', '¿Qué te atrae de este libro?', '¿Qué lo haría perfecto para ti ahora?'],
+  'German': ['Welche Bücher haben Sie zuletzt geliebt?', 'In welcher Lesestimmung sind Sie gerade?', 'Was zieht Sie zu diesem Buch?', 'Was würde es jetzt perfekt für Sie machen?'],
+  'Portuguese': ['Que livros você amou ultimamente?', 'Qual é seu humor de leitura agora?', 'O que te atrai neste livro?', 'O que o tornaria perfeito para você agora?']
+};
 function populateIcebreakers(_x0) {
   return _populateIcebreakers.apply(this, arguments);
 }
@@ -2355,7 +2425,9 @@ function _populateIcebreakers() {
           list = document.getElementById('icebreaker-list');
           list.innerHTML = '';
           if (STATE.companionMode === 'discover') {
-            renderIcebreakerButtons(['What kinds of books have you loved lately?', 'What mood are you in for reading right now?', 'What draws you to this one?', 'What would make this perfect for you right now?'], list);
+            var discoverLang = STATE.detectedLang || 'English';
+            var discoverSet = DISCOVER_PROMPTS[discoverLang] || DISCOVER_PROMPTS['English'];
+            renderIcebreakerButtons(discoverSet, list);
             return _context12.a(2);
           }
           loadEl = document.createElement('div');
