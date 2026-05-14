@@ -1632,8 +1632,8 @@ var LANG_PROMPT_MAP = {
 };
 
 function initSurpriseScreen() {
-  // Reset surprise screen to genre selection
   STATE.surpriseGenre = null;
+  STATE.surpriseSeen = [];
   document.getElementById('surprise-genre-step').style.display = 'block';
   document.getElementById('surprise-language-step').style.display = 'none';
   document.getElementById('surprise-result').style.display = 'none';
@@ -1700,10 +1700,21 @@ function selectSurpriseLanguage(lang) {
     'No explanation. No markdown. No code fences.\n' +
     'Raw JSON only, nothing else.';
 
+  var seen = STATE.surpriseSeen || [];
+  var seenNote = '';
+  if (seen.length > 0) {
+    var seenTitles = [];
+    for (var j = 0; j < seen.length; j++) {
+      seenTitles.push(seen[j].title + ' by ' + seen[j].author);
+    }
+    seenNote = '\nDo NOT suggest any of these books the user has already seen: ' + seenTitles.join('; ') + '.';
+  }
+
   var userMessage = 'Suggest one ' + genre + ' book for a reader who wants to read in ' + lang + '.\n' +
     'The book MUST be ' + langInstruction + '.\n' +
     'Do not suggest any book that is not available in ' + lang + '.\n' +
-    shelfContext + '\n' +
+    shelfContext +
+    seenNote + '\n' +
     'Respond with exactly this JSON format:\n' +
     '{"title":"book title","author":"author name","reason":"one sentence why"}';
 
@@ -1793,6 +1804,8 @@ function surpriseParseError(lang, msg) {
 
 function displaySurpriseResult(result) {
   STATE.surpriseResult = result;
+  if (!STATE.surpriseSeen) STATE.surpriseSeen = [];
+  STATE.surpriseSeen.push({title: result.title, author: result.author});
   STATE.surpriseBook = {
     title: result.title,
     author: result.author,
