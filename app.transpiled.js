@@ -1,3 +1,5 @@
+"use strict";
+
 function _regenerator() {
   /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */var e,
     t,
@@ -45,7 +47,7 @@ function _regenerator() {
                 if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object");
                 if (!t.done) return t;
                 u = t.value, c < 2 && (c = 0);
-              } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1);
+              } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1);
               i = e;
             } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break;
           } catch (t) {
@@ -1123,7 +1125,7 @@ function lookupManualBook() {
       };
     }
     showBookDetail(book);
-  }).catch(function () {
+  })["catch"](function () {
     var book = {
       title: title.trim(),
       author: author.trim() || 'Unknown author',
@@ -1639,8 +1641,9 @@ function detectLanguage(book) {
   var hasCyrillic = /[\u0400-\u04ff]/.test(titleAndAuthor);
   if (hasChinese || isBareZh) {
     // Characters that exist in Traditional but NOT Simplified (or differ in form)
-    // \u5b6b\u8207\u904e\u554f\u7576\u6b61\u6b72\u806f\u6b78\u7fa9\u6230\u969b\u5be6\u73fe\u83ef\u6a5f\u8fb2\u7fa9\u8853\u6a19\u6b0a\u7bc0\u985e\u5ef3\u969b\u6b77\u96e3\u96e2\u8b58\u89f8\u7e54\u85dd\u8072\u986f\u89c0\u9078\u8209\u8b70\u8ac7\u8ad6\u8a8d\u8b8a\u5beb\u8b80\u9435\u95dc
-    var isTraditional = /[\u8aaa\u8aac\u4f86\u570b\u70ba\u52d5\u7d71\u5011\u6642\u9019\u500b\u5b78\u9ebc\u50b3\u9023\u7a2e\u9ede\u5c64\u9928\u91ab\u7522\u6703\u5340\u7d93\u984c\u5c0d\u96fb\u96dc\u6aa2\u8996\u5275\u5c08\u7dda\u98a8\u98db\u8af8\u8acb\u8b6f\u9ad4\u66f8\u9577\u7121\u5f37\u958b\u7d66\u5167\u5bec\u9593\u7e3d\u5b6b\u8207\u904e\u554f\u7576\u6b61\u6b72\u806f\u6b78\u6230\u969b\u5be6\u73fe\u83ef\u6a5f\u8fb2\u8853\u6a19\u6b0a\u7bc0\u985e\u5ef3\u6b77\u96e3\u96e2\u8b58\u89f8\u7e54\u85dd\u8072\u986f\u89c0\u9078\u8209\u8b70\u8ac7\u8ad6\u8a8d\u8b8a\u5beb\u8b80\u9435\u95dc\u5ee3\u61c9\u6b61\u55ce\u9ebd\u865f\u7d19\u8cc7\u98fd\u5716\u904b\u9054\u9060\u9084\u820a\u6a13\u5c64\u908a\u908a\u7368\u9aee\u9f4a\u81fa\u7063]/.test(titleAndAuthor);
+    var isTraditional = /[\u8aaa\u8aac\u4f86\u570b\u70ba\u52d5\u7d71\u5011\u6642\u9019\u500b\u5b78\u9ebc\u50b3\u9023\u7a2e\u9ede\u5c64\u9928\u91ab\u7522\u6703\u5340\u7d93\u984c\u5c0d\u96fb\u96dc\u6aa2\u8996\u5275\u5c08\u7dda\u98a8\u98db\u8af8\u8acb\u8b6f\u9ad4\u66f8\u9577\u7121\u5f37\u958b\u7d66\u5167\u5bec\u9593\u7e3d\u5b6b\u8207\u904e\u554f\u7576\u6b61\u6b72\u806f\u6b78\u6230\u969b\u5be6\u73fe\u83ef\u6a5f\u8fb2\u8853\u6a19\u6b0a\u7bc0\u985e\u5ef3\u6b77\u96e3\u96e2\u8b58\u89f8\u7e54\u85dd\u8072\u986f\u89c0\u9078\u8209\u8b70\u8ac7\u8ad6\u8a8d\u8b8a\u5beb\u8b80\u9435\u95dc\u5ee3\u61c9\u6b61\u55ce\u9ebd\u865f\u7d19\u8cc7\u98fd\u5716\u904b\u9054\u9060\u9084\u820a\u6a13\u5c64\u908a\u908a\u7368\u9aae\u9f4a\u81fa\u7063\u885b\u6277]/.test(titleAndAuthor);
+    // For bare zh, prefer Traditional Chinese (Google Books often normalizes titles to Simplified form)
+    if (isBareZh && !isTraditional) return 'Traditional Chinese';
     return isTraditional ? 'Traditional Chinese' : 'Simplified Chinese';
   }
   if (hasJapanese) return 'Japanese';
@@ -1919,7 +1922,7 @@ function selectSurpriseLanguage(lang) {
         pageCount: meta.pageCount,
         year: meta.year
       });
-    }).catch(function () {
+    })["catch"](function () {
       displaySurpriseResult({
         title: json.title,
         author: json.author || '',
@@ -1932,7 +1935,7 @@ function selectSurpriseLanguage(lang) {
         year: ''
       });
     });
-  }).catch(function (err) {
+  })["catch"](function (err) {
     console.error('[Surprise Me] API call failed:', err && err.message ? err.message : err);
     var msg = err && err.message ? err.message : 'Could not reach AI — try again?';
     surpriseParseError(lang, msg);
@@ -2341,7 +2344,7 @@ function parseKoboDatabase(input) {
           year: '',
           key: ''
         });
-      }).catch(function (wasmErr) {
+      })["catch"](function (wasmErr) {
         statusEl.textContent = 'Database reader failed to start: ' + wasmErr.message;
       });
     };
@@ -2864,7 +2867,7 @@ function appendBubble(role, text) {
         setTimeout(function () {
           copyBtn.textContent = 'Copy';
         }, 1500);
-      }).catch(function () {
+      })["catch"](function () {
         return showToolbarMsg('Copy not available in this browser.');
       });
     };
@@ -3014,7 +3017,7 @@ function callFreeTier(system, messages) {
       throw rateLimitErr;
     }
     if (!res.ok) {
-      return res.json().catch(function () {
+      return res.json()["catch"](function () {
         return {};
       }).then(function (e) {
         throw new Error(e && e.error ? e.error : 'HTTP ' + res.status);
@@ -3057,7 +3060,7 @@ function _callAnthropic() {
             break;
           }
           _context16.n = 2;
-          return res.json().catch(function () {
+          return res.json()["catch"](function () {
             return {};
           });
         case 2:
@@ -3134,7 +3137,7 @@ function _callGemini() {
             break;
           }
           _context17.n = 2;
-          return res.json().catch(function () {
+          return res.json()["catch"](function () {
             return {};
           });
         case 2:
@@ -3196,7 +3199,7 @@ function _callGroq() {
             break;
           }
           _context18.n = 2;
-          return res.json().catch(function () {
+          return res.json()["catch"](function () {
             return {};
           });
         case 2:
@@ -3744,7 +3747,7 @@ function copyAllPassages() {
   }).join('\n\n');
   navigator.clipboard.writeText(text).then(function () {
     showToolbarMsg(passages.length + ' passage' + (passages.length !== 1 ? 's' : '') + ' copied to clipboard.');
-  }).catch(function () {
+  })["catch"](function () {
     return showToolbarMsg('Copy not available in this browser.');
   });
 }
@@ -3820,7 +3823,7 @@ function redeemTransferCode() {
     // Hide the transfer fields
     var fields = document.getElementById('transfer-fields');
     if (fields) fields.style.display = 'none';
-  }).catch(function (err) {
+  })["catch"](function (err) {
     if (btn) {
       btn.disabled = false;
       btn.textContent = 'Fetch my key';
@@ -3925,7 +3928,7 @@ function fetchAndCacheSubjects(book) {
     }).then(function (data) {
       var subjects = (data.subjects || []).slice(0, 10);
       localStorage.setItem(cacheKey, JSON.stringify(subjects));
-    }).catch(function () {});
+    })["catch"](function () {});
   } else if (book.cats) {
     var cats = book.cats.split(/\s+/).filter(Boolean).slice(0, 6);
     if (cats.length) localStorage.setItem(cacheKey, JSON.stringify(cats));
