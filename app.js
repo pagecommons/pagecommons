@@ -932,18 +932,23 @@ function _fetchGoogleBooks() {
             var thumb = info.imageLinks && info.imageLinks.smallThumbnail ? info.imageLinks.smallThumbnail : info.imageLinks && info.imageLinks.thumbnail ? info.imageLinks.thumbnail : '';
             if (thumb) thumb = thumb.replace('http://', 'https://');
             var cats = (info.categories || []).join(' ').toLowerCase();
-            if (!seen.has(k)) seen.set(k, {
-              title: title,
-              author: author,
-              year: info.publishedDate ? info.publishedDate.slice(0, 4) : '',
-              key: item.id || '',
-              source: 'Google Books',
-              lang: info.language || '',
-              thumb: thumb,
-              cats: cats,
-              pageCount: info.pageCount || 0,
-              description: info.description || ''
-            });
+            if (!seen.has(k)) {
+              var langCode = info.language || 'en';
+              var langName = LANG_CODE_TO_NAME[langCode] || 'English';
+              seen.set(k, {
+                title: title,
+                author: author,
+                year: info.publishedDate ? info.publishedDate.slice(0, 4) : '',
+                key: item.id || '',
+                source: 'Google Books',
+                lang: langCode,
+                language: langName,
+                thumb: thumb,
+                cats: cats,
+                pageCount: info.pageCount || 0,
+                description: info.description || ''
+              });
+            }
           });
           return _context6.a(2, Array.from(seen.values()).slice(0, 6));
       }
@@ -1465,6 +1470,11 @@ function _setLanguage() {
   return _setLanguage.apply(this, arguments);
 }
 function detectLanguage(book) {
+  // If language is explicitly set (from Google Books or AI), use that first
+  if (book.language && book.language !== 'English') {
+    return book.language;
+  }
+
   var lang = book.lang || '';
   // Traditional Chinese lang codes
   if (/^zh[-_]?(TW|HK|Hant)/i.test(lang)) return 'Traditional Chinese';
@@ -1473,24 +1483,7 @@ function detectLanguage(book) {
   // bare zh \u2014 distinguish by title characters below
   var isBareZh = (lang === 'zh');
   if (!isBareZh && lang && lang !== 'en') {
-    var LANG_NAMES = {
-      ja: 'Japanese',
-      ko: 'Korean',
-      fr: 'French',
-      de: 'German',
-      es: 'Spanish',
-      it: 'Italian',
-      pt: 'Portuguese',
-      ar: 'Arabic',
-      ru: 'Russian',
-      hi: 'Hindi',
-      th: 'Thai',
-      vi: 'Vietnamese',
-      nl: 'Dutch',
-      pl: 'Polish',
-      tr: 'Turkish'
-    };
-    return LANG_NAMES[lang] || null;
+    return LANG_CODE_TO_NAME[lang] || null;
   }
   // detect from non-ASCII characters in title
   var titleAndAuthor = (book.title || '') + ' ' + (book.author || '');
@@ -1500,7 +1493,7 @@ function detectLanguage(book) {
   var hasArabic = /[\u0600-\u06ff]/.test(titleAndAuthor);
   var hasCyrillic = /[\u0400-\u04ff]/.test(titleAndAuthor);
   if (hasChinese || isBareZh) {
-    // Traditional-only characters: \u8aaa\u4f86\u570b\u70ba\u52d5\u7d71\u5011\u6642\u9019\u500b\u5b78\u9ebc
+    // Traditional-only characters
     var isTraditional = /[\u8aaa\u8aac\u4f86\u570b\u70ba\u52d5\u7d71\u5011\u6642\u9019\u500b\u5b78\u9ebc\u50b3\u9023\u7a2e\u9ede\u5c64\u9928\u91ab\u7522\u6703\u5340\u7d93\u984c\u5c0d\u96fb\u96dc\u6aa2\u8996\u5275\u5c08\u7dda\u98a8\u98db\u8af8\u8acb\u8b6f\u9ad4\u66f8\u9577\u7121\u5f37\u958b\u7d66\u5167\u5bec\u9593\u7e3d]/.test(titleAndAuthor);
     return isTraditional ? 'Traditional Chinese' : 'Simplified Chinese';
   }
@@ -1617,6 +1610,28 @@ var LANG_NAME_TO_CODE = {
   'Hindi': 'hi',
   'Thai': 'th',
   'Vietnamese': 'vi'
+};
+
+var LANG_CODE_TO_NAME = {
+  'en': 'English',
+  'fr': 'French',
+  'de': 'German',
+  'es': 'Spanish',
+  'it': 'Italian',
+  'ja': 'Japanese',
+  'ko': 'Korean',
+  'zh': 'Chinese',
+  'zh-TW': 'Traditional Chinese',
+  'zh-CN': 'Simplified Chinese',
+  'pt': 'Portuguese',
+  'ar': 'Arabic',
+  'ru': 'Russian',
+  'nl': 'Dutch',
+  'pl': 'Polish',
+  'tr': 'Turkish',
+  'hi': 'Hindi',
+  'th': 'Thai',
+  'vi': 'Vietnamese'
 };
 
 var LANG_PROMPT_MAP = {
