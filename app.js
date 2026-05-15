@@ -758,7 +758,7 @@ function _searchBooks() {
           statusEl.textContent = 'Searching Google Books…';
           statusEl.style.display = 'block';
           _context4.n = 11;
-          return fetchGoogleBooks(gbQuery);
+          return fetchGoogleBooksWithFallback(raw, gbQuery);
         case 11:
           books = _context4.v;
           _context4.n = 19;
@@ -898,6 +898,12 @@ function _fetchOpenLibrary() {
     }, _callee5);
   }));
   return _fetchOpenLibrary.apply(this, arguments);
+}
+function fetchGoogleBooksWithFallback(bareQuery, intitleQuery) {
+  return fetchGoogleBooks(bareQuery).then(function(books) {
+    if (books.length) return books;
+    return fetchGoogleBooks(intitleQuery);
+  });
 }
 function fetchGoogleBooks(_x3) {
   return _fetchGoogleBooks.apply(this, arguments);
@@ -1469,9 +1475,15 @@ function _setLanguage() {
   }));
   return _setLanguage.apply(this, arguments);
 }
+var KNOWN_LANGUAGE_NAMES = {
+  'French': 1, 'German': 1, 'Spanish': 1, 'Italian': 1, 'Japanese': 1,
+  'Korean': 1, 'Traditional Chinese': 1, 'Simplified Chinese': 1,
+  'Portuguese': 1, 'Arabic': 1, 'Russian': 1, 'Dutch': 1, 'Polish': 1,
+  'Turkish': 1, 'Hindi': 1, 'Thai': 1, 'Vietnamese': 1
+};
 function detectLanguage(book) {
-  // If language is explicitly set (from Google Books or AI), use that first
-  if (book.language && book.language !== 'English') {
+  // Only trust the language field if it's a specific known name — not bare 'Chinese'
+  if (book.language && KNOWN_LANGUAGE_NAMES[book.language]) {
     return book.language;
   }
 
@@ -1493,8 +1505,9 @@ function detectLanguage(book) {
   var hasArabic = /[\u0600-\u06ff]/.test(titleAndAuthor);
   var hasCyrillic = /[\u0400-\u04ff]/.test(titleAndAuthor);
   if (hasChinese || isBareZh) {
-    // Traditional-only characters
-    var isTraditional = /[\u8aaa\u8aac\u4f86\u570b\u70ba\u52d5\u7d71\u5011\u6642\u9019\u500b\u5b78\u9ebc\u50b3\u9023\u7a2e\u9ede\u5c64\u9928\u91ab\u7522\u6703\u5340\u7d93\u984c\u5c0d\u96fb\u96dc\u6aa2\u8996\u5275\u5c08\u7dda\u98a8\u98db\u8af8\u8acb\u8b6f\u9ad4\u66f8\u9577\u7121\u5f37\u958b\u7d66\u5167\u5bec\u9593\u7e3d]/.test(titleAndAuthor);
+    // Characters that exist in Traditional but NOT Simplified (or differ in form)
+    // \u5b6b\u8207\u904e\u554f\u7576\u6b61\u6b72\u806f\u6b78\u7fa9\u6230\u969b\u5be6\u73fe\u83ef\u6a5f\u8fb2\u7fa9\u8853\u6a19\u6b0a\u7bc0\u985e\u5ef3\u969b\u6b77\u96e3\u96e2\u8b58\u89f8\u7e54\u85dd\u8072\u986f\u89c0\u9078\u8209\u8b70\u8ac7\u8ad6\u8a8d\u8b8a\u5beb\u8b80\u9435\u95dc
+    var isTraditional = /[\u8aaa\u8aac\u4f86\u570b\u70ba\u52d5\u7d71\u5011\u6642\u9019\u500b\u5b78\u9ebc\u50b3\u9023\u7a2e\u9ede\u5c64\u9928\u91ab\u7522\u6703\u5340\u7d93\u984c\u5c0d\u96fb\u96dc\u6aa2\u8996\u5275\u5c08\u7dda\u98a8\u98db\u8af8\u8acb\u8b6f\u9ad4\u66f8\u9577\u7121\u5f37\u958b\u7d66\u5167\u5bec\u9593\u7e3d\u5b6b\u8207\u904e\u554f\u7576\u6b61\u6b72\u806f\u6b78\u6230\u969b\u5be6\u73fe\u83ef\u6a5f\u8fb2\u8853\u6a19\u6b0a\u7bc0\u985e\u5ef3\u6b77\u96e3\u96e2\u8b58\u89f8\u7e54\u85dd\u8072\u986f\u89c0\u9078\u8209\u8b70\u8ac7\u8ad6\u8a8d\u8b8a\u5beb\u8b80\u9435\u95dc\u5ee3\u61c9\u6b61\u55ce\u9ebd\u865f\u7d19\u8cc7\u98fd\u5716\u904b\u9054\u9060\u9084\u820a\u6a13\u5c64\u908a\u908a\u7368\u9aee\u9f4a\u81fa\u7063]/.test(titleAndAuthor);
     return isTraditional ? 'Traditional Chinese' : 'Simplified Chinese';
   }
   if (hasJapanese) return 'Japanese';
