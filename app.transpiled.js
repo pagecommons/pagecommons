@@ -720,12 +720,13 @@ function searchBooks() {
 }
 function _searchBooks() {
   _searchBooks = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
-    var rawTitle, rawAuthor, raw, statusEl, resultsEl, isbnClean, isbnUrl, res, data, key, b, book, el, th, searchTitle, searchAuthor, isNL, interp, gbParts, gbQuery, olQuery, hasNonLatin, _addShowMoreBtn, books, refineEl, _page, _olQuery, _gbQuery, _hasNonLatin, _seen, _t0, _t1;
+    var rawTitle, rawAuthor, raw, searchLang, statusEl, resultsEl, isbnClean, isbnUrl, res, data, key, b, book, el, th, searchTitle, searchAuthor, isNL, interp, gbParts, gbQuery, olQuery, hasNonLatin, _addShowMoreBtn, books, refineEl, _page, _olQuery, _gbQuery, _hasNonLatin, _searchLang, _seen, _t0, _t1;
     return _regenerator().w(function (_context4) {
       while (1) switch (_context4.p = _context4.n) {
         case 0:
           rawTitle = document.getElementById('book-search-title').value.trim();
           rawAuthor = document.getElementById('book-search-author').value.trim();
+          searchLang = (document.getElementById('search-language') || {}).value || '';
           raw = rawTitle || rawAuthor;
           if (raw) {
             _context4.n = 1;
@@ -846,14 +847,14 @@ function _searchBooks() {
                       break;
                     }
                     _context3.n = 2;
-                    return fetchGoogleBooks(_gbQuery, 6, (_page - 1) * 6);
+                    return fetchGoogleBooks(_gbQuery, 6, (_page - 1) * 6, _searchLang);
                   case 2:
                     more = _context3.v;
                     _context3.n = 5;
                     break;
                   case 3:
                     _context3.n = 4;
-                    return fetchOpenLibrary(_olQuery, _page * 6 + 6);
+                    return fetchOpenLibrary(_olQuery, _page * 6 + 6, 0, _searchLang);
                   case 4:
                     more = _context3.v;
                   case 5:
@@ -897,14 +898,14 @@ function _searchBooks() {
           statusEl.textContent = 'Searching Google Books…';
           statusEl.style.display = 'block';
           _context4.n = 11;
-          return fetchGoogleBooksWithFallback(raw, gbQuery);
+          return fetchGoogleBooksWithFallback(raw, gbQuery, searchLang);
         case 11:
           books = _context4.v;
           _context4.n = 19;
           break;
         case 12:
           _context4.n = 13;
-          return fetchOpenLibrary(olQuery);
+          return fetchOpenLibrary(olQuery, 10, 0, searchLang);
         case 13:
           books = _context4.v;
           if (!(!books.length && searchTitle && searchAuthor)) {
@@ -914,7 +915,7 @@ function _searchBooks() {
           statusEl.textContent = 'Trying title only…';
           statusEl.style.display = 'block';
           _context4.n = 14;
-          return fetchOpenLibrary(searchTitle);
+          return fetchOpenLibrary(searchTitle, 10, 0, searchLang);
         case 14:
           books = _context4.v;
         case 15:
@@ -925,7 +926,7 @@ function _searchBooks() {
           statusEl.textContent = 'Trying Google Books…';
           statusEl.style.display = 'block';
           _context4.n = 16;
-          return fetchGoogleBooks(gbQuery);
+          return fetchGoogleBooks(gbQuery, 8, 0, searchLang);
         case 16:
           books = _context4.v;
         case 17:
@@ -934,7 +935,7 @@ function _searchBooks() {
             break;
           }
           _context4.n = 18;
-          return fetchGoogleBooks('intitle:' + searchTitle);
+          return fetchGoogleBooks('intitle:' + searchTitle, 8, 0, searchLang);
         case 18:
           books = _context4.v;
         case 19:
@@ -959,7 +960,7 @@ function _searchBooks() {
 
           // Pagination state
           _page = 1;
-          _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
+          _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin, _searchLang = searchLang;
           _seen = new Set(books.map(function (b) {
             return b.title.toLowerCase() + '||' + b.author.toLowerCase();
           }));
@@ -984,10 +985,30 @@ function _searchBooks() {
 function fetchOpenLibrary(_x2) {
   return _fetchOpenLibrary.apply(this, arguments);
 }
+var ISO_TO_MARC = {
+  en: 'eng',
+  fr: 'fre',
+  de: 'ger',
+  es: 'spa',
+  it: 'ita',
+  ja: 'jpn',
+  ko: 'kor',
+  zh: 'chi',
+  pt: 'por',
+  ar: 'ara',
+  ru: 'rus',
+  nl: 'dut',
+  pl: 'pol',
+  tr: 'tur',
+  hi: 'hin',
+  th: 'tha',
+  vi: 'vie'
+};
 function _fetchOpenLibrary() {
   _fetchOpenLibrary = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(q) {
     var limit,
       offset,
+      marcLang,
       res,
       data,
       seen,
@@ -998,8 +1019,10 @@ function _fetchOpenLibrary() {
         case 0:
           limit = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : 10;
           offset = _args5.length > 2 && _args5[2] !== undefined ? _args5[2] : 0;
+          var isoLang = _args5.length > 3 && _args5[3] ? _args5[3].replace(/-.*/, '').toLowerCase() : '';
+          marcLang = isoLang ? ISO_TO_MARC[isoLang] || '' : '';
           _context5.n = 1;
-          return fetch('https://openlibrary.org/search.json?q=' + encodeURIComponent(q) + '&limit=' + limit + '&offset=' + offset + '&fields=key,title,author_name,first_publish_year');
+          return fetch('https://openlibrary.org/search.json?q=' + encodeURIComponent(q) + '&limit=' + limit + '&offset=' + offset + '&fields=key,title,author_name,first_publish_year,cover_i,language' + (marcLang ? '&language=' + marcLang : ''));
         case 1:
           res = _context5.v;
           _context5.n = 2;
@@ -1038,10 +1061,10 @@ function _fetchOpenLibrary() {
   }));
   return _fetchOpenLibrary.apply(this, arguments);
 }
-function fetchGoogleBooksWithFallback(bareQuery, intitleQuery) {
-  return fetchGoogleBooks(bareQuery).then(function (books) {
+function fetchGoogleBooksWithFallback(bareQuery, intitleQuery, lang) {
+  return fetchGoogleBooks(bareQuery, 8, 0, lang).then(function (books) {
     if (books.length) return books;
-    return fetchGoogleBooks(intitleQuery);
+    return fetchGoogleBooks(intitleQuery, 8, 0, lang);
   });
 }
 function fetchGoogleBooks(_x3) {
@@ -1060,8 +1083,9 @@ function _fetchGoogleBooks() {
         case 0:
           maxResults = _args6.length > 1 && _args6[1] !== undefined ? _args6[1] : 8;
           startIndex = _args6.length > 2 && _args6[2] !== undefined ? _args6[2] : 0;
+          var gbLang = _args6.length > 3 && _args6[3] ? _args6[3].replace(/-.*/, '').toLowerCase() : '';
           _context6.n = 1;
-          return fetch('/api/books?q=' + encodeURIComponent(q) + '&maxResults=' + maxResults + '&startIndex=' + startIndex);
+          return fetch('/api/books?q=' + encodeURIComponent(q) + '&maxResults=' + maxResults + '&startIndex=' + startIndex + (gbLang ? '&langRestrict=' + gbLang : ''));
         case 1:
           res = _context6.v;
           _context6.n = 2;
