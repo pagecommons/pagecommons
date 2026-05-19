@@ -1481,63 +1481,59 @@ var KNOWN_LANGUAGE_NAMES = {
   'Portuguese': 1, 'Arabic': 1, 'Russian': 1, 'Dutch': 1, 'Polish': 1,
   'Turkish': 1, 'Hindi': 1, 'Thai': 1, 'Vietnamese': 1
 };
+// Traditional-only and Simplified-only Chinese character sets (for script detection)
+var TRAD_CHARS = /[並來個們備傳傷傾僅價儀億儉儘償優兌兒內兩冊凍凱別劃劇劉劍勁動務勝勞勢勳勵區協厲參叢問嘆嚇嚴國圍園圓圖團堅報場塊壓壘壞壟壯壺學實寫對廁廟廠廢廣廳彈從愛慮慶憂應懷懸戀戰戶採撥擁擇擊擔據攝數斷時書會東條業構樂樓標樣橋機檢權歡歲歷歸殺殼氣滅漢潔為煩熱燈燒營燭爺牆獎獨獸獻現瑪環產畢異當瘋療發盜監盤眾礙礦禮稅種稱積窩競筆節範築簡籃籌籠糧紀紅納純紙級紛細終組結給統絲經綠維網緊線編緻縣縮縱績繞繩繪繼續纖罈罷義習聖聞聯聰聲聶職聽腦膚膽臘臟與興舉舊艱艷萬蓋薦藍藥蘇蘭處號蝦蟲蠅術衛衝補裝製複褲見規視親覺觀觸訂計討記訪設許訴評詞詠試詩話該詳認語誠誤說誰課調談請論諸諾謀講謝證識譜譯議護讀讓貓買賞賠賢賣賤賬賭賴購贈贊贏趙趨跡踴躍車軌軍軒軟軸較載輔輕輛輝輩輪輸轉轎辦辭農這連進運過達遠適選還邊鄉鄭鄰釀釋針釣鈍鈔鈕鈣鈴鉛鉤銀銅銘銳鋒鋪鋸鋼錄錘錢錦錯鍋鍛鍵鎖鎮鏡鐘鐵鑄鑒長門閃閉開閏閑間閘閣閥閱闆闊闖關闡陘陣陰陳陸陽隊階際隨險隱隴隻雖雙雛雜雞離難雲電霧靈靜韋韌韓韻響頁頂頃項順須頌預頑頒頓頗領頭頰頸頻顆題額顏願顛類顧顫顯風飄飛飢飯飲飼飽飾餃餅養餌餓館餵饅馬馮馳馴駁駐駕駛駝駱騎騙騰騾驅驕驗驚驟髒體髮鬆鬚鬥鬧鬱魚魯鮮鯉鯨鯽鳥鳳鳴鴉鴨鴻鴿鵑鵝鶯鶴鷹鹽麗麥麵麼黃點黨黴鼴齊齋齒齡龍龐龜]/g;
+var SIMP_CHARS = /[万与业丛东丝两严个为丽举么义乐习乡书买云产亲亿仅从仪们价众优会传伤体俭倾偿儿兑党兰关兴养兽内册写军农冯冲冻凤凯击刘别剑剧办务动励劲劳势勋区协卖卫厂厅历厉压厕县参双发只号叹吓听咏响喂团园围国图圆圣场坏块坚坛垄垒墙壮声壳壶处备复头奖学实对尽岁并广庆应庙庞废开异弹归当录忧怀恋悬惊愿战户护报担拥拨择据摄数斋断旧时显术机杀杂权条来松构标样桥检楼欢毕气汉洁灭灯灵点烛烦烧热爱爷独猫献玛环现电疗疯盐监盖盗盘矿碍礼离种积称税窝竞笔笼筑筹简篮类粮紧红纤级纪纯纳纵纷纸线组细终经结绕绘给统继绩续绳维绿编缩网罢聂职联聪肤胆胜脏脑腊腾艰艳节苏荐药莺营蓝虑虫虽虾蝇补装裤见观规视觉触计订认讨让议记讲许论设访证评识诉词译试诗诚话该详语误说请诸诺读课谁调谈谋谢谱贤账购贱赌赏赔赖赞赠赢赵趋跃踊车轨轩转轮软轴轻载轿较辅辆辈辉输辞边达过运还这进远连迹适选邻郁郑酿释鉴针钓钙钝钞钟钢钩钮钱铁铃铅铜铭银铸铺锁锅锋锐错锤锦键锯锻镇镜长门闪闭问闯闰闲间闸闹闻阀阁阅阐阔队阳阴阵阶际陆陇陈陉险随隐难雏雾霉静韦韧韩韵页顶顷项顺须顽顾顿颁颂预领颇颈颊频颗题颜额颠颤风飘飞饥饭饮饰饱饲饵饺饼饿馆馒马驯驰驱驳驶驻驼驾骄骆验骑骗骡骤鱼鲁鲜鲤鲫鲸鸟鸡鸣鸦鸭鸽鸿鹃鹅鹤鹰麦黄鼹齐齿龄龙龟]/g;
 function detectLanguage(book) {
   var lang = book.lang || '';
   var titleAndAuthor = (book.title || '') + ' ' + (book.author || '');
   var description = (book.description || '');
 
-  // ---- CHINESE DETECTION: Priority: title > description > lang code > default Traditional ----
-  // Check if book is marked as any Chinese variant
+  // ---- JAPANESE / KOREAN: detect before Chinese (kanji range overlaps Chinese) ----
+  if (/^ja/i.test(lang) || book.language === 'Japanese' || /[\u3040-\u30ff]/.test(titleAndAuthor)) {
+    return 'Japanese';
+  }
+  if (/^ko/i.test(lang) || book.language === 'Korean' || /[\uac00-\ud7af]/.test(titleAndAuthor)) {
+    return 'Korean';
+  }
+
+  // ---- CHINESE: Traditional vs Simplified decided by character evidence ----
   var langIsZh = /^zh/i.test(lang);
   var languageIsZh = book.language === 'Chinese' || book.language === 'Traditional Chinese' || book.language === 'Simplified Chinese';
-  var titleHasCJK = /[一-鿿]/.test(titleAndAuthor);
+  var titleHasCJK = /[\u4e00-\u9fff]/.test(titleAndAuthor);
 
   if (langIsZh || languageIsZh || titleHasCJK) {
-    // Traditional-only character detection regex
-    var tradRegex = /[說説來國為動統們時這個學麼傳連種點層館醫產會區經題對電雜檢視創專線風飛諸請譯體書長無強開給內寬間總孫與過問當歡歲聯歸戰際實現華機農術標權節類廳歷難離識觸織藝聲顯觀選舉議談論認變寫讀鐵關廣應歡嗎麽號紙資飽圖運達遠還舊樓層邊邊獨骮齊臺灣衛扷]/;
+    // Count script-specific characters across title, author and description.
+    // Character evidence is more reliable than Google Books' language code,
+    // which frequently mislabels Traditional books as Simplified.
+    var combined = titleAndAuthor + ' ' + description;
+    var tradMatches = combined.match(TRAD_CHARS);
+    var simpMatches = combined.match(SIMP_CHARS);
+    var tradCount = tradMatches ? tradMatches.length : 0;
+    var simpCount = simpMatches ? simpMatches.length : 0;
 
-    // PRIORITY 1: Check title for script-specific markers
-    var titleHasTraditional = tradRegex.test(titleAndAuthor);
-    if (titleHasTraditional) return 'Traditional Chinese';
+    if (tradCount > simpCount) return 'Traditional Chinese';
+    if (simpCount > tradCount) return 'Simplified Chinese';
 
-    // PRIORITY 2: If title is script-neutral, check description for markers
-    if (description) {
-      var descHasTraditional = tradRegex.test(description);
-      if (descHasTraditional) return 'Traditional Chinese';
-    }
-
-    // PRIORITY 3: Fall back to language code
-    if (/^zh[-_]?(TW|HK|MO|Hant)/i.test(lang)) return 'Traditional Chinese';
+    // No decisive character evidence — fall back to the language code
     if (/^zh[-_]?(CN|SG|Hans)/i.test(lang)) return 'Simplified Chinese';
-    if (book.language === 'Traditional Chinese') return 'Traditional Chinese';
+    if (/^zh[-_]?(TW|HK|MO|Hant)/i.test(lang)) return 'Traditional Chinese';
     if (book.language === 'Simplified Chinese') return 'Simplified Chinese';
+    if (book.language === 'Traditional Chinese') return 'Traditional Chinese';
 
-    // PRIORITY 4: Fully ambiguous — default to Traditional Chinese
+    // Fully ambiguous — default to Traditional Chinese
     return 'Traditional Chinese';
   }
 
-  // ---- NON-CHINESE LANGUAGES ----
-  // Trust explicit language field if known
+  // ---- OTHER LANGUAGES ----
   if (book.language && KNOWN_LANGUAGE_NAMES[book.language]) {
     return book.language;
   }
-
-  // Detect from script markers in title/author
-  var hasJapanese = /[぀-ヿ]/.test(titleAndAuthor);
-  var hasKorean = /[가-힯]/.test(titleAndAuthor);
-  var hasArabic = /[؀-ۿ]/.test(titleAndAuthor);
-  var hasCyrillic = /[Ѐ-ӿ]/.test(titleAndAuthor);
-
-  if (hasJapanese) return 'Japanese';
-  if (hasKorean) return 'Korean';
-  if (hasArabic) return 'Arabic';
-  if (hasCyrillic) return 'Russian';
-
-  // Non-Chinese, non-CJK language code
+  if (/[\u0600-\u06ff]/.test(titleAndAuthor)) return 'Arabic';
+  if (/[\u0400-\u04ff]/.test(titleAndAuthor)) return 'Russian';
   if (lang && lang !== 'en') {
     return LANG_CODE_TO_NAME[lang] || null;
   }
-
   return null;
 }
 function getCompanionLang() {
