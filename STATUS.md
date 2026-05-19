@@ -1,76 +1,58 @@
 # Page Commons — Current Status
 
-Last updated: May 8, 2026
-Current version: v0.27-80d09f0
-Updated by: Claude session - four-part rebuild
+Last updated: May 19, 2026
+Current version: v0.27-zhdetect
+Updated by: Claude session - language detection + optional selector
 
 ## What was done this session
 
-### Part 1: Surprise Me Feature Rebuild ✓
-- Removed Surprise Me button from #home screen
-- Added Surprise Me button to #search screen (below "Your saved books →")
-- Implemented two-question flow: Genre selection (8 options) → Language selection
-- Single AI call to /api/ai.js (Gemini free tier): genre + language + shelf contents → JSON result
-- Displays book suggestion with title, author, reason
-- Two action buttons: "Find out if it's for me →" (Discovery mode), "Not for me" (refetch same genre+lang)
-- Result does NOT persist between sessions
+### Part 1: Chinese Language Detection Fix ✓
+- Implemented character-counting detection for Traditional vs Simplified Chinese
+- Built TRAD_CHARS (526 characters) and SIMP_CHARS (515 characters) regex from curated character pairs
+- Removed shared characters that appear in both scripts
+- Three-tier detection: character evidence > language code > default Traditional
+- Include book description text as additional detection signal
+- Fixed misdetection of books like 蒙格之道 (Traditional labeled as Simplified by Google Books)
+- Version bumped to v0.27-zhdetect
 
-### Part 2: New Book Detail Screen (#book-detail) ✓
-- Completely new HTML section for book metadata display
-- Shows: title, author, year, page count, full description (300 char truncated)
-- Three action buttons:
-  - "Find out if it's for me →" (triggers setReadingStatus('considering'))
-  - "I'm reading this" (setReadingStatus('started'))
-  - "Back ←" (returns to search)
-- Fallback message if no description available
+### Part 2: Optional Per-Book Language Selector ✓
+- Added "Language" button to companion screen reader-toolbar
+- Collapsible language-panel with 9 language options:
+  - English, French, German, Spanish, Portuguese
+  - Japanese, Korean, Traditional Chinese, Simplified Chinese
+- Auto-detect button to reset override
+- Language selection saved per-book in localStorage (pc_companion_lang_override_<bookKey>)
+- Language override applied to AI prompts when selected
+- All panels close when switching books (reduce clutter)
+- Language button shows active state when override is set
 
-### Part 3: About This Book Toggle on Search Results ✓
-- Small "About this book ▾" toggle below each search result
-- Expands/collapses inline with display:block/none (no animation)
-- Truncates description to 300 chars + ellipsis
-- Hides toggle entirely if no description available
-- Works on all search sources (Google Books, Open Library)
-
-### Part 4: Manual Entry Improvement ✓
-- Added Language dropdown to manual entry form (all supported languages)
-- Added Year optional text field
-- Changed button text from "Start companion" to "Find this book"
-- On submit: silent Google Books lookup by title+author+language
-- If match found: navigates to #book-detail with full Google Books metadata
-- If no match: navigates to #book-detail with manual data + fallback message
-
-### Infrastructure Updates ✓
-- Babel 7 setup with IE 11 target (@babel/preset-env, regenerator, transform-runtime)
-- Transpilation of app.js → app.transpiled.js (3876 lines)
-- CSS updates: select element styling, book detail styling
-- Version bumped to v0.27 (hash: 80d09f0)
-- Removed reading-langs-list from Settings screen entirely
-- Removed getReadingLanguages(), saveReadingLanguages(), renderReadingLanguages() functions
+### Cache Invalidation Updates ✓
+- Updated icebreaker cache key to include detected language
+- Ensures old cached prompts are invalidated when detection changes
+- Prevents stale Simplified prompts from showing after fix
 
 ## Testing Completed
-- [ ] On Kobo Libra Colour (device test needed)
-- [x] Transpilation validates (no errors)
+- [x] Transpilation validates (Babel ES5 for Kobo compatibility)
 - [x] All new functions present in transpiled output
-- [x] Book detail screen renders correctly (HTML structure)
-- [x] Surprise Me genre/language flow implemented
-- [x] Manual entry with language lookup implemented
+- [x] Language detection functions integrated into prompt building
+- [x] Language selector HTML/CSS/JS added to companion screen
+- [x] Language override saves to localStorage and persists per-book
+- [ ] On Kobo Libra Colour (device test needed)
 
 ## Current Known Issues
 - None identified yet (needs Kobo device testing)
 
 ## What to Tackle Next
-1. Test entire four-part rebuild on Kobo Libra Colour
-2. Verify Discovery mode integration works end-to-end
-3. Test Surprise Me AI flow with various genres/languages
-4. Verify manual entry Google Books lookup works as expected
-5. Test back navigation from book-detail to search
-6. Check that About toggle doesn't interfere with book tapping
-7. Consider: Move tagline to right side (pending)
-8. Consider: Reply length enforcement for AI companion
+1. Test language detection fix on Kobo with Traditional Chinese books
+2. Test language selector UI and language override on Kobo device
+3. Verify Traditional Chinese prompts appear after language selection
+4. Test switching books and loading correct language override
+5. Confirm all 9 language options work in AI prompts
+6. Check that cache invalidation works correctly
 
 ## Last Confirmed Working on Device
-↳ Kobo Libra Colour: v0.25 ✓ (before rebuild)
-↳ Desktop: v0.27 ✓ (after rebuild, transpiled version)
+↳ Kobo Libra Colour: v0.25 ✓ (before detection fix)
+↳ Desktop: v0.27-zhdetect ✓ (after detection fix + selector)
 ↳ Kindle: not yet tested
 
 ## Broken / Do Not Touch
