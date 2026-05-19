@@ -1588,7 +1588,7 @@ function _setLanguage() {
           return generateThinkingPhrases(STATE.detectedLang);
         case 1:
           // Clear cached ice breakers so they regenerate in the chosen language
-          cacheKey = 'pc_icebreakers_' + bookKey(STATE.book) + '_' + (STATE.readingStatus || '');
+          cacheKey = 'pc_icebreakers_' + bookKey(STATE.book) + '_' + (STATE.readingStatus || '') + '_' + (STATE.chatLanguage || 'english') + '_' + (STATE.detectedLang || '');
           localStorage.removeItem(cacheKey);
           launchCompanion(STATE.book);
         case 2:
@@ -2495,7 +2495,7 @@ function _populateIcebreakers() {
           loadEl.style.fontStyle = 'italic';
           loadEl.textContent = 'Finding the right questions…';
           list.appendChild(loadEl);
-          cacheKey = 'pc_icebreakers_' + bookKey(book) + '_' + (STATE.readingStatus || '') + '_' + (STATE.chatLanguage || 'english');
+          cacheKey = 'pc_icebreakers_' + bookKey(book) + '_' + (STATE.readingStatus || '') + '_' + (STATE.chatLanguage || 'english') + '_' + (STATE.detectedLang || '');
           _context12.p = 1;
           c = localStorage.getItem(cacheKey);
           if (!c) {
