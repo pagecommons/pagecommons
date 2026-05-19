@@ -2,64 +2,72 @@
 
 Last updated: May 19, 2026
 Current version: v0.28
-Updated by: Claude session - search language selector removal
+Updated by: Claude session - support page + footers + doc updates
 
 ## What was done this session
 
-### Removed Search Language Selector Feature ✓
-- Removed language selector HTML element from search form (was added between Author field and ISBN tip)
-- Removed searchLang variable and DOM reading logic from searchBooks()
-- Reverted fetchGoogleBooks() signature: removed lang parameter and langRestrict API filter
-- Reverted fetchOpenLibrary() signature: removed lang parameter and MARC code conversion filter
-- Removed ISO_TO_MARC mapping object (en→eng, fr→fre, de→ger, es→spa, ja→jpn, ko→kor, zh→chi, etc.)
-- Removed _searchLang closure variable from pagination "Show more results" handler
-- Cleaned up unused variable declarations
+### Support Page (support.html) ✓
+- Standalone page, no new dependencies, same CSS foundations as index.html
+- Two full-width CTA buttons: Ko-fi (one-time tip) and Amazon affiliate
+- Affiliate disclosure below Amazon button (16px, #777777)
+- GitHub issues link as plain inline text
+- Italic "Pete" sign-off
+- Back link "← Page Commons" at top
+- All e-ink design rules respected (no border-radius, no animations, Georgia serif)
 
-**Rationale**: Feature tested and found ineffective. When searching by author name (e.g., "赤川次郎" with Traditional Chinese filter), APIs returned Japanese results regardless of language parameter. Language filtering doesn't work reliably in APIs for author-based searches. User decision: abandon feature rather than debug black-box API behavior.
+### Per-Screen Support Footer ✓
+- `.screen-support-footer` CSS class added to index.html
+- "Page Commons is free and ad-free. Support it →" line on all 14 screens:
+  home, about, key, search, book-detail, status, language, companion,
+  tc, age-gate, shelf, settings, surprise, book-shelf
+- 15px font, #666666 colour, centred, padding-top: 32px, padding-bottom: 16px
+- Links to /support.html
 
-**Preserved**: Companion screen language selector IS working and remains untouched. 9-option per-book language override still available after entering discovery mode.
+### Removed Search Language Selector ✓ (earlier in session)
+- Removed 18-option language dropdown from search form
+- Reverted all API fetch functions to original signatures
+- Removed ISO_TO_MARC mapping and langRestrict / MARC language filtering
+- Rationale: API language filtering proved ineffective for author-based searches
 
-## Previous Sessions: Chinese Language Detection & Companion Selector
+### Chinese Language Detection Fix ✓ (earlier sessions)
+- TRAD_CHARS (526) vs SIMP_CHARS (515) character-count detection
+- Three-tier: character evidence > language code > default Traditional
+- Book description used as additional detection signal
+- Fixed: 蒙格之道, 蜜蜂與遠雷, 三色貓探案, 射雕英雄傳, 孫子兵法
 
-### Part 1: Chinese Language Detection Fix ✓
-- Character-counting detection: TRAD_CHARS (526) vs SIMP_CHARS (515)
-- Three-tier priority: character evidence > language code > default Traditional
-- Included book description as detection signal
-- Fixed misdetection (e.g., 蒙格之道, 蜜蜂與遠雨, 三色貓探案)
-- Version bumped to v0.27-zhdetect
-
-### Part 2: Optional Per-Book Language Selector ✓
-- "Language" button in companion screen reader-toolbar
-- 9 language options with auto-detect reset
-- Per-book localStorage persistence (pc_companion_lang_override_<bookKey>)
-- Language applied to AI prompts when selected
-- Active button state indicator
+### Per-Book Language Selector on Companion Screen ✓ (earlier sessions)
+- Language button in reader-toolbar, collapsible 9-option panel
+- Saves to localStorage per book (pc_companion_lang_override_<bookKey>)
+- Applied to AI prompts; auto-detect reset button
 
 ## Testing Completed
 - [x] Transpilation validates (Babel ES5 for Kobo compatibility)
-- [x] Searched and removed all searchLang parameter usage
-- [x] Reverted all fetch function signatures to pre-filter versions
-- [x] Removed ISO_TO_MARC mapping and language code conversion
-- [x] Removed Google Books langRestrict parameter
-- [x] Removed OpenLibrary MARC language filtering
-- [x] All changes transpiled to app.transpiled.js
-- [x] Code committed and pushed to feature branch
-- [ ] Desktop smoke test (verify search still works without language filter)
-- [ ] On Kobo Libra Colour (device test needed)
+- [x] support.html renders correctly on desktop
+- [x] All 14 screen footers present in index.html
+- [x] Ko-fi and Amazon links correct
+- [x] All changes committed and pushed to feature branch
+- [x] Merged to main for device testing
+- [ ] support.html on Kobo device
+- [ ] Footer links tappable on Kobo (44px not required — small text)
+- [ ] Chinese language detection on Kobo with Traditional books
+- [ ] Companion language selector on Kobo
+- [ ] Search regression test on Kobo
 
 ## Current Known Issues
 - None identified
 
 ## What to Tackle Next
-1. Desktop smoke test: verify search functionality still works
-2. Test on Kobo Libra Colour with Traditional/Simplified books
-3. Confirm companion language selector still works (should be unaffected)
-4. Verify language detection still correct (unchanged)
-5. Check pagination "Show more" works without _searchLang closure variable
+1. Test v0.28 on Kobo Libra Colour — focus on:
+   - Traditional Chinese detection (蒙格之道, 三色貓探案)
+   - Companion Language button and per-book override
+   - Search still works (regression check)
+   - support.html renders and links work
+2. Kindle device test (any version)
+3. Reddit launch post preparation
 
 ## Last Confirmed Working on Device
-↳ Kobo Libra Colour: v0.25 ✓ (baseline before detection fix)
-↳ Desktop: v0.28 ✓ (after search filter removal)
+↳ Kobo Libra Colour: v0.25 ✓ (baseline — many features added since)
+↳ Desktop: v0.28 ✓ (current)
 ↳ Kindle: not yet tested
 
 ## Broken / Do Not Touch

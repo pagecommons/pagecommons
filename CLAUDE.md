@@ -18,6 +18,7 @@ indie project by a solo founder.
 - app.js — ALL JavaScript (source)
 - app.transpiled.js — Babel ES5 output
   THIS is what Vercel serves
+- support.html — standalone support page
 - vercel.json — headers config
 - api/books.js — Google Books proxy
 - favicon.svg — dog-ear page icon
@@ -87,12 +88,19 @@ Single file SPA with hash navigation:
 - #tc — Terms & Conditions
 - #key — API key setup
 - #search — Book search
+- #book-detail — Book detail view
 - #status — Reading status
 - #language — Language choice
 - #companion — AI chat
 - #shelf — Your shelf
 - #book-shelf — Book conversations
+- #settings — App settings
+- #surprise — Surprise Me
+- #age-gate — Adult content gate
 - #about — About page
+
+Standalone pages:
+- support.html — Support / donate page
 
 ## Five Use Cases (in order of complexity)
 1. The Archivist — highlights + notes only
@@ -125,8 +133,8 @@ Single file SPA with hash navigation:
 - Block is the only social remedy
 
 ## Current Version
-v0.25 — confirmed working on 
-Kobo Libra Colour device.
+v0.28 — confirmed working on desktop.
+Kobo device test pending.
 
 ## What NOT to change
 - Single HTML + app.js architecture
