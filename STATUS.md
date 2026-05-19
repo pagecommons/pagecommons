@@ -1,7 +1,7 @@
 # Page Commons — Current Status
 
 Last updated: May 19, 2026
-Current version: v0.27-zhdetect
+Current version: v0.28
 Updated by: Claude session - language detection + optional selector
 
 ## What was done this session
