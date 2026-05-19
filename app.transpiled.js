@@ -1618,38 +1618,59 @@ var KNOWN_LANGUAGE_NAMES = {
   'Vietnamese': 1
 };
 function detectLanguage(book) {
-  // Only trust the language field if it's a specific known name — not bare 'Chinese'
+  var lang = book.lang || '';
+  var titleAndAuthor = (book.title || '') + ' ' + (book.author || '');
+  var description = book.description || '';
+
+  // ---- CHINESE DETECTION: Priority: title > description > lang code > default Traditional ----
+  // Check if book is marked as any Chinese variant
+  var langIsZh = /^zh/i.test(lang);
+  var languageIsZh = book.language === 'Chinese' || book.language === 'Traditional Chinese' || book.language === 'Simplified Chinese';
+  var titleHasCJK = /[一-鿿]/.test(titleAndAuthor);
+  if (langIsZh || languageIsZh || titleHasCJK) {
+    // Traditional-only character detection regex
+    var tradRegex = /[說説來國為動統們時這個學麼傳連種點層館醫產會區經題對電雜檢視創專線風飛諸請譯體書長無強開給內寬間總孫與過問當歡歲聯歸戰際實現華機農術標權節類廳歷難離識觸織藝聲顯觀選舉議談論認變寫讀鐵關廣應歡嗎麽號紙資飽圖運達遠還舊樓層邊邊獨骮齊臺灣衛扷]/;
+
+    // PRIORITY 1: Check title for script-specific markers
+    var titleHasTraditional = tradRegex.test(titleAndAuthor);
+    if (titleHasTraditional) return 'Traditional Chinese';
+
+    // PRIORITY 2: If title is script-neutral, check description for markers
+    if (description) {
+      var descHasTraditional = tradRegex.test(description);
+      if (descHasTraditional) return 'Traditional Chinese';
+    }
+
+    // PRIORITY 3: Fall back to language code
+    if (/^zh[-_]?(TW|HK|MO|Hant)/i.test(lang)) return 'Traditional Chinese';
+    if (/^zh[-_]?(CN|SG|Hans)/i.test(lang)) return 'Simplified Chinese';
+    if (book.language === 'Traditional Chinese') return 'Traditional Chinese';
+    if (book.language === 'Simplified Chinese') return 'Simplified Chinese';
+
+    // PRIORITY 4: Fully ambiguous — default to Traditional Chinese
+    return 'Traditional Chinese';
+  }
+
+  // ---- NON-CHINESE LANGUAGES ----
+  // Trust explicit language field if known
   if (book.language && KNOWN_LANGUAGE_NAMES[book.language]) {
     return book.language;
   }
-  var lang = book.lang || '';
-  // Traditional Chinese lang codes
-  if (/^zh[-_]?(TW|HK|Hant)/i.test(lang)) return 'Traditional Chinese';
-  // Simplified Chinese lang codes
-  if (/^zh[-_]?(CN|SG|Hans)/i.test(lang)) return 'Simplified Chinese';
-  // bare zh \u2014 distinguish by title characters below
-  var isBareZh = lang === 'zh';
-  if (!isBareZh && lang && lang !== 'en') {
-    return LANG_CODE_TO_NAME[lang] || null;
-  }
-  // detect from non-ASCII characters in title
-  var titleAndAuthor = (book.title || '') + ' ' + (book.author || '');
-  var hasChinese = /[\u4e00-\u9fff]/.test(titleAndAuthor);
-  var hasJapanese = /[\u3040-\u30ff]/.test(titleAndAuthor);
-  var hasKorean = /[\uac00-\ud7af]/.test(titleAndAuthor);
-  var hasArabic = /[\u0600-\u06ff]/.test(titleAndAuthor);
-  var hasCyrillic = /[\u0400-\u04ff]/.test(titleAndAuthor);
-  if (hasChinese || isBareZh) {
-    // Characters that exist in Traditional but NOT Simplified (or differ in form)
-    var isTraditional = /[\u8aaa\u8aac\u4f86\u570b\u70ba\u52d5\u7d71\u5011\u6642\u9019\u500b\u5b78\u9ebc\u50b3\u9023\u7a2e\u9ede\u5c64\u9928\u91ab\u7522\u6703\u5340\u7d93\u984c\u5c0d\u96fb\u96dc\u6aa2\u8996\u5275\u5c08\u7dda\u98a8\u98db\u8af8\u8acb\u8b6f\u9ad4\u66f8\u9577\u7121\u5f37\u958b\u7d66\u5167\u5bec\u9593\u7e3d\u5b6b\u8207\u904e\u554f\u7576\u6b61\u6b72\u806f\u6b78\u6230\u969b\u5be6\u73fe\u83ef\u6a5f\u8fb2\u8853\u6a19\u6b0a\u7bc0\u985e\u5ef3\u6b77\u96e3\u96e2\u8b58\u89f8\u7e54\u85dd\u8072\u986f\u89c0\u9078\u8209\u8b70\u8ac7\u8ad6\u8a8d\u8b8a\u5beb\u8b80\u9435\u95dc\u5ee3\u61c9\u6b61\u55ce\u9ebd\u865f\u7d19\u8cc7\u98fd\u5716\u904b\u9054\u9060\u9084\u820a\u6a13\u5c64\u908a\u908a\u7368\u9aae\u9f4a\u81fa\u7063\u885b\u6277]/.test(titleAndAuthor);
-    // For bare zh, prefer Traditional Chinese (Google Books often normalizes titles to Simplified form)
-    if (isBareZh && !isTraditional) return 'Traditional Chinese';
-    return isTraditional ? 'Traditional Chinese' : 'Simplified Chinese';
-  }
+
+  // Detect from script markers in title/author
+  var hasJapanese = /[぀-ヿ]/.test(titleAndAuthor);
+  var hasKorean = /[가-힯]/.test(titleAndAuthor);
+  var hasArabic = /[؀-ۿ]/.test(titleAndAuthor);
+  var hasCyrillic = /[Ѐ-ӿ]/.test(titleAndAuthor);
   if (hasJapanese) return 'Japanese';
   if (hasKorean) return 'Korean';
   if (hasArabic) return 'Arabic';
   if (hasCyrillic) return 'Russian';
+
+  // Non-Chinese, non-CJK language code
+  if (lang && lang !== 'en') {
+    return LANG_CODE_TO_NAME[lang] || null;
+  }
   return null;
 }
 function getCompanionLang() {
