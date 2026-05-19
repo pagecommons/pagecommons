@@ -729,6 +729,10 @@
     .age-gate-btns { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; margin-top: 20px; }
     .age-gate-btns > .btn { margin-bottom: 10px; }
     .age-gate-btns > .btn:last-child { margin-bottom: 0; }
+
+    /* === SCREEN SUPPORT FOOTER === */
+    .screen-support-footer { padding-top: 32px; padding-bottom: 16px; text-align: center; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: #666666; }
+    .screen-support-footer a { color: #666666; text-decoration: underline; }
   </style>
   <script src="app.js" defer></script>
   <script defer data-domain="pagecommons.com" src="https://plausible.io/js/script.js"></script>
@@ -780,6 +784,7 @@
         </div>
       </div>
     </div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -831,6 +836,7 @@
     </div>
 
     <button class="btn btn-primary" onclick="navigate('home')">Back to the library</button>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -895,7 +901,7 @@
     <hr />
     <div id="key-error" class="status-msg error" style="display:none"></div>
     <button class="btn btn-primary" onclick="saveKey()">Continue</button>
-
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -958,6 +964,7 @@
       </div>
     </div>
     <div id="kobo-status" class="status-msg" style="display:none"></div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -966,6 +973,7 @@
   <section id="screen-book-detail" class="screen">
     <button class="back-link" onclick="navigate('search')">← Back</button>
     <div id="book-detail-content"></div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -995,6 +1003,7 @@
         <span class="status-opt-sub">Coming back with fresh eyes</span>
       </button>
     </div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -1008,6 +1017,7 @@
       <button class="btn" onclick="setLanguage('english')">Chat in English</button>
     </div>
     <p style="font-size:0.78rem;color:#777777;margin-top:16px">You can change this later in More.</p>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -1123,7 +1133,7 @@
       API key loaded &nbsp;·&nbsp;
       <button onclick="clearKey()" style="background:none;border:none;cursor:pointer;text-decoration:underline;font-family:Georgia, 'Times New Roman', serif;font-size:0.78rem;color:#777777">Remove</button>
     </div>
-
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
 
@@ -1147,6 +1157,7 @@
     </div>
     <button class="btn btn-primary" onclick="acceptTC()">I agree — take me in</button>
     <p style="font-size:0.78rem;color:#777777;margin-top:12px;text-align:center">Your agreement is stored locally in your browser only.</p>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- AGE GATE -->
@@ -1159,6 +1170,7 @@
       <button class="btn btn-primary" onclick="confirmAgeGate()">I'm 18 or over — continue</button>
       <button class="btn" onclick="navigate('search')">Take me back</button>
     </div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- YOUR SHELF -->
@@ -1167,6 +1179,7 @@
     <h1>Your shelf</h1>
     <p style="font-size:0.88rem;color:#777777;margin-bottom:20px">Books you have discussed with your companion.</p>
     <div id="shelf-list"></div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -1250,7 +1263,7 @@
         <button class="font-size-opt" style="font-size:1.3rem"  data-size="22" onclick="setFontSize(22)">A</button>
       </div>
     </div>
-
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -1292,6 +1305,7 @@
     <div id="surprise-loading" style="display:none;font-size:1rem;padding:16px 0">Finding a book&#8230;</div>
 
     <div id="surprise-result" style="display:none"></div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- BOOK CONVERSATIONS -->
@@ -1305,6 +1319,7 @@
       <button class="btn btn-small" onclick="updateBookStatus()">Update status</button>
     </div>
     <div id="conv-list"></div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
 </div>
