@@ -1,150 +1,74 @@
 # Page Commons — Current Status
 
-Last updated: 2026-05-08
-Current version: v0.25
-Next version: v0.26 (bump on next deploy)
-Branch: claude/review-and-plan-HPGDI
-(ready to merge to main)
+Last updated: May 19, 2026
+Current version: v0.28
+Updated by: Claude session - support page + footers + doc updates
 
----
+## What was done this session
 
-## What was completed this session
+### Support Page (support.html) ✓
+- Standalone page, no new dependencies, same CSS foundations as index.html
+- Two full-width CTA buttons: Ko-fi (one-time tip) and Amazon affiliate
+- Affiliate disclosure below Amazon button (16px, #777777)
+- GitHub issues link as plain inline text
+- Italic "Pete" sign-off
+- Back link "← Page Commons" at top
+- All e-ink design rules respected (no border-radius, no animations, Georgia serif)
 
-**Surprise Me feature (Priority 1)**
-- Two modes: Random books + Shelf-based
-- Entry point: Library Hall "Surprise me" button
-- Dual-source architecture:
-  - Non-English users: Google Books with
-    langRestrict, stronger non-English catalogue
-  - English users / no signal: Open Library subjects
-- Language detection from shelf books' lang +
-  detectedLang fields or companion override
-- Threshold: 2+ books in language OR 40%+ of shelf
-- Randomized startIndex (0-4) for variety
-- Result validation: fallback if title missing
-- Graceful fallback chain: Google → Open Library
+### Per-Screen Support Footer ✓
+- `.screen-support-footer` CSS class added to index.html
+- "Page Commons is free and ad-free. Support it →" line on all 14 screens:
+  home, about, key, search, book-detail, status, language, companion,
+  tc, age-gate, shelf, settings, surprise, book-shelf
+- 15px font, #666666 colour, centred, padding-top: 32px, padding-bottom: 16px
+- Links to /support.html
 
-**Plausible analytics (Priority 5)**
-- Single script tag in <head>
-- No cookies, no personal data
-- Day-one signal for launch monitoring
-- Privacy-respecting implementation
+### Removed Search Language Selector ✓ (earlier in session)
+- Removed 18-option language dropdown from search form
+- Reverted all API fetch functions to original signatures
+- Removed ISO_TO_MARC mapping and langRestrict / MARC language filtering
+- Rationale: API language filtering proved ineffective for author-based searches
 
-**Discovery mode "I'll read this" button**
-- Converts discovery companion to reading mode
-- Adds book to shelf with status
-- Removes friction of going back to search
-- Updates reading progress in shelves
+### Chinese Language Detection Fix ✓ (earlier sessions)
+- TRAD_CHARS (526) vs SIMP_CHARS (515) character-count detection
+- Three-tier: character evidence > language code > default Traditional
+- Book description used as additional detection signal
+- Fixed: 蒙格之道, 蜜蜂與遠雷, 三色貓探案, 射雕英雄傳, 孫子兵法
 
----
+### Per-Book Language Selector on Companion Screen ✓ (earlier sessions)
+- Language button in reader-toolbar, collapsible 9-option panel
+- Saves to localStorage per book (pc_companion_lang_override_<bookKey>)
+- Applied to AI prompts; auto-detect reset button
 
-## What was completed previously
+## Testing Completed
+- [x] Transpilation validates (Babel ES5 for Kobo compatibility)
+- [x] support.html renders correctly on desktop
+- [x] All 14 screen footers present in index.html
+- [x] Ko-fi and Amazon links correct
+- [x] All changes committed and pushed to feature branch
+- [x] Merged to main for device testing
+- [ ] support.html on Kobo device
+- [ ] Footer links tappable on Kobo (44px not required — small text)
+- [ ] Chinese language detection on Kobo with Traditional books
+- [ ] Companion language selector on Kobo
+- [ ] Search regression test on Kobo
 
-**Language detection overhaul**
-- Auto-detects book language and responds in it
-- Distinguishes Traditional vs Simplified Chinese
-- Language instruction sent as system message
-- Ice breaker cache key includes language
+## Current Known Issues
+- None identified
 
-**Companion language setting**
-- Dropdown in Settings: Auto or specific language
-- Stored as pc_companion_lang
-- Custom arrow overlay fix applied
+## What to Tackle Next
+1. Test v0.28 on Kobo Libra Colour — focus on:
+   - Traditional Chinese detection (蒙格之道, 三色貓探案)
+   - Companion Language button and per-book override
+   - Search still works (regression check)
+   - support.html renders and links work
+2. Kindle device test (any version)
+3. Reddit launch post preparation
 
-**Kobo highlights import**
-- KoboReader.sqlite upload working
-- sql.js WebAssembly loaded lazily
-- Queries Bookmark JOIN content tables
-- ChapterProgress stored per highlight
+## Last Confirmed Working on Device
+↳ Kobo Libra Colour: v0.25 ✓ (baseline — many features added since)
+↳ Desktop: v0.28 ✓ (current)
+↳ Kindle: not yet tested
 
-**Discovery companion mode**
-- "Is this for me?" on every search result
-- Separate system prompt and flow
-- Book not added to shelf in discover mode
-- Reading time estimate from pageCount
-
----
-
-## Confirmed working on device
-
-- Kobo Libra Colour: v0.25 ✓
-  Loads, renders, scrolls, taps respond
-  Navigation works
-  Home screen displays correctly
-- Desktop/mobile browser: ✓
-- Kindle: not yet tested
-  (device expected — test when arrives)
-
----
-
-## Current known issues
-
-- Kobo WebAssembly for sql.js:
-  Kobo Libra Colour should be fine.
-  Older Kobo models uncertain.
-  Error surfaces in #kobo-status.
-  Test on device before shipping.
-
-- Companion language for returning books:
-  Cached ice breakers from before
-  override was set may be served.
-  Clears naturally as cache expires.
-  Not breaking.
-
----
-
-## What to tackle next
-
-In priority order:
-
-1. Affiliate links (Priority 1)
-   On book selection screen
-   Also inside Discovery mode flow
-   Amazon, Bookshop.org, Waterstones,
-   WorldCat (always free)
-   Clear disclosure copy
-
-2. Export/import localStorage (Priority 3)
-   Single JSON dump of all pc_* keys
-   Restore on new device
-   High value for launch users
-   Available from Settings screen
-
-3. Merge branch to main
-   Test on Kobo after merge (especially
-   Surprise Me non-English flow)
-   Bump to v0.26 on deploy
-
----
-
-## Infrastructure status
-
-- Vercel: active, auto-deploying from
-  pagecommons/pagecommons main branch
-- Upstash Redis: connected via Vercel KV
-  Transfer codes working
-- Google Books API proxy: working
-- Free tier Gemini pool: working
-- Cloudflare DNS: active
-- pagecommons.com: live
-
-## Post-launch infrastructure (do not do before June 1)
-- Migrate to Cloudflare Pages
-- GitHub account restructuring
-
----
-
-## Launch checklist (June 1 target)
-
-- [x] Surprise Me feature
-- [x] Plausible analytics added
-- [x] Discovery "I'll read this" button
-- [ ] Affiliate links
-- [ ] Export/import localStorage
-- [ ] Branch merged to main
-- [ ] Tested on Kobo Libra Colour (after merge)
-- [ ] Tested on Kindle (when arrives)
-- [ ] Version bumped to v0.26+
-- [ ] README.md created
-- [ ] About page polished
-- [ ] Reddit post drafted
+## Broken / Do Not Touch
+↳ Nothing currently broken

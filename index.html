@@ -82,6 +82,7 @@
     input[type="text"],
     input[type="password"],
     input[type="search"],
+    select,
     textarea {
       width: 100%;
       border: 1px solid #111111;
@@ -94,7 +95,7 @@
       -webkit-appearance: none;
       border-radius: 0;
     }
-    input:focus, textarea:focus { outline: 2px solid #111111; outline-offset: 1px; }
+    input:focus, textarea:focus, select:focus { outline: 2px solid #111111; outline-offset: 1px; }
     textarea { resize: none; min-height: 60px; overflow-y: hidden; }
     .field { margin-bottom: 20px; }
 
@@ -233,6 +234,18 @@
     .book-result-actions { border-top: 1px solid #e0e0e0; padding: 0; }
     .book-discover-btn { display: block; width: 100%; background: none; border: none; color: #555555; font-family: Georgia, 'Times New Roman', serif; font-size: 0.85rem; font-style: italic; padding: 10px 16px; text-align: left; cursor: pointer; min-height: 44px; }
     .book-discover-btn:active { background: #f5f5f5; }
+
+    /* === BOOK DETAIL === */
+    .book-about-toggle { display: block; width: 100%; background: none; border: none; color: #777777; font-family: Georgia, 'Times New Roman', serif; font-size: 0.85rem; padding: 10px 0; text-align: left; cursor: pointer; text-decoration: underline; }
+    .book-about-text { display: none; font-size: 0.9rem; color: #555555; line-height: 1.6; margin-top: 8px; margin-bottom: 12px; }
+    #book-detail-content { margin-bottom: 24px; }
+    .book-detail-title { font-size: 1.3rem; margin-bottom: 4px; }
+    .book-detail-author { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.9rem; color: #777777; margin-bottom: 8px; }
+    .book-detail-meta { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.75rem; color: #777777; margin-bottom: 16px; }
+    .book-detail-description { font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; color: #555555; }
+    .book-detail-actions { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; }
+    .book-detail-actions .btn { margin-bottom: 8px; }
+    .book-detail-actions .btn:last-child { margin-bottom: 0; }
 
     /* === READING STATUS === */
     .status-options { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; margin-top: 8px; }
@@ -674,6 +687,41 @@
     }
     .length-opt.active { background: #111111; color: #ffffff; }
 
+    /* === LANGUAGE PANEL === */
+    #language-panel {
+      display: none;
+      border: 1px solid #111111;
+      border-radius: 0;
+      padding: 16px;
+      margin-bottom: 16px;
+      background: #f5f5f5;
+    }
+    #language-panel.open { display: block; }
+    .language-options {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+      flex-direction: column;
+    }
+    .language-options > .language-opt { margin-bottom: 8px; }
+    .language-options > .language-opt:last-child { margin-bottom: 0; }
+    .language-opt {
+      border: 1px solid #111111;
+      border-radius: 0;
+      background: #ffffff;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      cursor: pointer;
+      padding: 12px;
+      text-align: left;
+      min-height: 44px;
+      color: #111111;
+      font-size: 0.9rem;
+    }
+    .language-opt.active { background: #111111; color: #ffffff; }
+
     /* === T&C === */
     .tc-section { margin-bottom: 20px; }
 
@@ -681,6 +729,10 @@
     .age-gate-btns { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; margin-top: 20px; }
     .age-gate-btns > .btn { margin-bottom: 10px; }
     .age-gate-btns > .btn:last-child { margin-bottom: 0; }
+
+    /* === SCREEN SUPPORT FOOTER === */
+    .screen-support-footer { padding-top: 32px; padding-bottom: 16px; text-align: center; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: #666666; }
+    .screen-support-footer a { color: #666666; text-decoration: underline; }
   </style>
   <script src="app.js" defer></script>
   <script defer data-domain="pagecommons.com" src="https://plausible.io/js/script.js"></script>
@@ -693,7 +745,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">36641b5+</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.28</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -717,10 +769,6 @@
           <span class="hall-door-title">Enter a book room</span>
           <span class="hall-door-sub">Coming soon — read notes from other readers</span>
         </button>
-        <button class="hall-door" onclick="navigate('surprise')">
-          <span class="hall-door-title">Surprise me</span>
-          <span class="hall-door-sub">Discover your next book, or revisit your shelf</span>
-        </button>
       </div>
 
       <p class="hall-newhero">
@@ -736,6 +784,7 @@
         </div>
       </div>
     </div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -787,6 +836,7 @@
     </div>
 
     <button class="btn btn-primary" onclick="navigate('home')">Back to the library</button>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -851,7 +901,7 @@
     <hr />
     <div id="key-error" class="status-msg error" style="display:none"></div>
     <button class="btn btn-primary" onclick="saveKey()">Continue</button>
-
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -861,7 +911,8 @@
     <button class="back-link" onclick="navigate('home')">← Back</button>
     <h1 id="search-heading">Which book?</h1>
 
-    <button class="btn" style="width:100%;margin-bottom:24px" onclick="navigate('shelf')">Your saved books →</button>
+    <button class="btn" style="width:100%;margin-bottom:8px" onclick="navigate('shelf')">Your saved books →</button>
+    <button class="btn" style="width:100%;margin-bottom:24px" onclick="startSurpriseMe()">Surprise me →</button>
 
     <div class="field">
       <label for="book-search-title">Title</label>
@@ -913,6 +964,16 @@
       </div>
     </div>
     <div id="kobo-status" class="status-msg" style="display:none"></div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       BOOK DETAIL SCREEN
+       ══════════════════════════════════ -->
+  <section id="screen-book-detail" class="screen">
+    <button class="back-link" onclick="navigate('search')">← Back</button>
+    <div id="book-detail-content"></div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -942,6 +1003,7 @@
         <span class="status-opt-sub">Coming back with fresh eyes</span>
       </button>
     </div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -955,6 +1017,7 @@
       <button class="btn" onclick="setLanguage('english')">Chat in English</button>
     </div>
     <p style="font-size:0.78rem;color:#777777;margin-top:16px">You can change this later in More.</p>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -971,8 +1034,9 @@
       <button id="change-book-btn" onclick="navigate('search')">Change book</button>
     </div>
 
-    <div id="discover-convert-bar" style="display:none;margin-bottom:24px">
-      <button class="btn btn-primary" onclick="startReadingFromDiscover()">I want to read this</button>
+    <div id="discover-convert-bar" style="display:none;margin-bottom:24px;display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">
+      <button class="btn" style="width:100%;min-height:44px;margin-bottom:12px" onclick="tryAnotherBook()">Try another book</button>
+      <button class="btn btn-primary" style="width:100%;min-height:44px" onclick="startReadingFromDiscover()">I want to read this</button>
     </div>
 
     <div id="icebreakers">
@@ -998,6 +1062,7 @@
         <button class="toolbar-btn" id="highlights-toolbar-btn" style="display:none" onclick="toggleHighlights()">Highlights</button>
         <button class="toolbar-btn" id="passages-toolbar-btn" style="display:none" onclick="togglePassagesPanel()">Passages</button>
         <button class="toolbar-btn" id="notes-toolbar-btn" onclick="toggleNotesPanel()">Notes</button>
+        <button class="toolbar-btn" id="language-toolbar-btn" onclick="toggleLanguagePanel()">Language</button>
         <button class="toolbar-btn" onclick="navigate('shelf')">Shelf</button>
         <button class="toolbar-btn" onclick="endConversation()">Done</button>
         <button class="toolbar-btn" id="length-toolbar-btn" onclick="toggleLengthPanel()">More</button>
@@ -1046,13 +1111,29 @@
         </div>
         <div id="passages-list"></div>
       </div>
+
+      <div id="language-panel">
+        <div class="font-panel-label">Prompt language</div>
+        <div class="language-options">
+          <button class="language-opt" onclick="setCompanionLanguage('English')">English</button>
+          <button class="language-opt" onclick="setCompanionLanguage('French')">French</button>
+          <button class="language-opt" onclick="setCompanionLanguage('German')">German</button>
+          <button class="language-opt" onclick="setCompanionLanguage('Spanish')">Spanish</button>
+          <button class="language-opt" onclick="setCompanionLanguage('Portuguese')">Portuguese</button>
+          <button class="language-opt" onclick="setCompanionLanguage('Japanese')">Japanese</button>
+          <button class="language-opt" onclick="setCompanionLanguage('Korean')">Korean</button>
+          <button class="language-opt" onclick="setCompanionLanguage('Traditional Chinese')">Traditional Chinese</button>
+          <button class="language-opt" onclick="setCompanionLanguage('Simplified Chinese')">Simplified Chinese</button>
+        </div>
+        <button class="bubble-action-btn" onclick="setCompanionLanguage(null)" style="font-size:0.85rem;margin-top:12px">Auto-detect</button>
+      </div>
     </div>
 
     <div id="key-status-bar">
       API key loaded &nbsp;·&nbsp;
       <button onclick="clearKey()" style="background:none;border:none;cursor:pointer;text-decoration:underline;font-family:Georgia, 'Times New Roman', serif;font-size:0.78rem;color:#777777">Remove</button>
     </div>
-
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
 
@@ -1076,6 +1157,7 @@
     </div>
     <button class="btn btn-primary" onclick="acceptTC()">I agree — take me in</button>
     <p style="font-size:0.78rem;color:#777777;margin-top:12px;text-align:center">Your agreement is stored locally in your browser only.</p>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- AGE GATE -->
@@ -1088,6 +1170,7 @@
       <button class="btn btn-primary" onclick="confirmAgeGate()">I'm 18 or over — continue</button>
       <button class="btn" onclick="navigate('search')">Take me back</button>
     </div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- YOUR SHELF -->
@@ -1096,6 +1179,7 @@
     <h1>Your shelf</h1>
     <p style="font-size:0.88rem;color:#777777;margin-bottom:20px">Books you have discussed with your companion.</p>
     <div id="shelf-list"></div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -1150,12 +1234,6 @@
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-label">Reading languages</div>
-      <div id="reading-langs-list"></div>
-      <p style="font-size:0.78rem;color:#777777;margin-top:6px">Select 1–3 languages. Surprise me will suggest one book per language. First selected is your preferred.</p>
-    </div>
-
-    <div class="settings-section">
       <div class="settings-section-label">AI provider</div>
       <div class="settings-radio-options">
         <button class="settings-radio" id="settings-prov-anthropic" onclick="selectProvider('anthropic')">Anthropic Claude</button>
@@ -1185,26 +1263,49 @@
         <button class="font-size-opt" style="font-size:1.3rem"  data-size="22" onclick="setFontSize(22)">A</button>
       </div>
     </div>
-
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- ══════════════════════════════════
        SURPRISE ME
        ══════════════════════════════════ -->
   <section id="screen-surprise" class="screen">
-    <button class="back-link" onclick="navigate('home')">← Back</button>
-    <h1>Surprise me</h1>
+    <button class="back-link" onclick="navigate('search')">← Back</button>
 
-    <div id="surprise-modes">
+    <div id="surprise-genre-step" style="display:block">
+      <h1>What do you feel like reading?</h1>
       <div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">
-        <button class="btn btn-primary" style="margin-bottom:10px" onclick="surpriseRandom()">Find me something new</button>
-        <button class="btn" id="surprise-shelf-btn" onclick="surpriseFromShelf()">Revisit my shelf</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Literary Fiction')">Literary Fiction</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Mystery &amp; Thriller')">Mystery &amp; Thriller</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Science Fiction &amp; Fantasy')">Science Fiction &amp; Fantasy</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('History &amp; Biography')">History &amp; Biography</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Science &amp; Ideas')">Science &amp; Ideas</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Philosophy &amp; Spirituality')">Philosophy &amp; Spirituality</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Poetry &amp; Essays')">Poetry &amp; Essays</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Business &amp; Investment')">Business &amp; Investment</button>
+        <button class="btn" style="text-align:left" onclick="selectSurpriseGenre('Surprise me anyway')">Surprise me anyway</button>
       </div>
     </div>
 
-    <div id="surprise-loading" class="status-msg" style="display:none">Finding a book…</div>
+    <div id="surprise-language-step" style="display:none">
+      <h1>Which language?</h1>
+      <div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('English')">English</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Traditional Chinese')">Traditional Chinese</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Simplified Chinese')">Simplified Chinese</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Japanese')">Japanese</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('French')">French</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Spanish')">Spanish</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('German')">German</button>
+        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Portuguese')">Portuguese</button>
+        <button class="btn" style="text-align:left" onclick="selectSurpriseLanguage('Korean')">Korean</button>
+      </div>
+    </div>
+
+    <div id="surprise-loading" style="display:none;font-size:1rem;padding:16px 0">Finding a book&#8230;</div>
 
     <div id="surprise-result" style="display:none"></div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
   <!-- BOOK CONVERSATIONS -->
@@ -1218,6 +1319,7 @@
       <button class="btn btn-small" onclick="updateBookStatus()">Update status</button>
     </div>
     <div id="conv-list"></div>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
 </div>

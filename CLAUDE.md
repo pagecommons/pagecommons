@@ -1,10 +1,10 @@
 # Page Commons — Claude Code Context
 
 ## What This Is
-Page Commons (pagecommons.com) is a
-reading companion web app optimised
-for e-ink devices (Kindle, Kobo Libra
-Colour). Open source, privacy-first,
+Page Commons (pagecommons.com) is a 
+reading companion web app optimised 
+for e-ink devices (Kindle, Kobo Libra 
+Colour). Open source, privacy-first, 
 indie project by a solo founder.
 
 ## Live URLs
@@ -30,11 +30,12 @@ indie project by a solo founder.
 - app.js — ALL JavaScript (source)
 - app.transpiled.js — Babel ES5 output
   THIS is what Vercel serves
+- support.html — standalone support page
+- transfer.html — desktop key transfer page
 - vercel.json — headers config
 - api/books.js — Google Books proxy
 - api/ai.js — free tier Gemini proxy
 - api/transfer.js — key transfer codes
-- transfer.html — desktop key transfer page
 - favicon.svg — dog-ear page icon
 - CLAUDE.md — this file
 - PENDING.md — full feature backlog
@@ -42,7 +43,7 @@ indie project by a solo founder.
 
 ## CRITICAL BUILD RULE
 Kobo WebKit does not support modern JS.
-ALL JavaScript in app.js must be
+ALL JavaScript in app.js must be 
 transpiled through Babel before deploy.
 
 Target: ie:11
@@ -111,13 +112,19 @@ Single file SPA with hash navigation:
 - #tc — Terms & Conditions
 - #key — API key setup
 - #search — Book search
+- #book-detail — Book detail view
 - #status — Reading status
 - #language — Language choice
 - #companion — AI chat
 - #shelf — Your shelf
 - #book-shelf — Book conversations
-- #settings — User settings
+- #settings — App settings
+- #surprise — Surprise Me
+- #age-gate — Adult content gate
 - #about — About page
+
+Standalone pages:
+- support.html — Support / donate page
 
 ## Five Use Cases
 1. The Archivist
@@ -172,6 +179,10 @@ Single file SPA with hash navigation:
 - Private messages never moderated
 - Block is the only social remedy
 - User owns all their data always
+
+## Current Version
+v0.28 — confirmed working on desktop.
+Kobo device test pending.
 
 ## What NOT to Change
 - index.html + app.js architecture
