@@ -1,5 +1,3 @@
-"use strict";
-
 function _regenerator() {
   /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */var e,
     t,
@@ -47,7 +45,7 @@ function _regenerator() {
                 if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object");
                 if (!t.done) return t;
                 u = t.value, c < 2 && (c = 0);
-              } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1);
+              } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1);
               i = e;
             } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break;
           } catch (t) {
@@ -412,6 +410,23 @@ function restoreCompanionUI(book) {
   updateStatusDisplay();
   populateIcebreakers(book);
   renderHighlightsPanel();
+  // Load per-book language override
+  var savedOverride = localStorage.getItem('pc_companion_lang_override_' + bookKey(book));
+  STATE.companionLangOverride = savedOverride || null;
+  updateLanguagePanelDisplay();
+  // Close all panels
+  document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('passages-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
+  document.getElementById('language-panel').classList.remove('open');
+  document.getElementById('length-panel').classList.remove('open');
+  document.getElementById('font-toolbar-btn').classList.remove('active');
+  document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('passages-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
+  document.getElementById('language-toolbar-btn').classList.remove('active');
+  document.getElementById('length-toolbar-btn').classList.remove('active');
 }
 
 // ═══════════════════════════════════════════════════
@@ -1125,7 +1140,7 @@ function lookupManualBook() {
       };
     }
     showBookDetail(book);
-  })["catch"](function () {
+  }).catch(function () {
     var book = {
       title: title.trim(),
       author: author.trim() || 'Unknown author',
@@ -1716,6 +1731,23 @@ function launchCompanion(book) {
   updatePassagesToolbarBtn();
   updateNotesToolbarBtn();
   populateIcebreakers(book);
+  // Load per-book language override
+  var savedOverride = localStorage.getItem('pc_companion_lang_override_' + bookKey(book));
+  STATE.companionLangOverride = savedOverride || null;
+  updateLanguagePanelDisplay();
+  // Close all panels
+  document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('passages-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
+  document.getElementById('language-panel').classList.remove('open');
+  document.getElementById('length-panel').classList.remove('open');
+  document.getElementById('font-toolbar-btn').classList.remove('active');
+  document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('passages-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
+  document.getElementById('language-toolbar-btn').classList.remove('active');
+  document.getElementById('length-toolbar-btn').classList.remove('active');
   navigate('companion');
 }
 function updateStatusDisplay() {
@@ -1940,7 +1972,7 @@ function selectSurpriseLanguage(lang) {
         pageCount: meta.pageCount,
         year: meta.year
       });
-    })["catch"](function () {
+    }).catch(function () {
       displaySurpriseResult({
         title: json.title,
         author: json.author || '',
@@ -1953,7 +1985,7 @@ function selectSurpriseLanguage(lang) {
         year: ''
       });
     });
-  })["catch"](function (err) {
+  }).catch(function (err) {
     console.error('[Surprise Me] API call failed:', err && err.message ? err.message : err);
     var msg = err && err.message ? err.message : 'Could not reach AI — try again?';
     surpriseParseError(lang, msg);
@@ -2362,7 +2394,7 @@ function parseKoboDatabase(input) {
           year: '',
           key: ''
         });
-      })["catch"](function (wasmErr) {
+      }).catch(function (wasmErr) {
         statusEl.textContent = 'Database reader failed to start: ' + wasmErr.message;
       });
     };
@@ -2885,7 +2917,7 @@ function appendBubble(role, text) {
         setTimeout(function () {
           copyBtn.textContent = 'Copy';
         }, 1500);
-      })["catch"](function () {
+      }).catch(function () {
         return showToolbarMsg('Copy not available in this browser.');
       });
     };
@@ -3035,7 +3067,7 @@ function callFreeTier(system, messages) {
       throw rateLimitErr;
     }
     if (!res.ok) {
-      return res.json()["catch"](function () {
+      return res.json().catch(function () {
         return {};
       }).then(function (e) {
         throw new Error(e && e.error ? e.error : 'HTTP ' + res.status);
@@ -3078,7 +3110,7 @@ function _callAnthropic() {
             break;
           }
           _context16.n = 2;
-          return res.json()["catch"](function () {
+          return res.json().catch(function () {
             return {};
           });
         case 2:
@@ -3155,7 +3187,7 @@ function _callGemini() {
             break;
           }
           _context17.n = 2;
-          return res.json()["catch"](function () {
+          return res.json().catch(function () {
             return {};
           });
         case 2:
@@ -3217,7 +3249,7 @@ function _callGroq() {
             break;
           }
           _context18.n = 2;
-          return res.json()["catch"](function () {
+          return res.json().catch(function () {
             return {};
           });
         case 2:
@@ -3582,6 +3614,45 @@ function setReplyLength(length) {
   });
   showToolbarMsg('Reply length set to ' + length + '.');
 }
+function toggleLanguagePanel() {
+  var panel = document.getElementById('language-panel');
+  var btn = document.getElementById('language-toolbar-btn');
+  panel.classList.toggle('open');
+  document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('passages-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
+  document.getElementById('length-panel').classList.remove('open');
+  document.getElementById('font-toolbar-btn').classList.remove('active');
+  document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('passages-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
+  document.getElementById('length-toolbar-btn').classList.remove('active');
+  panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
+  updateLanguagePanelDisplay();
+}
+function setCompanionLanguage(lang) {
+  STATE.companionLangOverride = lang || null;
+  if (lang) {
+    localStorage.setItem('pc_companion_lang_override_' + bookKey(STATE.book), lang);
+    showToolbarMsg('Prompts now in ' + lang + '.');
+  } else {
+    localStorage.removeItem('pc_companion_lang_override_' + bookKey(STATE.book));
+    showToolbarMsg('Auto-detect enabled.');
+  }
+  updateLanguagePanelDisplay();
+}
+function updateLanguagePanelDisplay() {
+  var overrideLang = STATE.companionLangOverride;
+  document.querySelectorAll('.language-opt').forEach(function (b) {
+    var btnLang = b.textContent.trim();
+    if (overrideLang && btnLang === overrideLang) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
+  });
+}
 
 // ═══════════════════════════════════════════════════
 //  PASSAGES
@@ -3765,7 +3836,7 @@ function copyAllPassages() {
   }).join('\n\n');
   navigator.clipboard.writeText(text).then(function () {
     showToolbarMsg(passages.length + ' passage' + (passages.length !== 1 ? 's' : '') + ' copied to clipboard.');
-  })["catch"](function () {
+  }).catch(function () {
     return showToolbarMsg('Copy not available in this browser.');
   });
 }
@@ -3841,7 +3912,7 @@ function redeemTransferCode() {
     // Hide the transfer fields
     var fields = document.getElementById('transfer-fields');
     if (fields) fields.style.display = 'none';
-  })["catch"](function (err) {
+  }).catch(function (err) {
     if (btn) {
       btn.disabled = false;
       btn.textContent = 'Fetch my key';
@@ -3946,7 +4017,7 @@ function fetchAndCacheSubjects(book) {
     }).then(function (data) {
       var subjects = (data.subjects || []).slice(0, 10);
       localStorage.setItem(cacheKey, JSON.stringify(subjects));
-    })["catch"](function () {});
+    }).catch(function () {});
   } else if (book.cats) {
     var cats = book.cats.split(/\s+/).filter(Boolean).slice(0, 6);
     if (cats.length) localStorage.setItem(cacheKey, JSON.stringify(cats));

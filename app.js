@@ -293,6 +293,23 @@ function restoreCompanionUI(book) {
   updateStatusDisplay();
   populateIcebreakers(book);
   renderHighlightsPanel();
+  // Load per-book language override
+  var savedOverride = localStorage.getItem('pc_companion_lang_override_' + bookKey(book));
+  STATE.companionLangOverride = savedOverride || null;
+  updateLanguagePanelDisplay();
+  // Close all panels
+  document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('passages-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
+  document.getElementById('language-panel').classList.remove('open');
+  document.getElementById('length-panel').classList.remove('open');
+  document.getElementById('font-toolbar-btn').classList.remove('active');
+  document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('passages-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
+  document.getElementById('language-toolbar-btn').classList.remove('active');
+  document.getElementById('length-toolbar-btn').classList.remove('active');
 }
 
 // ═══════════════════════════════════════════════════
@@ -1582,6 +1599,23 @@ function launchCompanion(book) {
   updatePassagesToolbarBtn();
   updateNotesToolbarBtn();
   populateIcebreakers(book);
+  // Load per-book language override
+  var savedOverride = localStorage.getItem('pc_companion_lang_override_' + bookKey(book));
+  STATE.companionLangOverride = savedOverride || null;
+  updateLanguagePanelDisplay();
+  // Close all panels
+  document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('passages-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
+  document.getElementById('language-panel').classList.remove('open');
+  document.getElementById('length-panel').classList.remove('open');
+  document.getElementById('font-toolbar-btn').classList.remove('active');
+  document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('passages-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
+  document.getElementById('language-toolbar-btn').classList.remove('active');
+  document.getElementById('length-toolbar-btn').classList.remove('active');
   navigate('companion');
 }
 function updateStatusDisplay() {
@@ -3510,6 +3544,48 @@ function setReplyLength(length) {
     b.dataset.length === length ? b.classList.add('active') : b.classList.remove('active');
   });
   showToolbarMsg('Reply length set to ' + length + '.');
+}
+
+function toggleLanguagePanel() {
+  var panel = document.getElementById('language-panel');
+  var btn = document.getElementById('language-toolbar-btn');
+  panel.classList.toggle('open');
+  document.getElementById('font-panel').classList.remove('open');
+  document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('passages-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
+  document.getElementById('length-panel').classList.remove('open');
+  document.getElementById('font-toolbar-btn').classList.remove('active');
+  document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('passages-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
+  document.getElementById('length-toolbar-btn').classList.remove('active');
+  panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
+  updateLanguagePanelDisplay();
+}
+
+function setCompanionLanguage(lang) {
+  STATE.companionLangOverride = lang || null;
+  if (lang) {
+    localStorage.setItem('pc_companion_lang_override_' + bookKey(STATE.book), lang);
+    showToolbarMsg('Prompts now in ' + lang + '.');
+  } else {
+    localStorage.removeItem('pc_companion_lang_override_' + bookKey(STATE.book));
+    showToolbarMsg('Auto-detect enabled.');
+  }
+  updateLanguagePanelDisplay();
+}
+
+function updateLanguagePanelDisplay() {
+  var overrideLang = STATE.companionLangOverride;
+  document.querySelectorAll('.language-opt').forEach(function (b) {
+    var btnLang = b.textContent.trim();
+    if (overrideLang && btnLang === overrideLang) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
+  });
 }
 
 // ═══════════════════════════════════════════════════
