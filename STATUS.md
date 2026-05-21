@@ -1,12 +1,20 @@
 # Page Commons — Current Status
 
-Last updated: May 19, 2026
-Current version: v0.28
-Updated by: Claude session - support page + footers + doc updates
+Last updated: May 21, 2026
+Current version: v0.28.1
+Updated by: Claude session - icebreaker prompt regression fix
 
 ## What was done this session
 
-### Support Page (support.html) ✓
+### Icebreaker Prompt Regression Fix ✓
+- Root cause: Race condition in selectBook() — fetchAndCacheSubjects was async fire-and-forget
+- populateIcebreakers ran immediately after, before subjects were cached from OpenLibrary
+- fetchAIIcebreakers received no book subjects, generated generic prompts instead
+- Fixed by: Making fetchAndCacheSubjects return Promise, awaiting it in selectBook before launchCompanion
+- Result: Book subjects now cached before icebreakers generated; AI gets genre/theme context
+- Prompts now specific to each book (e.g., finance-focused for business books like Rich Dad Poor Dad)
+
+### Support Page (support.html) ✓ [from v0.28]
 - Standalone page, no new dependencies, same CSS foundations as index.html
 - Two full-width CTA buttons: Ko-fi (one-time tip) and Amazon affiliate
 - Affiliate disclosure below Amazon button (16px, #777777)
@@ -41,16 +49,13 @@ Updated by: Claude session - support page + footers + doc updates
 - Applied to AI prompts; auto-detect reset button
 
 ## Testing Completed
-- [x] Transpilation validates (Babel ES5 for Kobo compatibility)
-- [x] support.html renders correctly on desktop
-- [x] All 14 screen footers present in index.html
-- [x] Ko-fi and Amazon links correct
-- [x] All changes committed and pushed to feature branch
-- [x] Merged to main for device testing
-- [ ] support.html on Kobo device
-- [ ] Footer links tappable on Kobo (44px not required — small text)
-- [ ] Chinese language detection on Kobo with Traditional books
-- [ ] Companion language selector on Kobo
+- [x] Icebreaker fix transpiled and verified
+- [x] All changes committed to feature branch
+- [ ] Device testing on Kobo Libra Colour with v0.28.1 (icebreaker fix)
+  - [ ] Icebreaker prompts are book-specific, not generic
+  - [ ] Test with Rich Dad Poor Dad (Business): expect finance-focused questions
+  - [ ] Test with a novel: expect narrative-focused questions
+- [ ] Verify no regression in: language detection, language selector, support page footer
 - [ ] Search regression test on Kobo
 
 ## Current Known Issues
