@@ -1100,8 +1100,10 @@ function discoverBook(book) {
   var dl = detectLanguage(book);
   STATE.detectedLang = dl;
   STATE.chatLanguage = dl ? 'native' : (localStorage.getItem('pc_lang_' + bookKey(book)) || 'english');
-  navigate('companion');
-  launchCompanion(book);
+  fetchAndCacheSubjects(book).then(function() {
+    navigate('companion');
+    launchCompanion(book);
+  });
 }
 function confirmAgeGate() {
   return _confirmAgeGate.apply(this, arguments);
@@ -2461,12 +2463,6 @@ function _populateIcebreakers() {
         case 0:
           list = document.getElementById('icebreaker-list');
           list.innerHTML = '';
-          if (STATE.companionMode === 'discover') {
-            var discoverLang = STATE.detectedLang || 'English';
-            var discoverSet = DISCOVER_PROMPTS[discoverLang] || DISCOVER_PROMPTS['English'];
-            renderIcebreakerButtons(discoverSet, list);
-            return _context12.a(2);
-          }
           loadEl = document.createElement('div');
           loadEl.className = 'icebreaker-label';
           loadEl.style.fontStyle = 'italic';
