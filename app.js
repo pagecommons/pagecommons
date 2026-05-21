@@ -2547,7 +2547,13 @@ function _fetchAIIcebreakers() {
           };
           statusLabel = statusLabels[STATE.readingStatus] || 'reading';
           var _lang = STATE.companionLangOverride || STATE.detectedLang || detectLanguage(book);
-          langNote = _lang ? 'You must write entirely in ' + _lang + '. Every word of your response must be in ' + _lang + '. Do not use any English.' : '';
+          var _langNotes = {
+            'Traditional Chinese': '寫全部繁體中文。You MUST write in Traditional Chinese (繁體中文) characters ONLY. Do NOT use Japanese, Simplified Chinese, or English. Every single word must be in Traditional Chinese.',
+            'Simplified Chinese': '写全部简体中文。You MUST write in Simplified Chinese (简体中文) characters ONLY. Do NOT use Japanese, Traditional Chinese, or English. Every single word must be in Simplified Chinese.',
+            'Japanese': 'すべて日本語で書いてください。You MUST write in Japanese (日本語) ONLY using hiragana, katakana, or kanji. Do NOT use Chinese or English.',
+            'Korean': '모두 한국어로 쓰세요. You MUST write in Korean (한국어) using Hangul ONLY. Do NOT use Chinese, Japanese, or English.'
+          };
+          langNote = _lang ? (_langNotes[_lang] || ('You must write entirely in ' + _lang + '. Every word of your response must be in ' + _lang + '. Do not use any English.')) : '';
           var cachedSubjects = localStorage.getItem('pc_subjects_' + bookKey(book));
           var subjectArr = cachedSubjects ? JSON.parse(cachedSubjects) : [];
           var subjectNote = subjectArr.length ? '\nKnown subjects/themes: ' + subjectArr.slice(0, 8).join(', ') + '.' : '';
