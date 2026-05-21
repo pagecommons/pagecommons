@@ -1380,8 +1380,9 @@ function _selectBook() {
           STATE.book = book;
           STATE.companionMode = 'reading';
           STATE.messages = [];
-          fetchAndCacheSubjects(book);
-
+          _context0.n = 1;
+          return fetchAndCacheSubjects(book);
+        case 1:
           // ensure lang field is persisted on book object (Bug Fix B)
           detectedLang = detectLanguage(book);
           if (detectedLang) book.detectedLang = detectedLang;
@@ -1390,7 +1391,7 @@ function _selectBook() {
           savedStatus = localStorage.getItem('pc_status_' + bk);
           savedLang = localStorage.getItem('pc_lang_' + bk);
           if (!savedStatus) {
-            _context0.n = 2;
+            _context0.n = 3;
             break;
           }
           // returning book — always use native for detected non-English books
@@ -1400,22 +1401,22 @@ function _selectBook() {
           if (detectedLang) localStorage.setItem('pc_lang_' + bk, 'native');
           // restore thinking phrases if native language was chosen
           if (!(STATE.chatLanguage === 'native' && detectedLang)) {
-            _context0.n = 1;
+            _context0.n = 2;
             break;
           }
-          _context0.n = 1;
+          _context0.n = 2;
           return generateThinkingPhrases(detectedLang);
-        case 1:
-          launchCompanion(book);
-          _context0.n = 3;
-          break;
         case 2:
+          launchCompanion(book);
+          _context0.n = 4;
+          break;
+        case 3:
           // new book — pre-set language so status screen renders in the right language
           STATE.detectedLang = detectedLang;
           if (detectedLang) STATE.chatLanguage = 'native';
           renderStatusScreen(book);
           navigate('status');
-        case 3:
+        case 4:
           return _context0.a(2);
       }
     }, _callee0);
@@ -3932,9 +3933,9 @@ function updateProgressFromHighlights(highlights) {
 function fetchAndCacheSubjects(book) {
   var bk = bookKey(book);
   var cacheKey = 'pc_subjects_' + bk;
-  if (localStorage.getItem(cacheKey)) return;
+  if (localStorage.getItem(cacheKey)) return Promise.resolve();
   if (book.key && book.key.indexOf('/works/') === 0) {
-    fetch('https://openlibrary.org' + book.key + '.json')
+    return fetch('https://openlibrary.org' + book.key + '.json')
       .then(function(r) { return r.json(); })
       .then(function(data) {
         var subjects = (data.subjects || []).slice(0, 10);
@@ -3944,7 +3945,9 @@ function fetchAndCacheSubjects(book) {
   } else if (book.cats) {
     var cats = book.cats.split(/\s+/).filter(Boolean).slice(0, 6);
     if (cats.length) localStorage.setItem(cacheKey, JSON.stringify(cats));
+    return Promise.resolve();
   }
+  return Promise.resolve();
 }
 
 function init() {
