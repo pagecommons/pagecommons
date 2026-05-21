@@ -1777,10 +1777,14 @@ function selectSurpriseLanguage(lang) {
     shelfContext = 'The user has not read any books yet.';
   }
 
+  var titleLangNote = (lang === 'English')
+    ? ''
+    : 'Write the title and author exactly as they appear in the ' + lang + ' edition. Use ' + lang + ' script for the title.\n';
+
   var system = 'You are a book recommendation assistant.\n' +
     'You MUST suggest a book that is ' + langInstruction + '.\n' +
     'The user will be reading it in ' + lang + '.\n' +
-    'Do NOT suggest a book that is not available in ' + lang + '.\n' +
+    'Do NOT suggest a book in a different language — even if the same book exists in multiple languages, you must return the ' + lang + ' edition.\n' +
     'Respond with JSON only.\n' +
     'No explanation. No markdown. No code fences.\n' +
     'Raw JSON only, nothing else.';
@@ -1797,6 +1801,7 @@ function selectSurpriseLanguage(lang) {
 
   var userMessage = 'Suggest one ' + genre + ' book for a reader who wants to read in ' + lang + '.\n' +
     'The book MUST be ' + langInstruction + '.\n' +
+    titleLangNote +
     'Do not suggest any book that is not available in ' + lang + '.\n' +
     shelfContext +
     seenNote + '\n' +
