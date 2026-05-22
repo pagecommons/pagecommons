@@ -588,7 +588,7 @@ function _interpretSearchQuery() {
             break;
           }
           _context2.n = 7;
-          return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + STATE.apiKey, {
+          return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + STATE.apiKey, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -598,7 +598,12 @@ function _interpretSearchQuery() {
                 parts: [{
                   text: prompt
                 }]
-              }]
+              }],
+              generationConfig: {
+                thinkingConfig: {
+                  thinkingBudget: 0
+                }
+              }
             }, langNote ? {
               systemInstruction: {
                 parts: [{
@@ -1362,7 +1367,7 @@ function _renderStatusScreen() {
             break;
           }
           _context9.n = 6;
-          return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + STATE.apiKey, {
+          return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + STATE.apiKey, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -1372,7 +1377,12 @@ function _renderStatusScreen() {
                 parts: [{
                   text: prompt
                 }]
-              }]
+              }],
+              generationConfig: {
+                thinkingConfig: {
+                  thinkingBudget: 0
+                }
+              }
             })
           });
         case 6:
@@ -2136,7 +2146,7 @@ function _generateThinkingPhrases() {
             break;
           }
           _context11.n = 9;
-          return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + STATE.apiKey, {
+          return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + STATE.apiKey, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -2146,7 +2156,12 @@ function _generateThinkingPhrases() {
                 parts: [{
                   text: prompt
                 }]
-              }]
+              }],
+              generationConfig: {
+                thinkingConfig: {
+                  thinkingBudget: 0
+                }
+              }
             })
           });
         case 9:
@@ -2738,7 +2753,7 @@ function _fetchAIIcebreakers() {
             break;
           }
           _context13.n = 5;
-          return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + STATE.apiKey, {
+          return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + STATE.apiKey, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -2751,7 +2766,10 @@ function _fetchAIIcebreakers() {
               }],
               generationConfig: {
                 responseMimeType: 'application/json',
-                maxOutputTokens: 400
+                maxOutputTokens: 400,
+                thinkingConfig: {
+                  thinkingBudget: 0
+                }
               }
             }, langNote ? {
               systemInstruction: {
@@ -3240,7 +3258,7 @@ function _callGemini() {
             }]
           });
           _context17.n = 1;
-          return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + STATE.apiKey, {
+          return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + STATE.apiKey, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -3248,7 +3266,10 @@ function _callGemini() {
             body: JSON.stringify({
               contents: contents,
               generationConfig: {
-                maxOutputTokens: STATE.replyLength === 'short' ? 400 : 1500
+                maxOutputTokens: STATE.replyLength === 'short' ? 400 : 1500,
+                thinkingConfig: {
+                  thinkingBudget: 0
+                }
               }
             })
           });

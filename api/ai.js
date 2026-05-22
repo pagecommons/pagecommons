@@ -11,8 +11,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+  const keys = getGroqKeys();
+  if (!keys.length) {
     return res.status(503).json({ error: 'Free tier not available' });
   }
 
@@ -21,50 +21,84 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid request' });
   }
 
-  const contents = messages.map(function(m) {
-    return {
-      role: m.role === 'user' ? 'user' : 'model',
-      parts: [{ text: m.content }]
-    };
+  const chatMessages = [];
+  if (system) {
+    chatMessages.push({ role: 'system', content: system });
+  }
+  messages.forEach(function (m) {
+    chatMessages.push({
+      role: m.role === 'user' ? 'user' : 'assistant',
+      content: m.content
+    });
   });
 
-  if (system) {
-    contents.unshift({ role: 'user', parts: [{ text: system }] });
-    contents.splice(1, 0, { role: 'model', parts: [{ text: "Understood. I'm ready." }] });
-  }
+  // Spread load across keys with a random start, and fail over to the next
+  // key on rate-limit or transient error. Only report rate_limited if every
+  // configured key is exhausted.
+  const start = Math.floor(Math.random() * keys.length);
+  let sawRateLimit = false;
 
-  try {
-    const geminiRes = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey,
-      {
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[(start + i) % keys.length];
+    try {
+      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: contents })
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + key
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 1024,
+          messages: chatMessages
+        })
+      });
+
+      if (groqRes.status === 429) {
+        sawRateLimit = true;
+        continue;
       }
-    );
 
-    if (geminiRes.status === 429) {
-      return res.status(429).json({ error: 'rate_limited' });
+      const data = await groqRes.json();
+
+      if (!groqRes.ok) {
+        continue;
+      }
+
+      const text =
+        data &&
+        data.choices &&
+        data.choices[0] &&
+        data.choices[0].message &&
+        data.choices[0].message.content
+          ? data.choices[0].message.content
+          : '(No response)';
+
+      return res.status(200).json({ text: text });
+    } catch (err) {
+      // try the next key
     }
-
-    const data = await geminiRes.json();
-
-    if (!geminiRes.ok) {
-      return res.status(502).json({ error: 'AI service error' });
-    }
-
-    const text =
-      data &&
-      data.candidates &&
-      data.candidates[0] &&
-      data.candidates[0].content &&
-      data.candidates[0].content.parts &&
-      data.candidates[0].content.parts[0]
-        ? data.candidates[0].content.parts[0].text
-        : '(No response)';
-
-    return res.status(200).json({ text: text });
-  } catch (err) {
-    return res.status(500).json({ error: 'Failed to reach AI service' });
   }
+
+  if (sawRateLimit) {
+    return res.status(429).json({ error: 'rate_limited' });
+  }
+  return res.status(502).json({ error: 'AI service error' });
+}
+
+// Collect Groq keys from env: a comma-separated GROQ_API_KEYS and/or the
+// individual GROQ_API_KEY / GROQ_API_KEY_1..5 variables. Duplicates removed.
+function getGroqKeys() {
+  const keys = [];
+  if (process.env.GROQ_API_KEYS) {
+    process.env.GROQ_API_KEYS.split(',').forEach(function (k) {
+      const t = k.trim();
+      if (t && keys.indexOf(t) === -1) keys.push(t);
+    });
+  }
+  ['GROQ_API_KEY', 'GROQ_API_KEY_1', 'GROQ_API_KEY_2', 'GROQ_API_KEY_3', 'GROQ_API_KEY_4', 'GROQ_API_KEY_5'].forEach(function (name) {
+    const v = process.env[name];
+    if (v && keys.indexOf(v) === -1) keys.push(v);
+  });
+  return keys;
 }
