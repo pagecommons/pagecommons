@@ -15,6 +15,9 @@
   - [ ] Surprise Me returns correct language edition (not alternate editions)
   - [ ] Pagination "Show more results" still works
   - [ ] Search still works (language filter removed — verify no regression)
+  - [ ] Data export downloads a valid JSON backup on device (Kobo/Kindle)
+  - [ ] Data import restores from backup file and merges localStorage
+  - [ ] Import error message shows for non-backup JSON (inline red, no alert)
 - [ ] Full device testing on Kindle (any model)
 - [ ] Test manual entry Google Books lookup across different queries
 - [ ] Test About toggle doesn't interfere with book result tapping
@@ -80,6 +83,17 @@
 - Database migration (in favor of localStorage for privacy)
 
 ## Completed ✓
+
+### v0.29 — Data export / import (localStorage backup)
+- [x] "Your data" section on #settings (below Text size)
+- [x] Export my data: downloads pagecommons-backup-YYYY-MM-DD.json (all pc_ keys
+      + exported_at/version metadata) via Blob URL, fully client-side
+- [x] Import data from backup: hidden .json file input, FileReader + JSON.parse
+- [x] Validates `data` field; merges into localStorage (overwrites conflicts,
+      keeps other keys); no auto reload
+- [x] Inline messages only (no alert/confirm): #cc0000 errors, #006600 success,
+      auto-hide after 5s
+- [x] ES5-safe, transpiled to app.transpiled.js (IE 11 target)
 
 ### v0.28 — Support page + per-screen footer
 - [x] support.html created (Ko-fi, Amazon affiliate, GitHub issues link)

@@ -745,7 +745,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.28</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.29</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -1263,6 +1263,17 @@
         <button class="font-size-opt" style="font-size:1.3rem"  data-size="22" onclick="setFontSize(22)">A</button>
       </div>
     </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label">Your data</div>
+      <p style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px">Back up your Page Commons data or restore it on another device.</p>
+      <button class="btn" style="margin-bottom:10px" onclick="exportUserData()">Export my data</button>
+      <div id="data-export-msg" style="display:none;font-size:0.85rem;margin-bottom:14px"></div>
+      <button class="btn" onclick="triggerImportPicker()">Import data from backup</button>
+      <input type="file" id="data-import-input" accept="application/json,.json" style="display:none" onchange="importUserData(this)" />
+      <div id="data-import-msg" style="display:none;font-size:0.85rem;margin-top:10px"></div>
+    </div>
+
     <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 

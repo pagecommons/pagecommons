@@ -1,10 +1,40 @@
 # Page Commons — Current Status
 
 Last updated: May 22, 2026
-Current version: v0.28.1
-Updated by: Claude session - icebreaker prompt regression fix
+Current version: v0.29
+Updated by: Claude session - data export/import (localStorage backup)
 
 ## What was done this session
+
+### Data Export / Import (localStorage backup) ✓ [v0.29]
+- New "Your data" section on #settings screen (below Text size)
+- Explanation line: "Back up your Page Commons data or restore it on another device."
+- Two full-width .btn buttons, stacked, 48px min height (≥44px tap target)
+- Export: collects all localStorage keys starting with `pc_`, builds JSON
+  { exported_at, version, data: {...} }, triggers client-side download via
+  temporary anchor + Blob URL, file named `pagecommons-backup-YYYY-MM-DD.json`
+- Import: hidden file input (accept .json), triggered by visible button;
+  FileReader → JSON.parse → validates presence of `data` object
+- Invalid file shows inline red error "This doesn't look like a Page Commons
+  backup file." (no alert)
+- Valid import merges into localStorage (overwrites conflicts, keeps other
+  keys), shows inline green "Data restored. Reload the page to see your shelf
+  and settings." — no auto reload
+- All messages inline below button: #cc0000 errors, #006600 success, auto-hide
+  after 5s. No alert()/confirm() anywhere.
+- Entirely client-side (FileReader + Blob, no libraries, no server)
+- ES5-safe; transpiled to app.transpiled.js (IE 11 target)
+- Logic verified in Node harness (export key filtering, metadata, filename,
+  import validation, merge/overwrite behaviour, error/success messaging)
+
+### Build note
+- app.transpiled.js regenerated with:
+  npx babel app.js -o app.transpiled.js \
+    --plugins @babel/plugin-transform-regenerator,@babel/plugin-transform-member-expression-literals,@babel/plugin-transform-property-literals,@babel/plugin-transform-reserved-words \
+    --presets @babel/preset-env
+  (reproduces prior committed output style: "use strict" + bracket reserved words)
+
+## Previous session
 
 ### Icebreaker Prompt Regression Fix ✓
 - Root cause: Race condition in selectBook() — fetchAndCacheSubjects was async fire-and-forget

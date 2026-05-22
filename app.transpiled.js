@@ -1,5 +1,7 @@
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 function _regenerator() {
   /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */var e,
     t,
@@ -3974,6 +3976,102 @@ function saveSettingCompanionName() {
   localStorage.setItem('pc_companion_name', STATE.companionName);
   var keyInp = document.getElementById('companion-name-input');
   if (keyInp) keyInp.value = val;
+}
+
+// ═══════════════════════════════════════════════════
+//  DATA EXPORT / IMPORT (localStorage backup)
+// ═══════════════════════════════════════════════════
+var DATA_BACKUP_VERSION = '0.29';
+function showDataMessage(elId, msg, isError) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = isError ? '#cc0000' : '#006600';
+  el.style.display = 'block';
+  if (el.pcMsgTimer) clearTimeout(el.pcMsgTimer);
+  el.pcMsgTimer = setTimeout(function () {
+    el.style.display = 'none';
+    el.textContent = '';
+  }, 5000);
+}
+function todayDateStamp() {
+  var now = new Date();
+  var y = now.getFullYear();
+  var m = ('0' + (now.getMonth() + 1)).slice(-2);
+  var d = ('0' + now.getDate()).slice(-2);
+  return y + '-' + m + '-' + d;
+}
+function exportUserData() {
+  try {
+    var data = {};
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf('pc_') === 0) {
+        data[k] = localStorage.getItem(k);
+      }
+    }
+    var dateStr = todayDateStamp();
+    var payload = {
+      exported_at: dateStr,
+      version: DATA_BACKUP_VERSION,
+      data: data
+    };
+    var json = JSON.stringify(payload, null, 2);
+    var blob = new Blob([json], {
+      type: 'application/json'
+    });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'pagecommons-backup-' + dateStr + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () {
+      URL.revokeObjectURL(url);
+    }, 1000);
+    showDataMessage('data-export-msg', 'Backup downloaded.', false);
+  } catch (e) {
+    showDataMessage('data-export-msg', 'Export failed. Please try again.', true);
+  }
+}
+function triggerImportPicker() {
+  var inp = document.getElementById('data-import-input');
+  if (!inp) return;
+  inp.value = '';
+  inp.click();
+}
+function importUserData(inputEl) {
+  var file = inputEl && inputEl.files && inputEl.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    var parsed;
+    try {
+      parsed = JSON.parse(e.target.result);
+    } catch (err) {
+      showDataMessage('data-import-msg', "This doesn't look like a Page Commons backup file.", true);
+      return;
+    }
+    if (!parsed || (0, _typeof2["default"])(parsed) !== 'object' || !parsed.data || (0, _typeof2["default"])(parsed.data) !== 'object') {
+      showDataMessage('data-import-msg', "This doesn't look like a Page Commons backup file.", true);
+      return;
+    }
+    try {
+      var keys = Object.keys(parsed.data);
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        localStorage.setItem(k, String(parsed.data[k]));
+      }
+      showDataMessage('data-import-msg', 'Data restored. Reload the page to see your shelf and settings.', false);
+    } catch (err2) {
+      showDataMessage('data-import-msg', 'Import failed. Please try again.', true);
+    }
+  };
+  reader.onerror = function () {
+    showDataMessage('data-import-msg', 'Could not read the file. Please try again.', true);
+  };
+  reader.readAsText(file);
 }
 
 // ═══════════════════════════════════════════════════
