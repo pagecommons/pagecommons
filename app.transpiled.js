@@ -2583,6 +2583,50 @@ function getStaticPromptsByStatus(status) {
   };
   return (sets[status] || STATIC_PROMPTS).slice(0, 4);
 }
+function _icebreakerStrings(v) {
+  if (!Array.isArray(v)) return null;
+  var out = [];
+  for (var i = 0; i < v.length; i++) {
+    if (typeof v[i] === 'string' && v[i].trim()) out.push(v[i].trim());else if (v[i] && typeof v[i].text === 'string' && v[i].text.trim()) out.push(v[i].text.trim());
+  }
+  return out.length ? out : null;
+}
+// Parse model output into a list of prompt strings, tolerating markdown
+// fences, smart quotes, surrounding prose, and numbered/bulleted lists.
+function parseIcebreakerList(text) {
+  if (!text) return [];
+  var clean = String(text).replace(/```json|```/g, '').trim();
+  // Normalize curly/smart quotes to straight quotes so JSON.parse can work
+  clean = clean.replace(/[“”„‟″‶]/g, '"').replace(/[‘’‚‛′‵]/g, "'");
+  var arr = null;
+  try {
+    arr = _icebreakerStrings(JSON.parse(clean));
+  } catch (e) {}
+  if (arr) return arr;
+  // Extract the first [...] block from surrounding prose and parse that
+  var m = clean.match(/\[[\s\S]*\]/);
+  if (m) {
+    try {
+      arr = _icebreakerStrings(JSON.parse(m[0]));
+    } catch (e2) {}
+    if (arr) return arr;
+  }
+  // Last resort: numbered / bulleted / quoted lines
+  var lines = clean.split(/\r?\n/);
+  var out = [];
+  for (var i = 0; i < lines.length; i++) {
+    var raw = lines[i].trim();
+    if (!raw) continue;
+    var marker = raw.match(/^(?:\d+[\.\)]|[-*•])\s+(.+)$/);
+    var quoted = raw.match(/^["'](.+)["'],?$/);
+    var item = marker ? marker[1] : quoted ? quoted[1] : null;
+    if (item) {
+      item = item.replace(/^["']+|["']+$/g, '').trim();
+      if (item && item.length <= 80) out.push(item);
+    }
+  }
+  return out;
+}
 function fetchAIIcebreakers(_x1) {
   return _fetchAIIcebreakers.apply(this, arguments);
 }
@@ -2738,22 +2782,7 @@ function _fetchAIIcebreakers() {
         case 11:
           text = _t31;
         case 12:
-          // Clean response and attempt JSON parse
-          clean = text.replace(/```json|```/g, '').trim();
-          parsed = null;
-          try {
-            parsed = JSON.parse(clean);
-          } catch (e) {
-            // Try to extract array with regex
-            match = clean.match(/\[\s*"[^"]*"(?:\s*,\s*"[^"]*")*\s*\]/);
-            if (match) {
-              try {
-                parsed = JSON.parse(match[0]);
-              } catch (e2) {
-                parsed = null;
-              }
-            }
-          }
+          parsed = parseIcebreakerList(text);
           if (!(!Array.isArray(parsed) || parsed.length < 2)) {
             _context13.n = 13;
             break;
