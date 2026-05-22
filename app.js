@@ -1799,6 +1799,7 @@ function selectSurpriseLanguage(lang) {
   var loadEl = document.getElementById('surprise-loading');
   loadEl.textContent = 'Finding a book…';
   loadEl.style.display = 'block';
+  document.getElementById('surprise-genre-step').style.display = 'none';
   document.getElementById('surprise-language-step').style.display = 'none';
   document.getElementById('surprise-result').style.display = 'none';
 
