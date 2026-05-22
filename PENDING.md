@@ -24,6 +24,7 @@
 - [ ] Test back navigation flow (search → book-detail → search)
 
 ### UI/UX Polish
+- [ ] #home (Welcome screen): add a short 1–2 sentence intro below "Welcome to Page Commons" explaining what the app is
 - [ ] Reading-status screen: omit the "considering / thinking about reading it" option when the screen is reached via the book-detail "I have this book" button — it duplicates the book-detail "Find out if it's for me" option already offered on the previous screen
 - [ ] Rename book-detail button "I'm reading this" → "I have this book"
 - [ ] Move tagline "Just books. No noise." to right side of header
@@ -32,6 +33,7 @@
 - [ ] Verify all 44px minimum tap targets on device
 
 ### Support Page
+- [ ] support.html: remove the "Support it →" footer link (it loops back to the same page)
 - [ ] Verify support.html renders correctly on Kobo
 - [ ] Verify Ko-fi and Amazon links open correctly
 - [ ] Confirm per-screen footer line "Support it →" appears on all screens
@@ -41,6 +43,15 @@
 - [ ] Review and improve genre list (currently 8 options)
 - [ ] Test Gemini free tier performance under various contexts
 - [ ] Add graceful fallback if Gemini API fails during Surprise Me
+
+### Onboarding Flow & AI-Mode System
+- [ ] After first-time T&C accept → intro screen with a brief introduction, then a choice: BYOK vs Use shared AI pool
+- [ ] Shared = the existing /api/ai shared proxy (now Groq-backed; already powers the companion when no key is set). Show a reminder it's shared and may be unavailable under heavy use → goes straight to the main hall, no key entry
+- [ ] BYOK → link to a new providers.html (standalone page) explaining how to get a key from each provider (Anthropic, Gemini, Groq) → then show #key entry → then main hall
+- [ ] Persist choice in localStorage (pc_ai_mode = byok | shared); returning users skip the choice step
+- [ ] Relax the current STATE.apiKey gate (around app.js:137 / :146) so shared-mode users reach search/companion without a key
+- [ ] Settings: BYOK/Shared becomes the top-level toggle; the AI-provider radio + key field only apply in BYOK mode; Shared forces the shared proxy and hides the key field
+- [ ] Persistent footer link on every screen → goes to Settings (full Settings page, not just AI), reusing the existing per-screen support-footer area
 
 ## Priority 2: V2 Features (Post-Launch, Community Rooms)
 
