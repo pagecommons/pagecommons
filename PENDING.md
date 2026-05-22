@@ -24,6 +24,8 @@
 - [ ] Test back navigation flow (search → book-detail → search)
 
 ### UI/UX Polish
+- [ ] Reading-status screen: omit the "considering / thinking about reading it" option when the screen is reached via the book-detail "I have this book" button — it duplicates the book-detail "Find out if it's for me" option already offered on the previous screen
+- [ ] Rename book-detail button "I'm reading this" → "I have this book"
 - [ ] Move tagline "Just books. No noise." to right side of header
 - [ ] Consider minimum width/responsiveness on very large e-ink screens
 - [ ] Review all button text for consistency and brevity
