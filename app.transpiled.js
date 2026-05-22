@@ -2574,14 +2574,42 @@ function _populateIcebreakers() {
   }));
   return _populateIcebreakers.apply(this, arguments);
 }
-function getStaticPromptsByStatus(status) {
-  var sets = {
+var STATIC_PROMPT_SETS = {
+  'English': {
     considering: ["What drew you to this book?", "Are you ready for its themes?", "What made you curious?", "Have you read similar books?"],
     started: ["What are your first impressions?", "Which character interests you most?", "Something already surprised me", "I want to know what lies ahead"],
     midway: ["Something unexpected happened", "I have a theory about the ending", "A character changed my mind", "I cannot put this down"],
     finished: ["I just finished it", "The ending stayed with me", "Something is still on my mind", "What should I read next?"]
-  };
-  return (sets[status] || STATIC_PROMPTS).slice(0, 4);
+  },
+  'Traditional Chinese': {
+    considering: ["是什麼吸引你看這本書？", "你準備好面對它的主題了嗎？", "什麼讓你感到好奇？", "你讀過類似的書嗎？"],
+    started: ["你最初的印象是什麼？", "你對哪個角色最感興趣？", "有些地方已經讓我驚訝", "我想知道接下來會發生什麼"],
+    midway: ["發生了意想不到的事", "我對結局有個猜測", "有個角色改變了我的看法", "我完全停不下來"],
+    finished: ["我剛讀完這本書", "結局一直縈繞在我心頭", "有些東西仍在我腦海裡", "接下來我該讀什麼？"]
+  },
+  'Simplified Chinese': {
+    considering: ["是什么吸引你看这本书？", "你准备好面对它的主题了吗？", "什么让你感到好奇？", "你读过类似的书吗？"],
+    started: ["你最初的印象是什么？", "你对哪个角色最感兴趣？", "有些地方已经让我惊讶", "我想知道接下来会发生什么"],
+    midway: ["发生了意想不到的事", "我对结局有个猜测", "有个角色改变了我的看法", "我完全停不下来"],
+    finished: ["我刚读完这本书", "结局一直萦绕在我心头", "有些东西仍在我脑海里", "接下来我该读什么？"]
+  },
+  'Japanese': {
+    considering: ["この本に惹かれた理由は？", "テーマに向き合う準備はできてる？", "何が気になったの？", "似た本を読んだことある？"],
+    started: ["最初の印象はどう？", "どの登場人物が気になる？", "もう驚いたことがある", "この先の展開を知りたい"],
+    midway: ["思いがけないことが起きた", "結末について予想がある", "ある人物に考えを変えられた", "どうしても止められない"],
+    finished: ["読み終えたばかり", "結末が心に残っている", "まだ心に引っかかることがある", "次は何を読もう？"]
+  },
+  'Korean': {
+    considering: ["이 책에 끌린 이유는?", "이 책의 주제를 마주할 준비가 됐나요?", "무엇이 궁금했나요?", "비슷한 책을 읽어봤나요?"],
+    started: ["첫인상은 어떤가요?", "어떤 인물이 가장 흥미로운가요?", "벌써 놀란 부분이 있어요", "앞으로의 전개가 궁금해요"],
+    midway: ["예상치 못한 일이 일어났어요", "결말에 대한 추측이 있어요", "한 인물이 내 생각을 바꿨어요", "도저히 손에서 놓을 수 없어요"],
+    finished: ["방금 다 읽었어요", "결말이 마음에 남아요", "여전히 마음에 걸리는 게 있어요", "다음엔 뭘 읽을까요?"]
+  }
+};
+function getStaticPromptsByStatus(status) {
+  var lang = STATE.companionLangOverride || STATE.detectedLang || 'English';
+  var sets = STATIC_PROMPT_SETS[lang] || STATIC_PROMPT_SETS['English'];
+  return (sets[status] || sets.considering).slice(0, 4);
 }
 function _icebreakerStrings(v) {
   if (!Array.isArray(v)) return null;
@@ -2720,7 +2748,11 @@ function _fetchAIIcebreakers() {
                 parts: [{
                   text: prompt
                 }]
-              }]
+              }],
+              generationConfig: {
+                responseMimeType: 'application/json',
+                maxOutputTokens: 400
+              }
             }, langNote ? {
               systemInstruction: {
                 parts: [{
