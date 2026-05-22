@@ -3,18 +3,22 @@
 ## Priority 1: Pre-Launch Polish (Target: June 1, 2026)
 
 ### Testing & Validation
-- [ ] Full device testing on Kobo Libra Colour (v0.28)
+- [ ] Full device testing on Kobo Libra Colour (v0.28.1)
+  - [ ] Icebreaker prompts are book-specific, not generic (race condition fix)
+  - [ ] Test with Rich Dad Poor Dad (Business): expect finance-focused questions
+  - [ ] Test with a novel: expect narrative-focused questions
   - [ ] Traditional Chinese language detection (e.g. 蒙格之道, 三色貓探案)
+  - [ ] CJK language disambiguation (Traditional vs Japanese, e.g. 東方快車謀殺案)
   - [ ] Companion language selector (Language button in toolbar)
   - [ ] Per-book language override persists across book switches
+  - [ ] Discover mode returns book-specific prompts (not generic)
+  - [ ] Surprise Me returns correct language edition (not alternate editions)
   - [ ] Pagination "Show more results" still works
-  - [ ] search still works (language filter removed — verify no regression)
+  - [ ] Search still works (language filter removed — verify no regression)
 - [ ] Full device testing on Kindle (any model)
-- [ ] Test Discovery mode integration with Surprise Me
 - [ ] Test manual entry Google Books lookup across different queries
 - [ ] Test About toggle doesn't interfere with book result tapping
 - [ ] Test back navigation flow (search → book-detail → search)
-- [ ] Verify Surprise Me AI with various genre/language combinations
 
 ### UI/UX Polish
 - [ ] Move tagline "Just books. No noise." to right side of header

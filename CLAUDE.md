@@ -181,8 +181,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.28 — confirmed working on desktop.
-Kobo device test pending.
+v0.28.1 — icebreaker prompt fixes (race condition, discover mode AI,
+Surprise Me language enforcement, CJK language disambiguation).
+Confirmed working on desktop. Kobo device test pending.
 
 ## What NOT to Change
 - index.html + app.js architecture
