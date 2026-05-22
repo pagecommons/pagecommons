@@ -25,7 +25,9 @@
 
 ### UI/UX Polish
 - [ ] #home (Welcome screen): add a short 1–2 sentence intro below "Welcome to Page Commons" explaining what the app is
-- [ ] Reading-status screen: omit the "considering / thinking about reading it" option when the screen is reached via the book-detail "I have this book" button — it duplicates the book-detail "Find out if it's for me" option already offered on the previous screen
+- [ ] Reading-status screen: omit the "considering / thinking about reading it" option when the screen is reached via a path that already offered "Find out if it's for me" on the previous screen — i.e. the book-detail "I have this book" button AND the Surprise Me "I'll read this" button. Both lead to the status screen where the considering option duplicates the prior choice
+- [ ] Unified navigation / consistent back button: every screen should have a back affordance (currently some screens have a "← back" link and others don't). Recommended approach: a per-screen back target (each screen declares its parent) rather than a full history stack, placed consistently on all screens. ES5/Kobo-safe, predictable, fits e-ink "no surprises"
+- [ ] Surprise Me: clarify "Change book" vs "Try another book" labels — they do different things (return to search vs re-roll a new suggestion) but read as confusingly similar. Fold into the navigation cleanup pass
 - [ ] Rename book-detail button "I'm reading this" → "I have this book"
 - [ ] Move tagline "Just books. No noise." to right side of header
 - [ ] Consider minimum width/responsiveness on very large e-ink screens
