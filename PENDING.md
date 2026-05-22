@@ -43,6 +43,7 @@
 - [ ] Review and improve genre list (currently 8 options)
 - [ ] Test Gemini free tier performance under various contexts
 - [ ] Add graceful fallback if Gemini API fails during Surprise Me
+- [ ] Fix icebreaker voice: prompts are tapped to fill the chat box and sent as the reader's own message, but they're phrased in interviewer voice (the companion asking the reader, e.g. "What drew you to this book?" / 「為何想深入了解林振強的詞作？」), which is backwards when sent to the AI. Rephrase into first-person reader voice (things the reader would say to the companion). Requires updating the icebreaker generation prompt (drop "ask the READER" wording at ~app.js:2629) and rewriting the STATIC_PROMPT_SETS fallback sets across all languages
 
 ### Onboarding Flow & AI-Mode System
 - [ ] After first-time T&C accept → intro screen with a brief introduction, then a choice: BYOK vs Use shared AI pool
