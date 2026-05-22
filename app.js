@@ -2562,34 +2562,34 @@ function _populateIcebreakers() {
 }
 var STATIC_PROMPT_SETS = {
   'English': {
-    considering: ["What drew you to this book?", "Are you ready for its themes?", "What made you curious?", "Have you read similar books?"],
-    started: ["What are your first impressions?", "Which character interests you most?", "Something already surprised me", "I want to know what lies ahead"],
-    midway: ["Something unexpected happened", "I have a theory about the ending", "A character changed my mind", "I cannot put this down"],
-    finished: ["I just finished it", "The ending stayed with me", "Something is still on my mind", "What should I read next?"]
+    considering: ["Why should I read this book?", "What's this book really about?", "What makes it worth reading?", "Tell me what to expect."],
+    started: ["Let me share my first impressions.", "What should I watch for early on?", "Something already caught my attention.", "Where is this heading?"],
+    midway: ["Something unexpected just happened.", "I have a theory about the ending.", "A part of this changed my mind.", "I can't put this down."],
+    finished: ["I just finished it.", "The ending stayed with me.", "Something is still on my mind.", "What should I read next?"]
   },
   'Traditional Chinese': {
-    considering: ["是什麼吸引你看這本書？", "你準備好面對它的主題了嗎？", "什麼讓你感到好奇？", "你讀過類似的書嗎？"],
-    started: ["你最初的印象是什麼？", "你對哪個角色最感興趣？", "有些地方已經讓我驚訝", "我想知道接下來會發生什麼"],
-    midway: ["發生了意想不到的事", "我對結局有個猜測", "有個角色改變了我的看法", "我完全停不下來"],
-    finished: ["我剛讀完這本書", "結局一直縈繞在我心頭", "有些東西仍在我腦海裡", "接下來我該讀什麼？"]
+    considering: ["我為什麼該讀這本書？", "這本書到底在講什麼？", "它哪裡值得一讀？", "告訴我可以期待什麼。"],
+    started: ["說說我最初的印象。", "開頭我該留意什麼？", "有些地方已經吸引了我。", "接下來會怎麼發展？"],
+    midway: ["剛剛發生了意想不到的事。", "我對結局有個猜測。", "有一段改變了我的看法。", "我完全停不下來。"],
+    finished: ["我剛剛讀完了。", "結局一直在我心頭。", "有些東西仍縈繞心中。", "接下來我該讀什麼？"]
   },
   'Simplified Chinese': {
-    considering: ["是什么吸引你看这本书？", "你准备好面对它的主题了吗？", "什么让你感到好奇？", "你读过类似的书吗？"],
-    started: ["你最初的印象是什么？", "你对哪个角色最感兴趣？", "有些地方已经让我惊讶", "我想知道接下来会发生什么"],
-    midway: ["发生了意想不到的事", "我对结局有个猜测", "有个角色改变了我的看法", "我完全停不下来"],
-    finished: ["我刚读完这本书", "结局一直萦绕在我心头", "有些东西仍在我脑海里", "接下来我该读什么？"]
+    considering: ["我为什么该读这本书？", "这本书到底在讲什么？", "它哪里值得一读？", "告诉我可以期待什么。"],
+    started: ["说说我最初的印象。", "开头我该留意什么？", "有些地方已经吸引了我。", "接下来会怎么发展？"],
+    midway: ["刚刚发生了意想不到的事。", "我对结局有个猜测。", "有一段改变了我的看法。", "我完全停不下来。"],
+    finished: ["我刚刚读完了。", "结局一直在我心头。", "有些东西仍萦绕心中。", "接下来我该读什么？"]
   },
   'Japanese': {
-    considering: ["この本に惹かれた理由は？", "テーマに向き合う準備はできてる？", "何が気になったの？", "似た本を読んだことある？"],
-    started: ["最初の印象はどう？", "どの登場人物が気になる？", "もう驚いたことがある", "この先の展開を知りたい"],
-    midway: ["思いがけないことが起きた", "結末について予想がある", "ある人物に考えを変えられた", "どうしても止められない"],
-    finished: ["読み終えたばかり", "結末が心に残っている", "まだ心に引っかかることがある", "次は何を読もう？"]
+    considering: ["なぜこの本を読むべき？", "この本は結局何の話？", "どこが読む価値ある？", "何を期待できるか教えて。"],
+    started: ["最初の印象を話したい。", "序盤で何に注目すべき？", "もう惹かれた部分がある。", "この先どう展開するの？"],
+    midway: ["思いがけないことが起きた。", "結末について予想がある。", "ある部分で考えが変わった。", "どうしても止められない。"],
+    finished: ["今読み終えたところ。", "結末が心に残っている。", "まだ心に引っかかっている。", "次は何を読めばいい？"]
   },
   'Korean': {
-    considering: ["이 책에 끌린 이유는?", "이 책의 주제를 마주할 준비가 됐나요?", "무엇이 궁금했나요?", "비슷한 책을 읽어봤나요?"],
-    started: ["첫인상은 어떤가요?", "어떤 인물이 가장 흥미로운가요?", "벌써 놀란 부분이 있어요", "앞으로의 전개가 궁금해요"],
-    midway: ["예상치 못한 일이 일어났어요", "결말에 대한 추측이 있어요", "한 인물이 내 생각을 바꿨어요", "도저히 손에서 놓을 수 없어요"],
-    finished: ["방금 다 읽었어요", "결말이 마음에 남아요", "여전히 마음에 걸리는 게 있어요", "다음엔 뭘 읽을까요?"]
+    considering: ["이 책을 왜 읽어야 할까요?", "이 책은 결국 무슨 내용인가요?", "어디가 읽을 만한가요?", "무엇을 기대하면 될지 알려줘요."],
+    started: ["첫인상을 이야기하고 싶어요.", "초반에 무엇을 눈여겨볼까요?", "벌써 끌리는 부분이 있어요.", "앞으로 어떻게 전개되나요?"],
+    midway: ["방금 예상치 못한 일이 일어났어요.", "결말에 대한 추측이 있어요.", "어떤 부분이 제 생각을 바꿨어요.", "도무지 손에서 놓을 수 없어요."],
+    finished: ["방금 다 읽었어요.", "결말이 마음에 남아요.", "아직도 마음에 걸리는 게 있어요.", "다음엔 뭘 읽을까요?"]
   }
 };
 function getStaticPromptsByStatus(status) {
@@ -2665,7 +2665,7 @@ function _fetchAIIcebreakers() {
           var cachedSubjects = localStorage.getItem('pc_subjects_' + bookKey(book));
           var subjectArr = cachedSubjects ? JSON.parse(cachedSubjects) : [];
           var subjectNote = subjectArr.length ? '\nKnown subjects/themes: ' + subjectArr.slice(0, 8).join(', ') + '.' : '';
-          prompt = 'You are a literary companion helping a reader of "' + book.title + '" by ' + book.author + '.\n\n' + 'The reader\'s current status: ' + statusLabel + subjectNote + '\n\n' + "First decide whether this book is fiction or non-fiction, then generate exactly 4 ice breaker prompts that fit THIS specific book.\n\n" + 'Rules:\n' + '- Each prompt max 8 words\n' + '- Specific to this exact book \u2014 its real themes, ideas, argument, setting, or reputation\n' + '- For NON-FICTION (economics, philosophy, history, science, etc.): focus on the central argument, key ideas, evidence, the author\'s perspective, and real-world relevance. NEVER mention characters, plot, or "the story".\n' + '- For FICTION: characters, plot, atmosphere, and the ending are all fair game\n' + '- NOT generic questions that fit any book\n' + '- NOT: "Is this book for me?"\n' + '- NOT: "What is the main idea?"\n' + '- NOT: "How long does it take to read?"\n' + '- Tone matches reading status:\n' + '  considering: ask what drew the READER to this book (curiosity, what they\'ve heard, what appeals) — NOT questions about the book\'s content or plot\n' + '  just started: early impressions, what to expect ahead\n' + '  halfway: ideas or tensions developing, observations and predictions so far\n' + '  just finished: what stayed with you, its meaning, how it changed your thinking, what to read next' + '\n\n' + 'Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.\n' + 'Example format: ["prompt one","prompt two","prompt three","prompt four"]';
+          prompt = 'You are a literary companion helping a reader of "' + book.title + '" by ' + book.author + '.\n\n' + 'The reader\'s current status: ' + statusLabel + subjectNote + '\n\n' + "First decide whether this book is fiction or non-fiction, then write exactly 4 short opening messages in the reader's OWN first-person voice — things the reader taps to say or ask you to begin the conversation. These are the reader speaking to you, never you asking the reader.\n\n" + 'Rules:\n' + '- Each message max 10 words\n' + "- Phrased as the reader speaking ('I...', 'Why does...', 'Tell me...', 'I've heard...')\n" + '- Specific to this exact book \u2014 its real themes, ideas, argument, setting, or reputation\n' + '- For NON-FICTION (economics, philosophy, history, science, etc.): focus on the central argument, key ideas, evidence, the author\'s perspective, and real-world relevance. NEVER mention characters, plot, or "the story".\n' + '- For FICTION: characters, plot, atmosphere, and the ending are all fair game\n' + '- NOT generic questions that fit any book\n' + '- NOT: "Is this book for me?"\n' + '- NOT: "What is the main idea?"\n' + '- NOT: "How long does it take to read?"\n' + '- NEVER phrased as a question TO the reader (no "What drew you to this?", "Are you ready for its themes?")\n' + '- Tone matches reading status, all in the reader\'s voice:\n' + '  considering: why the reader is drawn to it, what they\'ve heard, what they want to know before starting\n' + '  just started: the reader\'s first impressions, what they want to watch for\n' + '  halfway: what the reader is noticing now, a prediction or question they have\n' + '  just finished: what stayed with the reader, what it meant, what to read next' + '\n\n' + 'Return ONLY a JSON array of 4 strings. No preamble. No explanation. No markdown. Just the array.\n' + 'Example of the VOICE (not the content): ["I keep hearing about this book — why?","Tell me what makes it worth reading","I want to understand its main argument","What should I look out for early on?"]';
           // Reinforce language inside the user prompt — some providers (e.g.
           // Gemini) ignore the system/systemInstruction language note for this
           // short JSON task and default to English otherwise.
