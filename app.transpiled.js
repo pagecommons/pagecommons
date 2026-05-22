@@ -231,8 +231,48 @@ function updateSearchHeading() {
 
 // navigate() defined above with showScreen
 
+var navStack = [];
+var _navBack = false;
+// Fallback parent when the back stack is empty (e.g. deep link / fresh load)
+var BACK_FALLBACK = {
+  about: 'home',
+  key: 'home',
+  search: 'home',
+  'book-detail': 'search',
+  status: 'book-detail',
+  language: 'status',
+  companion: 'search',
+  shelf: 'home',
+  settings: 'home',
+  surprise: 'search',
+  'book-shelf': 'shelf',
+  'age-gate': 'search'
+};
+function currentScreen() {
+  var el = document.querySelector('.screen.active');
+  return el ? el.id.replace('screen-', '') : null;
+}
+function goBack() {
+  var prev = navStack.length ? navStack.pop() : null;
+  if (!prev) {
+    var cur = currentScreen() || 'home';
+    prev = BACK_FALLBACK[cur] || 'home';
+  }
+  _navBack = true;
+  navigate(prev);
+}
 function showScreen(id) {
   var target = SCREENS.includes(id) ? id : 'home';
+  var cur = currentScreen();
+  // Maintain a back stack: record the screen we're leaving on forward
+  // navigation; skip recording when goBack() is returning to a prior screen.
+  if (cur && cur !== target) {
+    if (!_navBack) {
+      navStack.push(cur);
+      if (navStack.length > 50) navStack.shift();
+    }
+  }
+  _navBack = false;
   SCREENS.forEach(function (s) {
     var el = document.getElementById('screen-' + s);
     if (el) {
@@ -1467,6 +1507,9 @@ function _renderStatusScreen() {
         case 16:
           container.innerHTML = '';
           options.forEach(function (opt) {
+            // "Considering" is offered separately via "Find out if it's for me";
+            // omit it here so it isn't a duplicate on the reading-status screen
+            if (opt.value === 'considering') return;
             var btn = document.createElement('button');
             btn.className = 'status-opt';
             btn.onclick = function () {
@@ -1500,7 +1543,7 @@ function loadBookDetailScreen() {
   var desc = book.description || '';
   var truncated = desc.length > 300 ? desc.substring(0, 300) + '…' : desc;
   var descHTML = truncated ? '<p class="book-detail-description">' + truncated + '</p>' : '<p class="book-detail-description" style="color:#aaaaaa;font-style:italic;">No description available — the companion can still help you explore this book.</p>';
-  container.innerHTML = '<h1 class="book-detail-title">' + (book.title || 'Untitled') + '</h1>' + '<p class="book-detail-author">' + (book.author || 'Unknown author') + '</p>' + (meta ? '<p class="book-detail-meta">' + meta + '</p>' : '') + descHTML + '<div class="book-detail-actions">' + '<button class="btn btn-primary" onclick="setReadingStatus(\'considering\')">Find out if it\'s for me →</button>' + '<button class="btn" onclick="renderStatusScreen(STATE.book);navigate(\'status\')">I\'m reading this</button>' + '<button class="btn" onclick="navigate(\'search\')">Back ←</button>' + '</div>';
+  container.innerHTML = '<h1 class="book-detail-title">' + (book.title || 'Untitled') + '</h1>' + '<p class="book-detail-author">' + (book.author || 'Unknown author') + '</p>' + (meta ? '<p class="book-detail-meta">' + meta + '</p>' : '') + descHTML + '<div class="book-detail-actions">' + '<button class="btn btn-primary" onclick="setReadingStatus(\'considering\')">Find out if it\'s for me →</button>' + '<button class="btn" onclick="renderStatusScreen(STATE.book);navigate(\'status\')">I have this book</button>' + '<button class="btn" onclick="goBack()">Back ←</button>' + '</div>';
 }
 function selectBook(_x6) {
   return _selectBook.apply(this, arguments);

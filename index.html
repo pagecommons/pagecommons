@@ -724,6 +724,7 @@
 
     /* === T&C === */
     .tc-section { margin-bottom: 20px; }
+    .tc-intro { font-size: 1rem; color: #333333; line-height: 1.5; margin-bottom: 20px; }
 
     /* === AGE GATE === */
     .age-gate-btns { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; margin-top: 20px; }
@@ -791,7 +792,7 @@
        ABOUT
        ══════════════════════════════════ -->
   <section id="screen-about" class="screen">
-    <button class="back-link" onclick="navigate('home')">← Back</button>
+    <button class="back-link" onclick="goBack()">← Back</button>
     <h1>What is Page Commons?</h1>
 
     <p>Page Commons is a quiet place for readers. No social feed, no follower counts, no algorithmic recommendations. Just books and the people who read them.</p>
@@ -844,7 +845,7 @@
        ══════════════════════════════════ -->
   <section id="screen-key" class="screen">
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:24px">
-      <button class="back-link" style="margin-bottom:0" onclick="navigate('home')">← Back</button>
+      <button class="back-link" style="margin-bottom:0" onclick="goBack()">← Back</button>
       <button class="back-link" style="margin-bottom:0" onclick="navigate('shelf')">Your shelf →</button>
     </div>
     <h1>Your companion awaits</h1>
@@ -905,7 +906,7 @@
        SEARCH
        ══════════════════════════════════ -->
   <section id="screen-search" class="screen">
-    <button class="back-link" onclick="navigate('home')">← Back</button>
+    <button class="back-link" onclick="goBack()">← Back</button>
     <h1 id="search-heading">Which book?</h1>
 
     <button class="btn" style="width:100%;margin-bottom:8px" onclick="navigate('shelf')">Your saved books →</button>
@@ -968,7 +969,7 @@
        BOOK DETAIL SCREEN
        ══════════════════════════════════ -->
   <section id="screen-book-detail" class="screen">
-    <button class="back-link" onclick="navigate('search')">← Back</button>
+    <button class="back-link" onclick="goBack()">← Back</button>
     <div id="book-detail-content"></div>
     <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
@@ -977,12 +978,9 @@
        READING STATUS SCREEN
        ══════════════════════════════════ -->
   <section id="screen-status" class="screen">
+    <button class="back-link" onclick="goBack()">← Back</button>
     <h1 id="status-book-title">Where are you with this book?</h1>
     <div class="status-options">
-      <button class="status-opt" onclick="setReadingStatus('considering')">
-        <span class="status-opt-label">Thinking about reading it</span>
-        <span class="status-opt-sub">Help me decide if it's for me</span>
-      </button>
       <button class="status-opt" onclick="setReadingStatus('started')">
         <span class="status-opt-label">Just started</span>
         <span class="status-opt-sub">I'm in the early pages</span>
@@ -1007,6 +1005,7 @@
        LANGUAGE CHOICE SCREEN
        ══════════════════════════════════ -->
   <section id="screen-language" class="screen">
+    <button class="back-link" onclick="goBack()">← Back</button>
     <h1>Which language?</h1>
     <p id="lang-prompt-text">This looks like a non-English book. Would you like to chat in the book's language or in English?</p>
     <div class="lang-options">
@@ -1137,6 +1136,7 @@
   <!-- T&C SCREEN -->
   <section id="screen-tc" class="screen">
     <h1>Welcome to Page Commons</h1>
+    <p class="tc-intro">Page Commons is a calm, private reading companion. Talk through the book you're reading with an AI that knows the work, save the passages that stay with you, and keep your shelf — all stored in your own browser, with no ads and no personal data on our servers.</p>
     <div class="tc-section">
       <p>Before you continue, please read and agree to the following:</p>
       <div class="note">
@@ -1172,7 +1172,7 @@
 
   <!-- YOUR SHELF -->
   <section id="screen-shelf" class="screen">
-    <button class="back-link" onclick="navigate('home')">← Back</button>
+    <button class="back-link" onclick="goBack()">← Back</button>
     <h1>Your shelf</h1>
     <p style="font-size:0.88rem;color:#777777;margin-bottom:20px">Books you have discussed with your companion.</p>
     <div id="shelf-list"></div>
@@ -1183,7 +1183,7 @@
        SETTINGS
        ══════════════════════════════════ -->
   <section id="screen-settings" class="screen">
-    <button class="back-link" onclick="navigate('home')">← Back</button>
+    <button class="back-link" onclick="goBack()">← Back</button>
     <h1>Settings</h1>
 
     <div class="settings-section">
@@ -1278,7 +1278,7 @@
        SURPRISE ME
        ══════════════════════════════════ -->
   <section id="screen-surprise" class="screen">
-    <button class="back-link" onclick="navigate('search')">← Back</button>
+    <button class="back-link" onclick="goBack()">← Back</button>
 
     <div id="surprise-genre-step" style="display:block">
       <h1>What do you feel like reading?</h1>
@@ -1318,7 +1318,7 @@
 
   <!-- BOOK CONVERSATIONS -->
   <section id="screen-book-shelf" class="screen">
-    <button class="back-link" onclick="navigate('shelf')">← Your shelf</button>
+    <button class="back-link" onclick="goBack()">← Back</button>
     <h1 id="book-shelf-title">—</h1>
     <p id="book-shelf-author" style="font-size:0.88rem;color:#777777;margin-bottom:4px"></p>
     <p id="book-shelf-status" style="font-size:0.78rem;color:#777777;font-style:italic;margin-bottom:20px"></p>
