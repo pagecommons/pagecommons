@@ -1,7 +1,4 @@
-"use strict";
-
-var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
-var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+import _typeof from "@babel/runtime/helpers/typeof";
 function _regenerator() {
   /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */var e,
     t,
@@ -49,7 +46,7 @@ function _regenerator() {
                 if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object");
                 if (!t.done) return t;
                 u = t.value, c < 2 && (c = 0);
-              } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1);
+              } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1);
               i = e;
             } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break;
           } catch (t) {
@@ -1144,7 +1141,7 @@ function lookupManualBook() {
       };
     }
     showBookDetail(book);
-  })["catch"](function () {
+  }).catch(function () {
     var book = {
       title: title.trim(),
       author: author.trim() || 'Unknown author',
@@ -1493,7 +1490,7 @@ function loadBookDetailScreen() {
   var desc = book.description || '';
   var truncated = desc.length > 300 ? desc.substring(0, 300) + '…' : desc;
   var descHTML = truncated ? '<p class="book-detail-description">' + truncated + '</p>' : '<p class="book-detail-description" style="color:#aaaaaa;font-style:italic;">No description available — the companion can still help you explore this book.</p>';
-  container.innerHTML = '<h1 class="book-detail-title">' + (book.title || 'Untitled') + '</h1>' + '<p class="book-detail-author">' + (book.author || 'Unknown author') + '</p>' + (meta ? '<p class="book-detail-meta">' + meta + '</p>' : '') + descHTML + '<div class="book-detail-actions">' + '<button class="btn btn-primary" onclick="setReadingStatus(\'considering\')">Find out if it\'s for me →</button>' + '<button class="btn" onclick="setReadingStatus(\'started\')">I\'m reading this</button>' + '<button class="btn" onclick="navigate(\'search\')">Back ←</button>' + '</div>';
+  container.innerHTML = '<h1 class="book-detail-title">' + (book.title || 'Untitled') + '</h1>' + '<p class="book-detail-author">' + (book.author || 'Unknown author') + '</p>' + (meta ? '<p class="book-detail-meta">' + meta + '</p>' : '') + descHTML + '<div class="book-detail-actions">' + '<button class="btn btn-primary" onclick="setReadingStatus(\'considering\')">Find out if it\'s for me →</button>' + '<button class="btn" onclick="renderStatusScreen(STATE.book);navigate(\'status\')">I\'m reading this</button>' + '<button class="btn" onclick="navigate(\'search\')">Back ←</button>' + '</div>';
 }
 function selectBook(_x6) {
   return _selectBook.apply(this, arguments);
@@ -1980,7 +1977,7 @@ function selectSurpriseLanguage(lang) {
         pageCount: meta.pageCount,
         year: meta.year
       });
-    })["catch"](function () {
+    }).catch(function () {
       displaySurpriseResult({
         title: json.title,
         author: json.author || '',
@@ -1993,7 +1990,7 @@ function selectSurpriseLanguage(lang) {
         year: ''
       });
     });
-  })["catch"](function (err) {
+  }).catch(function (err) {
     console.error('[Surprise Me] API call failed:', err && err.message ? err.message : err);
     var msg = err && err.message ? err.message : 'Could not reach AI — try again?';
     surpriseParseError(lang, msg);
@@ -2402,7 +2399,7 @@ function parseKoboDatabase(input) {
           year: '',
           key: ''
         });
-      })["catch"](function (wasmErr) {
+      }).catch(function (wasmErr) {
         statusEl.textContent = 'Database reader failed to start: ' + wasmErr.message;
       });
     };
@@ -2564,10 +2561,10 @@ function _populateIcebreakers() {
           prompts = null;
         case 8:
           if (!prompts || !prompts.length) {
-            // skip English static prompts for non-English books
-            if (!STATE.detectedLang) {
-              prompts = getStaticPromptsByStatus(STATE.readingStatus);
-            }
+            // Always fall back to static prompts so the screen is never empty
+            // (AI icebreakers can fail for any provider — e.g. Gemini returning
+            // non-JSON). English fallback is acceptable over a blank panel.
+            prompts = getStaticPromptsByStatus(STATE.readingStatus);
           }
           renderIcebreakerButtons(prompts || [], list);
         case 9:
@@ -2925,7 +2922,7 @@ function appendBubble(role, text) {
         setTimeout(function () {
           copyBtn.textContent = 'Copy';
         }, 1500);
-      })["catch"](function () {
+      }).catch(function () {
         return showToolbarMsg('Copy not available in this browser.');
       });
     };
@@ -3075,7 +3072,7 @@ function callFreeTier(system, messages) {
       throw rateLimitErr;
     }
     if (!res.ok) {
-      return res.json()["catch"](function () {
+      return res.json().catch(function () {
         return {};
       }).then(function (e) {
         throw new Error(e && e.error ? e.error : 'HTTP ' + res.status);
@@ -3118,7 +3115,7 @@ function _callAnthropic() {
             break;
           }
           _context16.n = 2;
-          return res.json()["catch"](function () {
+          return res.json().catch(function () {
             return {};
           });
         case 2:
@@ -3195,7 +3192,7 @@ function _callGemini() {
             break;
           }
           _context17.n = 2;
-          return res.json()["catch"](function () {
+          return res.json().catch(function () {
             return {};
           });
         case 2:
@@ -3257,7 +3254,7 @@ function _callGroq() {
             break;
           }
           _context18.n = 2;
-          return res.json()["catch"](function () {
+          return res.json().catch(function () {
             return {};
           });
         case 2:
@@ -3844,7 +3841,7 @@ function copyAllPassages() {
   }).join('\n\n');
   navigator.clipboard.writeText(text).then(function () {
     showToolbarMsg(passages.length + ' passage' + (passages.length !== 1 ? 's' : '') + ' copied to clipboard.');
-  })["catch"](function () {
+  }).catch(function () {
     return showToolbarMsg('Copy not available in this browser.');
   });
 }
@@ -3920,7 +3917,7 @@ function redeemTransferCode() {
     // Hide the transfer fields
     var fields = document.getElementById('transfer-fields');
     if (fields) fields.style.display = 'none';
-  })["catch"](function (err) {
+  }).catch(function (err) {
     if (btn) {
       btn.disabled = false;
       btn.textContent = 'Fetch my key';
@@ -4053,7 +4050,7 @@ function importUserData(inputEl) {
       showDataMessage('data-import-msg', "This doesn't look like a Page Commons backup file.", true);
       return;
     }
-    if (!parsed || (0, _typeof2["default"])(parsed) !== 'object' || !parsed.data || (0, _typeof2["default"])(parsed.data) !== 'object') {
+    if (!parsed || _typeof(parsed) !== 'object' || !parsed.data || _typeof(parsed.data) !== 'object') {
       showDataMessage('data-import-msg', "This doesn't look like a Page Commons backup file.", true);
       return;
     }
@@ -4121,7 +4118,7 @@ function fetchAndCacheSubjects(book) {
     }).then(function (data) {
       var subjects = (data.subjects || []).slice(0, 10);
       localStorage.setItem(cacheKey, JSON.stringify(subjects));
-    })["catch"](function () {});
+    }).catch(function () {});
   } else if (book.cats) {
     var cats = book.cats.split(/\s+/).filter(Boolean).slice(0, 6);
     if (cats.length) localStorage.setItem(cacheKey, JSON.stringify(cats));

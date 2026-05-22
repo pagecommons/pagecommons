@@ -1368,7 +1368,7 @@ function loadBookDetailScreen() {
   var desc = book.description || '';
   var truncated = desc.length > 300 ? desc.substring(0, 300) + '…' : desc;
   var descHTML = truncated ? '<p class="book-detail-description">' + truncated + '</p>' : '<p class="book-detail-description" style="color:#aaaaaa;font-style:italic;">No description available — the companion can still help you explore this book.</p>';
-  container.innerHTML = '<h1 class="book-detail-title">' + (book.title || 'Untitled') + '</h1>' + '<p class="book-detail-author">' + (book.author || 'Unknown author') + '</p>' + (meta ? '<p class="book-detail-meta">' + meta + '</p>' : '') + descHTML + '<div class="book-detail-actions">' + '<button class="btn btn-primary" onclick="setReadingStatus(\'considering\')">Find out if it\'s for me →</button>' + '<button class="btn" onclick="setReadingStatus(\'started\')">I\'m reading this</button>' + '<button class="btn" onclick="navigate(\'search\')">Back ←</button>' + '</div>';
+  container.innerHTML = '<h1 class="book-detail-title">' + (book.title || 'Untitled') + '</h1>' + '<p class="book-detail-author">' + (book.author || 'Unknown author') + '</p>' + (meta ? '<p class="book-detail-meta">' + meta + '</p>' : '') + descHTML + '<div class="book-detail-actions">' + '<button class="btn btn-primary" onclick="setReadingStatus(\'considering\')">Find out if it\'s for me →</button>' + '<button class="btn" onclick="renderStatusScreen(STATE.book);navigate(\'status\')">I\'m reading this</button>' + '<button class="btn" onclick="navigate(\'search\')">Back ←</button>' + '</div>';
 }
 function selectBook(_x6) {
   return _selectBook.apply(this, arguments);
@@ -2508,10 +2508,10 @@ function _populateIcebreakers() {
           prompts = null;
         case 8:
           if (!prompts || !prompts.length) {
-            // skip English static prompts for non-English books
-            if (!STATE.detectedLang) {
-              prompts = getStaticPromptsByStatus(STATE.readingStatus);
-            }
+            // Always fall back to static prompts so the screen is never empty
+            // (AI icebreakers can fail for any provider — e.g. Gemini returning
+            // non-JSON). English fallback is acceptable over a blank panel.
+            prompts = getStaticPromptsByStatus(STATE.readingStatus);
           }
           renderIcebreakerButtons(prompts || [], list);
         case 9:
