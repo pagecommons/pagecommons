@@ -1,10 +1,60 @@
 # Page Commons — Current Status
 
 Last updated: May 22, 2026
-Current version: v0.29
-Updated by: Claude session - data export/import (localStorage backup)
+Current version: v0.30
+Updated by: Claude session — AI quality, model upgrade, navigation & UX polish
 
-## What was done this session
+## What was done this session [v0.30]
+
+### Icebreaker quality + reliability ✓
+- Hardened the icebreaker parser (parseIcebreakerList): tolerates markdown
+  fences, smart quotes, surrounding prose, and numbered/bulleted/quoted lists
+- Enforce the target language inside the user prompt (not just
+  system/systemInstruction) so Gemini stops defaulting to English on
+  non-English books
+- Gemini icebreaker call requests responseMimeType application/json for
+  reliable parseable output
+- Made the static fallback language-aware (English + Traditional/Simplified
+  Chinese, Japanese, Korean) so a non-English book never shows English prompts
+- Genre-aware prompt: classify fiction vs non-fiction; non-fiction focuses on
+  argument/ideas, never "characters/plot" (fixes Das Kapital-style misfires)
+- Reworded icebreakers into first-person reader voice (the reader's own
+  opening messages), since tapping one fills the chat box and is sent as the
+  reader's message — interviewer-voice prompts were backwards
+
+### AI model changes ✓
+- BYOK Gemini upgraded gemini-2.0-flash → gemini-2.5-flash (all 5 call sites),
+  with thinkingConfig.thinkingBudget = 0 so thinking tokens don't consume the
+  maxOutputTokens caps (avoids truncated/empty JSON + chat replies)
+- Free shared pool (api/ai.js) switched from Gemini to Groq
+  (llama-3.3-70b-versatile) with multi-key support (GROQ_API_KEYS and/or
+  GROQ_API_KEY_1..5), random key pick + failover on rate-limit
+  - ACTION REQUIRED: set GROQ_API_KEY(S) in Vercel env or the free tier 503s.
+    GEMINI_API_KEY is no longer used by the free pool.
+  - NOTE: stacking multiple free Groq keys to dodge rate limits likely
+    violates Groq ToS — prefer one paid key.
+
+### Navigation & UX polish ✓
+- Unified back navigation: a back stack maintained in showScreen() with a
+  goBack() helper + per-screen fallbacks; every back link routes through
+  goBack(); added missing back links to status and language screens
+- Reading-status screen: removed the redundant "considering" option (still
+  offered via "Find out if it's for me")
+- Renamed book-detail "I'm reading this" → "I have this book"
+- Surprise Me: "Try another book" → "Surprise me again" (disambiguates from
+  header "Change book")
+- Added a 1–2 sentence app intro under "Welcome to Page Commons"
+- Removed the self-referential "Support it →" footer link from support.html
+- Removed misleading "Get free key" links from the API provider buttons
+
+### Architecture discussion (no code) — open decision
+- Debated SPA vs MPA, e-ink vs mobile, and PWA→Capacitor. Conclusion: don't
+  migrate pre-launch; the big framework/backend decision belongs at V2 (which
+  needs a server + accounts anyway). See chat history. Tiered privacy model
+  (BYOK local-first; opt-in minimal data for social) resolves the earlier
+  privacy-vs-roadmap tension.
+
+## Previous session
 
 ### Data Export / Import (localStorage backup) ✓ [v0.29]
 - New "Your data" section on #settings screen (below Text size)
@@ -92,17 +142,22 @@ Updated by: Claude session - data export/import (localStorage backup)
 - None identified
 
 ## What to Tackle Next
-1. Test v0.28 on Kobo Libra Colour — focus on:
-   - Traditional Chinese detection (蒙格之道, 三色貓探案)
-   - Companion Language button and per-book override
-   - Search still works (regression check)
-   - support.html renders and links work
-2. Kindle device test (any version)
-3. Reddit launch post preparation
+1. Set GROQ_API_KEY(S) in Vercel env (free pool now uses Groq, not Gemini)
+2. Review v0.30 on desktop, then device:
+   - Back button on every screen returns to the correct previous screen
+   - Status screen no longer shows "considering"; "I have this book" label
+   - Icebreakers in first-person reader voice, correct language, genre-aware
+   - BYOK Gemini 2.5-flash quality; free pool (Groq) responds once key is set
+3. Onboarding Flow & AI-Mode System (the one big remaining Priority-1 item):
+   intro screen + BYOK vs shared choice, providers.html, pc_ai_mode, relax the
+   apiKey gate, Settings top-level toggle, persistent footer→Settings link
+4. Kindle + Kobo device testing
+5. Reddit launch post preparation
 
 ## Last Confirmed Working on Device
 ↳ Kobo Libra Colour: v0.25 ✓ (baseline — many features added since)
-↳ Desktop: v0.28 ✓ (current)
+↳ Desktop: v0.29 ✓ (v0.30 changes verified via syntax checks only; not yet
+  exercised in a browser this session)
 ↳ Kindle: not yet tested
 
 ## Broken / Do Not Touch

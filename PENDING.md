@@ -24,18 +24,18 @@
 - [ ] Test back navigation flow (search → book-detail → search)
 
 ### UI/UX Polish
-- [ ] #home (Welcome screen): add a short 1–2 sentence intro below "Welcome to Page Commons" explaining what the app is
-- [ ] Reading-status screen: omit the "considering / thinking about reading it" option when the screen is reached via a path that already offered "Find out if it's for me" on the previous screen — i.e. the book-detail "I have this book" button AND the Surprise Me "I'll read this" button. Both lead to the status screen where the considering option duplicates the prior choice
-- [ ] Unified navigation / consistent back button: every screen should have a back affordance (currently some screens have a "← back" link and others don't). Recommended approach: a per-screen back target (each screen declares its parent) rather than a full history stack, placed consistently on all screens. ES5/Kobo-safe, predictable, fits e-ink "no surprises"
-- [ ] Surprise Me: clarify "Change book" vs "Try another book" labels — they do different things (return to search vs re-roll a new suggestion) but read as confusingly similar. Fold into the navigation cleanup pass
-- [ ] Rename book-detail button "I'm reading this" → "I have this book"
+- [x] #home (Welcome screen): add a short 1–2 sentence intro below "Welcome to Page Commons" explaining what the app is (added on the T&C/welcome screen where that heading lives)
+- [x] Reading-status screen: omit the "considering / thinking about reading it" option (now removed from both the static markup and the dynamic render; "Find out if it's for me" still offered on the prior screen)
+- [x] Unified navigation / consistent back button: implemented a back stack inside showScreen() with a goBack() helper + per-screen fallbacks; all back links route through goBack() and back links added to status/language screens
+- [x] Surprise Me: "Try another book" renamed to "Surprise me again" to disambiguate from header "Change book" (search)
+- [x] Rename book-detail button "I'm reading this" → "I have this book"
 - [ ] Move tagline "Just books. No noise." to right side of header
 - [ ] Consider minimum width/responsiveness on very large e-ink screens
 - [ ] Review all button text for consistency and brevity
 - [ ] Verify all 44px minimum tap targets on device
 
 ### Support Page
-- [ ] support.html: remove the "Support it →" footer link (it loops back to the same page)
+- [x] support.html: remove the "Support it →" footer link (it looped back to the same page)
 - [ ] Verify support.html renders correctly on Kobo
 - [ ] Verify Ko-fi and Amazon links open correctly
 - [ ] Confirm per-screen footer line "Support it →" appears on all screens
@@ -45,7 +45,7 @@
 - [ ] Review and improve genre list (currently 8 options)
 - [ ] Test Gemini free tier performance under various contexts
 - [ ] Add graceful fallback if Gemini API fails during Surprise Me
-- [ ] Fix icebreaker voice: prompts are tapped to fill the chat box and sent as the reader's own message, but they're phrased in interviewer voice (the companion asking the reader, e.g. "What drew you to this book?" / 「為何想深入了解林振強的詞作？」), which is backwards when sent to the AI. Rephrase into first-person reader voice (things the reader would say to the companion). Requires updating the icebreaker generation prompt (drop "ask the READER" wording at ~app.js:2629) and rewriting the STATIC_PROMPT_SETS fallback sets across all languages
+- [x] Fix icebreaker voice: rephrased into first-person reader voice (things the reader taps to say to the companion). Updated the generation prompt and rewrote all STATIC_PROMPT_SETS fallbacks (English + Traditional/Simplified Chinese, Japanese, Korean)
 
 ### Onboarding Flow & AI-Mode System
 - [ ] After first-time T&C accept → intro screen with a brief introduction, then a choice: BYOK vs Use shared AI pool
