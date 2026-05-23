@@ -2011,15 +2011,7 @@ function selectSurpriseLanguage(lang) {
     var placeholderish = /^(<.*>|book title|author name|title|author|n\/a|none)$/i;
     if (!title || !author || placeholderish.test(title) || placeholderish.test(author)) {
       console.error('[Surprise Me] Parse failed or incomplete. Raw response:', response);
-      var provider = STATE.apiKey ? STATE.provider : 'free pool';
-      var hint = '';
-      if (lang !== 'English') {
-        if (provider === 'groq') {
-          hint = ' Tip: Groq struggles with non-English recommendations — try Gemini or Anthropic for ' + lang + '.';
-        } else if (provider === 'free pool') {
-          hint = ' Tip: the free pool struggles with non-English recommendations — add a Gemini or Anthropic key in Settings for ' + lang + '.';
-        }
-      }
+      var hint = lang !== 'English' && STATE.apiKey && STATE.provider === 'groq' ? ' Tip: Groq struggles with non-English recommendations — try Gemini or Anthropic for ' + lang + '.' : '';
       surpriseParseError(lang, 'AI returned an incomplete suggestion — try again or pick a different genre.' + hint);
       return;
     }
