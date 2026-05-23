@@ -1983,19 +1983,22 @@ function selectSurpriseLanguage(lang) {
     aiCall = callFreeTier(system, msgs);
   }
   aiCall.then(function (response) {
-    // Extract JSON object from response — handles markdown fences and surrounding text
+    // Extract JSON object from response — handles markdown fences, surrounding
+    // text, smart/curly quotes, and full-width braces (common in CJK output,
+    // notably Japanese gemini-2.5-flash replies)
     var json = null;
-    var jsonMatch = response.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      try {
-        json = JSON.parse(jsonMatch[0]);
-      } catch (e) {}
-    }
-    if (!json) {
-      var stripped = response.replace(/```[a-z]*/gi, '').replace(/```/g, '').trim();
-      try {
-        json = JSON.parse(stripped);
-      } catch (e) {}
+    var clean = (response || '').replace(/```[a-z]*/gi, '').replace(/```/g, '').trim();
+    clean = clean.replace(/[“”„‟″‶]/g, '"').replace(/[‘’‚‛′‵]/g, "'").replace(/｛/g, '{').replace(/｝/g, '}');
+    try {
+      json = JSON.parse(clean);
+    } catch (e) {}
+    if (!json || !json.title) {
+      var m = clean.match(/\{[\s\S]*\}/);
+      if (m) {
+        try {
+          json = JSON.parse(m[0]);
+        } catch (e2) {}
+      }
     }
     if (!json || !json.title) {
       console.error('[Surprise Me] Parse failed. Raw response:', response);
