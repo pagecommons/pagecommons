@@ -1965,7 +1965,8 @@ function selectSurpriseLanguage(lang) {
     }
     seenNote = '\nDo NOT suggest any of these books the user has already seen: ' + seenTitles.join('; ') + '.';
   }
-  var userMessage = 'Recommend one ' + genre + ' book that is ' + langInstruction + '.\n' + titleLangNote + shelfContext + '\n' + seenNote + '\n' + 'Reply as a JSON object with three required string fields: "title" (the book\'s actual title), "author" (the author\'s actual name), and "reason" (one short sentence on why it fits this reader). Fill every field with real content from a book you can name.';
+  var anyGenre = genre === 'Surprise me anyway';
+  var userMessage = (anyGenre ? 'Recommend one book of any genre that is ' + langInstruction + '.\n' : 'Recommend one ' + genre + ' book that is ' + langInstruction + '.\n') + titleLangNote + shelfContext + '\n' + seenNote + '\n' + 'Reply as a JSON object with three required string fields: "title" (the book\'s actual title), "author" (the author\'s actual name), and "reason" (one short sentence on why it fits this reader). Fill every field with real content from a book you can name.';
   var msgs = [{
     role: 'user',
     content: userMessage

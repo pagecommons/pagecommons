@@ -1832,7 +1832,10 @@ function selectSurpriseLanguage(lang) {
     seenNote = '\nDo NOT suggest any of these books the user has already seen: ' + seenTitles.join('; ') + '.';
   }
 
-  var userMessage = 'Recommend one ' + genre + ' book that is ' + langInstruction + '.\n' +
+  var anyGenre = genre === 'Surprise me anyway';
+  var userMessage = (anyGenre
+      ? 'Recommend one book of any genre that is ' + langInstruction + '.\n'
+      : 'Recommend one ' + genre + ' book that is ' + langInstruction + '.\n') +
     titleLangNote +
     shelfContext + '\n' +
     seenNote + '\n' +
