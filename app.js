@@ -1818,15 +1818,9 @@ function selectSurpriseLanguage(lang) {
 
   var titleLangNote = (lang === 'English')
     ? ''
-    : 'Write the title and author exactly as they appear in the ' + lang + ' edition. Use ' + lang + ' script for the title.\n';
+    : 'Use ' + lang + ' script for the title and author when the book has a ' + lang + ' edition.\n';
 
-  var system = 'You are a book recommendation assistant.\n' +
-    'You MUST suggest a book that is ' + langInstruction + '.\n' +
-    'The user will be reading it in ' + lang + '.\n' +
-    'Do NOT suggest a book in a different language — even if the same book exists in multiple languages, you must return the ' + lang + ' edition.\n' +
-    'Respond with JSON only.\n' +
-    'No explanation. No markdown. No code fences.\n' +
-    'Raw JSON only, nothing else.';
+  var system = 'You are a knowledgeable reading companion who recommends books available in the reader\'s chosen language. Reply with a JSON object only.';
 
   var seen = STATE.surpriseSeen || [];
   var seenNote = '';
@@ -1842,7 +1836,7 @@ function selectSurpriseLanguage(lang) {
     titleLangNote +
     shelfContext + '\n' +
     seenNote + '\n' +
-    'Respond with a JSON object containing three string fields: "title" (the book\'s title), "author" (author\'s name), and "reason" (one short sentence on why it fits this reader). All three fields are required and must contain real content for an actual book — never empty strings.';
+    'Reply as a JSON object with three required string fields: "title" (the book\'s actual title), "author" (the author\'s actual name), and "reason" (one short sentence on why it fits this reader). Fill every field with real content from a book you can name.';
 
   var msgs = [{role: 'user', content: userMessage}];
   var aiCall;
