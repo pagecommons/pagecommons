@@ -1844,8 +1844,10 @@ function selectSurpriseLanguage(lang) {
     'Do not suggest any book that is not available in ' + lang + '.\n' +
     shelfContext +
     seenNote + '\n' +
-    'Respond with exactly this JSON format:\n' +
-    '{"title":"book title","author":"author name","reason":"one sentence why"}';
+    'Return a JSON object with three string fields: "title", "author", and "reason" (one sentence).\n' +
+    'All three fields MUST contain real, non-empty content for an actual book you are recommending. Never return empty strings or placeholder values.\n' +
+    'Example shape — do NOT copy these values, choose a real book that fits the request:\n' +
+    '{"title":"Norwegian Wood","author":"Haruki Murakami","reason":"A quiet, melancholy exploration of grief and first love in 1960s Tokyo."}';
 
   var msgs = [{role: 'user', content: userMessage}];
   var aiCall;
