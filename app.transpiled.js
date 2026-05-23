@@ -1966,7 +1966,7 @@ function selectSurpriseLanguage(lang) {
     seenNote = '\nDo NOT suggest any of these books the user has already seen: ' + seenTitles.join('; ') + '.';
   }
   var anyGenre = genre === 'Surprise me anyway';
-  var userMessage = (anyGenre ? 'Recommend one book of any genre that is ' + langInstruction + '.\n' : 'Recommend one ' + genre + ' book that is ' + langInstruction + '.\n') + titleLangNote + shelfContext + '\n' + seenNote + '\n' + 'Reply with EXACTLY this format and nothing else (three lines, plain text — no JSON, no markdown):\n' + 'TITLE: <the book\'s actual title>\n' + 'AUTHOR: <the author\'s actual name>\n' + 'REASON: <one short sentence on why it fits this reader>';
+  var userMessage = (anyGenre ? 'Recommend one book of any genre that is ' + langInstruction + '.\n' : 'Recommend one ' + genre + ' book that is ' + langInstruction + '.\n') + titleLangNote + shelfContext + '\n' + seenNote + '\n' + 'Reply as a JSON object with three required string fields: "title" (the book\'s actual title), "author" (the author\'s actual name), and "reason" (one short sentence on why it fits this reader). Fill every field with real content from a book you can name.';
   var msgs = [{
     role: 'user',
     content: userMessage
@@ -1976,31 +1976,50 @@ function selectSurpriseLanguage(lang) {
     if (STATE.provider === 'gemini') {
       aiCall = callGemini(system, msgs);
     } else if (STATE.provider === 'groq') {
-      aiCall = callGroq(system, msgs);
+      aiCall = callGroqJSON(system, msgs);
     } else {
       aiCall = callAnthropic(system, msgs);
     }
   } else {
-    aiCall = callFreeTier(system, msgs);
+    aiCall = callFreeTier(system, msgs, {
+      jsonMode: true
+    });
   }
   aiCall.then(function (response) {
-    // Parse the plain-text TITLE/AUTHOR/REASON format. Plain text avoids the
-    // json_object hedge-to-empty failure mode of medium-sized models (notably
-    // Groq llama-3.3-70b on non-English requests). Tolerate markdown bolding,
-    // full-width colons (CJK), and surrounding prose.
-    var clean = (response || '').replace(/\*\*/g, '').trim();
-    var titleMatch = clean.match(/^\s*TITLE\s*[:：]\s*(.+?)\s*$/im);
-    var authorMatch = clean.match(/^\s*AUTHOR\s*[:：]\s*(.+?)\s*$/im);
-    var reasonMatch = clean.match(/^\s*REASON\s*[:：]\s*([\s\S]+?)\s*$/im);
-    if (!titleMatch || !titleMatch[1] || !authorMatch || !authorMatch[1]) {
-      console.error('[Surprise Me] Parse failed. Raw response:', response);
-      surpriseParseError(lang, 'Bad response from AI — try again?');
+    // Extract JSON object from response. Tolerate markdown fences, surrounding
+    // prose, smart/curly quotes, and full-width braces (common in CJK output).
+    var json = null;
+    var clean = (response || '').replace(/```[a-z]*/gi, '').replace(/```/g, '').trim();
+    clean = clean.replace(/[“”„‟″‶]/g, '"').replace(/[‘’‚‛′‵]/g, "'").replace(/｛/g, '{').replace(/｝/g, '}');
+    try {
+      json = JSON.parse(clean);
+    } catch (e) {}
+    if (!json) {
+      var m = clean.match(/\{[\s\S]*\}/);
+      if (m) {
+        try {
+          json = JSON.parse(m[0]);
+        } catch (e2) {}
+      }
+    }
+    // Strict validation: title and author must be present, non-empty after
+    // trimming, and not look like a placeholder. Catches Llama's tendency to
+    // satisfy json_object with empty strings or echoed schema fragments.
+    var title = json && typeof json.title === 'string' ? json.title.trim() : '';
+    var author = json && typeof json.author === 'string' ? json.author.trim() : '';
+    var reason = json && typeof json.reason === 'string' ? json.reason.trim() : '';
+    var placeholderish = /^(<.*>|book title|author name|title|author|n\/a|none)$/i;
+    if (!title || !author || placeholderish.test(title) || placeholderish.test(author)) {
+      console.error('[Surprise Me] Parse failed or incomplete. Raw response:', response);
+      var provider = STATE.apiKey ? STATE.provider : 'free pool';
+      var hint = lang !== 'English' && (provider === 'groq' || provider === 'free pool') ? ' Tip: Llama on Groq struggles with non-English recommendations — try Gemini or Anthropic for ' + lang + '.' : '';
+      surpriseParseError(lang, 'AI returned an incomplete suggestion — try again or pick a different genre.' + hint);
       return;
     }
-    var json = {
-      title: titleMatch[1].trim(),
-      author: authorMatch[1].trim(),
-      reason: reasonMatch && reasonMatch[1] ? reasonMatch[1].trim() : ''
+    json = {
+      title: title,
+      author: author,
+      reason: reason
     };
     var q = json.title + ' ' + (json.author || '');
     fetch('/api/books?q=' + encodeURIComponent(q.trim())).then(function (r) {
