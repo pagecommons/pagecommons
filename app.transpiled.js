@@ -1965,7 +1965,7 @@ function selectSurpriseLanguage(lang) {
     }
     seenNote = '\nDo NOT suggest any of these books the user has already seen: ' + seenTitles.join('; ') + '.';
   }
-  var userMessage = 'Suggest one ' + genre + ' book for a reader who wants to read in ' + lang + '.\n' + 'The book MUST be ' + langInstruction + '.\n' + titleLangNote + 'Do not suggest any book that is not available in ' + lang + '.\n' + shelfContext + seenNote + '\n' + 'Return a JSON object with three string fields: "title", "author", and "reason" (one sentence).\n' + 'All three fields MUST contain real, non-empty content for an actual book you are recommending. Never return empty strings or placeholder values.\n' + 'Example shape — do NOT copy these values, choose a real book that fits the request:\n' + '{"title":"Norwegian Wood","author":"Haruki Murakami","reason":"A quiet, melancholy exploration of grief and first love in 1960s Tokyo."}';
+  var userMessage = 'Recommend one ' + genre + ' book that is ' + langInstruction + '.\n' + titleLangNote + shelfContext + '\n' + seenNote + '\n' + 'Respond with a JSON object containing three string fields: "title" (the book\'s title), "author" (author\'s name), and "reason" (one short sentence on why it fits this reader). All three fields are required and must contain real content for an actual book — never empty strings.';
   var msgs = [{
     role: 'user',
     content: userMessage
