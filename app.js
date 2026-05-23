@@ -1872,9 +1872,14 @@ function selectSurpriseLanguage(lang) {
     if (!title || !author || placeholderish.test(title) || placeholderish.test(author)) {
       console.error('[Surprise Me] Parse failed or incomplete. Raw response:', response);
       var provider = STATE.apiKey ? STATE.provider : 'free pool';
-      var hint = (lang !== 'English' && (provider === 'groq' || provider === 'free pool'))
-        ? ' Tip: Llama on Groq struggles with non-English recommendations — try Gemini or Anthropic for ' + lang + '.'
-        : '';
+      var hint = '';
+      if (lang !== 'English') {
+        if (provider === 'groq') {
+          hint = ' Tip: Groq struggles with non-English recommendations — try Gemini or Anthropic for ' + lang + '.';
+        } else if (provider === 'free pool') {
+          hint = ' Tip: the free pool struggles with non-English recommendations — add a Gemini or Anthropic key in Settings for ' + lang + '.';
+        }
+      }
       surpriseParseError(lang, 'AI returned an incomplete suggestion — try again or pick a different genre.' + hint);
       return;
     }
