@@ -1820,7 +1820,7 @@ function selectSurpriseLanguage(lang) {
     ? ''
     : 'Use ' + lang + ' script for the title and author when the book has a ' + lang + ' edition.\n';
 
-  var system = 'You are a knowledgeable reading companion who recommends books available in the reader\'s chosen language. Reply with a JSON object only.';
+  var system = 'You are a knowledgeable reading companion who recommends books available in the reader\'s chosen language.';
 
   var seen = STATE.surpriseSeen || [];
   var seenNote = '';
@@ -1839,35 +1839,40 @@ function selectSurpriseLanguage(lang) {
     titleLangNote +
     shelfContext + '\n' +
     seenNote + '\n' +
-    'Reply as a JSON object with three required string fields: "title" (the book\'s actual title), "author" (the author\'s actual name), and "reason" (one short sentence on why it fits this reader). Fill every field with real content from a book you can name.';
+    'Reply with EXACTLY this format and nothing else (three lines, plain text — no JSON, no markdown):\n' +
+    'TITLE: <the book\'s actual title>\n' +
+    'AUTHOR: <the author\'s actual name>\n' +
+    'REASON: <one short sentence on why it fits this reader>';
 
   var msgs = [{role: 'user', content: userMessage}];
   var aiCall;
   if (STATE.apiKey) {
     if (STATE.provider === 'gemini') { aiCall = callGemini(system, msgs); }
-    else if (STATE.provider === 'groq') { aiCall = callGroqJSON(system, msgs); }
+    else if (STATE.provider === 'groq') { aiCall = callGroq(system, msgs); }
     else { aiCall = callAnthropic(system, msgs); }
   } else {
-    aiCall = callFreeTier(system, msgs, { jsonMode: true });
+    aiCall = callFreeTier(system, msgs);
   }
 
   aiCall.then(function(response) {
-    // Extract JSON object from response — handles markdown fences, surrounding
-    // text, smart/curly quotes, and full-width braces (common in CJK output,
-    // notably Japanese gemini-2.5-flash replies)
-    var json = null;
-    var clean = (response || '').replace(/```[a-z]*/gi, '').replace(/```/g, '').trim();
-    clean = clean.replace(/[“”„‟″‶]/g, '"').replace(/[‘’‚‛′‵]/g, "'").replace(/｛/g, '{').replace(/｝/g, '}');
-    try { json = JSON.parse(clean); } catch(e) {}
-    if (!json || !json.title) {
-      var m = clean.match(/\{[\s\S]*\}/);
-      if (m) { try { json = JSON.parse(m[0]); } catch(e2) {} }
-    }
-    if (!json || !json.title) {
+    // Parse the plain-text TITLE/AUTHOR/REASON format. Plain text avoids the
+    // json_object hedge-to-empty failure mode of medium-sized models (notably
+    // Groq llama-3.3-70b on non-English requests). Tolerate markdown bolding,
+    // full-width colons (CJK), and surrounding prose.
+    var clean = (response || '').replace(/\*\*/g, '').trim();
+    var titleMatch = clean.match(/^\s*TITLE\s*[:：]\s*(.+?)\s*$/im);
+    var authorMatch = clean.match(/^\s*AUTHOR\s*[:：]\s*(.+?)\s*$/im);
+    var reasonMatch = clean.match(/^\s*REASON\s*[:：]\s*([\s\S]+?)\s*$/im);
+    if (!titleMatch || !titleMatch[1] || !authorMatch || !authorMatch[1]) {
       console.error('[Surprise Me] Parse failed. Raw response:', response);
       surpriseParseError(lang, 'Bad response from AI — try again?');
       return;
     }
+    var json = {
+      title: titleMatch[1].trim(),
+      author: authorMatch[1].trim(),
+      reason: reasonMatch && reasonMatch[1] ? reasonMatch[1].trim() : ''
+    };
     var q = json.title + ' ' + (json.author || '');
     fetch('/api/books?q=' + encodeURIComponent(q.trim()))
       .then(function(r) { return r.json(); })
