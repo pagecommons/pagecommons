@@ -1851,10 +1851,10 @@ function selectSurpriseLanguage(lang) {
   var aiCall;
   if (STATE.apiKey) {
     if (STATE.provider === 'gemini') { aiCall = callGemini(system, msgs); }
-    else if (STATE.provider === 'groq') { aiCall = callGroq(system, msgs); }
+    else if (STATE.provider === 'groq') { aiCall = callGroqJSON(system, msgs); }
     else { aiCall = callAnthropic(system, msgs); }
   } else {
-    aiCall = callFreeTier(system, msgs);
+    aiCall = callFreeTier(system, msgs, { jsonMode: true });
   }
 
   aiCall.then(function(response) {
@@ -3104,11 +3104,13 @@ function _callAI() {
   }));
   return _callAI.apply(this, arguments);
 }
-function callFreeTier(system, messages) {
+function callFreeTier(system, messages, opts) {
+  var body = { system: system, messages: messages };
+  if (opts && opts.jsonMode) body.jsonMode = true;
   return fetch('/api/ai', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ system: system, messages: messages })
+    body: JSON.stringify(body)
   }).then(function(res) {
     if (res.status === 429) {
       var rateLimitErr = new Error('Our free companion is busy right now — add your own key for instant access.');
@@ -3122,6 +3124,33 @@ function callFreeTier(system, messages) {
     }
     return res.json().then(function(data) {
       return data && data.text ? data.text : '(No response)';
+    });
+  });
+}
+// Groq call that forces a strict JSON object response, for structured tasks
+// like Surprise Me. Llama on Groq frequently returns prose around the JSON
+// or breaks JSON.parse otherwise; response_format pins it to valid JSON.
+function callGroqJSON(system, messages) {
+  return fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + STATE.apiKey
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      max_tokens: 1024,
+      response_format: { type: 'json_object' },
+      messages: [{ role: 'system', content: system }].concat(messages)
+    })
+  }).then(function(res) {
+    if (!res.ok) {
+      return res.json().catch(function() { return {}; }).then(function(e) {
+        throw new Error(e && e.error && e.error.message ? e.error.message : 'HTTP ' + res.status);
+      });
+    }
+    return res.json().then(function(j) {
+      return j && j.choices && j.choices[0] && j.choices[0].message ? j.choices[0].message.content : '';
     });
   });
 }

@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: 'Free tier not available' });
   }
 
-  const { system, messages } = req.body || {};
+  const { system, messages, jsonMode } = req.body || {};
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: 'Invalid request' });
   }
@@ -47,11 +47,11 @@ export default async function handler(req, res) {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + key
         },
-        body: JSON.stringify({
+        body: JSON.stringify(Object.assign({
           model: 'llama-3.3-70b-versatile',
           max_tokens: 1024,
           messages: chatMessages
-        })
+        }, jsonMode ? { response_format: { type: 'json_object' } } : {}))
       });
 
       if (groqRes.status === 429) {
