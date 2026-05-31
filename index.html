@@ -746,7 +746,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.30</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.31</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -1133,6 +1133,21 @@
   </section>
 
 
+  <!-- ONBOARDING — AI MODE CHOICE -->
+  <section id="screen-onboarding" class="screen">
+    <h1>Choose your companion</h1>
+    <p>Page Commons uses AI to power your reading companion. You can use the free shared pool or bring your own API key.</p>
+
+    <button class="btn btn-primary" onclick="chooseAIMode('shared')" style="width:100%;margin-bottom:8px">Use free shared companion</button>
+    <p style="font-size:0.78rem;color:#777777;margin-bottom:24px">No key needed. Shared with other readers — available for light use. Response quality and availability may vary.</p>
+
+    <button class="btn" onclick="chooseAIMode('byok')" style="width:100%;margin-bottom:8px">Use my own API key</button>
+    <p style="font-size:0.78rem;color:#777777;margin-bottom:24px">Full quality, always available. Your key is stored only in this browser and never sent to our servers.</p>
+
+    <p style="font-size:0.78rem;color:#777777">You can change this any time in Settings.</p>
+    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
+  </section>
+
   <!-- T&C SCREEN -->
   <section id="screen-tc" class="screen">
     <h1>Welcome to Page Commons</h1>
@@ -1231,7 +1246,16 @@
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-label">AI provider</div>
+      <div class="settings-section-label">AI companion</div>
+      <div class="settings-radio-options">
+        <button class="settings-radio" id="settings-mode-shared" onclick="switchAIMode('shared')">Free shared pool</button>
+        <button class="settings-radio" id="settings-mode-byok" onclick="switchAIMode('byok')">My own key</button>
+      </div>
+      <p style="font-size:0.78rem;color:#777777;margin-top:8px" id="settings-ai-mode-note"></p>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label">API key &amp; provider</div>
       <div class="settings-radio-options">
         <button class="settings-radio" id="settings-prov-anthropic" onclick="selectProvider('anthropic')">Anthropic Claude</button>
         <button class="settings-radio" id="settings-prov-gemini" onclick="selectProvider('gemini')">Google Gemini</button>

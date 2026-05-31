@@ -49,6 +49,8 @@ if (!Object.assign) {
 //  STATE
 // ═══════════════════════════════════════════════════
 var STATE = {
+  aiMode: null,
+  // 'shared' | 'byok' | null (not yet chosen)
   apiKey: '',
   provider: 'anthropic',
   companionName: 'Companion',
@@ -85,7 +87,7 @@ var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'L
 // ═══════════════════════════════════════════════════
 //  SCREENS + NAVIGATION
 // ═══════════════════════════════════════════════════
-var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'book-detail', 'tc', 'age-gate', 'settings', 'surprise'];
+var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'book-detail', 'tc', 'age-gate', 'settings', 'surprise', 'onboarding'];
 
 var SEARCH_HEADINGS = [
   'Which book?',
@@ -120,7 +122,7 @@ var BACK_FALLBACK = {
   about: 'home', key: 'home', search: 'home', 'book-detail': 'search',
   status: 'book-detail', language: 'status', companion: 'search',
   shelf: 'home', settings: 'home', surprise: 'search', 'book-shelf': 'shelf',
-  'age-gate': 'search'
+  'age-gate': 'search', onboarding: 'tc'
 };
 function currentScreen() {
   var el = document.querySelector('.screen.active');
@@ -167,7 +169,7 @@ function handleRoute() {
 
   // defensive redirects
   if (hash === 'companion') {
-    if (!STATE.apiKey) {
+    if (!STATE.apiKey && STATE.aiMode !== 'shared') {
       navigate('key');
       return;
     }
@@ -176,7 +178,7 @@ function handleRoute() {
       return;
     }
   }
-  if (hash === 'search' && !STATE.apiKey) {
+  if (hash === 'search' && !STATE.apiKey && STATE.aiMode !== 'shared') {
     navigate('key');
     return;
   }
@@ -410,6 +412,8 @@ function saveKey() {
   }
   STATE.apiKey = val;
   localStorage.setItem('pc_api_key', val);
+  STATE.aiMode = 'byok';
+  localStorage.setItem('pc_ai_mode', 'byok');
   if (name) {
     STATE.companionName = name;
     localStorage.setItem('pc_companion_name', name);
@@ -1080,7 +1084,40 @@ function selectManualBook() {
 // ═══════════════════════════════════════════════════
 function acceptTC() {
   localStorage.setItem('pc_tc_accepted', '1');
-  navigate('key');
+  if (STATE.aiMode) {
+    handleRoute();
+  } else {
+    navigate('onboarding');
+  }
+}
+function chooseAIMode(mode) {
+  STATE.aiMode = mode;
+  localStorage.setItem('pc_ai_mode', mode);
+  if (mode === 'shared') {
+    navigate('home');
+  } else {
+    navigate('key');
+  }
+}
+function switchAIMode(mode) {
+  STATE.aiMode = mode;
+  localStorage.setItem('pc_ai_mode', mode);
+  updateAIModeUI();
+}
+function updateAIModeUI() {
+  var sharedBtn = document.getElementById('settings-mode-shared');
+  var byokBtn = document.getElementById('settings-mode-byok');
+  var note = document.getElementById('settings-ai-mode-note');
+  if (!sharedBtn || !byokBtn) return;
+  if (STATE.aiMode === 'shared') {
+    sharedBtn.classList.add('active');
+    byokBtn.classList.remove('active');
+    if (note) note.textContent = 'Using the free shared companion. Add your own key for better quality and availability.';
+  } else {
+    sharedBtn.classList.remove('active');
+    byokBtn.classList.add('active');
+    if (note) note.textContent = STATE.apiKey ? 'Using your own API key.' : 'No key saved yet. Set one below.';
+  }
 }
 function isAdultBook(book) {
   var ADULT_TAGS = ['erotica', 'erotic', 'adult fiction', 'explicit', 'mature', 'sexuality', 'pornography'];
@@ -4019,6 +4056,7 @@ function loadSettingsScreen() {
   if (nameEl) nameEl.value = STATE.userName || '';
   var cnEl = document.getElementById('settings-companion-name');
   if (cnEl) cnEl.value = STATE.companionName === 'Companion' ? '' : STATE.companionName;
+  updateAIModeUI();
   applyProviderUI(STATE.provider);
   document.querySelectorAll('.length-opt').forEach(function(b) {
     b.dataset.length === STATE.replyLength ? b.classList.add('active') : b.classList.remove('active');
@@ -4195,6 +4233,14 @@ function fetchAndCacheSubjects(book) {
 
 function init() {
   try {
+    var aiMode = localStorage.getItem('pc_ai_mode');
+    if (aiMode) {
+      STATE.aiMode = aiMode;
+    } else if (localStorage.getItem('pc_api_key')) {
+      // existing user who had a key before onboarding was added — treat as byok
+      STATE.aiMode = 'byok';
+      localStorage.setItem('pc_ai_mode', 'byok');
+    }
     var prov = localStorage.getItem('pc_provider');
     if (prov) {
       STATE.provider = prov;

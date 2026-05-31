@@ -48,13 +48,15 @@
 - [x] Fix icebreaker voice: rephrased into first-person reader voice (things the reader taps to say to the companion). Updated the generation prompt and rewrote all STATIC_PROMPT_SETS fallbacks (English + Traditional/Simplified Chinese, Japanese, Korean)
 
 ### Onboarding Flow & AI-Mode System
-- [ ] After first-time T&C accept → intro screen with a brief introduction, then a choice: BYOK vs Use shared AI pool
-- [ ] Shared = the existing /api/ai shared proxy (now Groq-backed; already powers the companion when no key is set). Show a reminder it's shared and may be unavailable under heavy use → goes straight to the main hall, no key entry
-- [ ] BYOK → link to a new providers.html (standalone page) explaining how to get a key from each provider (Anthropic, Gemini, Groq) → then show #key entry → then main hall
-- [ ] Persist choice in localStorage (pc_ai_mode = byok | shared); returning users skip the choice step
-- [ ] Relax the current STATE.apiKey gate (around app.js:137 / :146) so shared-mode users reach search/companion without a key
-- [ ] Settings: BYOK/Shared becomes the top-level toggle; the AI-provider radio + key field only apply in BYOK mode; Shared forces the shared proxy and hides the key field
-- [ ] Persistent footer link on every screen → goes to Settings (full Settings page, not just AI), reusing the existing per-screen support-footer area
+- [x] After first-time T&C accept → #onboarding screen with BYOK vs shared pool choice
+- [x] Shared pool → home directly, no key entry; reminder that quality/availability may vary
+- [x] BYOK → #key screen → main hall; saveKey() sets pc_ai_mode = 'byok'
+- [x] Persist choice in localStorage (pc_ai_mode = byok | shared); returning users skip choice
+- [x] Relax STATE.apiKey gate so shared-mode users reach search/companion without a key
+- [x] Settings: "AI companion" toggle (Free shared pool / My own key); provider section renamed "API key & provider"
+- [ ] providers.html — standalone page explaining how to get a key from Anthropic/Gemini/Groq (deferred; BYOK users can use the hint text on #key screen for now)
+- [ ] Persistent footer link on every screen → Settings (deferred)
+- [ ] In shared mode, hide the API provider radio + key field in Settings (they're still visible but secondary; can clean up later)
 
 ## Priority 2: V2 Features (Post-Launch, Community Rooms)
 

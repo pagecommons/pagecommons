@@ -1,10 +1,31 @@
 # Page Commons — Current Status
 
-Last updated: May 22, 2026
-Current version: v0.30
-Updated by: Claude session — AI quality, model upgrade, navigation & UX polish
+Last updated: May 31, 2026
+Current version: v0.31
+Updated by: Claude session — onboarding flow, AI-mode system, Surprise Me fixes
 
-## What was done this session [v0.30]
+## What was done this session [v0.31]
+
+### Onboarding Flow & AI-Mode System ✓
+- New `#onboarding` screen shown after T&C accept for first-time users
+  (returning users with pc_ai_mode already set skip it and go straight to handleRoute)
+- Two choices: "Use free shared companion" (→ home) / "Use my own API key" (→ #key)
+- `chooseAIMode(mode)` saves `pc_ai_mode` to localStorage and routes accordingly
+- Existing users who already have a key migrated to `pc_ai_mode = 'byok'` silently
+- Navigation gates relaxed: `!STATE.apiKey && STATE.aiMode !== 'shared'` — shared-mode
+  users reach #search and #companion without a key; callAI() already falls through to
+  callFreeTier() when no apiKey is set
+- Settings: new "AI companion" section with Free shared pool / My own key toggle
+  (`switchAIMode()`, `updateAIModeUI()`); label renamed "AI provider" → "API key & provider"
+- `saveKey()` also sets `pc_ai_mode = 'byok'` so key entry always implies BYOK mode
+
+### Surprise Me fixes (from previous session) ✓
+- Error message no longer names underlying model or blames free-pool users
+- "Surprise me anyway" grammar fix (anyGenre flag → "book of any genre")
+- JSON mode + strict validation on Surprise Me suggestions
+- Groq tip shown only for BYOK Groq + non-English (not to free-pool users)
+
+## What was done last session [v0.30]
 
 ### Icebreaker quality + reliability ✓
 - Hardened the icebreaker parser (parseIcebreakerList): tolerates markdown
