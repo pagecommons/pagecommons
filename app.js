@@ -363,18 +363,14 @@ function restoreCompanionUI(book) {
   STATE.companionLangOverride = savedOverride || null;
   updateLanguagePanelDisplay();
   // Close all panels
-  document.getElementById('font-panel').classList.remove('open');
   document.getElementById('highlights-panel').classList.remove('open');
   document.getElementById('passages-panel').classList.remove('open');
   document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('language-panel').classList.remove('open');
-  document.getElementById('length-panel').classList.remove('open');
-  document.getElementById('font-toolbar-btn').classList.remove('active');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('passages-toolbar-btn').classList.remove('active');
   document.getElementById('notes-toolbar-btn').classList.remove('active');
   document.getElementById('language-toolbar-btn').classList.remove('active');
-  document.getElementById('length-toolbar-btn').classList.remove('active');
 }
 
 // ═══════════════════════════════════════════════════
@@ -1710,18 +1706,14 @@ function launchCompanion(book) {
   STATE.companionLangOverride = savedOverride || null;
   updateLanguagePanelDisplay();
   // Close all panels
-  document.getElementById('font-panel').classList.remove('open');
   document.getElementById('highlights-panel').classList.remove('open');
   document.getElementById('passages-panel').classList.remove('open');
   document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('language-panel').classList.remove('open');
-  document.getElementById('length-panel').classList.remove('open');
-  document.getElementById('font-toolbar-btn').classList.remove('active');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('passages-toolbar-btn').classList.remove('active');
   document.getElementById('notes-toolbar-btn').classList.remove('active');
   document.getElementById('language-toolbar-btn').classList.remove('active');
-  document.getElementById('length-toolbar-btn').classList.remove('active');
   navigate('companion');
 }
 function updateStatusDisplay() {
@@ -2132,9 +2124,7 @@ function toggleHighlights() {
   var panel = document.getElementById('highlights-panel'),
     btn = document.getElementById('highlights-toolbar-btn');
   panel.classList.toggle('open');
-  document.getElementById('font-panel').classList.remove('open');
   document.getElementById('notes-panel').classList.remove('open');
-  document.getElementById('font-toolbar-btn').classList.remove('active');
   document.getElementById('notes-toolbar-btn').classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
 }
@@ -3024,16 +3014,6 @@ function _callGroq() {
   }));
   return _callGroq.apply(this, arguments);
 }
-function toggleFontPanel() {
-  var panel = document.getElementById('font-panel'),
-    btn = document.getElementById('font-toolbar-btn');
-  panel.classList.toggle('open');
-  document.getElementById('highlights-panel').classList.remove('open');
-  document.getElementById('notes-panel').classList.remove('open');
-  document.getElementById('highlights-toolbar-btn').classList.remove('active');
-  document.getElementById('notes-toolbar-btn').classList.remove('active');
-  panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
-}
 function applyFontSize(size) {
   document.documentElement.style.fontSize = size + 'px';
   document.querySelectorAll('.font-size-opt').forEach(function (b) {
@@ -3339,20 +3319,6 @@ function updateBookStatus() {
 // ═══════════════════════════════════════════════════
 //  REPLY LENGTH
 // ═══════════════════════════════════════════════════
-function toggleLengthPanel() {
-  var panel = document.getElementById('length-panel');
-  var btn = document.getElementById('length-toolbar-btn');
-  panel.classList.toggle('open');
-  document.getElementById('font-panel').classList.remove('open');
-  document.getElementById('highlights-panel').classList.remove('open');
-  document.getElementById('passages-panel').classList.remove('open');
-  document.getElementById('notes-panel').classList.remove('open');
-  document.getElementById('font-toolbar-btn').classList.remove('active');
-  document.getElementById('highlights-toolbar-btn').classList.remove('active');
-  document.getElementById('passages-toolbar-btn').classList.remove('active');
-  document.getElementById('notes-toolbar-btn').classList.remove('active');
-  panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
-}
 function setReplyLength(length) {
   STATE.replyLength = length;
   localStorage.setItem('pc_reply_length', length);
@@ -3366,16 +3332,12 @@ function toggleLanguagePanel() {
   var panel = document.getElementById('language-panel');
   var btn = document.getElementById('language-toolbar-btn');
   panel.classList.toggle('open');
-  document.getElementById('font-panel').classList.remove('open');
   document.getElementById('highlights-panel').classList.remove('open');
   document.getElementById('passages-panel').classList.remove('open');
   document.getElementById('notes-panel').classList.remove('open');
-  document.getElementById('length-panel').classList.remove('open');
-  document.getElementById('font-toolbar-btn').classList.remove('active');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('passages-toolbar-btn').classList.remove('active');
   document.getElementById('notes-toolbar-btn').classList.remove('active');
-  document.getElementById('length-toolbar-btn').classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
   updateLanguagePanelDisplay();
 }
@@ -3467,10 +3429,8 @@ function togglePassagesPanel() {
   var panel = document.getElementById('passages-panel');
   var btn = document.getElementById('passages-toolbar-btn');
   panel.classList.toggle('open');
-  document.getElementById('font-panel').classList.remove('open');
   document.getElementById('highlights-panel').classList.remove('open');
   document.getElementById('notes-panel').classList.remove('open');
-  document.getElementById('font-toolbar-btn').classList.remove('active');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('notes-toolbar-btn').classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
@@ -3549,14 +3509,10 @@ function toggleNotesPanel() {
   var panel = document.getElementById('notes-panel');
   var btn = document.getElementById('notes-toolbar-btn');
   panel.classList.toggle('open');
-  document.getElementById('font-panel').classList.remove('open');
   document.getElementById('highlights-panel').classList.remove('open');
   document.getElementById('passages-panel').classList.remove('open');
-  document.getElementById('length-panel').classList.remove('open');
-  document.getElementById('font-toolbar-btn').classList.remove('active');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('passages-toolbar-btn').classList.remove('active');
-  document.getElementById('length-toolbar-btn').classList.remove('active');
   if (panel.classList.contains('open')) {
     btn.classList.add('active');
     renderNotesPanel();
@@ -3699,15 +3655,18 @@ function loadPreferencesScreen() {
   var clangEl = document.getElementById('settings-companion-lang');
   if (clangEl) clangEl.value = STATE.companionLangOverride || '';
 
-  // First-run mode: hide back link, show intro + Save & continue.
+  // First-run mode: hide back link, show intro + Save & continue, hide
+  // the data export/import section (nothing to back up yet).
   // Normal mode: show back link, hide intro + Save button.
   var firstRun = !localStorage.getItem('pc_preferences_set');
   var backLink = document.getElementById('prefs-back-link');
   var intro = document.getElementById('prefs-intro');
   var saveBtn = document.getElementById('prefs-save-continue');
+  var dataSection = document.getElementById('prefs-data-section');
   if (backLink) backLink.style.display = firstRun ? 'none' : 'inline-block';
   if (intro) intro.style.display = firstRun ? 'block' : 'none';
   if (saveBtn) saveBtn.style.display = firstRun ? 'block' : 'none';
+  if (dataSection) dataSection.style.display = firstRun ? 'none' : 'block';
 
   // Collapse "More settings" by default each time the screen is opened.
   var more = document.getElementById('prefs-more');

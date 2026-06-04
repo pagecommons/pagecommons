@@ -1,10 +1,32 @@
 # Page Commons — Current Status
 
 Last updated: June 4, 2026
-Current version: v0.33
-Updated by: Claude session — Preferences screen + first-run flow + bug fixes
+Current version: v0.34
+Updated by: Claude session — first-run polish + chat toolbar slim-down
 
-## What was done this session [v0.33]
+## What was done this session [v0.34]
+
+### First-run polish ✓
+- "Your data" (Export / Import) section is now hidden during first-run —
+  nothing to back up yet on a fresh install.
+- Footer support line (Preferences → / Support it →) is now left-aligned,
+  matching the rest of the app's layout. Same change applied to support.html.
+
+### Chat toolbar slim-down ✓
+- Removed "Aa" (text size) and "More" (reply length) buttons — both
+  duplicated controls now in Preferences. With the persistent
+  "Preferences →" footer link, users have one consistent place to tune
+  these, and they're rarely changed mid-chat.
+- Kept Notes, Language (per-book override is contextual, not a global
+  preference), Shelf, Done, plus the conditional Highlights/Passages.
+- "Export conversation" moved from the deleted length-panel into the
+  Notes panel (the closest semantic home).
+- Removed orphan toggleFontPanel / toggleLengthPanel functions and all
+  sibling-deactivation references to the removed buttons/panels (would
+  otherwise crash when Notes/Highlights/Passages tried to deactivate
+  vanished buttons). Dropped the dead #font-panel / #length-panel CSS.
+
+## What was done last session [v0.33]
 
 ### Renamed Settings → Preferences ✓
 - #settings screen renamed to #preferences (id, function names, navigate calls,

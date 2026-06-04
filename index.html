@@ -399,15 +399,6 @@
     .toolbar-btn:active { background: #f5f5f5; }
     .toolbar-btn.active { background: #111111; color: #ffffff; }
 
-    #font-panel {
-      display: none;
-      border: 1px solid #111111;
-      border-radius: 0;
-      padding: 16px;
-      margin-bottom: 16px;
-      background: #f5f5f5;
-    }
-    #font-panel.open { display: block; }
     .font-panel-label {
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
@@ -659,16 +650,6 @@
     }
     .passages-empty { font-size: 0.9rem; color: #777777; font-style: italic; }
 
-    /* === REPLY LENGTH PANEL === */
-    #length-panel {
-      display: none;
-      border: 1px solid #111111;
-      border-radius: 0;
-      padding: 16px;
-      margin-bottom: 16px;
-      background: #f5f5f5;
-    }
-    #length-panel.open { display: block; }
     .length-options { display: -webkit-box; display: -ms-flexbox; display: flex; }
     .length-options > .length-opt { margin-right: 8px; }
     .length-options > .length-opt:last-child { margin-right: 0; }
@@ -732,7 +713,7 @@
     .age-gate-btns > .btn:last-child { margin-bottom: 0; }
 
     /* === SCREEN SUPPORT FOOTER === */
-    .screen-support-footer { padding-top: 32px; padding-bottom: 16px; text-align: center; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: #666666; }
+    .screen-support-footer { padding-top: 32px; padding-bottom: 16px; text-align: left; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: #666666; }
     .screen-support-footer a { color: #666666; text-decoration: underline; }
   </style>
   <script src="app.js" defer></script>
@@ -746,7 +727,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.33</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.34</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -1033,43 +1014,19 @@
       </div>
 
       <div id="reader-toolbar">
-        <button class="toolbar-btn" id="font-toolbar-btn" onclick="toggleFontPanel()">Aa</button>
         <button class="toolbar-btn" id="highlights-toolbar-btn" style="display:none" onclick="toggleHighlights()">Highlights</button>
         <button class="toolbar-btn" id="passages-toolbar-btn" style="display:none" onclick="togglePassagesPanel()">Passages</button>
         <button class="toolbar-btn" id="notes-toolbar-btn" onclick="toggleNotesPanel()">Notes</button>
         <button class="toolbar-btn" id="language-toolbar-btn" onclick="toggleLanguagePanel()">Language</button>
         <button class="toolbar-btn" onclick="navigate('shelf')">Shelf</button>
         <button class="toolbar-btn" onclick="endConversation()">Done</button>
-        <button class="toolbar-btn" id="length-toolbar-btn" onclick="toggleLengthPanel()">More</button>
       </div>
 
       <div id="toolbar-msg"></div>
 
-      <div id="font-panel">
-        <div class="font-panel-label">Text size</div>
-        <div class="font-size-options">
-          <button class="font-size-opt" style="font-size:0.85rem" data-size="16" onclick="setFontSize(16)">A</button>
-          <button class="font-size-opt" style="font-size:1rem"    data-size="18" onclick="setFontSize(18)">A</button>
-          <button class="font-size-opt" style="font-size:1.15rem" data-size="20" onclick="setFontSize(20)">A</button>
-          <button class="font-size-opt" style="font-size:1.3rem"  data-size="22" onclick="setFontSize(22)">A</button>
-        </div>
-      </div>
-
       <div id="highlights-panel">
         <div id="highlights-count" style="font-size:0.85rem;color:#777777;margin-bottom:10px"></div>
         <div id="highlights-list"  style="font-size:0.9rem;line-height:1.6"></div>
-      </div>
-
-      <div id="length-panel">
-        <div class="font-panel-label">Reply length</div>
-        <div class="length-options">
-          <button class="length-opt active" data-length="short"    onclick="setReplyLength('short')">Short</button>
-          <button class="length-opt"        data-length="medium"   onclick="setReplyLength('medium')">Medium</button>
-          <button class="length-opt"        data-length="detailed" onclick="setReplyLength('detailed')">Detailed</button>
-        </div>
-        <p style="font-size:0.78rem;color:#777777;margin-top:10px;margin-bottom:0">Short keeps replies to a few sentences. Detailed allows longer responses.</p>
-        <hr style="border:none;border-top:1px solid #dddddd;margin:14px 0" />
-        <button class="bubble-action-btn" onclick="exportConversation()" style="font-size:0.85rem">Export conversation</button>
       </div>
 
       <div id="notes-panel">
@@ -1077,6 +1034,8 @@
         <textarea id="note-input" rows="4" placeholder="Write a private note about this book…" style="width:100%;border:1px solid #111111;padding:8px;font-size:0.9rem;font-family:Georgia,'Times New Roman',serif;resize:vertical;border-radius:0;background:#ffffff;color:#111111;margin-bottom:8px"></textarea>
         <button class="btn btn-primary btn-small" onclick="saveNoteEntry()" style="margin-bottom:16px">Save note</button>
         <div id="notes-list"></div>
+        <hr style="border:none;border-top:1px solid #dddddd;margin:16px 0" />
+        <button class="bubble-action-btn" onclick="exportConversation()" style="font-size:0.85rem">Export conversation</button>
       </div>
 
       <div id="passages-panel">
@@ -1268,7 +1227,7 @@
         </p>
       </div>
 
-      <div class="settings-section">
+      <div class="settings-section" id="prefs-data-section">
         <div class="settings-section-label">Your data</div>
         <p style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px">Back up your Page Commons data or restore it on another device.</p>
         <button class="btn" style="margin-bottom:10px" onclick="exportUserData()">Export my data</button>
