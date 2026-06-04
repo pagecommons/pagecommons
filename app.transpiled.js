@@ -211,11 +211,7 @@ var STATE = {
   // saved passages for current book
   replyLength: 'medium',
   // 'short' | 'medium' | 'detailed'
-  userName: '',
-  surpriseBook: null,
-  surpriseMode: null,
-  // 'random' | 'shelf'
-  surpriseResults: []
+  userName: ''
 };
 var STATIC_PROMPTS = ["I just finished it", "Something is still on my mind", "I want to understand something better", "There's a passage I keep thinking about", "I'm not sure how I feel about it", "I gave up — can we talk about why?", "I want to know what to read next", "Something surprised me"];
 var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'Let me think…', 'Hmm…', 'One moment…', 'With you…'];
@@ -223,7 +219,7 @@ var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'L
 // ═══════════════════════════════════════════════════
 //  SCREENS + NAVIGATION
 // ═══════════════════════════════════════════════════
-var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'book-detail', 'tc', 'age-gate', 'settings', 'surprise', 'onboarding'];
+var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'book-detail', 'tc', 'age-gate', 'settings', 'onboarding'];
 var SEARCH_HEADINGS = ['Which book?', 'What are you reading?', 'What are you lost in?', 'What\'s keeping you up?', 'What\'s calling to you?', 'What\'s in your hands?', 'Which world are you in?'];
 var SEARCH_HEADINGS_NAMED = ['What are you reading, {name}?', 'What are you lost in, {name}?', 'What\'s keeping you up, {name}?', 'What\'s calling to you, {name}?', 'Which world are you in, {name}?'];
 function updateSearchHeading() {
@@ -249,7 +245,6 @@ var BACK_FALLBACK = {
   companion: 'search',
   shelf: 'home',
   settings: 'home',
-  surprise: 'search',
   'book-shelf': 'shelf',
   'age-gate': 'search',
   onboarding: 'tc'
@@ -317,7 +312,6 @@ function handleRoute() {
   if (target === 'settings') loadSettingsScreen();
   if (target === 'search') updateSearchHeading();
   if (target === 'book-detail') loadBookDetailScreen();
-  if (target === 'surprise') initSurpriseScreen();
   updateTitleLink();
 }
 function navigate(view) {
@@ -1886,7 +1880,7 @@ function startReadingFromDiscover() {
 }
 
 // ═══════════════════════════════════════════════════
-//  SURPRISE ME
+//  LANGUAGE MAPS (used by manual entry + discover flows)
 // ═══════════════════════════════════════════════════
 
 var LANG_NAME_TO_CODE = {
@@ -1929,25 +1923,6 @@ var LANG_CODE_TO_NAME = {
   'th': 'Thai',
   'vi': 'Vietnamese'
 };
-var LANG_PROMPT_MAP = {
-  'English': 'available in English',
-  'Traditional Chinese': 'available in Traditional Chinese — original or translation',
-  'Simplified Chinese': 'available in Simplified Chinese — original or translation',
-  'Japanese': 'available in Japanese — original or translation',
-  'French': 'available in French — original or translation',
-  'Spanish': 'available in Spanish — original or translation',
-  'German': 'available in German — original or translation',
-  'Portuguese': 'available in Portuguese — original or translation',
-  'Korean': 'available in Korean — original or translation'
-};
-function initSurpriseScreen() {
-  STATE.surpriseGenre = null;
-  STATE.surpriseSeen = [];
-  document.getElementById('surprise-genre-step').style.display = 'block';
-  document.getElementById('surprise-language-step').style.display = 'none';
-  document.getElementById('surprise-result').style.display = 'none';
-  document.getElementById('surprise-loading').style.display = 'none';
-}
 function buildBookFromGoogleItem(item, lang, langCode) {
   if (!item) return null;
   var vi = item.volumeInfo || {};
@@ -1964,215 +1939,6 @@ function buildBookFromGoogleItem(item, lang, langCode) {
     lang: vi.language || langCode,
     language: lang
   };
-}
-function startSurpriseMe() {
-  STATE.surpriseGenre = null;
-  navigate('surprise');
-}
-function selectSurpriseGenre(genre) {
-  STATE.surpriseGenre = genre;
-  document.getElementById('surprise-genre-step').style.display = 'none';
-  document.getElementById('surprise-language-step').style.display = 'block';
-}
-function selectSurpriseLanguage(lang) {
-  var genre = STATE.surpriseGenre;
-  var langInstruction = LANG_PROMPT_MAP[lang] || 'available in ' + lang;
-  var loadEl = document.getElementById('surprise-loading');
-  loadEl.textContent = 'Finding a book…';
-  loadEl.style.display = 'block';
-  document.getElementById('surprise-genre-step').style.display = 'none';
-  document.getElementById('surprise-language-step').style.display = 'none';
-  document.getElementById('surprise-result').style.display = 'none';
-  var shelf = getShelfBooks();
-  var shelfContext = '';
-  if (shelf && shelf.length > 0) {
-    var shelfParts = [];
-    var limit = shelf.length < 20 ? shelf.length : 20;
-    for (var i = 0; i < limit; i++) {
-      shelfParts.push(shelf[i].title + ' by ' + shelf[i].author);
-    }
-    shelfContext = 'The user has already read: ' + shelfParts.join(', ') + '.';
-  } else {
-    shelfContext = 'The user has not read any books yet.';
-  }
-  var titleLangNote = lang === 'English' ? '' : 'Use ' + lang + ' script for the title and author when the book has a ' + lang + ' edition.\n';
-  var system = 'You are a knowledgeable reading companion who recommends books available in the reader\'s chosen language.';
-  var seen = STATE.surpriseSeen || [];
-  var seenNote = '';
-  if (seen.length > 0) {
-    var seenTitles = [];
-    for (var j = 0; j < seen.length; j++) {
-      seenTitles.push(seen[j].title + ' by ' + seen[j].author);
-    }
-    seenNote = '\nDo NOT suggest any of these books the user has already seen: ' + seenTitles.join('; ') + '.';
-  }
-  var anyGenre = genre === 'Surprise me anyway';
-  var userMessage = (anyGenre ? 'Recommend one book of any genre that is ' + langInstruction + '.\n' : 'Recommend one ' + genre + ' book that is ' + langInstruction + '.\n') + titleLangNote + shelfContext + '\n' + seenNote + '\n' + 'Reply as a JSON object with three required string fields: "title" (the book\'s actual title), "author" (the author\'s actual name), and "reason" (one short sentence on why it fits this reader). Fill every field with real content from a book you can name.';
-  var msgs = [{
-    role: 'user',
-    content: userMessage
-  }];
-  var aiCall;
-  if (STATE.apiKey) {
-    if (STATE.provider === 'gemini') {
-      aiCall = callGemini(system, msgs);
-    } else if (STATE.provider === 'groq') {
-      aiCall = callGroqJSON(system, msgs);
-    } else {
-      aiCall = callAnthropic(system, msgs);
-    }
-  } else {
-    aiCall = callFreeTier(system, msgs, {
-      jsonMode: true
-    });
-  }
-  aiCall.then(function (response) {
-    // Extract JSON object from response. Tolerate markdown fences, surrounding
-    // prose, smart/curly quotes, and full-width braces (common in CJK output).
-    var json = null;
-    var clean = (response || '').replace(/```[a-z]*/gi, '').replace(/```/g, '').trim();
-    clean = clean.replace(/[“”„‟″‶]/g, '"').replace(/[‘’‚‛′‵]/g, "'").replace(/｛/g, '{').replace(/｝/g, '}');
-    try {
-      json = JSON.parse(clean);
-    } catch (e) {}
-    if (!json) {
-      var m = clean.match(/\{[\s\S]*\}/);
-      if (m) {
-        try {
-          json = JSON.parse(m[0]);
-        } catch (e2) {}
-      }
-    }
-    // Strict validation: title and author must be present, non-empty after
-    // trimming, and not look like a placeholder. Catches Llama's tendency to
-    // satisfy json_object with empty strings or echoed schema fragments.
-    var title = json && typeof json.title === 'string' ? json.title.trim() : '';
-    var author = json && typeof json.author === 'string' ? json.author.trim() : '';
-    var reason = json && typeof json.reason === 'string' ? json.reason.trim() : '';
-    var placeholderish = /^(<.*>|book title|author name|title|author|n\/a|none)$/i;
-    if (!title || !author || placeholderish.test(title) || placeholderish.test(author)) {
-      console.error('[Surprise Me] Parse failed or incomplete. Raw response:', response);
-      var hint = lang !== 'English' && STATE.apiKey && STATE.provider === 'groq' ? ' Tip: Groq struggles with non-English recommendations — try Gemini or Anthropic for ' + lang + '.' : '';
-      surpriseParseError(lang, 'AI returned an incomplete suggestion — try again or pick a different genre.' + hint);
-      return;
-    }
-    json = {
-      title: title,
-      author: author,
-      reason: reason
-    };
-    var q = json.title + ' ' + (json.author || '');
-    fetch('/api/books?q=' + encodeURIComponent(q.trim())).then(function (r) {
-      return r.json();
-    }).then(function (data) {
-      var meta = {
-        description: '',
-        coverUrl: '',
-        pageCount: 0,
-        year: ''
-      };
-      if (data && data.items && data.items[0]) {
-        var vi = data.items[0].volumeInfo || {};
-        var desc = vi.description || '';
-        meta.description = desc.length > 300 ? desc.substring(0, 300) + '…' : desc;
-        meta.coverUrl = vi.imageLinks && vi.imageLinks.thumbnail ? vi.imageLinks.thumbnail.replace('http://', 'https://') : '';
-        meta.pageCount = vi.pageCount || 0;
-        meta.year = vi.publishedDate ? vi.publishedDate.substring(0, 4) : '';
-      }
-      displaySurpriseResult({
-        title: json.title,
-        author: json.author || '',
-        reason: json.reason || '',
-        genre: genre,
-        language: lang,
-        description: meta.description,
-        coverUrl: meta.coverUrl,
-        pageCount: meta.pageCount,
-        year: meta.year
-      });
-    })["catch"](function () {
-      displaySurpriseResult({
-        title: json.title,
-        author: json.author || '',
-        reason: json.reason || '',
-        genre: genre,
-        language: lang,
-        description: '',
-        coverUrl: '',
-        pageCount: 0,
-        year: ''
-      });
-    });
-  })["catch"](function (err) {
-    console.error('[Surprise Me] API call failed:', err && err.message ? err.message : err);
-    var msg = err && err.message ? err.message : 'Could not reach AI — try again?';
-    surpriseParseError(lang, msg);
-  });
-}
-function surpriseParseError(lang, msg) {
-  var loadEl = document.getElementById('surprise-loading');
-  if (loadEl) {
-    var text = msg || 'Could not get a suggestion — try again?';
-    loadEl.innerHTML = text + '<div style="margin-top:10px">' + '<button class="btn" onclick="selectSurpriseLanguage(\'' + lang + '\')">Retry</button>' + '</div>';
-  }
-}
-function displaySurpriseResult(result) {
-  STATE.surpriseResult = result;
-  if (!STATE.surpriseSeen) STATE.surpriseSeen = [];
-  STATE.surpriseSeen.push({
-    title: result.title,
-    author: result.author
-  });
-  STATE.surpriseBook = {
-    title: result.title,
-    author: result.author,
-    year: result.year || '',
-    coverUrl: result.coverUrl || '',
-    pageCount: result.pageCount || 0,
-    source: 'AI suggestion',
-    key: '',
-    lang: result.language && result.language !== 'English' ? LANG_NAME_TO_CODE[result.language] || '' : 'en'
-  };
-  var resultEl = document.getElementById('surprise-result');
-  if (!resultEl) return;
-  var coverHtml = result.coverUrl ? '<img src="' + result.coverUrl + '" alt="Cover" style="max-width:80px;display:block;margin-bottom:12px">' : '';
-  var metaParts = [];
-  if (result.year) metaParts.push(result.year);
-  if (result.pageCount) metaParts.push(result.pageCount + ' pages');
-  var metaHtml = metaParts.length ? '<div style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:0.8rem;color:#777777;margin-bottom:10px">' + metaParts.join(' · ') + '</div>' : '';
-  var bodyText = result.description || result.reason || '';
-  var bodyHtml = bodyText ? '<div style="font-size:0.95rem;margin-bottom:14px">' + bodyText + '</div>' : '';
-  resultEl.innerHTML = '<div style="border:1px solid #111111;padding:16px;margin-bottom:20px">' + coverHtml + '<div style="font-size:1.1rem;font-family:Georgia,serif;margin-bottom:4px">' + result.title + '</div>' + '<div style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:0.85rem;color:#777777;margin-bottom:10px">' + result.author + '</div>' + metaHtml + bodyHtml + '</div>' + '<div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">' + '<button class="btn btn-primary" style="min-height:44px;margin-bottom:10px;width:100%" onclick="surpriseDiscover()">Find out if it\'s for me &#8594;</button>' + '<button class="btn btn-primary" style="min-height:44px;margin-bottom:10px;width:100%" onclick="surpriseSelect()">I\'ll read this &#8594;</button>' + '<button class="btn" style="min-height:44px;width:100%" onclick="surpriseNotForMe()">Not for me &#8212; suggest another</button>' + '</div>';
-  document.getElementById('surprise-loading').style.display = 'none';
-  resultEl.style.display = 'block';
-}
-function surpriseDiscover() {
-  var book = STATE.surpriseBook;
-  if (!book) return;
-  discoverBookWithAgeCheck(book);
-}
-function surpriseSelect() {
-  var book = STATE.surpriseBook;
-  if (!book) return;
-  selectBookWithAgeCheck(book);
-}
-function surpriseNotForMe() {
-  var result = STATE.surpriseResult;
-  if (!result) return;
-  document.getElementById('surprise-result').style.display = 'none';
-  selectSurpriseLanguage(result.language);
-}
-function tryAnotherBook() {
-  var result = STATE.surpriseResult;
-  if (!result) return;
-  navigate('surprise');
-  var chatLog = document.getElementById('chat-log');
-  var inputArea = document.getElementById('chat-input-area');
-  var icebreakers = document.getElementById('icebreakers');
-  if (chatLog) chatLog.innerHTML = '';
-  if (inputArea) inputArea.style.display = 'none';
-  if (icebreakers) icebreakers.style.display = 'none';
-  selectSurpriseLanguage(result.language);
 }
 
 // ═══════════════════════════════════════════════════
@@ -2444,120 +2210,6 @@ function getMostRecentBook(h) {
 }
 
 // ═══════════════════════════════════════════════════
-//  KOBO HIGHLIGHTS IMPORT
-// ═══════════════════════════════════════════════════
-var SQL_JS_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js';
-var SQL_WASM_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.wasm';
-function loadSqlJs(callback) {
-  if (typeof initSqlJs !== 'undefined') {
-    callback(null);
-    return;
-  }
-  var script = document.createElement('script');
-  script.src = SQL_JS_CDN;
-  script.onload = function () {
-    callback(null);
-  };
-  script.onerror = function () {
-    callback(new Error('Could not load sql.js — check your internet connection.'));
-  };
-  document.head.appendChild(script);
-}
-function parseKoboDatabase(input) {
-  var file = input.files[0];
-  if (!file) return;
-  var statusEl = document.getElementById('kobo-status');
-  statusEl.textContent = 'Loading database reader…';
-  statusEl.style.display = 'block';
-  loadSqlJs(function (loadErr) {
-    if (loadErr) {
-      statusEl.textContent = loadErr.message;
-      return;
-    }
-    statusEl.textContent = 'Reading database…';
-    var reader = new FileReader();
-    reader.onerror = function () {
-      statusEl.textContent = 'Could not read the file.';
-    };
-    reader.onload = function (e) {
-      initSqlJs({
-        locateFile: function locateFile() {
-          return SQL_WASM_CDN;
-        }
-      }).then(function (SQL) {
-        var db;
-        try {
-          db = new SQL.Database(new Uint8Array(e.target.result));
-        } catch (openErr) {
-          statusEl.textContent = 'Not a valid SQLite database: ' + openErr.message;
-          return;
-        }
-        var highlights;
-        try {
-          highlights = processKoboHighlights(db);
-        } catch (queryErr) {
-          db.close();
-          statusEl.textContent = 'Could not read highlights: ' + queryErr.message;
-          return;
-        }
-        db.close();
-        if (!highlights.length) {
-          statusEl.textContent = 'No highlights found in this database.';
-          return;
-        }
-        STATE.highlights = highlights;
-        localStorage.setItem('pc_highlights', JSON.stringify(highlights));
-        var n = highlights.length,
-          b = countBooks(highlights);
-        statusEl.textContent = 'Loaded ' + n + ' highlight' + (n !== 1 ? 's' : '') + ' from ' + b + ' book' + (b !== 1 ? 's' : '') + '.';
-        var top = getMostRecentBook(highlights);
-        if (top) selectBook({
-          title: top.title,
-          author: top.author,
-          year: '',
-          key: ''
-        });
-      })["catch"](function (wasmErr) {
-        statusEl.textContent = 'Database reader failed to start: ' + wasmErr.message;
-      });
-    };
-    reader.readAsArrayBuffer(file);
-  });
-}
-function processKoboHighlights(db) {
-  var sql = 'SELECT b.Text, b.Annotation, b.DateCreated, b.ChapterProgress, ' + 'c.Title, c.Attribution, c.BookTitle ' + 'FROM Bookmark b ' + 'LEFT JOIN content c ON c.ContentID = b.VolumeID ' + "WHERE b.Hidden = 0 AND b.Text IS NOT NULL AND b.Text != '' " + 'ORDER BY b.DateCreated ASC';
-  var results = db.exec(sql);
-  if (!results || !results.length) return [];
-  var cols = results[0].columns;
-  var rows = results[0].values;
-  var out = [];
-  rows.forEach(function (row) {
-    var obj = {};
-    cols.forEach(function (c, i) {
-      obj[c] = row[i];
-    });
-    var text = (obj.Text || '').trim();
-    if (!text) return;
-    var title = obj.BookTitle && obj.BookTitle.trim() || obj.Title && obj.Title.trim() || 'Unknown';
-    var author = (obj.Attribution || '').replace(/^By\s+/i, '').trim() || 'Unknown';
-    var h = {
-      title: title,
-      author: author,
-      text: text,
-      date: (obj.DateCreated || '').substring(0, 10),
-      page: null,
-      source: 'kobo'
-    };
-    if (obj.Annotation && obj.Annotation.trim()) h.annotation = obj.Annotation.trim();
-    if (obj.ChapterProgress !== null && obj.ChapterProgress !== undefined) {
-      h.chapterProgress = parseFloat(obj.ChapterProgress);
-    }
-    out.push(h);
-  });
-  return out;
-}
-
-// ═══════════════════════════════════════════════════
 //  FUZZY HIGHLIGHTS MATCHING
 // ═══════════════════════════════════════════════════
 var STOP_WORDS = new Set(['the', 'a', 'an', 'of', 'and', 'in', 'on', 'at', 'to', 'for', 'by']);
@@ -2594,8 +2246,7 @@ function renderHighlightsPanel() {
   if (relevant.length) {
     btn.style.display = 'block';
     btn.textContent = 'Highlights (' + relevant.length + ')';
-    var _src = relevant[0] && relevant[0].source === 'kobo' ? 'Kobo' : 'Kindle';
-    document.getElementById('highlights-count').textContent = relevant.length + ' highlight' + (relevant.length !== 1 ? 's' : '') + ' from your ' + _src;
+    document.getElementById('highlights-count').textContent = relevant.length + ' highlight' + (relevant.length !== 1 ? 's' : '') + ' from your Kindle';
     document.getElementById('highlights-list').innerHTML = relevant.map(function (h) {
       return '<p style="border-left:3px solid #d0d0d0;padding-left:10px;margin-bottom:12px;font-style:italic">"' + esc(h.text) + '"</p>';
     }).join('');
@@ -3270,40 +2921,6 @@ function callFreeTier(system, messages, opts) {
     }
     return res.json().then(function (data) {
       return data && data.text ? data.text : '(No response)';
-    });
-  });
-}
-// Groq call that forces a strict JSON object response, for structured tasks
-// like Surprise Me. Llama on Groq frequently returns prose around the JSON
-// or breaks JSON.parse otherwise; response_format pins it to valid JSON.
-function callGroqJSON(system, messages) {
-  return fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + STATE.apiKey
-    },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      max_tokens: 1024,
-      response_format: {
-        type: 'json_object'
-      },
-      messages: [{
-        role: 'system',
-        content: system
-      }].concat(messages)
-    })
-  }).then(function (res) {
-    if (!res.ok) {
-      return res.json()["catch"](function () {
-        return {};
-      }).then(function (e) {
-        throw new Error(e && e.error && e.error.message ? e.error.message : 'HTTP ' + res.status);
-      });
-    }
-    return res.json().then(function (j) {
-      return j && j.choices && j.choices[0] && j.choices[0].message ? j.choices[0].message.content : '';
     });
   });
 }
@@ -4155,10 +3772,10 @@ function redeemTransferCode() {
 }
 function showInitError(msg) {
   try {
-    var errDiv = document.getElementById('kobo-init-error');
+    var errDiv = document.getElementById('pc-init-error');
     if (!errDiv) {
       errDiv = document.createElement('div');
-      errDiv.id = 'kobo-init-error';
+      errDiv.id = 'pc-init-error';
       errDiv.style.cssText = 'background:#f5f5f5;border:1px solid #111;padding:14px;margin:14px 0;font-size:16px;font-family:Georgia,serif;color:#111;';
       var page = document.querySelector('.page');
       if (page) page.insertBefore(errDiv, page.firstChild);else document.body.appendChild(errDiv);

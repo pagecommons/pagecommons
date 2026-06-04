@@ -1,10 +1,33 @@
 # Page Commons — Current Status
 
-Last updated: May 31, 2026
-Current version: v0.31
-Updated by: Claude session — onboarding flow, AI-mode system, Surprise Me fixes
+Last updated: June 4, 2026
+Current version: v0.32
+Updated by: Claude session — V1 scope trim (remove Surprise Me, remove Kobo import)
 
-## What was done this session [v0.31]
+## What was done this session [v0.32]
+
+### V1 scope trim ✓
+- Removed Surprise Me feature entirely
+  - app.js: STATE.surprise* fields, 'surprise' from SCREENS and BACK_FALLBACK,
+    handleRoute initSurpriseScreen call, LANG_PROMPT_MAP, initSurpriseScreen,
+    startSurpriseMe, selectSurpriseGenre, selectSurpriseLanguage,
+    surpriseParseError, displaySurpriseResult, surpriseDiscover, surpriseSelect,
+    surpriseNotForMe, tryAnotherBook, and the now-unused callGroqJSON helper
+  - index.html: "Surprise me →" button on search, "Surprise me again" button in
+    discover-convert-bar, and the entire #screen-surprise section
+  - LANG_NAME_TO_CODE / LANG_CODE_TO_NAME / buildBookFromGoogleItem kept — still
+    used by manual entry and other flows
+- Removed Kobo highlights import (kept Kindle import)
+  - app.js: KOBO HIGHLIGHTS IMPORT block (SQL_JS_CDN/SQL_WASM_CDN, loadSqlJs,
+    parseKoboDatabase, processKoboHighlights), Kobo source label in the
+    highlights panel (now always "Kindle")
+  - index.html: "Or import from Kobo" section under search
+  - Renamed the generic init-error div from kobo-init-error to pc-init-error
+- Rationale: Surprise Me had quality issues with non-English recommendations and
+  duplicated the existing search flow. Kobo import not yet tested by the user;
+  drop it for V1 to reduce surface area, can return in a later release.
+
+## What was done last session [v0.31]
 
 ### Onboarding Flow & AI-Mode System ✓
 - New `#onboarding` screen shown after T&C accept for first-time users

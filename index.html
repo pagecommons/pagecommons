@@ -746,7 +746,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.31</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.32</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -909,8 +909,7 @@
     <button class="back-link" onclick="goBack()">← Back</button>
     <h1 id="search-heading">Which book?</h1>
 
-    <button class="btn" style="width:100%;margin-bottom:8px" onclick="navigate('shelf')">Your saved books →</button>
-    <button class="btn" style="width:100%;margin-bottom:24px" onclick="startSurpriseMe()">Surprise me →</button>
+    <button class="btn" style="width:100%;margin-bottom:24px" onclick="navigate('shelf')">Your saved books →</button>
 
     <div class="field">
       <label for="book-search-title">Title</label>
@@ -934,6 +933,7 @@
 
     <hr />
     <h2>Or import from Kindle</h2>
+    <p class="note">Everything is processed locally in your browser. The file is never uploaded.</p>
     <p class="note">Upload your <em>My Clippings.txt</em> to auto-detect your last book and load your highlights.</p>
     <div class="field">
       <label>My Clippings.txt</label>
@@ -949,19 +949,6 @@
       <button class="btn" style="margin-top:8px" onclick="parseClippingsPaste()">Import pasted text</button>
     </div>
     <div id="clippings-status" class="status-msg" style="display:none"></div>
-
-    <hr style="margin-top:24px" />
-    <h2>Or import from Kobo</h2>
-    <p class="note">Upload your <em>KoboReader.sqlite</em> file to load your highlights and annotations. Find it in the <em>.kobo</em> folder on your device.</p>
-    <p class="note" style="margin-top:6px">Everything is processed locally in your browser. The file is never uploaded.</p>
-    <div class="field">
-      <label>KoboReader.sqlite</label>
-      <div class="file-input-wrapper">
-        <div class="file-btn-label">Choose file</div>
-        <input type="file" id="kobo-file" accept=".sqlite,.db" onchange="parseKoboDatabase(this)" />
-      </div>
-    </div>
-    <div id="kobo-status" class="status-msg" style="display:none"></div>
     <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
@@ -1031,7 +1018,6 @@
     </div>
 
     <div id="discover-convert-bar" style="display:none;margin-bottom:24px;display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">
-      <button class="btn" style="width:100%;min-height:44px;margin-bottom:12px" onclick="tryAnotherBook()">Surprise me again</button>
       <button class="btn btn-primary" style="width:100%;min-height:44px" onclick="startReadingFromDiscover()">I want to read this</button>
     </div>
 
@@ -1295,48 +1281,6 @@
       <div id="data-import-msg" style="display:none;font-size:0.85rem;margin-top:10px"></div>
     </div>
 
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
-  </section>
-
-  <!-- ══════════════════════════════════
-       SURPRISE ME
-       ══════════════════════════════════ -->
-  <section id="screen-surprise" class="screen">
-    <button class="back-link" onclick="goBack()">← Back</button>
-
-    <div id="surprise-genre-step" style="display:block">
-      <h1>What do you feel like reading?</h1>
-      <div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Literary Fiction')">Literary Fiction</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Mystery &amp; Thriller')">Mystery &amp; Thriller</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Science Fiction &amp; Fantasy')">Science Fiction &amp; Fantasy</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('History &amp; Biography')">History &amp; Biography</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Science &amp; Ideas')">Science &amp; Ideas</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Philosophy &amp; Spirituality')">Philosophy &amp; Spirituality</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Poetry &amp; Essays')">Poetry &amp; Essays</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseGenre('Business &amp; Investment')">Business &amp; Investment</button>
-        <button class="btn" style="text-align:left" onclick="selectSurpriseGenre('Surprise me anyway')">Surprise me anyway</button>
-      </div>
-    </div>
-
-    <div id="surprise-language-step" style="display:none">
-      <h1>Which language?</h1>
-      <div style="display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('English')">English</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Traditional Chinese')">Traditional Chinese</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Simplified Chinese')">Simplified Chinese</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Japanese')">Japanese</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('French')">French</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Spanish')">Spanish</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('German')">German</button>
-        <button class="btn" style="margin-bottom:10px;text-align:left" onclick="selectSurpriseLanguage('Portuguese')">Portuguese</button>
-        <button class="btn" style="text-align:left" onclick="selectSurpriseLanguage('Korean')">Korean</button>
-      </div>
-    </div>
-
-    <div id="surprise-loading" style="display:none;font-size:1rem;padding:16px 0">Finding a book&#8230;</div>
-
-    <div id="surprise-result" style="display:none"></div>
     <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 

@@ -119,8 +119,8 @@ Single file SPA with hash navigation:
 - #shelf — Your shelf
 - #book-shelf — Book conversations
 - #settings — App settings
-- #surprise — Surprise Me
 - #age-gate — Adult content gate
+- #onboarding — AI mode choice (first run)
 - #about — About page
 
 Standalone pages:

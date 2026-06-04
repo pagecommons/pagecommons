@@ -1,5 +1,9 @@
 # Page Commons — Pending Work
 
+## Scope Trim (v0.32)
+- [x] Remove Surprise Me feature entirely from V1 (screen, button on search, AI flows). May return in a later version with better quality controls.
+- [x] Remove Kobo highlights import (KoboReader.sqlite) from V1. Keep Kindle My Clippings.txt import.
+
 ## Priority 1: Pre-Launch Polish (Target: June 1, 2026)
 
 ### Testing & Validation
@@ -12,7 +16,6 @@
   - [ ] Companion language selector (Language button in toolbar)
   - [ ] Per-book language override persists across book switches
   - [ ] Discover mode returns book-specific prompts (not generic)
-  - [ ] Surprise Me returns correct language edition (not alternate editions)
   - [ ] Pagination "Show more results" still works
   - [ ] Search still works (language filter removed — verify no regression)
   - [ ] Data export downloads a valid JSON backup on device (Kobo/Kindle)
@@ -27,7 +30,6 @@
 - [x] #home (Welcome screen): add a short 1–2 sentence intro below "Welcome to Page Commons" explaining what the app is (added on the T&C/welcome screen where that heading lives)
 - [x] Reading-status screen: omit the "considering / thinking about reading it" option (now removed from both the static markup and the dynamic render; "Find out if it's for me" still offered on the prior screen)
 - [x] Unified navigation / consistent back button: implemented a back stack inside showScreen() with a goBack() helper + per-screen fallbacks; all back links route through goBack() and back links added to status/language screens
-- [x] Surprise Me: "Try another book" renamed to "Surprise me again" to disambiguate from header "Change book" (search)
 - [x] Rename book-detail button "I'm reading this" → "I have this book"
 - [ ] Move tagline "Just books. No noise." to right side of header
 - [ ] Consider minimum width/responsiveness on very large e-ink screens
@@ -44,7 +46,6 @@
 - [ ] Implement reply length enforcement for companion messages
 - [ ] Review and improve genre list (currently 8 options)
 - [ ] Test Gemini free tier performance under various contexts
-- [ ] Add graceful fallback if Gemini API fails during Surprise Me
 - [x] Fix icebreaker voice: rephrased into first-person reader voice (things the reader taps to say to the companion). Updated the generation prompt and rewrote all STATIC_PROMPT_SETS fallbacks (English + Traditional/Simplified Chinese, Japanese, Korean)
 
 ### Onboarding Flow & AI-Mode System
