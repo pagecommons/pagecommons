@@ -1,10 +1,28 @@
 # Page Commons — Current Status
 
 Last updated: June 4, 2026
-Current version: v0.34
-Updated by: Claude session — first-run polish + chat toolbar slim-down
+Current version: v0.35
+Updated by: Claude session — home footer cleanup + flagged shared-pool quality
 
-## What was done this session [v0.34]
+## What was done this session [v0.35]
+
+### Home footer cleanup ✓
+- Removed the duplicate "Preferences" link from the hall-footer (already
+  reachable via the persistent footer link on every screen).
+- Removed the "API key settings" link — API key now lives only inside
+  Preferences → More settings → API key & provider (shown when BYOK is
+  selected). One canonical place.
+- Kept the "No ads. No algorithms. No engagement metrics. Just books."
+  values line. Dropped the now-unused .hall-footer-links CSS.
+
+### Flagged for later [no code change]
+- Shared-pool (Groq llama-3.3-70b) response quality is noticeably weak on
+  non-blockbuster books — model admits "not familiar" then pivots to
+  unrelated recommendations. Tracked in PENDING.md with options for when
+  we revisit (route to a stronger model, prompt-side grounding, or
+  explicit expectation-setting on the free-tier choice screen).
+
+## What was done last session [v0.34]
 
 ### First-run polish ✓
 - "Your data" (Export / Import) section is now hidden during first-run —
