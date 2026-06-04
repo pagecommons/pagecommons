@@ -1,10 +1,31 @@
 # Page Commons — Current Status
 
 Last updated: June 4, 2026
-Current version: v0.35
-Updated by: Claude session — home footer cleanup + flagged shared-pool quality
+Current version: v0.36
+Updated by: Claude session — shared-pool quality: prompt tightening + honest expectations
 
-## What was done this session [v0.35]
+## What was done this session [v0.36]
+
+### Shared-pool quality — prompt + expectations ✓
+- Reading-mode system prompt: forbids the "I don't know, here's a different
+  book" escape pattern. Strengthened the honesty paragraph to explicitly
+  call out plot/characters/themes/author's arguments, and added a CRITICAL
+  rule to stay on the current book and use what the reader shares.
+- Rewrote the [RECOMMEND: ...] paragraph: only when the reader explicitly
+  asks for a recommendation. Never as a deflection when unsure of the
+  current book.
+- Onboarding "Choose your companion" screen: more honest copy on both
+  options. Shared = "Best for well-known books in English. May not know
+  recent or niche titles in depth — works best when you share what you
+  remember as you go." BYOK = "Stronger knowledge across more titles and
+  languages." Also fixed the "change this in Settings" line to say
+  "Preferences" (renamed in v0.33).
+- Preferences AI-mode note for shared users: mirrors the same honesty
+  ("Best for well-known books in English; weaker on recent, niche, or
+  non-English titles").
+- No model change; still Groq llama-3.3-70b-versatile in api/ai.js.
+
+## What was done last session [v0.35]
 
 ### Home footer cleanup ✓
 - Removed the duplicate "Preferences" link from the hall-footer (already
