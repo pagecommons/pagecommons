@@ -746,7 +746,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.32</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.33</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -762,7 +762,7 @@
       </p>
 
       <div class="hall-doors">
-        <button class="hall-door primary" onclick="navigate('key')">
+        <button class="hall-door primary" onclick="navigate('search')">
           <span class="hall-door-title">Talk to your companion</span>
           <span class="hall-door-sub">Start a new book conversation, or continue one from your shelf</span>
         </button>
@@ -781,7 +781,7 @@
         No ads. No algorithms. No engagement metrics. Just books.
         <div class="hall-footer-links">
           <a href="#" onclick="navigate('key'); return false;">API key settings</a>
-          <a href="#" onclick="navigate('settings'); return false;">Settings</a>
+          <a href="#" onclick="navigate('preferences'); return false;">Preferences</a>
         </div>
       </div>
     </div>
@@ -887,13 +887,6 @@
         <p class="note" style="margin-top:10px">Generate a code at <strong>pagecommons.com/transfer.html</strong> on your phone or desktop.</p>
         <p class="note" style="margin-top:8px">Your key briefly passes through our servers to complete this transfer and is deleted immediately. No record is kept.</p>
       </div>
-    </div>
-
-    <!-- Optional companion name -->
-    <div id="companion-name-section">
-      <label for="companion-name-input">Give your companion a name <span style="font-weight:normal;text-transform:none;font-size:0.85rem">(optional)</span></label>
-      <input type="text" id="companion-name-input" placeholder="e.g. Ellis, River, Claude…" autocomplete="off" />
-      <p style="font-size:0.78rem;color:#777777;margin-top:6px">Leave blank to use "Companion". You can change this later in More.</p>
     </div>
 
     <hr />
@@ -1181,11 +1174,12 @@
   </section>
 
   <!-- ══════════════════════════════════
-       SETTINGS
+       PREFERENCES
        ══════════════════════════════════ -->
-  <section id="screen-settings" class="screen">
-    <button class="back-link" onclick="goBack()">← Back</button>
-    <h1>Settings</h1>
+  <section id="screen-preferences" class="screen">
+    <button class="back-link" id="prefs-back-link" onclick="goBack()">← Back</button>
+    <h1 id="prefs-heading">Preferences</h1>
+    <p id="prefs-intro" style="display:none;margin-bottom:20px">Quick setup. Defaults are fine — change anything you like, then continue.</p>
 
     <div class="settings-section">
       <div class="settings-section-label">Your name</div>
@@ -1232,27 +1226,6 @@
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-label">AI companion</div>
-      <div class="settings-radio-options">
-        <button class="settings-radio" id="settings-mode-shared" onclick="switchAIMode('shared')">Free shared pool</button>
-        <button class="settings-radio" id="settings-mode-byok" onclick="switchAIMode('byok')">My own key</button>
-      </div>
-      <p style="font-size:0.78rem;color:#777777;margin-top:8px" id="settings-ai-mode-note"></p>
-    </div>
-
-    <div class="settings-section">
-      <div class="settings-section-label">API key &amp; provider</div>
-      <div class="settings-radio-options">
-        <button class="settings-radio" id="settings-prov-anthropic" onclick="selectProvider('anthropic')">Anthropic Claude</button>
-        <button class="settings-radio" id="settings-prov-gemini" onclick="selectProvider('gemini')">Google Gemini</button>
-        <button class="settings-radio" id="settings-prov-groq" onclick="selectProvider('groq')">Groq</button>
-      </div>
-      <p style="font-size:0.78rem;color:#777777;margin-top:8px">
-        <a href="#" onclick="navigate('key'); return false;" style="color:#777777">Set your API key →</a>
-      </p>
-    </div>
-
-    <div class="settings-section">
       <div class="settings-section-label">Default reply length</div>
       <div class="length-options">
         <button class="length-opt" data-length="short"    onclick="setReplyLength('short')">Short</button>
@@ -1271,15 +1244,42 @@
       </div>
     </div>
 
-    <div class="settings-section">
-      <div class="settings-section-label">Your data</div>
-      <p style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px">Back up your Page Commons data or restore it on another device.</p>
-      <button class="btn" style="margin-bottom:10px" onclick="exportUserData()">Export my data</button>
-      <div id="data-export-msg" style="display:none;font-size:0.85rem;margin-bottom:14px"></div>
-      <button class="btn" onclick="triggerImportPicker()">Import data from backup</button>
-      <input type="file" id="data-import-input" accept="application/json,.json" style="display:none" onchange="importUserData(this)" />
-      <div id="data-import-msg" style="display:none;font-size:0.85rem;margin-top:10px"></div>
+    <button class="back-link" id="prefs-more-toggle" style="margin-top:8px" onclick="togglePreferencesMore()">More settings ▾</button>
+
+    <div id="prefs-more" style="display:none">
+      <div class="settings-section">
+        <div class="settings-section-label">AI companion</div>
+        <div class="settings-radio-options">
+          <button class="settings-radio" id="settings-mode-shared" onclick="switchAIMode('shared')">Free shared pool</button>
+          <button class="settings-radio" id="settings-mode-byok" onclick="switchAIMode('byok')">My own key</button>
+        </div>
+        <p style="font-size:0.78rem;color:#777777;margin-top:8px" id="settings-ai-mode-note"></p>
+      </div>
+
+      <div class="settings-section" id="prefs-provider-section" style="display:none">
+        <div class="settings-section-label">API key &amp; provider</div>
+        <div class="settings-radio-options">
+          <button class="settings-radio" id="settings-prov-anthropic" onclick="selectProvider('anthropic')">Anthropic Claude</button>
+          <button class="settings-radio" id="settings-prov-gemini" onclick="selectProvider('gemini')">Google Gemini</button>
+          <button class="settings-radio" id="settings-prov-groq" onclick="selectProvider('groq')">Groq</button>
+        </div>
+        <p style="font-size:0.78rem;color:#777777;margin-top:8px">
+          <a href="#" onclick="navigate('key'); return false;" style="color:#777777">Set your API key →</a>
+        </p>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-label">Your data</div>
+        <p style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px">Back up your Page Commons data or restore it on another device.</p>
+        <button class="btn" style="margin-bottom:10px" onclick="exportUserData()">Export my data</button>
+        <div id="data-export-msg" style="display:none;font-size:0.85rem;margin-bottom:14px"></div>
+        <button class="btn" onclick="triggerImportPicker()">Import data from backup</button>
+        <input type="file" id="data-import-input" accept="application/json,.json" style="display:none" onchange="importUserData(this)" />
+        <div id="data-import-msg" style="display:none;font-size:0.85rem;margin-top:10px"></div>
+      </div>
     </div>
+
+    <button class="btn btn-primary" id="prefs-save-continue" style="display:none;width:100%;margin-top:24px" onclick="savePreferencesAndContinue()">Save & continue</button>
 
     <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>

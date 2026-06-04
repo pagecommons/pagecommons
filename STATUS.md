@@ -1,10 +1,52 @@
 # Page Commons — Current Status
 
 Last updated: June 4, 2026
-Current version: v0.32
-Updated by: Claude session — V1 scope trim (remove Surprise Me, remove Kobo import)
+Current version: v0.33
+Updated by: Claude session — Preferences screen + first-run flow + bug fixes
 
-## What was done this session [v0.32]
+## What was done this session [v0.33]
+
+### Renamed Settings → Preferences ✓
+- #settings screen renamed to #preferences (id, function names, navigate calls,
+  SCREENS, BACK_FALLBACK, home-page footer link). "Preferences" reads less
+  engineering-y than "Settings".
+
+### Preferences screen reorganised ✓
+- Visible by default: Your name, Companion name, Companion language, Default
+  reply length, Text size.
+- "More settings ▾" collapsible expand below reveals: AI companion mode toggle,
+  API key & provider (only when BYOK is selected via updateAIModeUI), Your data
+  (export/import). Collapsed by default each time the screen opens.
+
+### First-run preferences ✓
+- pc_preferences_set localStorage flag drives first-run mode.
+- First-run: no back link, intro line shown, big "Save & continue" button at
+  the bottom. After tap, sets the flag and routes to #search.
+- Returning users: back link shown, intro and Save button hidden — changes
+  auto-save on input as before.
+- Existing users with any prior config (api key, name, font size, etc.) are
+  migrated to "first-run complete" silently on app init.
+
+### First-run flow ✓
+- T&C → onboarding (AI mode) → (BYOK only) #key → #preferences → #search
+- chooseAIMode('shared') routes to #preferences on first run, #home after
+- chooseAIMode('byok') routes to #key (which then routes to #preferences on
+  first run, or #search after)
+
+### Persistent Preferences footer link ✓
+- updatePreferencesFooterLinks() injects a "Preferences →" link into every
+  .screen-support-footer on every screen change.
+- Hidden on first-run-flow screens (tc, onboarding, key, preferences itself)
+  and until first-run is complete.
+
+### Bug fixes ✓
+- Home "Talk to your companion" button was hard-wired to navigate('key') —
+  shared-pool users got the key screen. Now navigates to #search and lets
+  handleRoute() apply the gate.
+- Removed the "Give your companion a name" field from #screen-key — companion
+  name now lives only in Preferences. saveKey() no longer touches it.
+
+## What was done last session [v0.32]
 
 ### V1 scope trim ✓
 - Removed Surprise Me feature entirely

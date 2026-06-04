@@ -118,7 +118,7 @@ Single file SPA with hash navigation:
 - #companion — AI chat
 - #shelf — Your shelf
 - #book-shelf — Book conversations
-- #settings — App settings
+- #preferences — User preferences (incl. first-run setup)
 - #age-gate — Adult content gate
 - #onboarding — AI mode choice (first run)
 - #about — About page

@@ -84,7 +84,7 @@ var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'L
 // ═══════════════════════════════════════════════════
 //  SCREENS + NAVIGATION
 // ═══════════════════════════════════════════════════
-var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'book-detail', 'tc', 'age-gate', 'settings', 'onboarding'];
+var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'book-detail', 'tc', 'age-gate', 'preferences', 'onboarding'];
 
 var SEARCH_HEADINGS = [
   'Which book?',
@@ -118,7 +118,7 @@ var _navBack = false;
 var BACK_FALLBACK = {
   about: 'home', key: 'home', search: 'home', 'book-detail': 'search',
   status: 'book-detail', language: 'status', companion: 'search',
-  shelf: 'home', settings: 'home', 'book-shelf': 'shelf',
+  shelf: 'home', preferences: 'home', 'book-shelf': 'shelf',
   'age-gate': 'search', onboarding: 'tc'
 };
 function currentScreen() {
@@ -133,6 +133,39 @@ function goBack() {
   }
   _navBack = true;
   navigate(prev);
+}
+
+// Hide on first-run-flow screens; also hide until the user has completed the
+// initial preferences pass. Otherwise inject a "Preferences →" link above the
+// existing "Support it →" line inside each .screen-support-footer.
+var PREFS_FOOTER_HIDE = { tc: 1, onboarding: 1, key: 1, preferences: 1 };
+function updatePreferencesFooterLinks() {
+  var firstRunDone = !!localStorage.getItem('pc_preferences_set');
+  var cur = currentScreen();
+  var hideHere = !firstRunDone || (cur && PREFS_FOOTER_HIDE[cur]);
+  var footers = document.querySelectorAll('.screen-support-footer');
+  for (var i = 0; i < footers.length; i++) {
+    var f = footers[i];
+    var link = f.querySelector('.prefs-footer-link');
+    if (hideHere) {
+      if (link) link.style.display = 'none';
+      continue;
+    }
+    if (!link) {
+      link = document.createElement('a');
+      link.className = 'prefs-footer-link';
+      link.href = '#';
+      link.textContent = 'Preferences →';
+      link.style.display = 'block';
+      link.style.marginBottom = '8px';
+      link.style.color = '#666666';
+      link.style.textDecoration = 'underline';
+      link.onclick = function (e) { e.preventDefault(); navigate('preferences'); return false; };
+      f.insertBefore(link, f.firstChild);
+    } else {
+      link.style.display = 'block';
+    }
+  }
 }
 
 function showScreen(id) {
@@ -159,6 +192,7 @@ function showScreen(id) {
       }
     }
   });
+  updatePreferencesFooterLinks();
   window.scrollTo(0, 0);
 }
 function handleRoute() {
@@ -182,7 +216,7 @@ function handleRoute() {
   var target = SCREENS.includes(hash) ? hash : 'home';
   showScreen(target);
   if (target === 'shelf') renderShelf();
-  if (target === 'settings') loadSettingsScreen();
+  if (target === 'preferences') loadPreferencesScreen();
   if (target === 'search') updateSearchHeading();
   if (target === 'book-detail') loadBookDetailScreen();
   updateTitleLink();
@@ -398,7 +432,6 @@ function toggleKeyVisibility() {
 }
 function saveKey() {
   var val = document.getElementById('api-key-input').value.trim();
-  var name = document.getElementById('companion-name-input').value.trim();
   var err = document.getElementById('key-error');
   err.style.display = 'none';
   if (!val) {
@@ -410,14 +443,8 @@ function saveKey() {
   localStorage.setItem('pc_api_key', val);
   STATE.aiMode = 'byok';
   localStorage.setItem('pc_ai_mode', 'byok');
-  if (name) {
-    STATE.companionName = name;
-    localStorage.setItem('pc_companion_name', name);
-  } else {
-    STATE.companionName = 'Companion';
-  }
   document.getElementById('key-status-bar').style.display = 'block';
-  navigate('search');
+  navigate(localStorage.getItem('pc_preferences_set') ? 'search' : 'preferences');
 }
 function clearKey() {
   STATE.apiKey = '';
@@ -1089,10 +1116,12 @@ function acceptTC() {
 function chooseAIMode(mode) {
   STATE.aiMode = mode;
   localStorage.setItem('pc_ai_mode', mode);
-  if (mode === 'shared') {
+  if (mode === 'byok') {
+    navigate('key');
+  } else if (localStorage.getItem('pc_preferences_set')) {
     navigate('home');
   } else {
-    navigate('key');
+    navigate('preferences');
   }
 }
 function switchAIMode(mode) {
@@ -1105,14 +1134,17 @@ function updateAIModeUI() {
   var byokBtn = document.getElementById('settings-mode-byok');
   var note = document.getElementById('settings-ai-mode-note');
   if (!sharedBtn || !byokBtn) return;
+  var providerSection = document.getElementById('prefs-provider-section');
   if (STATE.aiMode === 'shared') {
     sharedBtn.classList.add('active');
     byokBtn.classList.remove('active');
     if (note) note.textContent = 'Using the free shared companion. Add your own key for better quality and availability.';
+    if (providerSection) providerSection.style.display = 'none';
   } else {
     sharedBtn.classList.remove('active');
     byokBtn.classList.add('active');
     if (note) note.textContent = STATE.apiKey ? 'Using your own API key.' : 'No key saved yet. Set one below.';
+    if (providerSection) providerSection.style.display = 'block';
   }
 }
 function isAdultBook(book) {
@@ -3649,9 +3681,9 @@ function showInitError(msg) {
   } catch (displayErr) {}
 }
 // ═══════════════════════════════════════════════════
-//  SETTINGS
+//  PREFERENCES
 // ═══════════════════════════════════════════════════
-function loadSettingsScreen() {
+function loadPreferencesScreen() {
   var nameEl = document.getElementById('settings-name');
   if (nameEl) nameEl.value = STATE.userName || '';
   var cnEl = document.getElementById('settings-companion-name');
@@ -3666,6 +3698,37 @@ function loadSettingsScreen() {
   });
   var clangEl = document.getElementById('settings-companion-lang');
   if (clangEl) clangEl.value = STATE.companionLangOverride || '';
+
+  // First-run mode: hide back link, show intro + Save & continue.
+  // Normal mode: show back link, hide intro + Save button.
+  var firstRun = !localStorage.getItem('pc_preferences_set');
+  var backLink = document.getElementById('prefs-back-link');
+  var intro = document.getElementById('prefs-intro');
+  var saveBtn = document.getElementById('prefs-save-continue');
+  if (backLink) backLink.style.display = firstRun ? 'none' : 'inline-block';
+  if (intro) intro.style.display = firstRun ? 'block' : 'none';
+  if (saveBtn) saveBtn.style.display = firstRun ? 'block' : 'none';
+
+  // Collapse "More settings" by default each time the screen is opened.
+  var more = document.getElementById('prefs-more');
+  var toggle = document.getElementById('prefs-more-toggle');
+  if (more) more.style.display = 'none';
+  if (toggle) toggle.textContent = 'More settings ▾';
+}
+
+function togglePreferencesMore() {
+  var more = document.getElementById('prefs-more');
+  var toggle = document.getElementById('prefs-more-toggle');
+  if (!more || !toggle) return;
+  var open = more.style.display !== 'none';
+  more.style.display = open ? 'none' : 'block';
+  toggle.textContent = open ? 'More settings ▾' : 'More settings ▴';
+}
+
+function savePreferencesAndContinue() {
+  localStorage.setItem('pc_preferences_set', '1');
+  updatePreferencesFooterLinks();
+  navigate('search');
 }
 function saveCompanionLangSetting(val) {
   STATE.companionLangOverride = val || null;
@@ -3684,8 +3747,6 @@ function saveSettingCompanionName() {
   var val = (document.getElementById('settings-companion-name').value || '').trim();
   STATE.companionName = val || 'Companion';
   localStorage.setItem('pc_companion_name', STATE.companionName);
-  var keyInp = document.getElementById('companion-name-input');
-  if (keyInp) keyInp.value = val;
 }
 
 // ═══════════════════════════════════════════════════
@@ -3841,6 +3902,13 @@ function init() {
       STATE.aiMode = 'byok';
       localStorage.setItem('pc_ai_mode', 'byok');
     }
+    // Existing users who already had a configured app should skip the
+    // first-run preferences pass.
+    if (!localStorage.getItem('pc_preferences_set') &&
+        (localStorage.getItem('pc_api_key') || localStorage.getItem('pc_user_name') ||
+         localStorage.getItem('pc_companion_name') || localStorage.getItem('pc_font_size'))) {
+      localStorage.setItem('pc_preferences_set', '1');
+    }
     var prov = localStorage.getItem('pc_provider');
     if (prov) {
       STATE.provider = prov;
@@ -3855,7 +3923,6 @@ function init() {
     var name = localStorage.getItem('pc_companion_name');
     if (name) {
       STATE.companionName = name;
-      document.getElementById('companion-name-input').value = name;
     }
     var uname = localStorage.getItem('pc_user_name');
     if (uname) STATE.userName = uname;

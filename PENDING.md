@@ -1,5 +1,13 @@
 # Page Commons — Pending Work
 
+## Preferences + first-run flow (v0.33)
+- [x] Fix shared-pool users hitting the key gate on "Talk to your companion"
+- [x] Move companion-name field off the API key screen
+- [x] Rename #settings → #preferences; reorder visible fields; collapse
+      AI mode / provider / data into "More settings ▾"
+- [x] First-run preferences with defaults pre-filled and Save & continue
+- [x] Persistent "Preferences →" footer link on every screen post first-run
+
 ## Scope Trim (v0.32)
 - [x] Remove Surprise Me feature entirely from V1 (screen, button on search, AI flows). May return in a later version with better quality controls.
 - [x] Remove Kobo highlights import (KoboReader.sqlite) from V1. Keep Kindle My Clippings.txt import.
