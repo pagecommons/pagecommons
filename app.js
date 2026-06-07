@@ -644,10 +644,12 @@ function toggleBookAbout(id) {
   if (!el) return;
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
-function searchFromRecommend(query) {
+function searchFromRecommend(title, author) {
   navigate('search');
-  var inp = document.getElementById('book-search-title');
-  if (inp) inp.value = query;
+  var titleEl = document.getElementById('book-search-title');
+  var authorEl = document.getElementById('book-search-author');
+  if (titleEl) titleEl.value = title || '';
+  if (authorEl) authorEl.value = author || '';
   searchBooks();
 }
 function searchBooks() {
@@ -2634,8 +2636,14 @@ function appendBubble(role, text) {
   bubble.className = 'message-bubble';
   var html = formatText(text);
   html = html.replace(/\[RECOMMEND:\s*([^\]]+)\]/g, function(match, q) {
-    var safe = q.trim().replace(/'/g, '&#39;');
-    return '<button class="recommend-btn" onclick="searchFromRecommend(\'' + safe + '\')">' + safe + '</button>';
+    var raw = q.trim();
+    var byMatch = raw.match(/^(.+?)\s+by\s+(.+)$/i);
+    var title = byMatch ? byMatch[1].trim() : raw;
+    var author = byMatch ? byMatch[2].trim() : '';
+    var t = title.replace(/'/g, '&#39;');
+    var a = author.replace(/'/g, '&#39;');
+    var l = raw.replace(/'/g, '&#39;');
+    return '<button class="recommend-btn" onclick="searchFromRecommend(\'' + t + '\', \'' + a + '\')">' + l + '</button>';
   });
   bubble.innerHTML = html;
   wrap.appendChild(roleEl);
