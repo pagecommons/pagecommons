@@ -1,10 +1,28 @@
 # Page Commons — Current Status
 
-Last updated: June 4, 2026
-Current version: v0.36
-Updated by: Claude session — shared-pool quality: prompt tightening + honest expectations
+Last updated: June 7, 2026
+Current version: v0.37
+Updated by: Claude session — shared-pool switched from Groq to Gemini 3.1 Flash-Lite
 
-## What was done this session [v0.36]
+## What was done this session [v0.37]
+
+### Shared-pool model: Groq → Gemini 3.1 Flash-Lite ✓
+- api/ai.js rewritten to call Google Gemini 3.1 Flash-Lite
+  (gemini-3.1-flash-lite) instead of Groq llama-3.3-70b-versatile.
+- Uses existing GEMINI_API_KEY Vercel env var (no new secret needed).
+- 500 RPD free-tier quota — 25× more headroom than Gemini 2.5 Flash (20 RPD).
+- Quality matches Gemini 2.5 Flash per Google docs; significantly better
+  multilingual book knowledge than Llama 3.3.
+- thinkingConfig.thinkingBudget: 0 — avoids silent token consumption.
+- jsonMode maps to generationConfig.responseMimeType: "application/json".
+- 429 still returns rate_limited → existing frontend message unchanged:
+  "Our free companion is busy right now — add your own key for instant access."
+- Multi-key rotation removed (single GEMINI_API_KEY; Google quotas are
+  per-project, not per-key, so rotation provided no benefit).
+- ACTION REQUIRED: ensure GEMINI_API_KEY is set in Vercel env.
+  GROQ_API_KEY(S) are no longer used by the free pool.
+
+## What was done last session [v0.36]
 
 ### Shared-pool quality — prompt + expectations ✓
 - Reading-mode system prompt: forbids the "I don't know, here's a different

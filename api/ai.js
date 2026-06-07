@@ -11,94 +11,78 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const keys = getGroqKeys();
-  if (!keys.length) {
+  var apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
     return res.status(503).json({ error: 'Free tier not available' });
   }
 
-  const { system, messages, jsonMode } = req.body || {};
+  var body = req.body || {};
+  var system = body.system;
+  var messages = body.messages;
+  var jsonMode = body.jsonMode;
+
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: 'Invalid request' });
   }
 
-  const chatMessages = [];
+  // Build Gemini contents array (user/model alternating)
+  var contents = [];
+  messages.forEach(function(m) {
+    contents.push({
+      role: m.role === 'user' ? 'user' : 'model',
+      parts: [{ text: m.content }]
+    });
+  });
+
+  var generationConfig = {
+    maxOutputTokens: 1024,
+    thinkingConfig: { thinkingBudget: 0 }
+  };
+  if (jsonMode) {
+    generationConfig.responseMimeType = 'application/json';
+  }
+
+  var requestBody = {
+    contents: contents,
+    generationConfig: generationConfig
+  };
   if (system) {
-    chatMessages.push({ role: 'system', content: system });
+    requestBody.systemInstruction = { parts: [{ text: system }] };
   }
-  messages.forEach(function (m) {
-    chatMessages.push({
-      role: m.role === 'user' ? 'user' : 'assistant',
-      content: m.content
-    });
-  });
 
-  // Spread load across keys with a random start, and fail over to the next
-  // key on rate-limit or transient error. Only report rate_limited if every
-  // configured key is exhausted.
-  const start = Math.floor(Math.random() * keys.length);
-  let sawRateLimit = false;
-
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[(start + i) % keys.length];
-    try {
-      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  try {
+    var geminiRes = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=' + apiKey,
+      {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + key
-        },
-        body: JSON.stringify(Object.assign({
-          model: 'llama-3.3-70b-versatile',
-          max_tokens: 1024,
-          messages: chatMessages
-        }, jsonMode ? { response_format: { type: 'json_object' } } : {}))
-      });
-
-      if (groqRes.status === 429) {
-        sawRateLimit = true;
-        continue;
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
       }
+    );
 
-      const data = await groqRes.json();
-
-      if (!groqRes.ok) {
-        continue;
-      }
-
-      const text =
-        data &&
-        data.choices &&
-        data.choices[0] &&
-        data.choices[0].message &&
-        data.choices[0].message.content
-          ? data.choices[0].message.content
-          : '(No response)';
-
-      return res.status(200).json({ text: text });
-    } catch (err) {
-      // try the next key
+    if (geminiRes.status === 429) {
+      return res.status(429).json({ error: 'rate_limited' });
     }
-  }
 
-  if (sawRateLimit) {
-    return res.status(429).json({ error: 'rate_limited' });
-  }
-  return res.status(502).json({ error: 'AI service error' });
-}
+    var data = await geminiRes.json();
 
-// Collect Groq keys from env: a comma-separated GROQ_API_KEYS and/or the
-// individual GROQ_API_KEY / GROQ_API_KEY_1..5 variables. Duplicates removed.
-function getGroqKeys() {
-  const keys = [];
-  if (process.env.GROQ_API_KEYS) {
-    process.env.GROQ_API_KEYS.split(',').forEach(function (k) {
-      const t = k.trim();
-      if (t && keys.indexOf(t) === -1) keys.push(t);
-    });
+    if (!geminiRes.ok) {
+      return res.status(502).json({ error: 'AI service error' });
+    }
+
+    var text =
+      data &&
+      data.candidates &&
+      data.candidates[0] &&
+      data.candidates[0].content &&
+      data.candidates[0].content.parts &&
+      data.candidates[0].content.parts[0] &&
+      data.candidates[0].content.parts[0].text
+        ? data.candidates[0].content.parts[0].text
+        : '(No response)';
+
+    return res.status(200).json({ text: text });
+  } catch (err) {
+    return res.status(502).json({ error: 'AI service error' });
   }
-  ['GROQ_API_KEY', 'GROQ_API_KEY_1', 'GROQ_API_KEY_2', 'GROQ_API_KEY_3', 'GROQ_API_KEY_4', 'GROQ_API_KEY_5'].forEach(function (name) {
-    const v = process.env[name];
-    if (v && keys.indexOf(v) === -1) keys.push(v);
-  });
-  return keys;
 }

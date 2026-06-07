@@ -2,22 +2,12 @@
 
 ## Known concerns — keep in view
 
-### Shared-pool (Groq llama-3.3-70b) response quality
-- Companion responses on the free shared pool are noticeably thinner than
-  BYOK Gemini / Anthropic. The model often falls back to "I'm not familiar
-  with the specific contents of this book" for non-blockbuster titles, then
-  pivots to a generic recommendation prompt instead of answering.
-- Observed example: "Tell me what methods he shared in the book" (Jim Kwik,
-  Limitless) → "我對書中的具體內容不夠熟悉…" then suggested an unrelated
-  book. Conversation in Chinese; English would likely fare similarly.
-- Not fixing yet — flagging. Options when we revisit:
-  - Route shared-pool to a stronger model (Gemini Flash via api/ai when
-    funded; or Anthropic Haiku) for users on free tier
-  - Prompt-side: add stronger "ground only in what you actually know about
-    this book; if you don't know, say so plainly and ask the reader what
-    they remember — don't pivot to a different book" guidance
-  - Make the limitation explicit on the free-tier choice screen so the
-    expectation is set up front
+### Shared-pool response quality — resolved in v0.37 ✓
+- Switched from Groq llama-3.3-70b to Gemini 3.1 Flash-Lite (v0.37).
+- System prompt tightened in v0.36 to forbid deflection to a different book.
+- Honest expectations copy on onboarding screen (v0.36).
+- Monitor: if quality is still insufficient after Gemini switch, consider
+  routing to Anthropic Haiku as next step (higher cost, much better knowledge).
 
 ## Preferences + first-run flow (v0.33)
 - [x] Fix shared-pool users hitting the key gate on "Talk to your companion"
