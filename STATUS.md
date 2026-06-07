@@ -2,25 +2,33 @@
 
 Last updated: June 7, 2026
 Current version: v0.37
-Updated by: Claude session — shared-pool switched from Groq to Gemini 3.1 Flash-Lite
+Updated by: Claude session — shared-pool switched from Groq to Gemma 4 26B (for quality testing)
 
 ## What was done this session [v0.37]
 
-### Shared-pool model: Groq → Gemini 3.1 Flash-Lite ✓
-- api/ai.js rewritten to call Google Gemini 3.1 Flash-Lite
-  (gemini-3.1-flash-lite) instead of Groq llama-3.3-70b-versatile.
+### Shared-pool model: Groq → Gemma 4 26B A4B IT ✓
+- api/ai.js rewritten to call Google Gemma 4 26B via AI Studio
+  (gemma-4-26b-a4b-it) instead of Groq llama-3.3-70b-versatile.
 - Uses existing GEMINI_API_KEY Vercel env var (no new secret needed).
-- 500 RPD free-tier quota — 25× more headroom than Gemini 2.5 Flash (20 RPD).
-- Quality matches Gemini 2.5 Flash per Google docs; significantly better
-  multilingual book knowledge than Llama 3.3.
-- thinkingConfig.thinkingBudget: 0 — avoids silent token consumption.
-- jsonMode maps to generationConfig.responseMimeType: "application/json".
-- 429 still returns rate_limited → existing frontend message unchanged:
-  "Our free companion is busy right now — add your own key for instant access."
-- Multi-key rotation removed (single GEMINI_API_KEY; Google quotas are
-  per-project, not per-key, so rotation provided no benefit).
-- ACTION REQUIRED: ensure GEMINI_API_KEY is set in Vercel env.
-  GROQ_API_KEY(S) are no longer used by the free pool.
+- 1.5K RPD free-tier quota on AI Studio — 3× the 500 RPD of Gemini 3.1
+  Flash-Lite, addresses the "what if hundreds of users use it on day one"
+  concern. (Gemma 4 26B benchmarks are also very strong.)
+- Considered Gemini 3.1 Flash-Lite first but chose Gemma for higher daily
+  quota; switch back is trivial if Gemma quality disappoints.
+- Vertex AI MaaS path also exists for Gemma but requires OAuth + service
+  account on Vercel — not worth the setup until usage justifies it.
+- Implementation notes:
+  - Gemma on AI Studio does NOT support systemInstruction or thinkingConfig.
+    The system prompt is inlined into the first user turn instead.
+  - jsonMode still sets responseMimeType but Gemma may ignore it — relies
+    on prompt-side JSON instructions as before.
+- 429 still returns rate_limited → existing frontend message unchanged.
+- ACTION REQUIRED:
+  1. Ensure GEMINI_API_KEY is set in Vercel env.
+  2. Confirm the exact model ID in AI Studio matches `gemma-4-26b-a4b-it`.
+     If the AI Studio dashboard shows a different ID for the 1.5K RPD
+     Gemma 4 26B entry, update the model string in api/ai.js line ~55.
+  3. GROQ_API_KEY(S) are no longer used by the free pool.
 
 ## What was done last session [v0.36]
 

@@ -2,12 +2,16 @@
 
 ## Known concerns — keep in view
 
-### Shared-pool response quality — resolved in v0.37 ✓
-- Switched from Groq llama-3.3-70b to Gemini 3.1 Flash-Lite (v0.37).
+### Shared-pool response quality — under evaluation in v0.37
+- Switched from Groq llama-3.3-70b to Gemma 4 26B A4B IT via AI Studio
+  (gemma-4-26b-a4b-it). Picked Gemma over Gemini 3.1 Flash-Lite for the
+  higher daily quota (1.5K RPD vs 500 RPD) since shared pool needs headroom.
 - System prompt tightened in v0.36 to forbid deflection to a different book.
 - Honest expectations copy on onboarding screen (v0.36).
-- Monitor: if quality is still insufficient after Gemini switch, consider
-  routing to Anthropic Haiku as next step (higher cost, much better knowledge).
+- TODO: test Gemma 4 26B response quality on real book conversations
+  (English + Chinese). If quality is poor:
+  - Step down to Gemini 3.1 Flash-Lite (500 RPD, matches 2.5 Flash quality)
+  - Or step up to Anthropic Haiku (paid, much better knowledge)
 
 ## Preferences + first-run flow (v0.33)
 - [x] Fix shared-pool users hitting the key gate on "Talk to your companion"
