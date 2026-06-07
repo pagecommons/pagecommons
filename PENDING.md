@@ -15,6 +15,19 @@
   - Gemma 4 via Vertex AI MaaS (OAuth/service account setup needed)
   - Anthropic Haiku (paid, best knowledge)
 
+## Post-launch AI infrastructure (only if hitting rate limits)
+
+- Vertex AI MaaS for Gemma 4 26B as fallback
+  Advantage: proper systemInstruction support,
+  1.5K RPD vs 500 RPD on Flash-Lite
+  Requires: OAuth service account setup on Vercel
+  JSON key stored as Vercel env var
+  Token refresh handling in api/ai.js
+  Only worth doing if Flash-Lite 500 RPD
+  becomes a consistent daily constraint
+  Prerequisite: confirm Groq paid tier
+  has reopened as simpler alternative first
+
 ## Preferences + first-run flow (v0.33)
 - [x] Fix shared-pool users hitting the key gate on "Talk to your companion"
 - [x] Move companion-name field off the API key screen
