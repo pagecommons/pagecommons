@@ -169,6 +169,8 @@ Standalone pages:
 - GEMINI_API_KEY (sensitive)
 - KV_REST_API_URL (Upstash Redis)
 - KV_REST_API_TOKEN (Upstash Redis)
+- GDRIVE_CLIENT_ID (Drive sync OAuth, also hardcoded in app.js)
+- GDRIVE_CLIENT_SECRET (Drive sync OAuth, sensitive — server only)
 
 ## Privacy Principles (non-negotiable)
 - No user data ever stored server-side

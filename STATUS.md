@@ -1,10 +1,97 @@
 # Page Commons — Current Status
 
 Last updated: June 7, 2026
-Current version: v0.37
-Updated by: Claude session — shared-pool switched from Groq to Gemma 4 26B (for quality testing)
+Current version: v0.38
+Updated by: Claude session — Google Drive sync ported from ShortJo
 
-## What was done this session [v0.37]
+## What was done this session [v0.38]
+
+### Google Drive sync (ported from ShortJo pattern) ✓
+
+**Note on version number:** Spec said "bump to v0.30" but that would go
+backwards from v0.37. Bumped to v0.38 to keep versions monotonic.
+
+#### Part 1 — Passages storage migration ✓
+- `pc_passages_<bookKey>` shape changed from flat string array to
+  `[{text, ts}, ...]` (mirrors `pc_notes_*`).
+- `getPassages()` normalises old flat-string format on read so existing
+  users' data still works without a migration step.
+- `savePassage()`, `renderPassagesPanel()`, `copyAllPassages()` all updated
+  to use `p.text`. Dedup check updated from `passages.includes(text)` to
+  `passages.some(function(p) { return p.text === text; })`.
+- Import path needs no change — it stores raw JSON; `getPassages()` handles
+  the format on the next read.
+
+#### Part 2 — pc_sync_meta + touchSyncMeta ✓
+- New `touchSyncMeta(category)` helper sets `pc_sync_meta[<category>_modified]`
+  to `Date.now()`.
+- Called from every write site of: pc_shelf_books, pc_font_size,
+  pc_reply_length, pc_companion_name (both write paths), pc_user_name,
+  pc_companion_lang, pc_provider, pc_ai_mode (3 write paths), pc_status_*,
+  pc_progress_*, pc_lang_*, pc_companion_lang_override_*.
+- Categories: `shelf`, `preferences`, `status`.
+
+#### Part 3 — /api/gdrive-token.js ✓
+- New serverless function. Handles both `authorization_code` (initial
+  exchange) and `refresh_token` (re-auth). Server holds GDRIVE_CLIENT_SECRET.
+- Returns Google's token response verbatim with original status code.
+
+#### Part 4 — Client-side Drive functions ✓
+- `GDRIVE_CLIENT_ID` constant at top of GDrive section (must be filled in
+  with real client ID — currently empty string).
+- `initGDriveAuth()` — same-tab redirect to Google OAuth (works on Kindle).
+- `handleGDriveCallback()` — exchanges `?code=` for tokens, fetches user
+  email, strips code from URL.
+- `refreshGDriveToken()` — refreshes access token via /api/gdrive-token.
+- `gdriveFetch()` — fetch wrapper with token refresh + single retry on 401.
+- `getOrCreatePageCommonsFolder()`, `getOrCreateConversationsFolder()` —
+  search/create folder helpers, cache IDs in localStorage.
+- `syncToDrive()` — refresh token → find/create folder → find data file →
+  merge or upload → apply merged to local → update last_synced timestamp.
+- `exportConversationToDrive()` — uploads single conversation as .md to
+  Page Commons/conversations/.
+
+#### Part 5 — Sync payload structure ✓
+```
+{ schema_version, last_synced, sync_meta,
+  conversations, notes, passages, shelf,
+  preferences, reading_state }
+```
+- Explicitly excluded: pc_api_key, pc_tc_accepted, pc_preferences_set,
+  pc_icebreakers_*, pc_subjects_*, pc_categories_*, pc_thinking_*,
+  pc_status_opts_*, pc_gdrive_*, pc_offline_queue, pc_last_book.
+
+#### Part 6 — Merge rules ✓
+- Conversations: merge by `id`, keep newer `lastUpdated`.
+- Notes: union by `ts`.
+- Passages: union by `text`, keep earliest `ts` on text collision.
+- Shelf: union by `title|author` composite key.
+- Preferences: last-write-wins via `sync_meta.preferences_modified`.
+- Reading state: last-write-wins via `sync_meta.status_modified`.
+- sync_meta: per-category max.
+
+#### Part 7 — Preferences screen UI ✓
+- New "Google Drive sync" section added below "Your data" inside the
+  More settings ▾ expand. Hidden on first-run.
+- Not connected view: "Connect Google Drive" button.
+- Connected view: email + last synced + Sync now + Disconnect buttons.
+- Inline messages via #gdrive-msg (#cc0000 errors, #006600 success).
+
+#### Part 8 — OAuth callback handling ✓
+- `init()` checks `window.location.search` for `?code=` before any routing.
+- If present, calls handleGDriveCallback() then runInitInner() then
+  navigates to #preferences so the user sees the connected status.
+- URL is stripped via `history.replaceState` before normal routing.
+
+### ACTION REQUIRED before deploying
+1. **Set `GDRIVE_CLIENT_ID`** at top of GDrive section in app.js with the
+   real OAuth 2.0 Web Application client ID from Google Cloud Console.
+2. **Set `GDRIVE_CLIENT_SECRET`** in Vercel env vars.
+3. In Google Cloud Console OAuth client: add the production redirect URI
+   (https://pagecommons.com/) to authorised redirect URIs.
+4. Confirm Drive API is enabled in the Google Cloud project.
+
+## What was done last session [v0.37]
 
 ### Shared-pool model: Groq → Gemini 3.1 Flash-Lite ✓
 - api/ai.js rewritten to call Gemini 3.1 Flash-Lite (gemini-3.1-flash-lite)

@@ -78,6 +78,17 @@ var STATE = {
   replyLength: 'medium', // 'short' | 'medium' | 'detailed'
   userName: ''
 };
+// ═══════════════════════════════════════════════════
+//  SYNC METADATA — tracks modification timestamps for
+//  categories that don't have per-item timestamps.
+// ═══════════════════════════════════════════════════
+function touchSyncMeta(category) {
+  try {
+    var meta = JSON.parse(localStorage.getItem('pc_sync_meta') || '{}');
+    meta[category + '_modified'] = Date.now();
+    localStorage.setItem('pc_sync_meta', JSON.stringify(meta));
+  } catch (e) {}
+}
 var STATIC_PROMPTS = ["I just finished it", "Something is still on my mind", "I want to understand something better", "There's a passage I keep thinking about", "I'm not sure how I feel about it", "I gave up — can we talk about why?", "I want to know what to read next", "Something surprised me"];
 var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'Let me think…', 'Hmm…', 'One moment…', 'With you…'];
 
@@ -403,6 +414,7 @@ var PROVIDER_CONFIG = {
 function selectProvider(prov) {
   STATE.provider = prov;
   localStorage.setItem('pc_provider', prov);
+  touchSyncMeta('preferences');
   applyProviderUI(prov);
 }
 function applyProviderUI(prov) {
@@ -439,6 +451,7 @@ function saveKey() {
   localStorage.setItem('pc_api_key', val);
   STATE.aiMode = 'byok';
   localStorage.setItem('pc_ai_mode', 'byok');
+  touchSyncMeta('preferences');
   document.getElementById('key-status-bar').style.display = 'block';
   navigate(localStorage.getItem('pc_preferences_set') ? 'search' : 'preferences');
 }
@@ -1114,6 +1127,7 @@ function acceptTC() {
 function chooseAIMode(mode) {
   STATE.aiMode = mode;
   localStorage.setItem('pc_ai_mode', mode);
+  touchSyncMeta('preferences');
   if (mode === 'byok') {
     navigate('key');
   } else if (localStorage.getItem('pc_preferences_set')) {
@@ -1125,6 +1139,7 @@ function chooseAIMode(mode) {
 function switchAIMode(mode) {
   STATE.aiMode = mode;
   localStorage.setItem('pc_ai_mode', mode);
+  touchSyncMeta('preferences');
   updateAIModeUI();
 }
 function updateAIModeUI() {
@@ -1501,7 +1516,7 @@ function _selectBook() {
           STATE.readingStatus = savedStatus;
           STATE.detectedLang = detectedLang;
           STATE.chatLanguage = detectedLang ? 'native' : (savedLang || 'english');
-          if (detectedLang) localStorage.setItem('pc_lang_' + bk, 'native');
+          if (detectedLang) { localStorage.setItem('pc_lang_' + bk, 'native'); touchSyncMeta('status'); }
           // restore thinking phrases if native language was chosen
           if (!(STATE.chatLanguage === 'native' && detectedLang)) {
             _context0.n = 2;
@@ -1537,6 +1552,7 @@ function _setReadingStatus() {
         case 0:
           STATE.readingStatus = status;
           localStorage.setItem('pc_status_' + bookKey(STATE.book), status);
+          touchSyncMeta('status');
 
           // detect if non-English
           lang = detectLanguage(STATE.book);
@@ -1547,6 +1563,7 @@ function _setReadingStatus() {
             // auto-set to native; user can change via language screen if they want
             STATE.chatLanguage = 'native';
             localStorage.setItem('pc_lang_' + bk, 'native');
+            touchSyncMeta('status');
             _context1.n = 1;
             break;
           }
@@ -1577,6 +1594,7 @@ function _setLanguage() {
         case 0:
           STATE.chatLanguage = choice;
           localStorage.setItem('pc_lang_' + bookKey(STATE.book), choice);
+          touchSyncMeta('status');
           // await thinking phrases before launching so they're ready for first message
           if (!(choice === 'native' && STATE.detectedLang)) {
             _context10.n = 1;
@@ -3046,6 +3064,7 @@ function applyFontSize(size) {
 function setFontSize(size) {
   applyFontSize(size);
   localStorage.setItem('pc_font_size', size);
+  touchSyncMeta('preferences');
 }
 
 // ═══════════════════════════════════════════════════
@@ -3057,6 +3076,7 @@ function showOtherOptions() {
   var trimmed = name.trim();
   STATE.companionName = trimmed || 'Companion';
   localStorage.setItem('pc_companion_name', STATE.companionName);
+  touchSyncMeta('preferences');
   showToolbarMsg("Companion name set to \"" + STATE.companionName + "\".");
 }
 
@@ -3120,6 +3140,7 @@ function addBookToShelf(book) {
       pageCount: book.pageCount || 0
     });
     localStorage.setItem('pc_shelf_books', JSON.stringify(books));
+    touchSyncMeta('shelf');
   }
 }
 function saveCurrentConversation() {
@@ -3345,6 +3366,7 @@ function updateBookStatus() {
 function setReplyLength(length) {
   STATE.replyLength = length;
   localStorage.setItem('pc_reply_length', length);
+  touchSyncMeta('preferences');
   document.querySelectorAll('.length-opt').forEach(function (b) {
     b.dataset.length === length ? b.classList.add('active') : b.classList.remove('active');
   });
@@ -3369,9 +3391,11 @@ function setCompanionLanguage(lang) {
   STATE.companionLangOverride = lang || null;
   if (lang) {
     localStorage.setItem('pc_companion_lang_override_' + bookKey(STATE.book), lang);
+    touchSyncMeta('status');
     showToolbarMsg('Prompts now in ' + lang + '.');
   } else {
     localStorage.removeItem('pc_companion_lang_override_' + bookKey(STATE.book));
+    touchSyncMeta('status');
     showToolbarMsg('Auto-detect enabled.');
   }
   updateLanguagePanelDisplay();
@@ -3395,7 +3419,9 @@ function updateLanguagePanelDisplay() {
 function getPassages() {
   if (!STATE.book) return [];
   try {
-    return JSON.parse(localStorage.getItem('pc_passages_' + bookKey(STATE.book)) || '[]');
+    var raw = JSON.parse(localStorage.getItem('pc_passages_' + bookKey(STATE.book)) || '[]');
+    // Normalise old flat-string format to {text, ts} objects for backwards compat
+    return raw.map(function(p) { return typeof p === 'string' ? { text: p, ts: 0 } : p; });
   } catch (e) {
     return [];
   }
@@ -3403,7 +3429,7 @@ function getPassages() {
 function savePassage(text, btn) {
   var passages = getPassages();
   // avoid duplicates
-  if (passages.includes(text)) {
+  if (passages.some(function(p) { return p.text === text; })) {
     btn.textContent = 'Already saved';
     btn.classList.add('saved');
     setTimeout(function () {
@@ -3412,7 +3438,7 @@ function savePassage(text, btn) {
     }, 1500);
     return;
   }
-  passages.push(text);
+  passages.push({ text: text, ts: Date.now() });
   localStorage.setItem('pc_passages_' + bookKey(STATE.book), JSON.stringify(passages));
   btn.textContent = 'Saved ✓';
   btn.classList.add('saved');
@@ -3445,7 +3471,7 @@ function renderPassagesPanel() {
   }
   countEl.textContent = passages.length + ' passage' + (passages.length !== 1 ? 's' : '') + ' saved';
   listEl.innerHTML = passages.map(function (p, i) {
-    return '<div class="passage-item">' + formatText(p) + '</div>';
+    return '<div class="passage-item">' + formatText(p.text) + '</div>';
   }).join('');
 }
 function togglePassagesPanel() {
@@ -3568,7 +3594,7 @@ function copyAllPassages() {
     return;
   }
   var text = passages.map(function (p, i) {
-    return '[' + (i + 1) + '] ' + p;
+    return '[' + (i + 1) + '] ' + p.text;
   }).join('\n\n');
   navigator.clipboard.writeText(text).then(function () {
     showToolbarMsg(passages.length + ' passage' + (passages.length !== 1 ? 's' : '') + ' copied to clipboard.');
@@ -3703,6 +3729,11 @@ function loadPreferencesScreen() {
   if (saveBtn) saveBtn.style.display = firstRun ? 'block' : 'none';
   if (dataSection) dataSection.style.display = firstRun ? 'none' : 'block';
 
+  // Hide Drive sync section during first-run (nothing to sync yet)
+  var gdriveSection = document.getElementById('prefs-gdrive-section');
+  if (gdriveSection) gdriveSection.style.display = firstRun ? 'none' : 'block';
+  if (!firstRun) renderDriveStatus();
+
   // Collapse "More settings" by default each time the screen is opened.
   var more = document.getElementById('prefs-more');
   var toggle = document.getElementById('prefs-more-toggle');
@@ -3728,6 +3759,7 @@ function saveCompanionLangSetting(val) {
   STATE.companionLangOverride = val || null;
   if (val) localStorage.setItem('pc_companion_lang', val);
   else localStorage.removeItem('pc_companion_lang');
+  touchSyncMeta('preferences');
 }
 
 
@@ -3736,11 +3768,13 @@ function saveSettingName() {
   STATE.userName = val;
   if (val) localStorage.setItem('pc_user_name', val);
   else localStorage.removeItem('pc_user_name');
+  touchSyncMeta('preferences');
 }
 function saveSettingCompanionName() {
   var val = (document.getElementById('settings-companion-name').value || '').trim();
   STATE.companionName = val || 'Companion';
   localStorage.setItem('pc_companion_name', STATE.companionName);
+  touchSyncMeta('preferences');
 }
 
 // ═══════════════════════════════════════════════════
@@ -3859,6 +3893,7 @@ function updateProgressFromHighlights(highlights) {
     var existing = getReadingProgress({ title: bk, author: '' });
     if (!existing || byBook[bk] > (existing.page || 0)) {
       localStorage.setItem('pc_progress_' + bk, JSON.stringify({ page: byBook[bk], source: 'kindle' }));
+      touchSyncMeta('status');
     }
   });
 }
@@ -3886,7 +3921,447 @@ function fetchAndCacheSubjects(book) {
   return Promise.resolve();
 }
 
+// ═══════════════════════════════════════════════════
+//  GOOGLE DRIVE SYNC
+//  - OAuth via /api/gdrive-token.js (server holds client_secret)
+//  - Scope: drive.file (only files this app creates)
+//  - File: "Page Commons/pagecommons-data.json" plus
+//    per-conversation markdown in "Page Commons/conversations/"
+// ═══════════════════════════════════════════════════
+// Public OAuth client ID — safe to ship in client code.
+// Set GDRIVE_CLIENT_ID below and GDRIVE_CLIENT_SECRET in Vercel env.
+var GDRIVE_CLIENT_ID = '';
+var GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+var GDRIVE_KEYS_DEVICE_LOCAL = ['pc_gdrive_access_token','pc_gdrive_refresh_token','pc_gdrive_user_email','pc_gdrive_folder_id','pc_gdrive_conv_folder_id','pc_gdrive_last_synced'];
+
+// Keys that are NEVER synced (privacy / device-local)
+var SYNC_EXCLUDE_PREFIXES = ['pc_api_key','pc_tc_accepted','pc_preferences_set','pc_icebreakers_','pc_subjects_','pc_categories_','pc_thinking_','pc_status_opts_','pc_gdrive_','pc_offline_queue','pc_last_book'];
+
+function gdriveRedirectUri() {
+  // Use origin only — no path — so OAuth lands on the app root and we
+  // strip ?code= before normal routing.
+  return window.location.origin + window.location.pathname;
+}
+
+function initGDriveAuth() {
+  if (!GDRIVE_CLIENT_ID) {
+    showSyncMessage('Drive sync not configured — set GDRIVE_CLIENT_ID.', true);
+    return;
+  }
+  var params = new URLSearchParams({
+    client_id: GDRIVE_CLIENT_ID,
+    redirect_uri: gdriveRedirectUri(),
+    response_type: 'code',
+    scope: GDRIVE_SCOPE,
+    access_type: 'offline',
+    prompt: 'consent',
+    include_granted_scopes: 'true'
+  });
+  // Same-tab redirect — works on Kindle / Kobo browsers
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+
+function handleGDriveCallback() {
+  var qs = window.location.search;
+  if (!qs || qs.indexOf('code=') === -1) return Promise.resolve(false);
+  var sp = new URLSearchParams(qs);
+  var code = sp.get('code');
+  if (!code) return Promise.resolve(false);
+  // Strip the code from the URL so it doesn't linger or get bookmarked
+  try { window.history.replaceState({}, document.title, window.location.pathname); } catch (e) {}
+  return fetch('/api/gdrive-token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ grant_type: 'authorization_code', code: code, redirect_uri: gdriveRedirectUri() })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (!data || !data.access_token) throw new Error('No access token');
+    localStorage.setItem('pc_gdrive_access_token', data.access_token);
+    if (data.refresh_token) localStorage.setItem('pc_gdrive_refresh_token', data.refresh_token);
+    // Best-effort user email lookup (display only)
+    return fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { 'Authorization': 'Bearer ' + data.access_token }
+    }).then(function(r) { return r.json(); }).then(function(u) {
+      if (u && u.email) localStorage.setItem('pc_gdrive_user_email', u.email);
+    }).catch(function() {});
+  }).then(function() { return true; }).catch(function() {
+    return false;
+  });
+}
+
+function refreshGDriveToken() {
+  var rt = localStorage.getItem('pc_gdrive_refresh_token');
+  if (!rt) return Promise.reject(new Error('Not connected'));
+  return fetch('/api/gdrive-token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: rt })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (!data || !data.access_token) throw new Error('Token refresh failed');
+    localStorage.setItem('pc_gdrive_access_token', data.access_token);
+    return data.access_token;
+  });
+}
+
+function gdriveFetch(url, opts) {
+  // Wrap fetch with token refresh + single retry on 401.
+  opts = opts || {};
+  opts.headers = opts.headers || {};
+  var tok = localStorage.getItem('pc_gdrive_access_token');
+  if (!tok) {
+    return refreshGDriveToken().then(function(newTok) {
+      opts.headers['Authorization'] = 'Bearer ' + newTok;
+      return fetch(url, opts);
+    });
+  }
+  opts.headers['Authorization'] = 'Bearer ' + tok;
+  return fetch(url, opts).then(function(res) {
+    if (res.status === 401) {
+      return refreshGDriveToken().then(function(newTok) {
+        opts.headers['Authorization'] = 'Bearer ' + newTok;
+        return fetch(url, opts);
+      });
+    }
+    return res;
+  });
+}
+
+function gdriveFindOrCreateFolder(name, parentId) {
+  var q = "mimeType='application/vnd.google-apps.folder' and trashed=false and name='" + name.replace(/'/g, "\\'") + "'";
+  if (parentId) q += " and '" + parentId + "' in parents";
+  var url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id,name)';
+  return gdriveFetch(url).then(function(r) { return r.json(); }).then(function(data) {
+    if (data && data.files && data.files.length) return data.files[0].id;
+    var meta = { name: name, mimeType: 'application/vnd.google-apps.folder' };
+    if (parentId) meta.parents = [parentId];
+    return gdriveFetch('https://www.googleapis.com/drive/v3/files', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(meta)
+    }).then(function(r) { return r.json(); }).then(function(d) { return d.id; });
+  });
+}
+
+function getOrCreatePageCommonsFolder() {
+  var cached = localStorage.getItem('pc_gdrive_folder_id');
+  if (cached) return Promise.resolve(cached);
+  return gdriveFindOrCreateFolder('Page Commons', null).then(function(id) {
+    localStorage.setItem('pc_gdrive_folder_id', id);
+    return id;
+  });
+}
+
+function getOrCreateConversationsFolder(parentId) {
+  var cached = localStorage.getItem('pc_gdrive_conv_folder_id');
+  if (cached) return Promise.resolve(cached);
+  return gdriveFindOrCreateFolder('conversations', parentId).then(function(id) {
+    localStorage.setItem('pc_gdrive_conv_folder_id', id);
+    return id;
+  });
+}
+
+function shouldSyncKey(k) {
+  for (var i = 0; i < SYNC_EXCLUDE_PREFIXES.length; i++) {
+    if (k === SYNC_EXCLUDE_PREFIXES[i] || k.indexOf(SYNC_EXCLUDE_PREFIXES[i]) === 0) return false;
+  }
+  return k.indexOf('pc_') === 0;
+}
+
+function buildSyncPayload() {
+  var conversations = {}, notes = {}, passages = {}, reading_state = {};
+  var preferences = {};
+  var prefKeys = ['pc_user_name','pc_companion_name','pc_companion_lang','pc_font_size','pc_reply_length','pc_provider','pc_ai_mode'];
+  for (var i = 0; i < localStorage.length; i++) {
+    var k = localStorage.key(i);
+    if (!k || !shouldSyncKey(k)) continue;
+    var v = localStorage.getItem(k);
+    if (k.indexOf('pc_convs_') === 0) {
+      try { conversations[k.slice(9)] = JSON.parse(v); } catch (e) {}
+    } else if (k.indexOf('pc_notes_') === 0) {
+      try { notes[k.slice(9)] = JSON.parse(v); } catch (e) {}
+    } else if (k.indexOf('pc_passages_') === 0) {
+      try { passages[k.slice(12)] = JSON.parse(v); } catch (e) {}
+    } else if (k.indexOf('pc_status_') === 0) {
+      reading_state[k] = v;
+    } else if (k.indexOf('pc_progress_') === 0) {
+      reading_state[k] = v;
+    } else if (k.indexOf('pc_lang_') === 0) {
+      reading_state[k] = v;
+    } else if (k.indexOf('pc_companion_lang_override_') === 0) {
+      reading_state[k] = v;
+    } else if (prefKeys.indexOf(k) !== -1) {
+      preferences[k] = v;
+    }
+  }
+  var shelf = [];
+  try { shelf = JSON.parse(localStorage.getItem('pc_shelf_books') || '[]'); } catch (e) {}
+  var sync_meta = {};
+  try { sync_meta = JSON.parse(localStorage.getItem('pc_sync_meta') || '{}'); } catch (e) {}
+  return {
+    schema_version: 1,
+    last_synced: new Date().toISOString(),
+    sync_meta: sync_meta,
+    conversations: conversations,
+    notes: notes,
+    passages: passages,
+    shelf: shelf,
+    preferences: preferences,
+    reading_state: reading_state
+  };
+}
+
+function mergeSyncPayloads(local, remote) {
+  // Conversations — by id, keep newer lastUpdated
+  var merged = JSON.parse(JSON.stringify(local));
+  var bk;
+  Object.keys(remote.conversations || {}).forEach(function(bk) {
+    var localConvs = merged.conversations[bk] || [];
+    var remoteConvs = remote.conversations[bk] || [];
+    var byId = {};
+    localConvs.forEach(function(c) { byId[c.id] = c; });
+    remoteConvs.forEach(function(c) {
+      var existing = byId[c.id];
+      if (!existing || (c.lastUpdated || 0) > (existing.lastUpdated || 0)) byId[c.id] = c;
+    });
+    merged.conversations[bk] = Object.keys(byId).map(function(id) { return byId[id]; });
+  });
+  // Notes — union by ts
+  Object.keys(remote.notes || {}).forEach(function(bk) {
+    var localNotes = merged.notes[bk] || [];
+    var remoteNotes = remote.notes[bk] || [];
+    var seen = {};
+    localNotes.forEach(function(n) { seen[n.ts] = n; });
+    remoteNotes.forEach(function(n) { if (!seen[n.ts]) seen[n.ts] = n; });
+    merged.notes[bk] = Object.keys(seen).map(function(ts) { return seen[ts]; });
+  });
+  // Passages — union by text (use earliest ts on conflict)
+  Object.keys(remote.passages || {}).forEach(function(bk) {
+    var localPs = merged.passages[bk] || [];
+    var remotePs = remote.passages[bk] || [];
+    var byText = {};
+    localPs.forEach(function(p) { byText[p.text] = p; });
+    remotePs.forEach(function(p) {
+      if (!byText[p.text]) byText[p.text] = p;
+      else if ((p.ts || 0) < (byText[p.text].ts || 0)) byText[p.text] = p;
+    });
+    merged.passages[bk] = Object.keys(byText).map(function(t) { return byText[t]; });
+  });
+  // Shelf — union by title|author
+  var shelfSeen = {};
+  (merged.shelf || []).forEach(function(b) { shelfSeen[(b.title||'')+'|'+(b.author||'')] = b; });
+  (remote.shelf || []).forEach(function(b) {
+    var k = (b.title||'')+'|'+(b.author||'');
+    if (!shelfSeen[k]) shelfSeen[k] = b;
+  });
+  merged.shelf = Object.keys(shelfSeen).map(function(k) { return shelfSeen[k]; });
+  // Preferences — last-write-wins by sync_meta.preferences_modified
+  var localPM = (local.sync_meta && local.sync_meta.preferences_modified) || 0;
+  var remotePM = (remote.sync_meta && remote.sync_meta.preferences_modified) || 0;
+  if (remotePM > localPM) {
+    merged.preferences = remote.preferences || {};
+  }
+  // Reading state — last-write-wins by sync_meta.status_modified
+  var localSM = (local.sync_meta && local.sync_meta.status_modified) || 0;
+  var remoteSM = (remote.sync_meta && remote.sync_meta.status_modified) || 0;
+  if (remoteSM > localSM) {
+    merged.reading_state = remote.reading_state || {};
+  }
+  // sync_meta — take the max of each category timestamp
+  var ms = {};
+  ['shelf_modified','preferences_modified','status_modified'].forEach(function(k) {
+    ms[k] = Math.max((local.sync_meta && local.sync_meta[k]) || 0, (remote.sync_meta && remote.sync_meta[k]) || 0);
+  });
+  merged.sync_meta = ms;
+  return merged;
+}
+
+function applySyncPayloadToLocal(merged) {
+  // Conversations
+  Object.keys(merged.conversations || {}).forEach(function(bk) {
+    localStorage.setItem('pc_convs_' + bk, JSON.stringify(merged.conversations[bk]));
+  });
+  // Notes
+  Object.keys(merged.notes || {}).forEach(function(bk) {
+    localStorage.setItem('pc_notes_' + bk, JSON.stringify(merged.notes[bk]));
+  });
+  // Passages
+  Object.keys(merged.passages || {}).forEach(function(bk) {
+    localStorage.setItem('pc_passages_' + bk, JSON.stringify(merged.passages[bk]));
+  });
+  // Shelf
+  localStorage.setItem('pc_shelf_books', JSON.stringify(merged.shelf || []));
+  // Preferences
+  var prefs = merged.preferences || {};
+  Object.keys(prefs).forEach(function(k) {
+    if (prefs[k] != null) localStorage.setItem(k, String(prefs[k]));
+  });
+  // Reading state
+  var rs = merged.reading_state || {};
+  Object.keys(rs).forEach(function(k) {
+    if (rs[k] != null) localStorage.setItem(k, String(rs[k]));
+  });
+  // sync_meta
+  if (merged.sync_meta) localStorage.setItem('pc_sync_meta', JSON.stringify(merged.sync_meta));
+}
+
+function gdriveFindDataFile(folderId) {
+  var q = "name='pagecommons-data.json' and trashed=false and '" + folderId + "' in parents";
+  return gdriveFetch('https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id,name)')
+    .then(function(r) { return r.json(); })
+    .then(function(d) { return d && d.files && d.files.length ? d.files[0].id : null; });
+}
+
+function gdriveDownloadJson(fileId) {
+  return gdriveFetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media')
+    .then(function(r) { return r.json(); });
+}
+
+function gdriveUploadJson(folderId, fileId, payload) {
+  // Multipart upload: metadata + body. If fileId given, PATCH; else POST.
+  var boundary = '----pc_boundary_' + Date.now();
+  var meta = fileId ? {} : { name: 'pagecommons-data.json', parents: [folderId] };
+  var bodyStr =
+    '--' + boundary + '\r\n' +
+    'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+    JSON.stringify(meta) + '\r\n' +
+    '--' + boundary + '\r\n' +
+    'Content-Type: application/json\r\n\r\n' +
+    JSON.stringify(payload) + '\r\n' +
+    '--' + boundary + '--';
+  var url = fileId
+    ? 'https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=multipart'
+    : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+  return gdriveFetch(url, {
+    method: fileId ? 'PATCH' : 'POST',
+    headers: { 'Content-Type': 'multipart/related; boundary=' + boundary },
+    body: bodyStr
+  }).then(function(r) { return r.json(); });
+}
+
+function syncToDrive() {
+  showSyncMessage('Syncing…', false);
+  return refreshGDriveToken().then(function() {
+    return getOrCreatePageCommonsFolder();
+  }).then(function(folderId) {
+    return gdriveFindDataFile(folderId).then(function(fileId) {
+      var local = buildSyncPayload();
+      if (!fileId) {
+        return gdriveUploadJson(folderId, null, local).then(function() {
+          return local;
+        });
+      }
+      return gdriveDownloadJson(fileId).then(function(remote) {
+        var merged = mergeSyncPayloads(local, remote || {});
+        return gdriveUploadJson(folderId, fileId, merged).then(function() {
+          applySyncPayloadToLocal(merged);
+          return merged;
+        });
+      });
+    });
+  }).then(function() {
+    var ts = Date.now();
+    localStorage.setItem('pc_gdrive_last_synced', String(ts));
+    showSyncMessage('Synced successfully.', false);
+    renderDriveStatus();
+  }).catch(function(err) {
+    showSyncMessage('Sync failed — try again.', true);
+  });
+}
+
+function exportConversationToDrive(book, fullMessages) {
+  // Builds the same markdown the local export does, uploads to
+  // Page Commons/conversations/. Returns the Drive web link.
+  var now = new Date();
+  var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
+  var iso = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate());
+  var date = now.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+  var companionName = STATE.companionName || 'Companion';
+  var lines = ['# ' + (book ? book.title : 'Conversation'), '', '**Author:** ' + (book ? book.author : 'Unknown'), '**Exported from Page Commons:** ' + date, '', '---', ''];
+  fullMessages.forEach(function(m) {
+    lines.push(m.role === 'user' ? '**You**' : '**' + companionName + '**');
+    lines.push('');
+    lines.push(m.content);
+    lines.push('');
+  });
+  var md = lines.join('\n');
+  var titlePart = book && book.title ? book.title.replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, ' ').trim() : 'Conversation';
+  var filename = iso + '-' + titlePart + '.md';
+  return refreshGDriveToken().then(function() {
+    return getOrCreatePageCommonsFolder();
+  }).then(function(folderId) {
+    return getOrCreateConversationsFolder(folderId);
+  }).then(function(convFolderId) {
+    var boundary = '----pc_md_' + Date.now();
+    var meta = { name: filename, parents: [convFolderId], mimeType: 'text/markdown' };
+    var bodyStr =
+      '--' + boundary + '\r\n' +
+      'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+      JSON.stringify(meta) + '\r\n' +
+      '--' + boundary + '\r\n' +
+      'Content-Type: text/markdown\r\n\r\n' +
+      md + '\r\n' +
+      '--' + boundary + '--';
+    return gdriveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'multipart/related; boundary=' + boundary },
+      body: bodyStr
+    }).then(function(r) { return r.json(); });
+  });
+}
+
+function disconnectGDrive() {
+  GDRIVE_KEYS_DEVICE_LOCAL.forEach(function(k) { localStorage.removeItem(k); });
+  renderDriveStatus();
+}
+
+function showSyncMessage(text, isError) {
+  var el = document.getElementById('gdrive-msg');
+  if (!el) return;
+  el.style.display = 'block';
+  el.style.color = isError ? '#cc0000' : '#006600';
+  el.textContent = text;
+  if (showSyncMessage._t) clearTimeout(showSyncMessage._t);
+  showSyncMessage._t = setTimeout(function() { el.style.display = 'none'; }, 5000);
+}
+
+function renderDriveStatus() {
+  var connected = !!localStorage.getItem('pc_gdrive_refresh_token');
+  var notConnected = document.getElementById('gdrive-not-connected');
+  var connectedBlock = document.getElementById('gdrive-connected');
+  var emailEl = document.getElementById('gdrive-email');
+  var lastEl = document.getElementById('gdrive-last-synced');
+  if (!notConnected || !connectedBlock) return;
+  if (connected) {
+    notConnected.style.display = 'none';
+    connectedBlock.style.display = 'block';
+    if (emailEl) emailEl.textContent = localStorage.getItem('pc_gdrive_user_email') || '(connected)';
+    var last = localStorage.getItem('pc_gdrive_last_synced');
+    if (lastEl) {
+      if (last) {
+        var d = new Date(parseInt(last, 10));
+        lastEl.textContent = 'Last synced: ' + d.toLocaleString('en-GB', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+      } else {
+        lastEl.textContent = 'Last synced: never';
+      }
+    }
+  } else {
+    notConnected.style.display = 'block';
+    connectedBlock.style.display = 'none';
+  }
+}
+
 function init() {
+  // Handle OAuth callback first — strip ?code= from URL before any routing
+  if (window.location.search && window.location.search.indexOf('code=') !== -1) {
+    handleGDriveCallback().then(function() {
+      runInitInner();
+      try { renderDriveStatus(); navigate('preferences'); } catch (e) {}
+    });
+    return;
+  }
+  runInitInner();
+}
+
+function runInitInner() {
   try {
     var aiMode = localStorage.getItem('pc_ai_mode');
     if (aiMode) {

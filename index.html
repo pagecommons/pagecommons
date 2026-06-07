@@ -1223,6 +1223,21 @@
         <input type="file" id="data-import-input" accept="application/json,.json" style="display:none" onchange="importUserData(this)" />
         <div id="data-import-msg" style="display:none;font-size:0.85rem;margin-top:10px"></div>
       </div>
+
+      <div class="settings-section" id="prefs-gdrive-section">
+        <div class="settings-section-label">Google Drive sync</div>
+        <div id="gdrive-not-connected">
+          <p style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px">Back up and access your conversations from any device.</p>
+          <button class="btn" onclick="initGDriveAuth()">Connect Google Drive</button>
+        </div>
+        <div id="gdrive-connected" style="display:none">
+          <p style="font-size:0.85rem;margin-top:0;margin-bottom:4px">Connected as <span id="gdrive-email">&mdash;</span></p>
+          <p id="gdrive-last-synced" style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px">Last synced: never</p>
+          <button class="btn" style="margin-bottom:10px" onclick="syncToDrive()">Sync now</button>
+          <button class="btn" onclick="disconnectGDrive()">Disconnect</button>
+        </div>
+        <div id="gdrive-msg" style="display:none;font-size:0.85rem;margin-top:10px"></div>
+      </div>
     </div>
 
     <button class="btn btn-primary" id="prefs-save-continue" style="display:none;width:100%;margin-top:24px" onclick="savePreferencesAndContinue()">Save & continue</button>

@@ -1,5 +1,22 @@
 # Page Commons — Pending Work
 
+## Google Drive sync (v0.38) — ACTION REQUIRED before testing
+
+- [ ] Create Google Cloud OAuth 2.0 Web Application client
+      - Authorised redirect URIs: production origin + any preview/test origins
+      - Scopes: https://www.googleapis.com/auth/drive.file (file scope only)
+      - Enable Drive API for the project
+- [ ] Fill `GDRIVE_CLIENT_ID` constant near top of GDrive section in app.js
+- [ ] Set `GDRIVE_CLIENT_SECRET` in Vercel env vars
+- [ ] Re-transpile app.js after filling the client ID
+- [ ] Test: Connect → grant consent → verify connected status + email
+- [ ] Test: Sync now → verify pagecommons-data.json appears in Drive
+- [ ] Test: Two devices → make different changes → sync both → confirm merge
+- [ ] Test: Disconnect → reconnect (refresh token regenerated)
+- [ ] Kindle device test of full OAuth round-trip
+- [ ] Decide whether to wire exportConversationToDrive() into the toolbar
+      Export button (currently still does local .md download)
+
 ## Known concerns — keep in view
 
 ### Shared-pool response quality — resolved in v0.37 ✓
