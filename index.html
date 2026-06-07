@@ -1006,6 +1006,7 @@
         <button class="toolbar-btn" id="passages-toolbar-btn" style="display:none" onclick="togglePassagesPanel()">Passages</button>
         <button class="toolbar-btn" id="notes-toolbar-btn" onclick="toggleNotesPanel()">Notes</button>
         <button class="toolbar-btn" id="language-toolbar-btn" onclick="toggleLanguagePanel()">Language</button>
+        <button class="toolbar-btn" onclick="exportConversation()">Export</button>
         <button class="toolbar-btn" onclick="navigate('shelf')">Shelf</button>
         <button class="toolbar-btn" onclick="endConversation()">Done</button>
       </div>
@@ -1022,8 +1023,6 @@
         <textarea id="note-input" rows="4" placeholder="Write a private note about this book…" style="width:100%;border:1px solid #111111;padding:8px;font-size:0.9rem;font-family:Georgia,'Times New Roman',serif;resize:vertical;border-radius:0;background:#ffffff;color:#111111;margin-bottom:8px"></textarea>
         <button class="btn btn-primary btn-small" onclick="saveNoteEntry()" style="margin-bottom:16px">Save note</button>
         <div id="notes-list"></div>
-        <hr style="border:none;border-top:1px solid #dddddd;margin:16px 0" />
-        <button class="bubble-action-btn" onclick="exportConversation()" style="font-size:0.85rem">Export conversation</button>
       </div>
 
       <div id="passages-panel">

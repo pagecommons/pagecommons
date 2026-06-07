@@ -3585,37 +3585,47 @@ function togglePassagesPanel() {
   if (panel.classList.contains('open')) renderPassagesPanel();
 }
 function exportConversation() {
-  if (!STATE.messages || !STATE.messages.length) {
+  var book = STATE.book;
+  // Use the full saved conversation, not the in-memory sliding window
+  var fullMessages = STATE.messages;
+  if (STATE.currentConvId && book) {
+    var convs = getConvs(book);
+    var conv = convs.find(function (c) {
+      return c.id === STATE.currentConvId;
+    });
+    if (conv && conv.messages && conv.messages.length) fullMessages = conv.messages;
+  }
+  if (!fullMessages || !fullMessages.length) {
     showToolbarMsg('No conversation to export yet.');
     return;
   }
-  var book = STATE.book;
   var date = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   });
-  var lines = ['Page Commons — Conversation Export', 'Book: ' + (book ? book.title : 'Unknown'), 'Author: ' + (book ? book.author : 'Unknown'), 'Exported: ' + date, '', '---', ''];
-  var exchange = 0;
-  STATE.messages.forEach(function (m) {
+  var companionName = STATE.companionName || 'Companion';
+  var lines = ['# ' + (book ? book.title : 'Conversation'), '', '**Author:** ' + (book ? book.author : 'Unknown'), '**Exported from Page Commons:** ' + date, '', '---', ''];
+  fullMessages.forEach(function (m) {
     if (m.role === 'user') {
-      exchange++;
-      lines.push('[' + exchange + '] You');
+      lines.push('**You**');
+      lines.push('');
       lines.push(m.content);
       lines.push('');
     } else {
-      lines.push(STATE.companionName || 'Companion');
+      lines.push('**' + companionName + '**');
+      lines.push('');
       lines.push(m.content);
       lines.push('');
     }
   });
   var blob = new Blob([lines.join('\n')], {
-    type: 'text/plain'
+    type: 'text/markdown'
   });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  a.download = (book ? book.title.replace(/[^a-z0-9]/gi, '-').toLowerCase() : 'conversation') + '-export.txt';
+  a.download = (book ? book.title.replace(/[^a-z0-9]/gi, '-').toLowerCase() : 'conversation') + '-export.md';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
