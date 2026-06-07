@@ -25,32 +25,20 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid request' });
   }
 
-  // Gemma on AI Studio does not support systemInstruction or thinkingConfig
-  // the way Gemini does. Inline the system prompt into the first user turn.
+  // Build Gemini contents array (user/model alternating)
   var contents = [];
-  var systemPrepended = false;
   messages.forEach(function(m) {
-    var role = m.role === 'user' ? 'user' : 'model';
-    var text = m.content;
-    if (!systemPrepended && system && role === 'user') {
-      text = system + '\n\n' + text;
-      systemPrepended = true;
-    }
     contents.push({
-      role: role,
-      parts: [{ text: text }]
+      role: m.role === 'user' ? 'user' : 'model',
+      parts: [{ text: m.content }]
     });
   });
-  // Fallback: if there were no user messages, push the system prompt as one
-  if (!systemPrepended && system) {
-    contents.unshift({ role: 'user', parts: [{ text: system }] });
-  }
 
   var generationConfig = {
-    maxOutputTokens: 1024
+    maxOutputTokens: 1024,
+    thinkingConfig: { thinkingBudget: 0 }
   };
   if (jsonMode) {
-    // Gemma may ignore this; rely on prompt-side JSON instructions too.
     generationConfig.responseMimeType = 'application/json';
   }
 
@@ -58,10 +46,13 @@ export default async function handler(req, res) {
     contents: contents,
     generationConfig: generationConfig
   };
+  if (system) {
+    requestBody.systemInstruction = { parts: [{ text: system }] };
+  }
 
   try {
     var geminiRes = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemma-4-26b-a4b-it:generateContent?key=' + apiKey,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=' + apiKey,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
