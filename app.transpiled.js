@@ -3599,7 +3599,12 @@ function exportConversation() {
     showToolbarMsg('No conversation to export yet.');
     return;
   }
-  var date = new Date().toLocaleDateString('en-GB', {
+  var now = new Date();
+  var pad = function pad(n) {
+    return n < 10 ? '0' + n : '' + n;
+  };
+  var isoDate = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+  var date = now.toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
@@ -3625,7 +3630,8 @@ function exportConversation() {
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  a.download = (book ? book.title.replace(/[^a-z0-9]/gi, '-').toLowerCase() : 'conversation') + '-export.md';
+  var titlePart = book && book.title ? book.title.replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, ' ').trim() : 'Conversation';
+  a.download = isoDate + '-' + titlePart + '.md';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
