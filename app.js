@@ -2223,10 +2223,6 @@ function _populateIcebreakers() {
           _t25 = _context12.v;
         case 4:
           prompts = null;
-          if (!STATE.apiKey) {
-            _context12.n = 8;
-            break;
-          }
           _context12.p = 5;
           _context12.n = 6;
           return fetchAIIcebreakers(book);
@@ -2337,7 +2333,7 @@ function fetchAIIcebreakers(_x1) {
 }
 function _fetchAIIcebreakers() {
   _fetchAIIcebreakers = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee13(book) {
-    var statusLabels, statusLabel, langNote, prompt, text, res, _res7, _res8, clean, parsed, match, _t27, _t28, _t29, _t30, _t31, _t32;
+    var statusLabels, statusLabel, langNote, prompt, text, res, _res7, _res8, _res9, clean, parsed, match, _t27, _t28, _t29, _t30, _t31, _t32;
     return _regenerator().w(function (_context13) {
       while (1) switch (_context13.n) {
         case 0:
@@ -2367,6 +2363,10 @@ function _fetchAIIcebreakers() {
             prompt += '\n\nThe text of all 4 prompt strings MUST be written in ' + _lang + '. ' + langNote + ' Keep the JSON array structure; only the wording inside each string changes language.';
           }
           text = '';
+          if (!STATE.apiKey) {
+            _context13.n = 14;
+            break;
+          }
           if (!(STATE.provider === 'anthropic')) {
             _context13.n = 4;
             break;
@@ -2486,6 +2486,21 @@ function _fetchAIIcebreakers() {
           _t31 = '';
         case 11:
           text = _t31;
+          _context13.n = 12;
+          break;
+        case 14:
+          _context13.n = 15;
+          return fetch('/api/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], jsonMode: true })
+          });
+        case 15:
+          _res9 = _context13.v;
+          _context13.n = 16;
+          return _res9.json();
+        case 16:
+          text = _context13.v && _context13.v.text ? _context13.v.text : '';
         case 12:
           parsed = parseIcebreakerList(text);
           if (!(!Array.isArray(parsed) || parsed.length < 2)) {
