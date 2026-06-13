@@ -491,10 +491,12 @@ function restoreCompanionUI(book) {
   document.getElementById('passages-panel').classList.remove('open');
   document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('language-panel').classList.remove('open');
+  document.getElementById('export-panel').classList.remove('open');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('passages-toolbar-btn').classList.remove('active');
   document.getElementById('notes-toolbar-btn').classList.remove('active');
   document.getElementById('language-toolbar-btn').classList.remove('active');
+  document.getElementById('export-toolbar-btn').classList.remove('active');
 }
 
 // ═══════════════════════════════════════════════════
@@ -1878,10 +1880,12 @@ function launchCompanion(book) {
   document.getElementById('passages-panel').classList.remove('open');
   document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('language-panel').classList.remove('open');
+  document.getElementById('export-panel').classList.remove('open');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('passages-toolbar-btn').classList.remove('active');
   document.getElementById('notes-toolbar-btn').classList.remove('active');
   document.getElementById('language-toolbar-btn').classList.remove('active');
+  document.getElementById('export-toolbar-btn').classList.remove('active');
   navigate('companion');
 }
 function updateStatusDisplay() {
@@ -2321,6 +2325,8 @@ function toggleHighlights() {
   panel.classList.toggle('open');
   document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('notes-toolbar-btn').classList.remove('active');
+  document.getElementById('export-panel').classList.remove('open');
+  document.getElementById('export-toolbar-btn').classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
 }
 
@@ -3550,6 +3556,8 @@ function toggleLanguagePanel() {
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('passages-toolbar-btn').classList.remove('active');
   document.getElementById('notes-toolbar-btn').classList.remove('active');
+  document.getElementById('export-panel').classList.remove('open');
+  document.getElementById('export-toolbar-btn').classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
   updateLanguagePanelDisplay();
 }
@@ -3659,10 +3667,30 @@ function togglePassagesPanel() {
   document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('notes-toolbar-btn').classList.remove('active');
+  document.getElementById('export-panel').classList.remove('open');
+  document.getElementById('export-toolbar-btn').classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
   if (panel.classList.contains('open')) renderPassagesPanel();
 }
-function exportConversation() {
+function toggleExportPanel() {
+  var panel = document.getElementById('export-panel');
+  var btn = document.getElementById('export-toolbar-btn');
+  panel.classList.toggle('open');
+  document.getElementById('highlights-panel').classList.remove('open');
+  document.getElementById('passages-panel').classList.remove('open');
+  document.getElementById('notes-panel').classList.remove('open');
+  document.getElementById('language-panel').classList.remove('open');
+  document.getElementById('highlights-toolbar-btn').classList.remove('active');
+  document.getElementById('passages-toolbar-btn').classList.remove('active');
+  document.getElementById('notes-toolbar-btn').classList.remove('active');
+  document.getElementById('language-toolbar-btn').classList.remove('active');
+  panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
+}
+
+// format: 'txt' (plain text, the only thing a Kindle browser can download
+// and read on-device) or 'md' (Markdown, for desktop / note apps).
+function exportConversation(format) {
+  format = format === 'md' ? 'md' : 'txt';
   var book = STATE.book;
   // Use the full saved conversation, not the in-memory sliding window
   var fullMessages = STATE.messages;
@@ -3688,32 +3716,43 @@ function exportConversation() {
     year: 'numeric'
   });
   var companionName = STATE.companionName || 'Companion';
-  var lines = ['# ' + (book ? book.title : 'Conversation'), '', '**Author:** ' + (book ? book.author : 'Unknown'), '**Exported from Page Commons:** ' + date, '', '---', ''];
-  fullMessages.forEach(function (m) {
-    if (m.role === 'user') {
-      lines.push('**You**');
+  var title = book ? book.title : 'Conversation';
+  var author = book ? book.author : 'Unknown';
+  var lines;
+  if (format === 'md') {
+    lines = ['# ' + title, '', '**Author:** ' + author, '**Exported from Page Commons:** ' + date, '', '---', ''];
+    fullMessages.forEach(function (m) {
+      lines.push(m.role === 'user' ? '**You**' : '**' + companionName + '**');
       lines.push('');
       lines.push(m.content);
       lines.push('');
-    } else {
-      lines.push('**' + companionName + '**');
-      lines.push('');
+    });
+  } else {
+    lines = [title, 'Author: ' + author, 'Exported from Page Commons: ' + date, '', '----------------------------------------', ''];
+    fullMessages.forEach(function (m) {
+      lines.push(m.role === 'user' ? 'You:' : companionName + ':');
       lines.push(m.content);
       lines.push('');
-    }
-  });
+    });
+  }
+  var mime = format === 'md' ? 'text/markdown' : 'text/plain';
   var blob = new Blob([lines.join('\n')], {
-    type: 'text/markdown'
+    type: mime + ';charset=utf-8'
   });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
   var titlePart = book && book.title ? book.title.replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, ' ').trim() : 'Conversation';
-  a.download = isoDate + '-' + titlePart + '.md';
+  a.download = isoDate + '-' + titlePart + '.' + format;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  // Close the export panel after a choice is made
+  var panel = document.getElementById('export-panel');
+  var btn = document.getElementById('export-toolbar-btn');
+  if (panel) panel.classList.remove('open');
+  if (btn) btn.classList.remove('active');
 }
 function getNotes(book) {
   var bk = bookKey(book || STATE.book);
@@ -3760,6 +3799,8 @@ function toggleNotesPanel() {
   document.getElementById('passages-panel').classList.remove('open');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('passages-toolbar-btn').classList.remove('active');
+  document.getElementById('export-panel').classList.remove('open');
+  document.getElementById('export-toolbar-btn').classList.remove('active');
   if (panel.classList.contains('open')) {
     btn.classList.add('active');
     renderNotesPanel();

@@ -75,9 +75,24 @@ every fix is ES5/legacy-WebKit safe.
   the case-only filename clash with PENDING.md will collide on case-insensitive
   checkouts (macOS/Windows). Decide: merge into PENDING.md, rename, or drop.
 
+### Follow-ups found during preview testing
+- **CORS allowlist blocked preview builds**: the v0.39 origin allowlist on
+  /api/ai + /api/gdrive-token only permitted pagecommons.com, so the app's own
+  *.vercel.app preview returned 403 ("Something went wrong: Forbidden") on the
+  first companion message. Now allows same-origin requests (Origin host ==
+  serving host) plus the production domains; third-party cross-origin still
+  rejected. Confirmed working on the preview by the user.
+- **Conversation export now offers .txt or .md**: the Export toolbar button
+  opens a small panel (mirrors the Language panel) with "Plain text (.txt)" and
+  "Markdown (.md)". The Kindle browser only downloads/opens .txt, so plain text
+  lets readers keep the conversation as a readable document on the device;
+  Markdown stays for desktop/note apps. exportConversation(format) builds either
+  layout; new toggleExportPanel() wired into the panel mutual-exclusion set.
+
 ### Not done (your task)
 - Kobo Libra Colour + Kindle device testing of all the above, especially the
-  Kobo-compat API replacements and the new app.transpiled.js.
+  Kobo-compat API replacements, the new app.transpiled.js, and the new .txt
+  export actually downloading + opening on a Kindle.
 
 ## What was done last session [v0.38]
 
