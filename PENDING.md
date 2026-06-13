@@ -80,6 +80,17 @@
 - [ ] Test back navigation flow (search → book-detail → search)
 
 ### UI/UX Polish
+- [ ] Kindle clippings import — no on-device path exists. The Kindle browser
+      can't read My Clippings.txt by its (fixed) path: the browser security
+      sandbox forbids JS from reading local files except via a user-driven file
+      picker, and the Kindle browser exposes neither a working file picker nor
+      file:// navigation. Knowing the path doesn't help — the wall is the
+      sandbox, not the location. Realistic flow stays: import on a desktop
+      browser (file picker or the existing paste box), then move highlights to
+      the device via data Export/Import backup or Google Drive sync.
+      Possible improvement: when no file picker is available (likely the Kindle
+      browser), hide/disable the upload control and surface the paste box +
+      a short "import on desktop and sync" note instead of a dead button.
 - [x] #home (Welcome screen): add a short 1–2 sentence intro below "Welcome to Page Commons" explaining what the app is (added on the T&C/welcome screen where that heading lives)
 - [x] Reading-status screen: omit the "considering / thinking about reading it" option (now removed from both the static markup and the dynamic render; "Find out if it's for me" still offered on the prior screen)
 - [x] Unified navigation / consistent back button: implemented a back stack inside showScreen() with a goBack() helper + per-screen fallbacks; all back links route through goBack() and back links added to status/language screens
