@@ -1,17 +1,28 @@
 // Only our own site may use this endpoint — it spends the shared free-tier
-// Gemini quota, so an open CORS proxy would let any site drain it. Requests
-// with no Origin header (same-origin / e-reader browsers that omit it) are
-// allowed; cross-origin requests are only allowed from the allowlist.
+// Gemini quota, so an open CORS proxy would let any site drain it. Allowed:
+// requests with no Origin header (e-reader browsers that omit it), the known
+// production domains, and any same-origin request (Origin host matches the
+// host this function is served from — covers Vercel preview deployments).
+// Genuine cross-origin requests from third-party sites are rejected.
 var ALLOWED_ORIGINS = ['https://pagecommons.com', 'https://www.pagecommons.com'];
+function isAllowedOrigin(req) {
+  var origin = req.headers.origin;
+  if (!origin) return true;
+  if (ALLOWED_ORIGINS.indexOf(origin) !== -1) return true;
+  var originHost = origin.replace(/^https?:\/\//, '');
+  var host = req.headers['x-forwarded-host'] || req.headers.host;
+  return !!host && originHost === host;
+}
 function applyCors(req, res) {
   var origin = req.headers.origin;
+  var allowed = isAllowedOrigin(req);
   res.setHeader('Vary', 'Origin');
-  if (origin && ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+  if (origin && allowed) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  return !origin || ALLOWED_ORIGINS.indexOf(origin) !== -1;
+  return allowed;
 }
 
 export default async function handler(req, res) {

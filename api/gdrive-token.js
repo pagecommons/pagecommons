@@ -2,13 +2,22 @@
 // the initial auth code from the consent screen for refresh+access tokens.
 // Client never sees GDRIVE_CLIENT_SECRET.
 // Restrict to our own origin so the token-exchange proxy can't be driven
-// by arbitrary third-party sites. Requests with no Origin header
-// (same-origin / e-reader browsers that omit it) are allowed.
+// by arbitrary third-party sites. Allowed: no Origin header (e-reader
+// browsers that omit it), the known production domains, and same-origin
+// requests (Origin host matches the serving host — covers Vercel previews).
 var ALLOWED_ORIGINS = ['https://pagecommons.com', 'https://www.pagecommons.com'];
+function isAllowedOrigin(req) {
+  var origin = req.headers.origin;
+  if (!origin) return true;
+  if (ALLOWED_ORIGINS.indexOf(origin) !== -1) return true;
+  var originHost = origin.replace(/^https?:\/\//, '');
+  var host = req.headers['x-forwarded-host'] || req.headers.host;
+  return !!host && originHost === host;
+}
 
 module.exports = async function (req, res) {
   var origin = req.headers.origin;
-  var originAllowed = !origin || ALLOWED_ORIGINS.indexOf(origin) !== -1;
+  var originAllowed = isAllowedOrigin(req);
   res.setHeader('Vary', 'Origin');
   if (origin && originAllowed) {
     res.setHeader('Access-Control-Allow-Origin', origin);
