@@ -2685,8 +2685,8 @@ function appendBubble(role, text) {
   wrap.appendChild(roleEl);
   wrap.appendChild(bubble);
 
-  // Add copy + save actions to companion bubbles only
-  if (role === 'companion') {
+  // Add copy + save actions to all bubbles (user and companion)
+  if (role === 'companion' || role === 'user') {
     var actions = document.createElement('div');
     actions.className = 'bubble-actions';
     var copyBtn = document.createElement('button');
