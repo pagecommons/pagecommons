@@ -1,10 +1,85 @@
 # Page Commons — Current Status
 
-Last updated: June 7, 2026
-Current version: v0.38
-Updated by: Claude session — Google Drive sync ported from ShortJo
+Last updated: June 13, 2026
+Current version: v0.39
+Updated by: Claude session — sanity-check bug-fix round
 
-## What was done this session [v0.38]
+## What was done this session [v0.39]
+
+A full code sanity check turned up 12 bugs plus minor issues; all were
+fixed on branch `claude/brave-lovelace-vet1sn`. None required modern JS —
+every fix is ES5/legacy-WebKit safe.
+
+### Critical
+- **Chat "Try again" lost the user's message** (app.js appendError retry
+  handler): it popped the failed user turn from STATE.messages, but
+  sendMessage(retryText) never re-pushes it, so the retry was sent with a
+  dangling/empty history. Removed the erroneous pop.
+- **AI-mode toggle was ignored** (callAI): routed on STATE.apiKey only, so a
+  BYOK user who switched to the free shared pool kept spending their own key.
+  Now: shared mode → free tier even when a key is saved.
+- **Drive sync reported false success** (gdriveFindOrCreateFolder,
+  gdriveFindDataFile, gdriveDownloadJson, gdriveUploadJson, export upload):
+  none checked res.ok, so a failed upload still applied merged data locally,
+  set last-synced, and showed "Synced successfully." A failed folder-create
+  also cached `undefined` into pc_gdrive_folder_id, permanently breaking sync.
+  Added a gdriveJson() helper that throws on !res.ok, and folder-id validation.
+- **Build pipeline was broken/unused**: .babelrc used
+  @babel/plugin-transform-runtime, which injects browser-fatal require()
+  calls into app.transpiled.js; meanwhile index.html loaded raw app.js.
+  Removed transform-runtime (helpers now inlined), regenerated
+  app.transpiled.js (0 require() calls, verified), pointed index.html at
+  app.transpiled.js, and added its vercel.json Content-Type/no-store headers.
+
+### Moderate
+- **Sync merge dropped per-book data** (mergeSyncPayloads): reading_state and
+  preferences were replaced wholesale last-write-wins, so a status set on
+  device A could be erased by a later unrelated change on device B. Now uses
+  per-key union (new mergeFlatMaps helper); conflicting keys resolve by
+  sync_meta timestamp. Verified with a Node harness.
+- **Passages "Saved ✓" never showed**: used getPassages().includes(text) but
+  passages are {text, ts} objects since v0.38. Now .some(p => p.text === text).
+- **Global companion-language preference wiped**: opening/restoring a book set
+  STATE.companionLangOverride to the per-book value or null, clobbering the
+  pc_companion_lang preference. Now falls back to the global pref.
+- **Offline queue stranded shared-pool users**: processOfflineQueue bailed on
+  !STATE.apiKey and cleared the queue before sending. Rewritten (plain ES5
+  promise chain) to include shared mode, keep items for other books, and only
+  clear successfully-sent items.
+- **/api/transfer GET had no rate limit**: added per-IP limit (30/hr) so the
+  6-digit code space can't be scanned to steal an in-flight key.
+- **Open CORS on quota/secret endpoints**: api/ai.js and api/gdrive-token.js
+  were Access-Control-Allow-Origin: *. Now an origin allowlist (pagecommons.com
+  + www), still allowing requests with no Origin header (e-reader browsers).
+- **XSS via [RECOMMEND]**: formatText now escapes " too, and the onclick
+  attribute interpolation escapes backslashes + quotes properly.
+- **Kobo-unsafe APIs** (CLAUDE.md lists these as breakers): replaced all
+  NodeList.forEach with indexed loops, new Set/Map + Array.from with
+  plain-object maps, client-side URLSearchParams with hand-rolled
+  buildQueryString/getQueryParam helpers, and scrollTo({behavior}) with
+  scrollTo(x, y).
+
+### Minor
+- Fixed a latent ReferenceError in fetchGoogleBooksWithFallback (passed an
+  undefined `lang`).
+- init() OAuth detection now matches a real `code` param (not ?promocode=…).
+- api/books.js validates/encodes maxResults & startIndex.
+- Removed dead `(s==='home')?'block':'block'` ternary in showScreen.
+
+### Deferred (needs your call)
+- bookKey() keys on the first 40 chars of title||author, so long-title series
+  volumes collide. NOT changed — altering it would orphan existing users'
+  stored conversations/passages/status. Needs a migration plan.
+- `pending.md` (lowercase) is NOT a duplicate of PENDING.md — it's a separate
+  ~27-item long-term roadmap (V2/V3/V4). Left in place rather than deleted, but
+  the case-only filename clash with PENDING.md will collide on case-insensitive
+  checkouts (macOS/Windows). Decide: merge into PENDING.md, rename, or drop.
+
+### Not done (your task)
+- Kobo Libra Colour + Kindle device testing of all the above, especially the
+  Kobo-compat API replacements and the new app.transpiled.js.
+
+## What was done last session [v0.38]
 
 ### Google Drive sync (ported from ShortJo pattern) ✓
 

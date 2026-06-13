@@ -18,7 +18,9 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'API key not configured' });
   }
 
-  let url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=${maxResults}&startIndex=${startIndex}&key=${apiKey}`;
+  const max = Math.min(Math.max(parseInt(maxResults, 10) || 10, 1), 40);
+  const start = Math.max(parseInt(startIndex, 10) || 0, 0);
+  let url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=${max}&startIndex=${start}&key=${apiKey}`;
   if (langRestrict) url += `&langRestrict=${encodeURIComponent(langRestrict)}`;
 
   try {

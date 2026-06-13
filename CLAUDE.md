@@ -48,10 +48,25 @@ transpiled through Babel before deploy.
 
 Target: ie:11
 Includes: regenerator runtime
-Includes: Promise polyfill
+(Babel helpers are inlined — no
+@babel/runtime require() calls.)
+
+No Promise polyfill ships: the app
+relies on fetch() everywhere, and any
+WebKit new enough to have fetch also
+has Promise. The hand-written polyfills
+at the top of app.js cover only
+includes/startsWith/endsWith/Object.assign.
 
 Never deploy raw app.js to production.
 Always deploy app.transpiled.js.
+index.html loads app.transpiled.js.
+
+To rebuild: npm install (once), then
+node_modules/.bin/babel app.js \
+  -o app.transpiled.js
+Then verify: grep -c 'require(' on the
+output must be 0.
 
 ## CRITICAL — Do Not Remove
 The permanent synchronous IIFE at the
@@ -159,10 +174,11 @@ Standalone pages:
 - Anthropic Claude Sonnet (primary BYOK)
   claude-sonnet-4-20250514
   https://api.anthropic.com/v1/messages
-- Google Gemini Flash (free tier pool)
-  gemini-2.0-flash
-  Proxied via api/ai.js
-- Groq Llama (BYOK fallback)
+- Google Gemini (free shared tier pool)
+  gemini-3.1-flash-lite
+  Proxied via api/ai.js (500 RPD quota)
+- BYOK alternatives: Gemini
+  (gemini-2.5-flash) and Groq
 
 ## Environment Variables (Vercel)
 - GOOGLE_BOOKS_API_KEY (sensitive)
@@ -183,9 +199,16 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.28.1 — icebreaker prompt fixes (race condition, discover mode AI,
-Surprise Me language enforcement, CJK language disambiguation).
-Confirmed working on desktop. Kobo device test pending.
+v0.39 — sanity-check bug-fix round. Fixed chat retry losing the
+user's message, AI-mode toggle being ignored (BYOK key spent in
+shared mode), Drive sync reporting false success / caching undefined
+folder ids, sync merge dropping per-book reading state, passages
+"Saved ✓" check, global companion-language preference being wiped,
+offline queue for shared-pool users, [RECOMMEND] attribute escaping,
+and Kobo-unsafe APIs (NodeList.forEach, Set/Map, URLSearchParams,
+scrollTo options). Also fixed the broken Babel pipeline (was emitting
+require() calls) and pointed index.html at app.transpiled.js.
+See STATUS.md. Kobo/Kindle device test pending.
 
 ## What NOT to Change
 - index.html + app.js architecture

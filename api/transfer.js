@@ -53,6 +53,17 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid code' });
     }
 
+    // Per-IP rate limit on retrieval so a single IP can't scan the 6-digit
+    // code space to grab an in-flight key during its 10-minute window.
+    const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown')
+      .split(',')[0].trim();
+    const ipKey = 'ratelimit:get:' + ip;
+    const ipCount = await kv(['INCR', ipKey]);
+    if (ipCount === 1) await kv(['EXPIRE', ipKey, 3600]);
+    if (ipCount > 30) {
+      return res.status(429).json({ error: 'Too many requests. Try again in an hour.' });
+    }
+
     const failCount = await kv(['GET', 'fail:' + code]);
     if (failCount !== null && parseInt(failCount, 10) >= 5) {
       return res.status(404).json({ error: 'Code not found or expired' });

@@ -1,7 +1,4 @@
-"use strict";
-
-var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
-var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regenerator() {
   /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */var e,
     t,
@@ -49,7 +46,7 @@ function _regenerator() {
                 if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object");
                 if (!t.done) return t;
                 u = t.value, c < 2 && (c = 0);
-              } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1);
+              } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1);
               i = e;
             } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break;
           } catch (t) {
@@ -332,7 +329,7 @@ function showScreen(id) {
     if (el) {
       if (s === target) {
         el.classList.add('active');
-        el.style.display = s === 'home' ? 'block' : 'block';
+        el.style.display = 'block';
       } else {
         el.classList.remove('active');
         el.style.display = 'none';
@@ -437,63 +434,42 @@ function processOfflineQueue() {
 // ═══════════════════════════════════════════════════
 // init() called at end of file
 function _processOfflineQueue() {
-  _processOfflineQueue = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-    var queue, _qi, item, reply, el, _t;
-    return _regenerator().w(function (_context) {
-      while (1) switch (_context.p = _context.n) {
-        case 0:
-          queue = getOfflineQueue();
-          if (!(!queue.length || !STATE.apiKey)) {
-            _context.n = 1;
-            break;
-          }
-          return _context.a(2);
-        case 1:
-          showToolbarMsg("You're back online — sending your saved message…");
-          clearOfflineQueue();
-          _qi = 0;
-        case 2:
-          if (!(_qi < queue.length)) {
-            _context.n = 7;
-            break;
-          }
-          item = queue[_qi];
-          if (!(item.book && STATE.book && item.book.title === STATE.book.title)) {
-            _context.n = 6;
-            break;
-          }
-          STATE.messages.push({
-            role: 'user',
-            content: item.text
-          });
-          appendBubble('user', item.text);
-          _context.p = 3;
-          _context.n = 4;
-          return callAI();
-        case 4:
-          reply = _context.v;
-          STATE.messages.push({
-            role: 'assistant',
-            content: reply
-          });
-          el = appendBubble('companion', reply);
-          scrollToMessage(el);
-          _context.n = 6;
-          break;
-        case 5:
-          _context.p = 5;
-          _t = _context.v;
-          appendError(_t);
-        case 6:
-          _qi++;
-          _context.n = 2;
-          break;
-        case 7:
-          return _context.a(2);
+  var queue = getOfflineQueue();
+  // Shared-pool users have no apiKey but can still send via the free tier.
+  if (!queue.length || !STATE.apiKey && STATE.aiMode !== 'shared') return Promise.resolve();
+  showToolbarMsg("You're back online — sending your saved message…");
+  // Items queued for a different book than the one currently open are kept
+  // for a later visit instead of being dropped.
+  var remaining = [];
+  var chain = Promise.resolve();
+  function sendItem(item) {
+    chain = chain.then(function () {
+      if (!(item.book && STATE.book && item.book.title === STATE.book.title)) {
+        remaining.push(item);
+        return;
       }
-    }, _callee, null, [[3, 5]]);
-  }));
-  return _processOfflineQueue.apply(this, arguments);
+      STATE.messages.push({
+        role: 'user',
+        content: item.text
+      });
+      appendBubble('user', item.text);
+      STATE.lastUserText = item.text;
+      return callAI().then(function (reply) {
+        STATE.messages.push({
+          role: 'assistant',
+          content: reply
+        });
+        var el = appendBubble('companion', reply);
+        scrollToMessage(el);
+      }).catch(function (err) {
+        appendError(err);
+      });
+    });
+  }
+  for (var qi = 0; qi < queue.length; qi++) sendItem(queue[qi]);
+  return chain.then(function () {
+    if (remaining.length) localStorage.setItem('pc_offline_queue', JSON.stringify(remaining));else clearOfflineQueue();
+  });
 }
 function bookKey(book) {
   return btoa(encodeURIComponent((book.title + '||' + book.author).slice(0, 40))).replace(/=/g, '');
@@ -505,9 +481,10 @@ function restoreCompanionUI(book) {
   updateStatusDisplay();
   populateIcebreakers(book);
   renderHighlightsPanel();
-  // Load per-book language override
+  // Load per-book language override; fall back to the global preference
+  // (pc_companion_lang) instead of wiping it when no per-book override exists.
   var savedOverride = localStorage.getItem('pc_companion_lang_override_' + bookKey(book));
-  STATE.companionLangOverride = savedOverride || null;
+  STATE.companionLangOverride = savedOverride || localStorage.getItem('pc_companion_lang') || null;
   updateLanguagePanelDisplay();
   // Close all panels
   document.getElementById('highlights-panel').classList.remove('open');
@@ -954,8 +931,8 @@ function _searchBooks() {
                   case 5:
                     fresh = more.filter(function (b) {
                       var k = b.title.toLowerCase() + '||' + b.author.toLowerCase();
-                      if (_seen.has(k)) return false;
-                      _seen.add(k);
+                      if (_seen[k]) return false;
+                      _seen[k] = 1;
                       return true;
                     });
                     _manualEntry = resultsEl.querySelector('.manual-entry');
@@ -1055,9 +1032,10 @@ function _searchBooks() {
           // Pagination state
           _page = 1;
           _olQuery = olQuery, _gbQuery = gbQuery, _hasNonLatin = hasNonLatin;
-          _seen = new Set(books.map(function (b) {
-            return b.title.toLowerCase() + '||' + b.author.toLowerCase();
-          }));
+          _seen = {};
+          books.forEach(function (b) {
+            _seen[b.title.toLowerCase() + '||' + b.author.toLowerCase()] = 1;
+          });
           if (books.length >= 6) _addShowMoreBtn();
           renderManualEntry(searchTitle, resultsEl);
           _context4.n = 22;
@@ -1101,23 +1079,25 @@ function _fetchOpenLibrary() {
           return res.json();
         case 2:
           data = _context5.v;
-          seen = new Map();
+          seen = {};
           (data.docs || []).forEach(function (d) {
             var title = d.title || 'Unknown title',
               author = (d.author_name || ['Unknown author'])[0];
             var k = title.toLowerCase() + '||' + author.toLowerCase(),
               year = d.first_publish_year || 9999;
             var olid = d.cover_i ? 'https://covers.openlibrary.org/b/id/' + d.cover_i + '-S.jpg' : '';
-            if (!seen.has(k) || year < seen.get(k).year) seen.set(k, {
+            if (!seen[k] || year < seen[k].year) seen[k] = {
               title: title,
               author: author,
               year: d.first_publish_year || '',
               key: d.key || '',
               source: 'Open Library',
               thumb: olid
-            });
+            };
           });
-          results = Array.from(seen.values()); // Sort: exact title matches first, then by year
+          results = Object.keys(seen).map(function (k) {
+            return seen[k];
+          }); // Sort: exact title matches first, then by year
           results.sort(function (a, b) {
             var aq = q.toLowerCase(),
               at = a.title.toLowerCase(),
@@ -1136,7 +1116,7 @@ function _fetchOpenLibrary() {
 function fetchGoogleBooksWithFallback(bareQuery, intitleQuery) {
   return fetchGoogleBooks(bareQuery, 8, 0).then(function (books) {
     if (books.length) return books;
-    return fetchGoogleBooks(intitleQuery, 8, 0, lang);
+    return fetchGoogleBooks(intitleQuery, 8, 0);
   });
 }
 function fetchGoogleBooks(_x3) {
@@ -1149,6 +1129,7 @@ function _fetchGoogleBooks() {
       res,
       data,
       seen,
+      seenOrder,
       _args6 = arguments;
     return _regenerator().w(function (_context6) {
       while (1) switch (_context6.n) {
@@ -1163,7 +1144,8 @@ function _fetchGoogleBooks() {
           return res.json();
         case 2:
           data = _context6.v;
-          seen = new Map();
+          seen = {};
+          seenOrder = [];
           (data.items || []).forEach(function (item) {
             var info = item.volumeInfo || {},
               title = info.title || 'Unknown title',
@@ -1172,10 +1154,10 @@ function _fetchGoogleBooks() {
             var thumb = info.imageLinks && info.imageLinks.smallThumbnail ? info.imageLinks.smallThumbnail : info.imageLinks && info.imageLinks.thumbnail ? info.imageLinks.thumbnail : '';
             if (thumb) thumb = thumb.replace('http://', 'https://');
             var cats = (info.categories || []).join(' ').toLowerCase();
-            if (!seen.has(k)) {
+            if (!seen[k]) {
               var langCode = info.language || 'en';
               var langName = LANG_CODE_TO_NAME[langCode] || 'English';
-              seen.set(k, {
+              seen[k] = {
                 title: title,
                 author: author,
                 year: info.publishedDate ? info.publishedDate.slice(0, 4) : '',
@@ -1187,10 +1169,13 @@ function _fetchGoogleBooks() {
                 cats: cats,
                 pageCount: info.pageCount || 0,
                 description: info.description || ''
-              });
+              };
+              seenOrder.push(k);
             }
           });
-          return _context6.a(2, Array.from(seen.values()).slice(0, 6));
+          return _context6.a(2, seenOrder.map(function (k) {
+            return seen[k];
+          }).slice(0, 6));
       }
     }, _callee6);
   }));
@@ -1235,7 +1220,7 @@ function lookupManualBook() {
       };
     }
     showBookDetail(book);
-  })["catch"](function () {
+  }).catch(function () {
     var book = {
       title: title.trim(),
       author: author.trim() || 'Unknown author',
@@ -1883,9 +1868,10 @@ function launchCompanion(book) {
   updatePassagesToolbarBtn();
   updateNotesToolbarBtn();
   populateIcebreakers(book);
-  // Load per-book language override
+  // Load per-book language override; fall back to the global preference
+  // (pc_companion_lang) instead of wiping it when no per-book override exists.
   var savedOverride = localStorage.getItem('pc_companion_lang_override_' + bookKey(book));
-  STATE.companionLangOverride = savedOverride || null;
+  STATE.companionLangOverride = savedOverride || localStorage.getItem('pc_companion_lang') || null;
   updateLanguagePanelDisplay();
   // Close all panels
   document.getElementById('highlights-panel').classList.remove('open');
@@ -2254,9 +2240,16 @@ function parseClippingsText(text) {
   return out;
 }
 function countBooks(h) {
-  return new Set(h.map(function (x) {
-    return x.title;
-  })).size;
+  var titles = {};
+  var n = 0;
+  for (var i = 0; i < h.length; i++) {
+    var t = h[i].title;
+    if (!Object.prototype.hasOwnProperty.call(titles, t)) {
+      titles[t] = 1;
+      n++;
+    }
+  }
+  return n;
 }
 function getMostRecentBook(h) {
   return h.length ? {
@@ -2268,10 +2261,22 @@ function getMostRecentBook(h) {
 // ═══════════════════════════════════════════════════
 //  FUZZY HIGHLIGHTS MATCHING
 // ═══════════════════════════════════════════════════
-var STOP_WORDS = new Set(['the', 'a', 'an', 'of', 'and', 'in', 'on', 'at', 'to', 'for', 'by']);
+var STOP_WORDS = {
+  'the': 1,
+  'a': 1,
+  'an': 1,
+  'of': 1,
+  'and': 1,
+  'in': 1,
+  'on': 1,
+  'at': 1,
+  'to': 1,
+  'for': 1,
+  'by': 1
+};
 function significantWords(str) {
   return str.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(function (w) {
-    return w && !STOP_WORDS.has(w);
+    return w && !STOP_WORDS[w];
   }).slice(0, 3);
 }
 function fuzzyMatch(book, highlight) {
@@ -2822,10 +2827,16 @@ function appendBubble(role, text) {
     var byMatch = raw.match(/^(.+?)\s+by\s+(.+)$/i);
     var title = byMatch ? byMatch[1].trim() : raw;
     var author = byMatch ? byMatch[2].trim() : '';
-    var t = title.replace(/'/g, '&#39;');
-    var a = author.replace(/'/g, '&#39;');
-    var l = raw.replace(/'/g, '&#39;');
-    return '<button class="recommend-btn" onclick="searchFromRecommend(\'' + t + '\', \'' + a + '\')">' + l + '</button>';
+    // q comes from formatText output, so < > & " are already HTML-escaped.
+    // Escape for the single-quoted JS string inside the onclick attribute:
+    // backslashes first, then ' as \' (entity escapes like &#39; would be
+    // decoded back to a raw quote by the HTML parser and break the JS).
+    var jsEsc = function jsEsc(s) {
+      return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    };
+    var t = jsEsc(title);
+    var a = jsEsc(author);
+    return '<button class="recommend-btn" onclick="searchFromRecommend(\'' + t + '\', \'' + a + '\')">' + raw + '</button>';
   });
   bubble.innerHTML = html;
   wrap.appendChild(roleEl);
@@ -2844,14 +2855,16 @@ function appendBubble(role, text) {
         setTimeout(function () {
           copyBtn.textContent = 'Copy';
         }, 1500);
-      })["catch"](function () {
+      }).catch(function () {
         return showToolbarMsg('Copy not available in this browser.');
       });
     };
     var saveBtn = document.createElement('button');
     saveBtn.className = 'bubble-action-btn';
     // Check if already saved
-    var alreadySaved = getPassages().includes(text);
+    var alreadySaved = getPassages().some(function (p) {
+      return p.text === text;
+    });
     saveBtn.textContent = alreadySaved ? 'Saved ✓' : 'Save passage';
     if (alreadySaved) saveBtn.classList.add('saved');
     saveBtn.onclick = function () {
@@ -2878,7 +2891,8 @@ function appendError(err) {
   retryBtn.textContent = 'Try again';
   retryBtn.onclick = function () {
     wrap.remove();
-    if (STATE.messages.length && STATE.messages[STATE.messages.length - 1].role === 'user') STATE.messages.pop();
+    // The failed user message is still in STATE.messages; sendMessage with
+    // retryText does not re-push it, so it must NOT be popped here.
     sendMessage(STATE.lastUserText);
   };
   wrap.appendChild(bubble);
@@ -2886,23 +2900,17 @@ function appendError(err) {
   document.getElementById('chat-log').appendChild(wrap);
 }
 function formatText(t) {
-  return t.replace(/&/g, '&' + 'amp;').replace(/</g, '&' + 'lt;').replace(/>/g, '&' + 'gt;').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>').replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>').replace(/^/, '<p>').replace(/$/, '</p>');
+  return t.replace(/&/g, '&' + 'amp;').replace(/</g, '&' + 'lt;').replace(/>/g, '&' + 'gt;').replace(/"/g, '&' + 'quot;').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>').replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>').replace(/^/, '<p>').replace(/$/, '</p>');
 }
 function scrollBottom() {
-  window.scrollTo({
-    top: document.body.scrollHeight,
-    behavior: 'instant'
-  });
+  window.scrollTo(0, document.body.scrollHeight);
 }
 function scrollToMessage(el) {
   if (!el) {
     scrollBottom();
     return;
   }
-  window.scrollTo({
-    top: el.getBoundingClientRect().top + window.scrollY - 12,
-    behavior: 'instant'
-  });
+  window.scrollTo(0, el.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0) - 12);
 }
 
 // ═══════════════════════════════════════════════════
@@ -2945,7 +2953,9 @@ function _callAI() {
       while (1) switch (_context15.n) {
         case 0:
           system = buildSystemPrompt(), messages = STATE.messages.slice(-20);
-          if (STATE.apiKey) {
+          // Respect the AI-mode toggle: shared mode always uses the free
+          // pool, even when a BYOK key is still saved in localStorage.
+          if (STATE.apiKey && STATE.aiMode !== 'shared') {
             _context15.n = 1;
             break;
           }
@@ -2996,7 +3006,7 @@ function callFreeTier(system, messages, opts) {
       throw rateLimitErr;
     }
     if (!res.ok) {
-      return res.json()["catch"](function () {
+      return res.json().catch(function () {
         return {};
       }).then(function (e) {
         throw new Error(e && e.error ? e.error : 'HTTP ' + res.status);
@@ -3039,7 +3049,7 @@ function _callAnthropic() {
             break;
           }
           _context16.n = 2;
-          return res.json()["catch"](function () {
+          return res.json().catch(function () {
             return {};
           });
         case 2:
@@ -3119,7 +3129,7 @@ function _callGemini() {
             break;
           }
           _context17.n = 2;
-          return res.json()["catch"](function () {
+          return res.json().catch(function () {
             return {};
           });
         case 2:
@@ -3181,7 +3191,7 @@ function _callGroq() {
             break;
           }
           _context18.n = 2;
-          return res.json()["catch"](function () {
+          return res.json().catch(function () {
             return {};
           });
         case 2:
@@ -3211,9 +3221,11 @@ function _callGroq() {
 }
 function applyFontSize(size) {
   document.documentElement.style.fontSize = size + 'px';
-  document.querySelectorAll('.font-size-opt').forEach(function (b) {
+  var opts = document.querySelectorAll('.font-size-opt');
+  for (var i = 0; i < opts.length; i++) {
+    var b = opts[i];
     parseInt(b.dataset.size) === size ? b.classList.add('active') : b.classList.remove('active');
-  });
+  }
 }
 function setFontSize(size) {
   applyFontSize(size);
@@ -3521,9 +3533,11 @@ function setReplyLength(length) {
   STATE.replyLength = length;
   localStorage.setItem('pc_reply_length', length);
   touchSyncMeta('preferences');
-  document.querySelectorAll('.length-opt').forEach(function (b) {
+  var lenOpts = document.querySelectorAll('.length-opt');
+  for (var i = 0; i < lenOpts.length; i++) {
+    var b = lenOpts[i];
     b.dataset.length === length ? b.classList.add('active') : b.classList.remove('active');
-  });
+  }
   showToolbarMsg('Reply length set to ' + length + '.');
 }
 function toggleLanguagePanel() {
@@ -3554,14 +3568,16 @@ function setCompanionLanguage(lang) {
 }
 function updateLanguagePanelDisplay() {
   var overrideLang = STATE.companionLangOverride;
-  document.querySelectorAll('.language-opt').forEach(function (b) {
+  var langOpts = document.querySelectorAll('.language-opt');
+  for (var i = 0; i < langOpts.length; i++) {
+    var b = langOpts[i];
     var btnLang = b.textContent.trim();
     if (overrideLang && btnLang === overrideLang) {
       b.classList.add('active');
     } else {
       b.classList.remove('active');
     }
-  });
+  }
 }
 
 // ═══════════════════════════════════════════════════
@@ -3768,7 +3784,7 @@ function copyAllPassages() {
   }).join('\n\n');
   navigator.clipboard.writeText(text).then(function () {
     showToolbarMsg(passages.length + ' passage' + (passages.length !== 1 ? 's' : '') + ' copied to clipboard.');
-  })["catch"](function () {
+  }).catch(function () {
     return showToolbarMsg('Copy not available in this browser.');
   });
 }
@@ -3844,7 +3860,7 @@ function redeemTransferCode() {
     // Hide the transfer fields
     var fields = document.getElementById('transfer-fields');
     if (fields) fields.style.display = 'none';
-  })["catch"](function (err) {
+  }).catch(function (err) {
     if (btn) {
       btn.disabled = false;
       btn.textContent = 'Fetch my key';
@@ -3877,12 +3893,16 @@ function loadPreferencesScreen() {
   if (cnEl) cnEl.value = STATE.companionName === 'Companion' ? '' : STATE.companionName;
   updateAIModeUI();
   applyProviderUI(STATE.provider);
-  document.querySelectorAll('.length-opt').forEach(function (b) {
-    b.dataset.length === STATE.replyLength ? b.classList.add('active') : b.classList.remove('active');
-  });
-  document.querySelectorAll('.font-size-opt').forEach(function (b) {
-    parseInt(b.dataset.size, 10) === (parseInt(localStorage.getItem('pc_font_size'), 10) || 18) ? b.classList.add('active') : b.classList.remove('active');
-  });
+  var prefLenOpts = document.querySelectorAll('.length-opt');
+  for (var li = 0; li < prefLenOpts.length; li++) {
+    var lb = prefLenOpts[li];
+    lb.dataset.length === STATE.replyLength ? lb.classList.add('active') : lb.classList.remove('active');
+  }
+  var prefFontOpts = document.querySelectorAll('.font-size-opt');
+  for (var fi = 0; fi < prefFontOpts.length; fi++) {
+    var fb = prefFontOpts[fi];
+    parseInt(fb.dataset.size, 10) === (parseInt(localStorage.getItem('pc_font_size'), 10) || 18) ? fb.classList.add('active') : fb.classList.remove('active');
+  }
   var clangEl = document.getElementById('settings-companion-lang');
   if (clangEl) clangEl.value = STATE.companionLangOverride || '';
 
@@ -4016,7 +4036,7 @@ function importUserData(inputEl) {
       showDataMessage('data-import-msg', "This doesn't look like a Page Commons backup file.", true);
       return;
     }
-    if (!parsed || (0, _typeof2["default"])(parsed) !== 'object' || !parsed.data || (0, _typeof2["default"])(parsed.data) !== 'object') {
+    if (!parsed || _typeof(parsed) !== 'object' || !parsed.data || _typeof(parsed.data) !== 'object') {
       showDataMessage('data-import-msg', "This doesn't look like a Page Commons backup file.", true);
       return;
     }
@@ -4085,7 +4105,7 @@ function fetchAndCacheSubjects(book) {
     }).then(function (data) {
       var subjects = (data.subjects || []).slice(0, 10);
       localStorage.setItem(cacheKey, JSON.stringify(subjects));
-    })["catch"](function () {});
+    }).catch(function () {});
   } else if (book.cats) {
     var cats = book.cats.split(/\s+/).filter(Boolean).slice(0, 6);
     if (cats.length) localStorage.setItem(cacheKey, JSON.stringify(cats));
@@ -4114,12 +4134,28 @@ function gdriveRedirectUri() {
   // strip ?code= before normal routing.
   return window.location.origin + window.location.pathname;
 }
+
+// URLSearchParams isn't available on old Kobo/Kindle WebKit, so build and
+// parse query strings by hand.
+function buildQueryString(obj) {
+  var parts = [];
+  for (var key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
+    }
+  }
+  return parts.join('&');
+}
+function getQueryParam(qs, name) {
+  var m = qs.match(new RegExp('[?&]' + name + '=([^&]*)'));
+  return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : null;
+}
 function initGDriveAuth() {
   if (!GDRIVE_CLIENT_ID) {
     showSyncMessage('Drive sync not configured — set GDRIVE_CLIENT_ID.', true);
     return;
   }
-  var params = new URLSearchParams({
+  var query = buildQueryString({
     client_id: GDRIVE_CLIENT_ID,
     redirect_uri: gdriveRedirectUri(),
     response_type: 'code',
@@ -4129,13 +4165,11 @@ function initGDriveAuth() {
     include_granted_scopes: 'true'
   });
   // Same-tab redirect — works on Kindle / Kobo browsers
-  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + query;
 }
 function handleGDriveCallback() {
   var qs = window.location.search;
-  if (!qs || qs.indexOf('code=') === -1) return Promise.resolve(false);
-  var sp = new URLSearchParams(qs);
-  var code = sp.get('code');
+  var code = getQueryParam(qs, 'code');
   if (!code) return Promise.resolve(false);
   // Strip the code from the URL so it doesn't linger or get bookmarked
   try {
@@ -4166,10 +4200,10 @@ function handleGDriveCallback() {
       return r.json();
     }).then(function (u) {
       if (u && u.email) localStorage.setItem('pc_gdrive_user_email', u.email);
-    })["catch"](function () {});
+    }).catch(function () {});
   }).then(function () {
     return true;
-  })["catch"](function () {
+  }).catch(function () {
     return false;
   });
 }
@@ -4214,13 +4248,19 @@ function gdriveFetch(url, opts) {
     return res;
   });
 }
+
+// Parse a Drive API response, throwing on HTTP errors so callers never
+// treat an error body as data (previously a failed upload still showed
+// "Synced successfully" and undefined ids got cached into localStorage).
+function gdriveJson(r) {
+  if (!r.ok) throw new Error('Drive request failed (HTTP ' + r.status + ')');
+  return r.json();
+}
 function gdriveFindOrCreateFolder(name, parentId) {
   var q = "mimeType='application/vnd.google-apps.folder' and trashed=false and name='" + name.replace(/'/g, "\\'") + "'";
   if (parentId) q += " and '" + parentId + "' in parents";
   var url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id,name)';
-  return gdriveFetch(url).then(function (r) {
-    return r.json();
-  }).then(function (data) {
+  return gdriveFetch(url).then(gdriveJson).then(function (data) {
     if (data && data.files && data.files.length) return data.files[0].id;
     var meta = {
       name: name,
@@ -4233,9 +4273,8 @@ function gdriveFindOrCreateFolder(name, parentId) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(meta)
-    }).then(function (r) {
-      return r.json();
-    }).then(function (d) {
+    }).then(gdriveJson).then(function (d) {
+      if (!d || !d.id) throw new Error('Drive folder create failed');
       return d.id;
     });
   });
@@ -4317,6 +4356,18 @@ function buildSyncPayload() {
     reading_state: reading_state
   };
 }
+function mergeFlatMaps(localMap, remoteMap, remoteWins) {
+  var out = {};
+  var k;
+  for (k in localMap) {
+    if (Object.prototype.hasOwnProperty.call(localMap, k)) out[k] = localMap[k];
+  }
+  for (k in remoteMap) {
+    if (!Object.prototype.hasOwnProperty.call(remoteMap, k)) continue;
+    if (!Object.prototype.hasOwnProperty.call(out, k) || remoteWins) out[k] = remoteMap[k];
+  }
+  return out;
+}
 function mergeSyncPayloads(local, remote) {
   // Conversations — by id, keep newer lastUpdated
   var merged = JSON.parse(JSON.stringify(local));
@@ -4378,18 +4429,17 @@ function mergeSyncPayloads(local, remote) {
   merged.shelf = Object.keys(shelfSeen).map(function (k) {
     return shelfSeen[k];
   });
-  // Preferences — last-write-wins by sync_meta.preferences_modified
+  // Preferences — per-key union; on a conflicting key the newer side
+  // (by sync_meta.preferences_modified) wins. Keys present on only one
+  // side always survive — wholesale replacement dropped them.
   var localPM = local.sync_meta && local.sync_meta.preferences_modified || 0;
   var remotePM = remote.sync_meta && remote.sync_meta.preferences_modified || 0;
-  if (remotePM > localPM) {
-    merged.preferences = remote.preferences || {};
-  }
-  // Reading state — last-write-wins by sync_meta.status_modified
+  merged.preferences = mergeFlatMaps(local.preferences || {}, remote.preferences || {}, remotePM > localPM);
+  // Reading state — same per-key union; statuses for books only touched on
+  // one device must not be lost.
   var localSM = local.sync_meta && local.sync_meta.status_modified || 0;
   var remoteSM = remote.sync_meta && remote.sync_meta.status_modified || 0;
-  if (remoteSM > localSM) {
-    merged.reading_state = remote.reading_state || {};
-  }
+  merged.reading_state = mergeFlatMaps(local.reading_state || {}, remote.reading_state || {}, remoteSM > localSM);
   // sync_meta — take the max of each category timestamp
   var ms = {};
   ['shelf_modified', 'preferences_modified', 'status_modified'].forEach(function (k) {
@@ -4428,16 +4478,12 @@ function applySyncPayloadToLocal(merged) {
 }
 function gdriveFindDataFile(folderId) {
   var q = "name='pagecommons-data.json' and trashed=false and '" + folderId + "' in parents";
-  return gdriveFetch('https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id,name)').then(function (r) {
-    return r.json();
-  }).then(function (d) {
+  return gdriveFetch('https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id,name)').then(gdriveJson).then(function (d) {
     return d && d.files && d.files.length ? d.files[0].id : null;
   });
 }
 function gdriveDownloadJson(fileId) {
-  return gdriveFetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media').then(function (r) {
-    return r.json();
-  });
+  return gdriveFetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media').then(gdriveJson);
 }
 function gdriveUploadJson(folderId, fileId, payload) {
   // Multipart upload: metadata + body. If fileId given, PATCH; else POST.
@@ -4454,9 +4500,7 @@ function gdriveUploadJson(folderId, fileId, payload) {
       'Content-Type': 'multipart/related; boundary=' + boundary
     },
     body: bodyStr
-  }).then(function (r) {
-    return r.json();
-  });
+  }).then(gdriveJson);
 }
 function syncToDrive() {
   showSyncMessage('Syncing…', false);
@@ -4483,7 +4527,7 @@ function syncToDrive() {
     localStorage.setItem('pc_gdrive_last_synced', String(ts));
     showSyncMessage('Synced successfully.', false);
     renderDriveStatus();
-  })["catch"](function (err) {
+  }).catch(function (err) {
     showSyncMessage('Sync failed — try again.', true);
   });
 }
@@ -4529,9 +4573,7 @@ function exportConversationToDrive(book, fullMessages) {
         'Content-Type': 'multipart/related; boundary=' + boundary
       },
       body: bodyStr
-    }).then(function (r) {
-      return r.json();
-    });
+    }).then(gdriveJson);
   });
 }
 function disconnectGDrive() {
@@ -4583,8 +4625,9 @@ function renderDriveStatus() {
   }
 }
 function init() {
-  // Handle OAuth callback first — strip ?code= from URL before any routing
-  if (window.location.search && window.location.search.indexOf('code=') !== -1) {
+  // Handle OAuth callback first — strip ?code= from URL before any routing.
+  // Match the real "code" param only (not e.g. ?promocode=...).
+  if (getQueryParam(window.location.search, 'code')) {
     handleGDriveCallback().then(function () {
       runInitInner();
       try {
@@ -4642,9 +4685,11 @@ function runInitInner() {
     var rl = localStorage.getItem('pc_reply_length');
     if (rl) {
       STATE.replyLength = rl;
-      document.querySelectorAll('.length-opt').forEach(function (b) {
-        b.dataset.length === rl ? b.classList.add('active') : b.classList.remove('active');
-      });
+      var initLenOpts = document.querySelectorAll('.length-opt');
+      for (var ri = 0; ri < initLenOpts.length; ri++) {
+        var rb = initLenOpts[ri];
+        rb.dataset.length === rl ? rb.classList.add('active') : rb.classList.remove('active');
+      }
     }
   } catch (e) {
     showInitError('font: ' + e.message);

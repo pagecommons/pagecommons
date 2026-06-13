@@ -1,13 +1,26 @@
 // Exchanges OAuth refresh tokens for fresh access tokens, OR exchanges
 // the initial auth code from the consent screen for refresh+access tokens.
 // Client never sees GDRIVE_CLIENT_SECRET.
+// Restrict to our own origin so the token-exchange proxy can't be driven
+// by arbitrary third-party sites. Requests with no Origin header
+// (same-origin / e-reader browsers that omit it) are allowed.
+var ALLOWED_ORIGINS = ['https://pagecommons.com', 'https://www.pagecommons.com'];
+
 module.exports = async function (req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  var origin = req.headers.origin;
+  var originAllowed = !origin || ALLOWED_ORIGINS.indexOf(origin) !== -1;
+  res.setHeader('Vary', 'Origin');
+  if (origin && originAllowed) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+  if (!originAllowed) {
+    return res.status(403).json({ error: 'Forbidden' });
   }
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });

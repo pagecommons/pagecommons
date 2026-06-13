@@ -1,6 +1,19 @@
 {
   "headers": [
     {
+      "source": "/app.transpiled.js",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
       "source": "/app.js",
       "headers": [
         {

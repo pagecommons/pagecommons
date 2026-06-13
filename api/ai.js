@@ -1,10 +1,28 @@
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+// Only our own site may use this endpoint — it spends the shared free-tier
+// Gemini quota, so an open CORS proxy would let any site drain it. Requests
+// with no Origin header (same-origin / e-reader browsers that omit it) are
+// allowed; cross-origin requests are only allowed from the allowlist.
+var ALLOWED_ORIGINS = ['https://pagecommons.com', 'https://www.pagecommons.com'];
+function applyCors(req, res) {
+  var origin = req.headers.origin;
+  res.setHeader('Vary', 'Origin');
+  if (origin && ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  return !origin || ALLOWED_ORIGINS.indexOf(origin) !== -1;
+}
+
+export default async function handler(req, res) {
+  var originAllowed = applyCors(req, res);
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  if (!originAllowed) {
+    return res.status(403).json({ error: 'Forbidden' });
   }
 
   if (req.method !== 'POST') {
