@@ -35,7 +35,7 @@ test('app.transpiled.js is in sync with app.js (re-transpile produces identical 
   assert.strictEqual(
     fresh.trim(),
     transpiled.trim(),
-    'app.transpiled.js is stale — run `npm run build` and commit the result'
+    'app.transpiled.js is stale — run `npm run transpile` and commit the result'
   );
 });
 

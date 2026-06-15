@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "babel app.js -o app.transpiled.js",
+    "transpile": "babel app.js -o app.transpiled.js",
     "test": "node --test \"test/*.test.js\""
   },
   "devDependencies": {
