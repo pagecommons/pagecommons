@@ -1884,6 +1884,7 @@ function launchCompanion(book) {
   renderHighlightsPanel();
   updatePassagesToolbarBtn();
   updateNotesToolbarBtn();
+  if (typeof renderDriveStatus === 'function') renderDriveStatus();
   populateIcebreakers(book);
   // Load per-book language override; fall back to the global preference
   // (pc_companion_lang) instead of wiping it when no per-book override exists.
@@ -4742,7 +4743,22 @@ function disconnectGDrive() {
   });
   renderDriveStatus();
 }
+
+// Manual sync trigger from the conversation-view toolbar. Connect/disconnect
+// stays in Preferences; this is just the "sync now" shortcut where it's useful.
+function syncFromToolbar() {
+  if (!localStorage.getItem('pc_gdrive_refresh_token')) {
+    showToolbarMsg('Connect Google Drive in Preferences to sync.');
+    return;
+  }
+  syncToDrive();
+}
 function showSyncMessage(text, isError) {
+  // Mirror to the in-chat toolbar message so the toolbar Sync button gives
+  // feedback when the Preferences panel isn't on screen.
+  if (typeof currentScreen === 'function' && currentScreen() === 'companion') {
+    showToolbarMsg(text);
+  }
   var el = document.getElementById('gdrive-msg');
   if (!el) return;
   el.style.display = 'block';
@@ -4759,6 +4775,9 @@ function renderDriveStatus() {
   var connectedBlock = document.getElementById('gdrive-connected');
   var emailEl = document.getElementById('gdrive-email');
   var lastEl = document.getElementById('gdrive-last-synced');
+  // Show the toolbar Sync shortcut only when Drive is connected.
+  var syncBtn = document.getElementById('sync-toolbar-btn');
+  if (syncBtn) syncBtn.style.display = connected ? '' : 'none';
   if (!notConnected || !connectedBlock) return;
   if (connected) {
     notConnected.style.display = 'none';

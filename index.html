@@ -806,7 +806,8 @@
         <div class="about-feature-title">Discusses books, not summaries</div>
         <p class="about-feature-desc">Your companion never recites plot points. It asks questions, offers opinions when asked, and follows your lead.</p>
       </div>
-      <div class="about-feature">
+      <!-- Hidden for soft launch alongside the Kindle clippings import -->
+      <div class="about-feature" style="display:none">
         <div class="about-feature-title">Knows your highlights</div>
         <p class="about-feature-desc">Import your Kindle clippings and the companion will remember the passages that stayed with you.</p>
       </div>
@@ -926,6 +927,8 @@
     <div id="search-status" class="status-msg" style="display:none"></div>
     <div id="search-results"></div>
 
+    <!-- Kindle clippings import — hidden for soft launch; markup kept for future use -->
+    <div id="kindle-import-section" style="display:none">
     <hr />
     <h2>Or import from Kindle</h2>
     <p class="note">Everything is processed locally in your browser. The file is never uploaded.</p>
@@ -944,6 +947,7 @@
       <button class="btn" style="margin-top:8px" onclick="parseClippingsPaste()">Import pasted text</button>
     </div>
     <div id="clippings-status" class="status-msg" style="display:none"></div>
+    </div>
     <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a></div>
   </section>
 
@@ -1040,6 +1044,7 @@
         <button class="toolbar-btn" id="notes-toolbar-btn" onclick="toggleNotesPanel()">Notes</button>
         <button class="toolbar-btn" id="language-toolbar-btn" onclick="toggleLanguagePanel()">Language</button>
         <button class="toolbar-btn" id="export-toolbar-btn" onclick="toggleExportPanel()">Export</button>
+        <button class="toolbar-btn" id="sync-toolbar-btn" style="display:none" onclick="syncFromToolbar()">Sync</button>
         <button class="toolbar-btn" onclick="navigate('shelf')">Shelf</button>
         <button class="toolbar-btn" onclick="endConversation()">End Chat</button>
       </div>
