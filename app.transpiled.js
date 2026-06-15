@@ -4523,6 +4523,30 @@ function gdriveFindDataFile(folderId) {
     return d && d.files && d.files.length ? d.files[0].id : null;
   });
 }
+function gdriveFindFileInFolder(folderId, filename) {
+  var escapedName = filename.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  var q = "name='" + escapedName + "' and trashed=false and '" + folderId + "' in parents";
+  return gdriveFetch('https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id)').then(gdriveJson).then(function (d) {
+    return d && d.files && d.files.length ? d.files[0].id : null;
+  });
+}
+function gdriveUploadMarkdown(folderId, existingId, filename, content) {
+  var boundary = '----pc_md_' + Date.now();
+  var meta = existingId ? {} : {
+    name: filename,
+    parents: [folderId],
+    mimeType: 'text/markdown'
+  };
+  var bodyStr = '--' + boundary + '\r\n' + 'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(meta) + '\r\n' + '--' + boundary + '\r\n' + 'Content-Type: text/markdown\r\n\r\n' + content + '\r\n' + '--' + boundary + '--';
+  var url = existingId ? 'https://www.googleapis.com/upload/drive/v3/files/' + existingId + '?uploadType=multipart' : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+  return gdriveFetch(url, {
+    method: existingId ? 'PATCH' : 'POST',
+    headers: {
+      'Content-Type': 'multipart/related; boundary=' + boundary
+    },
+    body: bodyStr
+  }).then(gdriveJson);
+}
 function gdriveDownloadJson(fileId) {
   return gdriveFetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media').then(gdriveJson);
 }
@@ -4543,25 +4567,102 @@ function gdriveUploadJson(folderId, fileId, payload) {
     body: bodyStr
   }).then(gdriveJson);
 }
+function syncConversationMarkdowns(convFolderId) {
+  var pad = function pad(n) {
+    return n < 10 ? '0' + n : '' + n;
+  };
+
+  // Build bookKey → title map from shelf
+  var shelf = [];
+  try {
+    shelf = JSON.parse(localStorage.getItem('pc_shelf_books') || '[]');
+  } catch (e) {}
+  var titleMap = {};
+  for (var si = 0; si < shelf.length; si++) {
+    titleMap[bookKey(shelf[si])] = shelf[si].title || 'Unknown';
+  }
+  var cName = STATE && STATE.companionName || localStorage.getItem('pc_companion_name') || 'Companion';
+
+  // Collect upload tasks from all pc_convs_* keys
+  var tasks = [];
+  for (var li = 0; li < localStorage.length; li++) {
+    var k = localStorage.key(li);
+    if (!k || k.indexOf('pc_convs_') !== 0) continue;
+    var bk = k.slice(9);
+    var convList = [];
+    try {
+      convList = JSON.parse(localStorage.getItem(k) || '[]');
+    } catch (e) {}
+    if (!convList.length) continue;
+    var bTitle = titleMap[bk] || 'Unknown Book';
+    var titleSafe = bTitle.replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, ' ').trim().slice(0, 80);
+
+    // Keep only conversations with messages, sorted oldest-first
+    var withMsgs = [];
+    for (var ci = 0; ci < convList.length; ci++) {
+      if (convList[ci].messages && convList[ci].messages.length) withMsgs.push(convList[ci]);
+    }
+    withMsgs.sort(function (a, b) {
+      var ta = a.lastUpdated || 0;
+      var tb = b.lastUpdated || 0;
+      return ta > tb ? 1 : ta < tb ? -1 : 0;
+    });
+    for (var wi = 0; wi < withMsgs.length; wi++) {
+      var conv = withMsgs[wi];
+      var d = conv.lastUpdated ? new Date(conv.lastUpdated) : new Date();
+      var iso = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+      var dateStr = d.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+      var fname = withMsgs.length > 1 ? iso + '-' + titleSafe + '-' + (wi + 1) + '.md' : iso + '-' + titleSafe + '.md';
+      var lines = ['# ' + bTitle, '', '**Exported from Page Commons:** ' + dateStr, '', '---', ''];
+      for (var mi = 0; mi < conv.messages.length; mi++) {
+        var m = conv.messages[mi];
+        lines.push(m.role === 'user' ? '**You**' : '**' + cName + '**');
+        lines.push('');
+        lines.push(m.content);
+        lines.push('');
+      }
+      tasks.push({
+        filename: fname,
+        content: lines.join('\n')
+      });
+    }
+  }
+
+  // Upload sequentially: find existing file by name then create/update
+  return tasks.reduce(function (chain, task) {
+    return chain.then(function () {
+      return gdriveFindFileInFolder(convFolderId, task.filename).then(function (existingId) {
+        return gdriveUploadMarkdown(convFolderId, existingId, task.filename, task.content);
+      });
+    });
+  }, Promise.resolve());
+}
 function syncToDrive() {
   showSyncMessage('Syncing…', false);
+  var mainFolderId;
   return refreshGDriveToken().then(function () {
     return getOrCreatePageCommonsFolder();
   }).then(function (folderId) {
+    mainFolderId = folderId;
     return gdriveFindDataFile(folderId).then(function (fileId) {
       var local = buildSyncPayload();
       if (!fileId) {
-        return gdriveUploadJson(folderId, null, local).then(function () {
-          return local;
-        });
+        return gdriveUploadJson(folderId, null, local);
       }
       return gdriveDownloadJson(fileId).then(function (remote) {
         var merged = mergeSyncPayloads(local, remote || {});
         return gdriveUploadJson(folderId, fileId, merged).then(function () {
           applySyncPayloadToLocal(merged);
-          return merged;
         });
       });
+    });
+  }).then(function () {
+    return getOrCreateConversationsFolder(mainFolderId).then(function (convFolderId) {
+      return syncConversationMarkdowns(convFolderId);
     });
   }).then(function () {
     var ts = Date.now();
