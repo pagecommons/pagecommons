@@ -1266,10 +1266,13 @@ function _renderStatusScreen() {
     return _regenerator().w(function (_context9) {
       while (1) switch (_context9.p = _context9.n) {
         case 0:
-          lang = STATE.detectedLang;
+          // Effective companion language: the user's explicit choice (per-book
+          // override or global preference) wins over the auto-detected one, so
+          // the status options match what the companion will speak.
+          lang = getCompanionLang();
           chatLang = STATE.chatLanguage;
-          options = STATUS_OPTIONS_EN; // Translate if native language chosen and language detected
-          if (!(chatLang === 'native' && lang && STATE.apiKey)) {
+          options = STATUS_OPTIONS_EN; // Translate whenever there's a non-English target language and a key
+          if (!(lang && lang !== 'English' && STATE.apiKey)) {
             _context9.n = 15;
             break;
           }
@@ -1493,6 +1496,9 @@ function _selectBook() {
           if (detectedLang) book.detectedLang = detectedLang;
           localStorage.setItem('pc_last_book', JSON.stringify(book));
           bk = bookKey(book);
+          // Load the effective companion language (per-book override, else the
+          // global preference) up front so the status screen renders in it.
+          STATE.companionLangOverride = localStorage.getItem('pc_companion_lang_override_' + bk) || localStorage.getItem('pc_companion_lang') || null;
           savedStatus = localStorage.getItem('pc_status_' + bk);
           savedLang = localStorage.getItem('pc_lang_' + bk);
           if (!savedStatus) {
@@ -1591,7 +1597,7 @@ function _setLanguage() {
           return generateThinkingPhrases(STATE.detectedLang);
         case 1:
           // Clear cached ice breakers so they regenerate in the chosen language
-          cacheKey = 'pc_icebreakers_' + bookKey(STATE.book) + '_' + (STATE.readingStatus || '') + '_' + (STATE.chatLanguage || 'english') + '_' + (STATE.detectedLang || '');
+          cacheKey = 'pc_icebreakers_' + bookKey(STATE.book) + '_' + (STATE.readingStatus || '') + '_' + (STATE.chatLanguage || 'english') + '_' + (STATE.detectedLang || '') + '_' + (STATE.companionLangOverride || '');
           localStorage.removeItem(cacheKey);
           launchCompanion(STATE.book);
         case 2:
@@ -1674,6 +1680,14 @@ function launchCompanion(book) {
   }
   // add to shelf (skip in discover mode — user hasn't decided to read it yet)
   if (STATE.companionMode !== 'discover' && typeof addBookToShelf === 'function') addBookToShelf(book);
+  // Persist as the active book so a page reload restores THIS book rather than
+  // a stale pc_last_book (e.g. when entering a chat from the shelf).
+  if (STATE.companionMode !== 'discover') {
+    try {
+      if (STATE.detectedLang && !book.detectedLang) book.detectedLang = STATE.detectedLang;
+      localStorage.setItem('pc_last_book', JSON.stringify(book));
+    } catch (e) {}
+  }
   document.getElementById('book-title-display').textContent = book.title;
   document.getElementById('book-author-display').textContent = book.author;
   var metaEl = document.getElementById('book-meta-display');
@@ -2223,7 +2237,7 @@ function _populateIcebreakers() {
           loadEl.style.fontStyle = 'italic';
           loadEl.textContent = 'Finding the right questions…';
           list.appendChild(loadEl);
-          cacheKey = 'pc_icebreakers_' + bookKey(book) + '_' + (STATE.readingStatus || '') + '_' + (STATE.chatLanguage || 'english') + '_' + (STATE.detectedLang || '');
+          cacheKey = 'pc_icebreakers_' + bookKey(book) + '_' + (STATE.readingStatus || '') + '_' + (STATE.chatLanguage || 'english') + '_' + (STATE.detectedLang || '') + '_' + (STATE.companionLangOverride || '');
           _context12.p = 1;
           c = localStorage.getItem(cacheKey);
           if (!c) {
@@ -3404,6 +3418,9 @@ function setCompanionLanguage(lang) {
     touchSyncMeta('status');
     showToolbarMsg('Auto-detect enabled.');
   }
+  // Refresh the icebreaker prompts so they appear in the newly chosen language
+  // right away (the cache key now includes the override, so this regenerates).
+  if (STATE.book) populateIcebreakers(STATE.book);
   updateLanguagePanelDisplay();
 }
 
