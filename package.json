@@ -1,10 +1,15 @@
 {
+  "scripts": {
+    "build": "babel app.js -o app.transpiled.js",
+    "test": "node --test \"test/*.test.js\""
+  },
   "devDependencies": {
     "@babel/cli": "^7.28.6",
     "@babel/core": "^7.29.0",
     "@babel/plugin-transform-regenerator": "^7.29.0",
     "@babel/plugin-transform-runtime": "^7.29.0",
     "@babel/preset-env": "^7.29.5",
-    "@babel/runtime": "^7.29.2"
+    "@babel/runtime": "^7.29.2",
+    "jsdom": "^29.1.1"
   }
 }
