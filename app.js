@@ -3967,7 +3967,7 @@ function fetchAndCacheSubjects(book) {
 // ═══════════════════════════════════════════════════
 // Public OAuth client ID — safe to ship in client code.
 // Set GDRIVE_CLIENT_ID below and GDRIVE_CLIENT_SECRET in Vercel env.
-var GDRIVE_CLIENT_ID = '';
+var GDRIVE_CLIENT_ID = '391567836708-1eof6nlfsgplekj64apqk9dl36uh8trq.apps.googleusercontent.com';
 var GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 var GDRIVE_KEYS_DEVICE_LOCAL = ['pc_gdrive_access_token','pc_gdrive_refresh_token','pc_gdrive_user_email','pc_gdrive_folder_id','pc_gdrive_conv_folder_id','pc_gdrive_last_synced'];
 
