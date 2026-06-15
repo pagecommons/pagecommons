@@ -86,12 +86,24 @@
     .screen-support-footer {
       padding-top: 32px;
       padding-bottom: 16px;
-      text-align: left;
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       font-size: 15px;
       color: #666666;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: flex;
+      -webkit-box-pack: justify;
+      -webkit-justify-content: space-between;
+      justify-content: space-between;
+      -webkit-box-align: center;
+      -webkit-align-items: center;
+      align-items: center;
+      -webkit-flex-wrap: wrap;
+      flex-wrap: wrap;
     }
     .screen-support-footer a { color: #666666; text-decoration: underline; }
+    .screen-support-footer .sf-brand { font-weight: 600; }
+    .screen-support-footer .sf-links a { margin-left: 14px; }
   </style>
 </head>
 <body>
@@ -126,7 +138,7 @@
 
   <p class="signoff">Pete</p>
 
-  <div class="screen-support-footer"><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+  <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
 
 </div>
 

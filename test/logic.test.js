@@ -100,3 +100,61 @@ test('mergeSyncPayloads resolves preferences by timestamp and keeps both shelves
   assert.strictEqual(m.preferences.reply_length, 'short', 'remote-only preference should be kept');
   assert.strictEqual(m.shelf.length, 2, 'shelf should be the union of both devices');
 });
+
+// ── bookKey collision fix + one-time migration (v0.41) ──────────────────────
+
+function legacyKey(book) {
+  return btoa(encodeURIComponent((book.title + '||' + book.author).slice(0, 40))).replace(/=/g, '');
+}
+function fullKey(book) {
+  return btoa(encodeURIComponent(book.title + '||' + book.author)).replace(/=/g, '');
+}
+// A long-titled book whose title+author exceeds the old 40-char cap, so the
+// legacy (truncated) key differs from the new (full) key.
+var LONG_BOOK = { title: 'The Lord of the Rings: The Fellowship of the Ring', author: 'J.R.R. Tolkien' };
+var SHORT_BOOK = { title: 'Dune', author: 'Frank Herbert' };
+
+test('bookKey uses the full title+author (no 40-char collision)', async function () {
+  var w = (await appP).window;
+  // Two long titles that share the same first 40 chars must get distinct keys.
+  var a = w.bookKey({ title: 'A Very Long Series Title, Book One: The Beginning', author: 'X' });
+  var b = w.bookKey({ title: 'A Very Long Series Title, Book Two: The Middle', author: 'X' });
+  assert.notStrictEqual(a, b, 'long titles sharing a 40-char prefix must not collide');
+  // Short books keep the same key as the legacy scheme — no migration needed.
+  assert.strictEqual(w.bookKey(SHORT_BOOK), legacyKey(SHORT_BOOK), 'short-title key must be unchanged');
+});
+
+test('migrateBookKeys moves a long-titled book’s data from legacy to new key', async function () {
+  var seed = {
+    pc_tc_accepted: '1', pc_preferences_set: '1', pc_ai_mode: 'shared',
+    pc_shelf_books: JSON.stringify([LONG_BOOK])
+  };
+  // Durable data stored under the OLD key, as a pre-v0.41 user would have it.
+  seed['pc_status_' + legacyKey(LONG_BOOK)] = 'finished';
+  seed['pc_convs_' + legacyKey(LONG_BOOK)] = JSON.stringify([{ id: '1', messages: [] }]);
+
+  var app = await boot({ seed: seed });
+  var ls = app.localStorage;
+  var newK = fullKey(LONG_BOOK);
+  var oldK = legacyKey(LONG_BOOK);
+  assert.notStrictEqual(newK, oldK, 'test book must actually have a truncated legacy key');
+
+  assert.strictEqual(ls.getItem('pc_status_' + newK), 'finished', 'status must move to the new key');
+  assert.strictEqual(ls.getItem('pc_convs_' + newK), JSON.stringify([{ id: '1', messages: [] }]), 'conversations must move');
+  assert.strictEqual(ls.getItem('pc_status_' + oldK), null, 'legacy status key must be cleared');
+  assert.strictEqual(ls.getItem('pc_bookkey_migrated_v1'), '1', 'migration flag must be set');
+});
+
+test('migrateBookKeys is a no-op when already migrated', async function () {
+  var seed = {
+    pc_tc_accepted: '1', pc_preferences_set: '1', pc_ai_mode: 'shared',
+    pc_bookkey_migrated_v1: '1',
+    pc_shelf_books: JSON.stringify([LONG_BOOK])
+  };
+  seed['pc_status_' + legacyKey(LONG_BOOK)] = 'midway';
+  var app = await boot({ seed: seed });
+  var ls = app.localStorage;
+  // Flag already set → legacy data is left exactly where it was.
+  assert.strictEqual(ls.getItem('pc_status_' + legacyKey(LONG_BOOK)), 'midway');
+  assert.strictEqual(ls.getItem('pc_status_' + fullKey(LONG_BOOK)), null);
+});

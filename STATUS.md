@@ -1,10 +1,54 @@
 # Page Commons — Current Status
 
 Last updated: June 15, 2026
-Current version: v0.40
-Updated by: Claude session — soft-launch prep + Drive sync to production
+Current version: v0.41
+Updated by: Claude session — post-verification polish + test harness
 
-## What was done this session [v0.40]
+## What was done this session [v0.41]
+
+Post-verification polish on branch `claude/brave-lovelace-vet1sn`.
+All ES5/legacy-WebKit safe; app.transpiled.js rebuilt; `npm test` green.
+
+- **bookKey() collision fixed** (was deferred in v0.39). `bookKey()` now keys
+  on the FULL `title + '||' + author` instead of the first 40 chars, so
+  long-titled series volumes no longer collide and silently merge their
+  conversations/passages/status. Backward-compatible: any book whose
+  `title||author` is ≤ 40 chars gets the *same* key as before (no change).
+  - `bookKeyLegacy()` retained only for migration.
+  - `migrateBookKeys()` runs once at init (guarded by `pc_bookkey_migrated_v1`),
+    driven by the shelf + `pc_last_book` (the only places we hold full book
+    objects). For long-titled books it moves `pc_status_`, `pc_lang_`,
+    `pc_companion_lang_override_`, `pc_convs_`, `pc_passages_`, `pc_notes_`,
+    `pc_progress_` from the legacy key to the new key. Caches
+    (`pc_icebreakers_`, `pc_subjects_`) are left to regenerate.
+  - Limitation: a book with stored data that is NOT in the shelf and NOT the
+    last-opened book can't be migrated (its full title is unrecoverable from
+    the key). Realistically everything with data is shelved.
+- **One-row footer** (matches the ShortJo layout): brand "Page Commons" left,
+  `Support · Privacy · Terms` right, in a single flexbox row. Applied to all
+  in-app screen footers (index.html) and the standalone privacy/terms/support
+  pages. E-ink-safe: `-webkit-box` prefixes, `space-between`, `flex-wrap`, no
+  `gap:`. The injected "Preferences" link now sits inline in the right group
+  (`updatePreferencesFooterLinks` targets `.sf-links`).
+  - transfer.html keeps its own distinct utility-page footer (left as-is).
+- **pending.md → ROADMAP.md**: renamed to resolve the case-only filename clash
+  with PENDING.md (broke on case-insensitive macOS/Windows checkouts). Added a
+  header clarifying it's the long-term V2/V3 roadmap and that PENDING.md /
+  STATUS.md are the live docs. CLAUDE.md file list updated.
+- **About page**: confirmed present and wired (`#screen-about`, reached via the
+  home "New here?" link). No work needed — it was not abolished.
+- **Headless test harness** (from the prior step, now extended): `npm test`
+  boots the real index.html + app.transpiled.js in jsdom (build integrity +
+  Kobo-syntax guard, DOM/navigation, pure logic incl. the new bookKey
+  migration). 24 tests, all green. See test/README.md.
+
+### Open items / next
+- **Device test (Kobo Libra Colour + Kindle)** the footer flexbox row and the
+  bookKey migration on real legacy WebKit — the one thing the headless harness
+  can't cover.
+- Consider an email contact on privacy/terms (currently GitHub issues).
+
+## What was done last session [v0.40]
 
 Soft-launch preparation on branch `claude/brave-lovelace-vet1sn`
 (v0.40 round merged to main as it went). All ES5/legacy-WebKit safe.

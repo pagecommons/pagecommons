@@ -40,9 +40,13 @@ indie project by a solo founder.
 - api/transfer.js — key transfer codes
 - favicon.svg — dog-ear page icon
 - CLAUDE.md — this file
-- PENDING.md — full feature backlog
+- PENDING.md — full feature backlog (active)
+- ROADMAP.md — long-term V2/V3 roadmap
+  (was pending.md; renamed to fix a
+  case-only clash with PENDING.md)
 - STATUS.md — current session status
 - STRATEGY.md — product direction (post-launch)
+- test/ — headless harness (npm test)
 
 ## CRITICAL BUILD RULE
 Kobo WebKit does not support modern JS.
@@ -213,7 +217,16 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.40 — soft-launch prep. Per-conversation .md sync to Google Drive;
+v0.41 — post-verification polish. Fixed the bookKey() collision (now
+keys on the full title+author, not the first 40 chars) with a one-time
+shelf-driven migration of existing per-book data; one-row footer (brand
+left, Support/Privacy/Terms right) across the app + standalone pages;
+renamed pending.md → ROADMAP.md (case-clash fix). Added a headless test
+harness (npm test). Google Drive sync is verified + live in production
+(domain ownership via Cloudflare DNS). Kobo/Kindle device test of the
+footer flex + bookKey migration pending.
+
+Earlier (v0.40): soft-launch prep. Per-conversation .md sync to Google Drive;
 fixed book-reload switching to a stale book and the companion-language
 inconsistency (explicit choice now wins, defaults to English; auto-
 follow-the-book option removed). Hid the Kindle clippings import for

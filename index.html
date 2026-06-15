@@ -738,8 +738,10 @@
     .age-gate-btns > .btn:last-child { margin-bottom: 0; }
 
     /* === SCREEN SUPPORT FOOTER === */
-    .screen-support-footer { padding-top: 32px; padding-bottom: 16px; text-align: left; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: #666666; }
+    .screen-support-footer { padding-top: 32px; padding-bottom: 16px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: #666666; display: -webkit-box; display: -webkit-flex; display: flex; -webkit-box-pack: justify; -webkit-justify-content: space-between; justify-content: space-between; -webkit-box-align: center; -webkit-align-items: center; align-items: center; -webkit-flex-wrap: wrap; flex-wrap: wrap; }
     .screen-support-footer a { color: #666666; text-decoration: underline; }
+    .screen-support-footer .sf-brand { font-weight: 600; }
+    .screen-support-footer .sf-links a { margin-left: 14px; }
   </style>
   <script src="app.transpiled.js" defer></script>
   <script defer data-domain="pagecommons.com" src="https://plausible.io/js/script.js"></script>
@@ -752,7 +754,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.40</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.41</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -787,7 +789,7 @@
         No ads. No algorithms. No engagement metrics. Just books.
       </div>
     </div>
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a><br /><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -840,7 +842,7 @@
     </div>
 
     <button class="btn btn-primary" onclick="navigate('home')">Back to the library</button>
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a><br /><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -895,7 +897,7 @@
     <hr />
     <div id="key-error" class="status-msg error" style="display:none"></div>
     <button class="btn btn-primary" onclick="saveKey()">Continue</button>
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a><br /><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -948,7 +950,7 @@
     </div>
     <div id="clippings-status" class="status-msg" style="display:none"></div>
     </div>
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a><br /><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -957,7 +959,7 @@
   <section id="screen-book-detail" class="screen">
     <button class="back-link" onclick="goBack()">← Back</button>
     <div id="book-detail-content"></div>
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a><br /><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -984,7 +986,7 @@
         <span class="status-opt-sub">Coming back with fresh eyes</span>
       </button>
     </div>
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a><br /><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -999,7 +1001,7 @@
       <button class="btn" onclick="setLanguage('english')">Chat in English</button>
     </div>
     <p style="font-size:0.78rem;color:#777777;margin-top:16px">You can change this later in More.</p>
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a><br /><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -1099,7 +1101,7 @@
       API key loaded &nbsp;·&nbsp;
       <button onclick="clearKey()" style="background:none;border:none;cursor:pointer;text-decoration:underline;font-family:Georgia, 'Times New Roman', serif;font-size:0.78rem;color:#777777">Remove</button>
     </div>
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a><br /><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
 
@@ -1115,7 +1117,7 @@
     <p style="font-size:0.78rem;color:#777777;margin-bottom:24px">Stronger knowledge across more titles and languages, always available. Anthropic Claude, Google Gemini, or Groq. Your key is stored only in this browser and never sent to our servers.</p>
 
     <p style="font-size:0.78rem;color:#777777">You can change this any time in Preferences.</p>
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a><br /><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- T&C SCREEN -->
@@ -1139,7 +1141,7 @@
     </div>
     <button class="btn btn-primary" onclick="acceptTC()">I agree — take me in</button>
     <p style="font-size:0.78rem;color:#777777;margin-top:12px;text-align:center">Your agreement is stored locally in your browser only.</p>
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a><br /><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- AGE GATE -->
@@ -1152,7 +1154,7 @@
       <button class="btn btn-primary" onclick="confirmAgeGate()">I'm 18 or over — continue</button>
       <button class="btn" onclick="navigate('search')">Take me back</button>
     </div>
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a><br /><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- YOUR SHELF -->
@@ -1161,7 +1163,7 @@
     <h1>Your shelf</h1>
     <p style="font-size:0.88rem;color:#777777;margin-bottom:20px">Books you have discussed with your companion.</p>
     <div id="shelf-list"></div>
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a><br /><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -1286,7 +1288,7 @@
 
     <button class="btn btn-primary" id="prefs-save-continue" style="display:none;width:100%;margin-top:24px" onclick="savePreferencesAndContinue()">Save & continue</button>
 
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a><br /><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- BOOK CONVERSATIONS -->
@@ -1300,7 +1302,7 @@
       <button class="btn btn-small" onclick="updateBookStatus()">Update status</button>
     </div>
     <div id="conv-list"></div>
-    <div class="screen-support-footer">Page Commons is free and ad-free. <a href="/support.html">Support it &rarr;</a><br /><a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
 </div>

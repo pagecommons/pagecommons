@@ -1,7 +1,17 @@
-# Page Commons — Pending Work
+# Page Commons — Long-Term Roadmap
 
-Last updated: May 2026
-Current version: v0.25 (v0.26 next deploy)
+> This is the long-horizon roadmap (V2/V3 community layer, book-mates,
+> platform maturity, use cases, and decisions made). It was formerly
+> `pending.md`; renamed to `ROADMAP.md` to resolve a case-only filename
+> clash with `PENDING.md` that broke on case-insensitive filesystems
+> (macOS/Windows).
+>
+> For the **live, active backlog** see `PENDING.md`; for current session
+> state see `STATUS.md`; for product direction see `STRATEGY.md`. The
+> near-term sections below are historical (last touched v0.25) — treat
+> `PENDING.md` as authoritative for anything pre-launch.
+
+Last updated: May 2026 (near-term sections superseded by PENDING.md)
 Launch target: June 1 2026 — Reddit
 
 ---

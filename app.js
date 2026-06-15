@@ -157,7 +157,10 @@ function updatePreferencesFooterLinks() {
   var footers = document.querySelectorAll('.screen-support-footer');
   for (var i = 0; i < footers.length; i++) {
     var f = footers[i];
-    var link = f.querySelector('.prefs-footer-link');
+    // Inject the Preferences link into the right-side links group so it sits
+    // inline with Support / Privacy / Terms.
+    var group = f.querySelector('.sf-links') || f;
+    var link = group.querySelector('.prefs-footer-link');
     if (hideHere) {
       if (link) link.style.display = 'none';
       continue;
@@ -166,15 +169,13 @@ function updatePreferencesFooterLinks() {
       link = document.createElement('a');
       link.className = 'prefs-footer-link';
       link.href = '#';
-      link.textContent = 'Preferences →';
-      link.style.display = 'block';
-      link.style.marginBottom = '8px';
+      link.textContent = 'Preferences';
       link.style.color = '#666666';
       link.style.textDecoration = 'underline';
       link.onclick = function (e) { e.preventDefault(); navigate('preferences'); return false; };
-      f.insertBefore(link, f.firstChild);
+      group.insertBefore(link, group.firstChild);
     } else {
-      link.style.display = 'block';
+      link.style.display = '';
     }
   }
 }
@@ -340,7 +341,53 @@ function _processOfflineQueue() {
   });
 }
 function bookKey(book) {
+  // Full title+author, no truncation — the old 40-char slice collided for
+  // long-titled series volumes (e.g. two long subtitles sharing a prefix),
+  // silently merging their conversations/passages/status.
+  return btoa(encodeURIComponent(book.title + '||' + book.author)).replace(/=/g, '');
+}
+// Pre-v0.41 key: truncated to the first 40 chars. Retained ONLY so a one-time
+// migration can move existing users' data onto the collision-free key above.
+// For any book whose title+author is <= 40 chars this returns the same value
+// as bookKey(), so those (the vast majority) need no migration at all.
+function bookKeyLegacy(book) {
   return btoa(encodeURIComponent((book.title + '||' + book.author).slice(0, 40))).replace(/=/g, '');
+}
+// One-time, idempotent migration. Driven by the shelf + last-opened book, the
+// only places we hold full book objects (the storage keys themselves aren't
+// reversible to a full title). Moves durable per-book data from the legacy key
+// to the new key for long-titled books; short-titled books are untouched.
+function migrateBookKeys() {
+  try {
+    if (localStorage.getItem('pc_bookkey_migrated_v1')) return;
+    var prefixes = ['pc_status_', 'pc_lang_', 'pc_companion_lang_override_', 'pc_convs_', 'pc_passages_', 'pc_notes_', 'pc_progress_'];
+    var books = [];
+    try {
+      var shelf = JSON.parse(localStorage.getItem('pc_shelf_books') || '[]');
+      for (var i = 0; i < shelf.length; i++) books.push(shelf[i]);
+    } catch (e) {}
+    try {
+      var last = JSON.parse(localStorage.getItem('pc_last_book') || 'null');
+      if (last) books.push(last);
+    } catch (e) {}
+    for (var b = 0; b < books.length; b++) {
+      var book = books[b];
+      if (!book || !book.title) continue;
+      var oldK = bookKeyLegacy(book);
+      var newK = bookKey(book);
+      if (oldK === newK) continue; // short title — key unchanged, nothing to move
+      for (var p = 0; p < prefixes.length; p++) {
+        var oldName = prefixes[p] + oldK;
+        var newName = prefixes[p] + newK;
+        var val = localStorage.getItem(oldName);
+        if (val !== null && localStorage.getItem(newName) === null) {
+          localStorage.setItem(newName, val);
+          localStorage.removeItem(oldName);
+        }
+      }
+    }
+    localStorage.setItem('pc_bookkey_migrated_v1', '1');
+  } catch (e) {}
 }
 function restoreCompanionUI(book) {
   document.getElementById('book-title-display').textContent = book.title;
@@ -4576,6 +4623,8 @@ function init() {
 }
 
 function runInitInner() {
+  // Migrate any legacy (truncated) book keys before we read per-book data.
+  migrateBookKeys();
   try {
     var aiMode = localStorage.getItem('pc_ai_mode');
     if (aiMode) {

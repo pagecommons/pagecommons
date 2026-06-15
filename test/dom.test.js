@@ -59,14 +59,18 @@ test('#companion with no book selected redirects to #search', async function () 
   assert.strictEqual(await app.go('companion'), 'search');
 });
 
-test('legal + support footer links are present on the home screen', async function () {
+test('footer is a single row: brand left, Support/Privacy/Terms right', async function () {
   var app = await boot({ seed: RETURNING });
-  var home = app.document.getElementById('screen-home');
+  var footer = app.document.querySelector('#screen-home .screen-support-footer');
+  var brand = footer.querySelector('.sf-brand');
+  assert.ok(brand && /Page Commons/.test(brand.textContent), 'footer should show the brand on the left');
+
   var hrefs = [];
-  var links = home.querySelectorAll('.screen-support-footer a');
+  var links = footer.querySelectorAll('.sf-links a');
   for (var i = 0; i < links.length; i++) hrefs.push(links[i].getAttribute('href'));
-  assert.ok(hrefs.indexOf('/privacy.html') !== -1, 'privacy link missing from footer');
-  assert.ok(hrefs.indexOf('/terms.html') !== -1, 'terms link missing from footer');
+  assert.ok(hrefs.indexOf('/support.html') !== -1, 'Support link missing from footer');
+  assert.ok(hrefs.indexOf('/privacy.html') !== -1, 'Privacy link missing from footer');
+  assert.ok(hrefs.indexOf('/terms.html') !== -1, 'Terms link missing from footer');
 });
 
 test('the End Chat toolbar button is labelled correctly (not "Done"/"Close")', async function () {
