@@ -484,7 +484,7 @@ function restoreCompanionUI(book) {
   // Load per-book language override; fall back to the global preference
   // (pc_companion_lang) instead of wiping it when no per-book override exists.
   var savedOverride = localStorage.getItem('pc_companion_lang_override_' + bookKey(book));
-  STATE.companionLangOverride = savedOverride || localStorage.getItem('pc_companion_lang') || null;
+  STATE.companionLangOverride = savedOverride || localStorage.getItem('pc_companion_lang') || 'English';
   updateLanguagePanelDisplay();
   // Close all panels
   document.getElementById('highlights-panel').classList.remove('open');
@@ -1646,7 +1646,7 @@ function _selectBook() {
           bk = bookKey(book);
           // Load the effective companion language (per-book override, else the
           // global preference) up front so the status screen renders in it.
-          STATE.companionLangOverride = localStorage.getItem('pc_companion_lang_override_' + bk) || localStorage.getItem('pc_companion_lang') || null;
+          STATE.companionLangOverride = localStorage.getItem('pc_companion_lang_override_' + bk) || localStorage.getItem('pc_companion_lang') || 'English';
           savedStatus = localStorage.getItem('pc_status_' + bk);
           savedLang = localStorage.getItem('pc_lang_' + bk);
           if (!savedStatus) {
@@ -1831,8 +1831,9 @@ function detectLanguage(book) {
   return null;
 }
 function getCompanionLang() {
-  if (STATE.companionLangOverride) return STATE.companionLangOverride;
-  return STATE.detectedLang || null;
+  // The companion speaks the user's chosen language, defaulting to English.
+  // It no longer auto-follows the book's detected language.
+  return STATE.companionLangOverride || 'English';
 }
 function launchCompanion(book) {
   // assign conversation ID if not set
@@ -1887,7 +1888,7 @@ function launchCompanion(book) {
   // Load per-book language override; fall back to the global preference
   // (pc_companion_lang) instead of wiping it when no per-book override exists.
   var savedOverride = localStorage.getItem('pc_companion_lang_override_' + bookKey(book));
-  STATE.companionLangOverride = savedOverride || localStorage.getItem('pc_companion_lang') || null;
+  STATE.companionLangOverride = savedOverride || localStorage.getItem('pc_companion_lang') || 'English';
   updateLanguagePanelDisplay();
   // Close all panels
   document.getElementById('highlights-panel').classList.remove('open');
@@ -2451,7 +2452,7 @@ var STATIC_PROMPT_SETS = {
   }
 };
 function getStaticPromptsByStatus(status) {
-  var lang = STATE.companionLangOverride || STATE.detectedLang || 'English';
+  var lang = getCompanionLang();
   var sets = STATIC_PROMPT_SETS[lang] || STATIC_PROMPT_SETS['English'];
   return (sets[status] || sets.considering).slice(0, 4);
 }
@@ -2515,7 +2516,7 @@ function _fetchAIIcebreakers() {
             finished: 'just finished'
           };
           statusLabel = statusLabels[STATE.readingStatus] || 'reading';
-          var _lang = STATE.companionLangOverride || STATE.detectedLang || detectLanguage(book);
+          var _lang = getCompanionLang();
           var _langNotes = {
             'Traditional Chinese': '寫全部繁體中文。You MUST write in Traditional Chinese (繁體中文) characters ONLY. Do NOT use Japanese, Simplified Chinese, or English. Every single word must be in Traditional Chinese.',
             'Simplified Chinese': '写全部简体中文。You MUST write in Simplified Chinese (简体中文) characters ONLY. Do NOT use Japanese, Traditional Chinese, or English. Every single word must be in Simplified Chinese.',
@@ -2939,8 +2940,8 @@ function scrollToMessage(el) {
 function buildDiscoveryPrompt() {
   var book = STATE.book;
   var readingTime = book.pageCount ? ' The book is ' + book.pageCount + ' pages — roughly ' + Math.round(book.pageCount / 50) + ' hours for an average reader.' : '';
-  var _companionLang = STATE.companionLangOverride || (STATE.chatLanguage === 'native' && STATE.detectedLang ? STATE.detectedLang : null);
-  var langNote = _companionLang ? '\n\nRespond entirely in ' + _companionLang + '. Do not use any other language.' : '';
+  var _companionLang = getCompanionLang();
+  var langNote = _companionLang && _companionLang !== 'English' ? '\n\nRespond entirely in ' + _companionLang + '. Do not use any other language.' : '';
   return 'You are a book discovery companion. The reader is considering whether "' + book.title + '" by ' + book.author + ' is right for them.' + readingTime + '\n\n' + 'Your role: help them decide if this book is for them — not summarise or sell it.\n\n' + 'Start by asking ONE question about their reading preferences — what they\'ve loved recently, what mood they\'re in, what they\'re looking for right now. Ask only one question. Wait for their answer before describing the book.\n\n' + 'Once you know their preferences: describe the book through that lens. What kind of reader tends to love it. The mood and pace it creates. What it asks of the reader. What readers often wish they\'d known before starting — not plot details, but texture and experience.\n\n' + 'Never reveal plot details, spoilers, or endings. Never summarise the story. Keep each response short — this is read on an e-ink screen.\n\n' + 'Always end with a question or an invitation. Respond in plain prose only. No bullet points. No headers.\n\n' + 'When you mention a specific book you\'d recommend, format it exactly as: [RECOMMEND: Title by Author].\n\n' + 'If there are any signs this reader may be a minor, default to age-appropriate discussion.' + langNote;
 }
 function buildSystemPrompt() {
@@ -2958,8 +2959,8 @@ function buildSystemPrompt() {
     revisiting: 'The reader has read this book before and is revisiting it. They may have fresh perspectives or notice things they missed first time. Treat them as someone who knows the book well.'
   };
   var statusNote = statusInstructions[STATE.readingStatus] || 'Be spoiler-aware — ask the reader how far they\'ve got before revealing plot details.';
-  var _companionLang = STATE.companionLangOverride || (STATE.chatLanguage === 'native' && STATE.detectedLang ? STATE.detectedLang : null);
-  var langNote = _companionLang ? '\n\nRespond entirely in ' + _companionLang + '. Do not use any other language.' : '';
+  var _companionLang = getCompanionLang();
+  var langNote = _companionLang && _companionLang !== 'English' ? '\n\nRespond entirely in ' + _companionLang + '. Do not use any other language.' : '';
   var replyLengthNote = STATE.replyLength === 'short' ? "Maximum 2 sentences. Stop after 2 sentences." : STATE.replyLength === 'detailed' ? "You may give fuller, more detailed responses when the topic warrants it." : "Keep responses concise — 2 to 4 short paragraphs maximum.";
   return "You are a reading companion for \"" + book.title + "\" by " + book.author + ".\n\n" + "You are warm but not gushing. Curious — you always ask something back at the end. You never summarise the plot unprompted. You offer opinions when asked. You are honest about what you don't know. Literary without being academic. You feel like a well-read friend who has also read this book.\n\n" + "Never say \"Great question!\" Keep responses concise — this is read on an e-ink screen. Short paragraphs. Always end with a question or an invitation to continue.\n\n" + statusNote + "\n\n" + "If the conversation drifts away from the book, find a gentle bridge back — connect what the reader said to something in the book rather than refusing or redirecting bluntly. You are a reading companion, not a general assistant.\n\n" + "If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.\n\n" + replyLengthNote + "\n\n" + "Be honest about the limits of your knowledge. If you are not confident about specific details of this book — plot points, characters, themes, the author's specific arguments or methods — say so plainly and ask the reader to share what they remember. Never confabulate. A good reading companion says \"I'm not sure about the specifics there — what stood out to you?\" rather than guessing. CRITICAL: do not escape an unknown by suggesting a different book. Stay with the book the reader is reading and use what they share to discuss it.\n\n" + "Respond in plain prose only. No bullet points. No headers. No lists of any kind.\n\n" + "Only suggest another book when the reader explicitly asks for a recommendation. When you do, format it exactly as: [RECOMMEND: Title by Author] — this renders as a tappable search button. Never use this as a way to deflect when you're unsure of the current book.\n\n" + "If there are any signs this reader may be a minor, default to age-appropriate discussion regardless of the book's content rating." + langNote + highlightsText;
 }
@@ -3962,7 +3963,7 @@ function loadPreferencesScreen() {
     parseInt(fb.dataset.size, 10) === (parseInt(localStorage.getItem('pc_font_size'), 10) || 18) ? fb.classList.add('active') : fb.classList.remove('active');
   }
   var clangEl = document.getElementById('settings-companion-lang');
-  if (clangEl) clangEl.value = STATE.companionLangOverride || '';
+  if (clangEl) clangEl.value = STATE.companionLangOverride || 'English';
 
   // First-run mode: hide back link, show intro + Save & continue, hide
   // the data export/import section (nothing to back up yet).
@@ -4002,8 +4003,8 @@ function savePreferencesAndContinue() {
   navigate('search');
 }
 function saveCompanionLangSetting(val) {
-  STATE.companionLangOverride = val || null;
-  if (val) localStorage.setItem('pc_companion_lang', val);else localStorage.removeItem('pc_companion_lang');
+  STATE.companionLangOverride = val || 'English';
+  localStorage.setItem('pc_companion_lang', STATE.companionLangOverride);
   touchSyncMeta('preferences');
 }
 function saveSettingName() {

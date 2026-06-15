@@ -1079,7 +1079,6 @@
           <button class="language-opt" onclick="setCompanionLanguage('Traditional Chinese')">Traditional Chinese</button>
           <button class="language-opt" onclick="setCompanionLanguage('Simplified Chinese')">Simplified Chinese</button>
         </div>
-        <button class="bubble-action-btn" onclick="setCompanionLanguage(null)" style="font-size:0.85rem;margin-top:12px">Auto-detect</button>
       </div>
 
       <div id="export-panel">
@@ -1190,7 +1189,6 @@
       <div class="field">
         <div style="position:relative">
           <select id="settings-companion-lang" onchange="saveCompanionLangSetting(this.value)" style="width:100%;border:1px solid #111111;background:#ffffff;color:#111111;font-family:Georgia,'Times New Roman',serif;font-size:1rem;padding:12px 14px;padding-right:36px;outline:none;border-radius:0;-webkit-appearance:none;appearance:none">
-            <option value="">Auto (match book)</option>
             <option value="English">English</option>
             <option value="French">French</option>
             <option value="German">German</option>
@@ -1209,7 +1207,7 @@
           </select>
           <span style="position:absolute;right:12px;top:50%;margin-top:-8px;font-size:1rem;line-height:1;pointer-events:none;color:#111111">&#9660;</span>
         </div>
-        <p style="font-size:0.78rem;color:#777777;margin-top:6px">Auto matches the book's language. Override to always chat in your preferred language.</p>
+        <p style="font-size:0.78rem;color:#777777;margin-top:6px">The companion chats in this language. Defaults to English; per-book overrides are available from the Language button in a chat.</p>
       </div>
     </div>
 
