@@ -32,6 +32,8 @@ indie project by a solo founder.
   THIS is what Vercel serves
 - support.html — standalone support page
 - transfer.html — desktop key transfer page
+- privacy.html — standalone privacy policy page
+- terms.html — standalone terms & conditions page
 - vercel.json — headers config
 - api/books.js — Google Books proxy
 - api/ai.js — free tier Gemini proxy
@@ -40,6 +42,7 @@ indie project by a solo founder.
 - CLAUDE.md — this file
 - PENDING.md — full feature backlog
 - STATUS.md — current session status
+- STRATEGY.md — product direction (post-launch)
 
 ## CRITICAL BUILD RULE
 Kobo WebKit does not support modern JS.
@@ -67,6 +70,17 @@ node_modules/.bin/babel app.js \
   -o app.transpiled.js
 Then verify: grep -c 'require(' on the
 output must be 0.
+
+## VERSIONING RULE
+Bump the version number on EVERY code
+change. Update both:
+- index.html header tagline span
+  (the "vX.YY" next to "Just books.
+  No noise.")
+- the "## Current Version" line below
+Keep them in sync. Increment the minor
+version (v0.40 → v0.41 → …) each change
+unless told otherwise.
 
 ## CRITICAL — Do Not Remove
 The permanent synchronous IIFE at the
@@ -199,16 +213,21 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.39 — sanity-check bug-fix round. Fixed chat retry losing the
-user's message, AI-mode toggle being ignored (BYOK key spent in
-shared mode), Drive sync reporting false success / caching undefined
-folder ids, sync merge dropping per-book reading state, passages
-"Saved ✓" check, global companion-language preference being wiped,
-offline queue for shared-pool users, [RECOMMEND] attribute escaping,
-and Kobo-unsafe APIs (NodeList.forEach, Set/Map, URLSearchParams,
-scrollTo options). Also fixed the broken Babel pipeline (was emitting
-require() calls) and pointed index.html at app.transpiled.js.
-See STATUS.md. Kobo/Kindle device test pending.
+v0.40 — soft-launch prep. Per-conversation .md sync to Google Drive;
+fixed book-reload switching to a stale book and the companion-language
+inconsistency (explicit choice now wins, defaults to English; auto-
+follow-the-book option removed). Hid the Kindle clippings import for
+the soft launch (markup kept). Moved a Sync button into the chat
+toolbar (connect/disconnect stays in Preferences). Simplified chat
+navigation (End Chat → Shelf, "New book" → search, removed duplicate
+Shelf button). Added standalone privacy.html + terms.html (linked in
+every screen footer) for Google Drive sync verification. Added
+STRATEGY.md. Kobo/Kindle device test pending.
+
+Earlier (v0.39): sanity-check bug-fix round — chat retry, AI-mode
+toggle, Drive sync false success, sync merge, passages check, language
+pref, offline queue, [RECOMMEND] escaping, Kobo-unsafe APIs, and the
+Babel pipeline. See STATUS.md.
 
 ## What NOT to Change
 - index.html + app.js architecture

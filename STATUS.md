@@ -1,8 +1,49 @@
 # Page Commons — Current Status
 
-Last updated: June 13, 2026
-Current version: v0.39
-Updated by: Claude session — sanity-check bug-fix round
+Last updated: June 15, 2026
+Current version: v0.40
+Updated by: Claude session — soft-launch prep
+
+## What was done this session [v0.40]
+
+Soft-launch preparation on branch `claude/brave-lovelace-vet1sn`
+(v0.40 round merged to main as it went). All ES5/legacy-WebKit safe.
+
+- **Per-conversation Markdown sync**: syncToDrive() now also writes each
+  saved conversation to the Drive `conversations/` folder as
+  `YYYY-MM-DD-[Book].md` (numbered when a book has several), upserting by
+  filename so re-syncs update rather than duplicate.
+- **Book reload fix**: launchCompanion() now persists `pc_last_book` on all
+  entry paths (was only set during search selection), so reloading
+  `#companion` no longer restores a stale/different book.
+- **Companion language**: the user's explicit choice now wins everywhere and
+  defaults to English; auto-follow-the-book was removed (UI auto options
+  gone). Icebreaker cache key includes the override; status screen translates
+  to the effective language.
+- **Soft-launch trim**: hid the Kindle clippings import (search screen + About
+  card) behind display:none, keeping the markup/code. Added a **Sync** button
+  to the chat toolbar (shown only when Drive connected; feedback mirrors into
+  the toolbar). Connect/disconnect stays in Preferences.
+- **Navigation**: End Chat → Shelf; "Change book" renamed "New book" → search;
+  removed the duplicate Shelf toolbar button (Sync took its slot); title still
+  → Library Hall.
+- **Legal pages**: added standalone `privacy.html` + `terms.html` (styled like
+  support.html), linked in every screen footer and on support/transfer pages,
+  for Google Drive OAuth verification. Privacy page documents the `drive.file`
+  scope, local-only storage, and Google API Limited Use compliance.
+- **Docs**: added `STRATEGY.md` (product direction); added a VERSIONING RULE to
+  CLAUDE.md (bump version on every code change).
+
+### Open items / next
+- Google OAuth consent screen: add the privacy.html + terms.html URLs and
+  submit for verification to take Drive sync to production (out of testing).
+- Consider whether the privacy/terms contact should be an email (currently
+  GitHub issues) — Google reviewers sometimes prefer an email.
+- Kobo/Kindle device test of the v0.40 changes still pending.
+
+---
+
+## Previous session [v0.39]
 
 ## What was done this session [v0.39]
 
