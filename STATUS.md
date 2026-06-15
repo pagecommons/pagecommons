@@ -2,7 +2,7 @@
 
 Last updated: June 15, 2026
 Current version: v0.40
-Updated by: Claude session — soft-launch prep
+Updated by: Claude session — soft-launch prep + Drive sync to production
 
 ## What was done this session [v0.40]
 
@@ -31,12 +31,32 @@ Soft-launch preparation on branch `claude/brave-lovelace-vet1sn`
   support.html), linked in every screen footer and on support/transfer pages,
   for Google Drive OAuth verification. Privacy page documents the `drive.file`
   scope, local-only storage, and Google API Limited Use compliance.
+- **Privacy-policy refinements** (later in session, merged to main):
+  - Book-search section now names **both** sources: Google Books API (primary,
+    via the serverless proxy) and **Open Library** (openlibrary.org, called
+    directly from the browser as a fallback — see `fetchOpenLibrary()` in
+    app.js). Notes neither receives PII, only the query.
+  - BYOK section now names the **specific models** so users can gauge cost:
+    Claude Sonnet 4 (`claude-sonnet-4-20250514`), Gemini 2.5 Flash
+    (`gemini-2.5-flash`), Llama 3.3 70B (`llama-3.3-70b-versatile`), each
+    subject to that provider's pricing (Groq free tier vs per-token for
+    Anthropic/Google). If these model IDs change in app.js, update privacy.html
+    to match.
 - **Docs**: added `STRATEGY.md` (product direction); added a VERSIONING RULE to
   CLAUDE.md (bump version on every code change).
 
+### Production milestone — Google Drive sync live
+- **Domain ownership verified** for `pagecommons.com` via a **DNS TXT record on
+  Cloudflare** (the domain provider). This is a Domain-property style
+  verification, so it covers all subdomains — nothing tracked in the repo
+  (no HTML verification file/meta tag needed, and none should be added).
+- privacy.html + terms.html are live in production and serve as the OAuth
+  consent-screen privacy/terms URLs. Drive sync is out of testing.
+- NOTE for future: if the OAuth consent screen ever needs re-verification, the
+  proof lives in Cloudflare DNS, not here. Don't remove or expect a
+  `google*.html` file in the repo root.
+
 ### Open items / next
-- Google OAuth consent screen: add the privacy.html + terms.html URLs and
-  submit for verification to take Drive sync to production (out of testing).
 - Consider whether the privacy/terms contact should be an email (currently
   GitHub issues) — Google reviewers sometimes prefer an email.
 - Kobo/Kindle device test of the v0.40 changes still pending.
