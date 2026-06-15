@@ -3854,7 +3854,9 @@ function copyAllPassages() {
 // ═══════════════════════════════════════════════════
 function endConversation() {
   saveCurrentConversation();
-  navigate('home');
+  // Land on the shelf — the reader's books and saved conversations — rather
+  // than the Library Hall, so leaving a chat continues naturally from there.
+  navigate('shelf');
 }
 // ═══════════════════════════════════════════════════
 //  KEY TRANSFER
