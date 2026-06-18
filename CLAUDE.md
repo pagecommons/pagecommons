@@ -217,7 +217,14 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.41 — post-verification polish. Fixed the bookKey() collision (now
+v0.42 — Kindle clippings import via Google Drive. User uploads My Clippings.txt
+to their "Page Commons" Drive folder; PC downloads it, parses it, merges
+highlights (deduplicating by title+text), then shows a confirmation list of
+books to add to shelf. AI companion automatically uses relevant highlights
+as context in chat (existing buildSystemPrompt pipeline — no UI change).
+Highlights persist in pc_highlights localStorage across sessions.
+
+Earlier (v0.41): post-verification polish. Fixed the bookKey() collision (now
 keys on the full title+author, not the first 40 chars) with a one-time
 shelf-driven migration of existing per-book data; one-row footer (brand
 left, Support/Privacy/Terms right) across the app + standalone pages;
