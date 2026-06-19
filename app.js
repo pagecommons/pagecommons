@@ -3235,15 +3235,41 @@ function saveCurrentConversation() {
   saveConvs(STATE.book, convs);
   addBookToShelf(STATE.book);
 }
+function archiveBook(book) {
+  var bk = bookKey(book);
+  var books = getShelfBooks();
+  for (var i = 0; i < books.length; i++) {
+    if (bookKey(books[i]) === bk) { books[i].archived = true; break; }
+  }
+  localStorage.setItem('pc_shelf_books', JSON.stringify(books));
+  touchSyncMeta('shelf');
+  renderShelf();
+}
+function unarchiveBook(book) {
+  var bk = bookKey(book);
+  var books = getShelfBooks();
+  for (var i = 0; i < books.length; i++) {
+    if (bookKey(books[i]) === bk) { books[i].archived = false; break; }
+  }
+  localStorage.setItem('pc_shelf_books', JSON.stringify(books));
+  touchSyncMeta('shelf');
+  renderShelf();
+}
 function renderShelf() {
   var books = getShelfBooks();
   var listEl = document.getElementById('shelf-list');
-  if (!books.length) {
+  var active = [], archived = [];
+  for (var i = 0; i < books.length; i++) {
+    if (books[i].archived) archived.push(books[i]);
+    else active.push(books[i]);
+  }
+  if (!active.length && !archived.length) {
     listEl.innerHTML = '<p class="shelf-empty">Your shelf is empty. Start a conversation to add books here.</p>';
     return;
   }
   listEl.innerHTML = '';
-  books.forEach(function (book) {
+
+  function makeBookEl(book, isArchived) {
     var convs = getConvs(book);
     var last = convs.length ? new Date(convs[0].lastUpdated).toLocaleDateString() : '';
     var bk = bookKey(book);
@@ -3256,12 +3282,46 @@ function renderShelf() {
     }[status] || '';
     var el = document.createElement('div');
     el.className = 'shelf-book';
-    el.innerHTML = '<div class="shelf-book-title">' + esc(book.title) + '</div>' + '<div class="shelf-book-author">' + esc(book.author) + '</div>' + '<div class="shelf-book-meta">' + (statusLabel ? statusLabel + ' · ' : '') + convs.length + ' conversation' + (convs.length !== 1 ? 's' : '') + (last ? ' · Last: ' + last : '') + '</div>';
-    el.addEventListener('click', function () {
-      return openBookShelf(book);
+    var actionBtn = isArchived
+      ? '<button class="shelf-archive-btn" data-action="unarchive">Restore</button>'
+      : '<button class="shelf-archive-btn" data-action="archive">Archive</button>';
+    el.innerHTML = '<div class="shelf-book-title">' + esc(book.title) + '</div>'
+      + '<div class="shelf-book-author">' + esc(book.author) + '</div>'
+      + '<div class="shelf-book-meta">' + (statusLabel ? statusLabel + ' · ' : '') + convs.length + ' conversation' + (convs.length !== 1 ? 's' : '') + (last ? ' · Last: ' + last : '') + '</div>'
+      + actionBtn;
+    el.addEventListener('click', function (evt) {
+      var btn = evt.target;
+      var action = btn.getAttribute ? btn.getAttribute('data-action') : null;
+      if (action === 'archive') { archiveBook(book); return; }
+      if (action === 'unarchive') { unarchiveBook(book); return; }
+      openBookShelf(book);
     });
-    listEl.appendChild(el);
-  });
+    return el;
+  }
+
+  for (var a = 0; a < active.length; a++) {
+    listEl.appendChild(makeBookEl(active[a], false));
+  }
+
+  if (archived.length) {
+    var toggle = document.createElement('button');
+    toggle.className = 'shelf-archive-toggle';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.textContent = 'Archived (' + archived.length + ')';
+    var archivedList = document.createElement('div');
+    archivedList.id = 'shelf-archived-list';
+    archivedList.style.display = 'none';
+    for (var b = 0; b < archived.length; b++) {
+      archivedList.appendChild(makeBookEl(archived[b], true));
+    }
+    toggle.addEventListener('click', function () {
+      var expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+      archivedList.style.display = expanded ? 'none' : 'block';
+    });
+    listEl.appendChild(toggle);
+    listEl.appendChild(archivedList);
+  }
 }
 function openBookShelf(book) {
   STATE.book = book;

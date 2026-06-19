@@ -305,12 +305,6 @@
     #book-title-display  { font-size: 1.1rem; margin-bottom: 3px; }
     #book-author-display { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #777777; }
     #book-status-display { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.75rem; color: #777777; margin-top: 4px; font-style: italic; }
-    #change-book-btn {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      font-size: 0.75rem; color: #777777; text-decoration: underline;
-      background: none; border: none; cursor: pointer; margin-top: 6px; padding: 0;
-    }
-
     /* === ICE BREAKERS === */
     #icebreakers { margin-bottom: 24px; }
     .icebreaker-label {
@@ -536,6 +530,18 @@
     .shelf-book-meta {
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       font-size: 0.75rem; color: #777777;
+    }
+    .shelf-archive-btn {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.75rem; color: #777777; text-decoration: underline;
+      background: none; border: none; padding: 0; cursor: pointer;
+      margin-top: 8px; display: block;
+    }
+    .shelf-archive-toggle {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.85rem; color: #777777; background: none; border: none;
+      padding: 16px 0 8px; cursor: pointer; text-decoration: underline;
+      display: block;
     }
 
     .conv-item { border: 1px solid #111111; border-radius: 0; padding: 14px 16px; margin-bottom: 10px; }
@@ -772,7 +778,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.46</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.47</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -1033,7 +1039,6 @@
       <div id="book-meta-display"></div>
       <div id="book-progress-display"></div>
       <div id="book-status-display"></div>
-      <button id="change-book-btn" onclick="navigate('search')">New book</button>
     </div>
 
     <div id="discover-convert-bar" style="display:none;margin-bottom:24px;display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">
