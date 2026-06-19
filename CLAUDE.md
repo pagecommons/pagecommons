@@ -217,7 +217,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.49 — Home screen: moved "No ads. No algorithms..." pitch into the description paragraph (same font/size, immediately visible). "Search for a book" / "Search book" renamed to "Find a book" across all screens and toolbar.
+v0.50 — Header nav: on inner screens the tagline swaps for "← Back · Hall · Find a book" right-aligned in the header, saving a full row of vertical space per screen. Home screen keeps the tagline. Companion/tc/onboarding show a minimal header.
+
+Earlier (v0.49): Home screen: moved "No ads. No algorithms..." pitch into the description paragraph (same font/size, immediately visible). "Search for a book" / "Search book" renamed to "Find a book" across all screens and toolbar.
 
 Earlier (v0.48): UI polish: search screen hint ("search by title and author below"); footer now has top border + header-matching "PAGE COMMONS" brand text; "Support" → "Support us"; home screen top/bottom spacing reduced so greeting is closer to header on small screens.
 

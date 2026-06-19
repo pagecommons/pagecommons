@@ -38,8 +38,11 @@
     /* === HEADER === */
     .site-header {
       border-bottom: 1px solid #111111;
-      padding: 22px 0 16px;
-      margin-bottom: 32px;
+      padding: 14px 0;
+      margin-bottom: 24px;
+      display: -webkit-box; display: -ms-flexbox; display: flex;
+      -webkit-box-align: center; -ms-flex-align: center; align-items: center;
+      -webkit-box-pack: justify; -ms-flex-pack: justify; justify-content: space-between;
     }
     .site-name {
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -57,6 +60,19 @@
       margin-top: 3px;
       letter-spacing: 0.02em;
     }
+    #header-nav {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.03em;
+      text-align: right;
+      white-space: nowrap;
+    }
+    #header-nav button, #header-nav a {
+      background: none; border: none; padding: 0; cursor: pointer;
+      color: #111111; text-decoration: underline;
+      font-family: inherit; font-size: inherit; letter-spacing: inherit;
+    }
+    #header-nav .nav-sep { color: #cccccc; margin: 0 5px; }
 
     /* === SCREENS === */
     .screen { display: none; }
@@ -171,25 +187,6 @@
       margin-bottom: 24px;
       padding: 0;
     }
-    .screen-nav {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      font-size: 0.78rem;
-      letter-spacing: 0.04em;
-      margin-bottom: 24px;
-    }
-    .screen-nav a, .screen-nav button {
-      background: none;
-      border: none;
-      padding: 0;
-      cursor: pointer;
-      color: #111111;
-      text-decoration: underline;
-      font-family: inherit;
-      font-size: inherit;
-      letter-spacing: inherit;
-    }
-    .screen-nav .nav-sep { color: #cccccc; margin: 0 8px; }
-
     /* === PROVIDER SELECTOR === */
     .provider-options { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; margin-bottom: 20px; }
     .provider-options > .provider-opt { margin-bottom: 8px; }
@@ -777,8 +774,13 @@
 <div class="page">
 
   <header class="site-header">
-    <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.49</span></div>
+    <div>
+      <div class="site-name" id="site-name-el">Page Commons</div>
+      <div id="site-tagline-el" class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.50</span></div>
+    </div>
+    <nav id="header-nav" style="display:none">
+      <button onclick="goBack()">&#8592; Back</button><span class="nav-sep">&#183;</span><a href="#home">Hall</a><span class="nav-sep">&#183;</span><a href="#search">Find a book</a>
+    </nav>
   </header>
 
   <!-- ══════════════════════════════════
@@ -816,7 +818,6 @@
        ABOUT
        ══════════════════════════════════ -->
   <section id="screen-about" class="screen">
-    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Find a book</a></div>
     <h1>What is Page Commons?</h1>
 
     <p>Page Commons is a quiet place for readers. No social feed, no follower counts, no algorithmic recommendations. Just books and the people who read them.</p>
@@ -869,10 +870,6 @@
        KEY SCREEN
        ══════════════════════════════════ -->
   <section id="screen-key" class="screen">
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:24px">
-      <button class="back-link" style="margin-bottom:0" onclick="goBack()">← Back</button>
-      <button class="back-link" style="margin-bottom:0" onclick="navigate('shelf')">Your shelf →</button>
-    </div>
     <h1>Your companion awaits</h1>
     <p>Choose your AI provider and enter your API key. Your key stays in your browser and never touches our servers — unless you use the transfer code option, where your key briefly passes through our servers to complete the transfer and is deleted immediately. No record is kept.</p>
 
@@ -924,7 +921,6 @@
        SEARCH
        ══════════════════════════════════ -->
   <section id="screen-search" class="screen">
-    <button class="back-link" onclick="goBack()">← Back</button>
     <h1 id="search-heading">Which book?</h1>
 
     <button class="btn" style="width:100%;margin-bottom:8px" onclick="navigate('shelf')">Your saved books →</button>
@@ -978,7 +974,6 @@
        BOOK DETAIL SCREEN
        ══════════════════════════════════ -->
   <section id="screen-book-detail" class="screen">
-    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Find a book</a></div>
     <div id="book-detail-content"></div>
     <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
@@ -987,7 +982,6 @@
        READING STATUS SCREEN
        ══════════════════════════════════ -->
   <section id="screen-status" class="screen">
-    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Find a book</a></div>
     <h1 id="status-book-title">Where are you with this book?</h1>
     <div class="status-options">
       <button class="status-opt" onclick="setReadingStatus('started')">
@@ -1014,7 +1008,6 @@
        LANGUAGE CHOICE SCREEN
        ══════════════════════════════════ -->
   <section id="screen-language" class="screen">
-    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Find a book</a></div>
     <h1>Which language?</h1>
     <p id="lang-prompt-text">This looks like a non-English book. Would you like to chat in the book's language or in English?</p>
     <div class="lang-options">
@@ -1180,7 +1173,6 @@
 
   <!-- YOUR SHELF -->
   <section id="screen-shelf" class="screen">
-    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Find a book</a></div>
     <h1>Your shelf</h1>
     <div id="shelf-list"></div>
     <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
@@ -1190,7 +1182,6 @@
        PREFERENCES
        ══════════════════════════════════ -->
   <section id="screen-preferences" class="screen">
-    <div class="screen-nav"><button id="prefs-back-link" onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Find a book</a></div>
     <h1 id="prefs-heading">Preferences</h1>
     <p id="prefs-intro" style="display:none;margin-bottom:20px">Quick setup. Defaults are fine — change anything you like, then continue.</p>
 
@@ -1322,7 +1313,6 @@
 
   <!-- BOOK CONVERSATIONS -->
   <section id="screen-book-shelf" class="screen">
-    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Find a book</a></div>
     <h1 id="book-shelf-title">—</h1>
     <p id="book-shelf-author" style="font-size:0.88rem;color:#777777;margin-bottom:4px"></p>
     <p id="book-shelf-status" style="font-size:0.78rem;color:#777777;font-style:italic;margin-bottom:20px"></p>

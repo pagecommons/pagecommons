@@ -313,6 +313,32 @@ function updatePreferencesFooterLinks() {
     }
   }
 }
+var HEADER_NAV_SCREENS = {
+  'about': true,
+  'book-detail': true,
+  'status': true,
+  'language': true,
+  'shelf': true,
+  'preferences': true,
+  'book-shelf': true,
+  'key': true,
+  'search': true
+};
+function updateHeaderNav(screenName) {
+  var taglineEl = document.getElementById('site-tagline-el');
+  var headerNav = document.getElementById('header-nav');
+  if (!taglineEl || !headerNav) return;
+  if (HEADER_NAV_SCREENS[screenName]) {
+    taglineEl.style.display = 'none';
+    headerNav.style.display = 'block';
+  } else if (screenName === 'home') {
+    taglineEl.style.display = 'block';
+    headerNav.style.display = 'none';
+  } else {
+    taglineEl.style.display = 'none';
+    headerNav.style.display = 'none';
+  }
+}
 function showScreen(id) {
   var target = SCREENS.includes(id) ? id : 'home';
   var cur = currentScreen();
@@ -337,6 +363,7 @@ function showScreen(id) {
       }
     }
   });
+  updateHeaderNav(target);
   updatePreferencesFooterLinks();
   window.scrollTo(0, 0);
 }
@@ -4085,11 +4112,11 @@ function loadPreferencesScreen() {
   // the data export/import section (nothing to back up yet).
   // Normal mode: show back link, hide intro + Save button.
   var firstRun = !localStorage.getItem('pc_preferences_set');
-  var backLink = document.getElementById('prefs-back-link');
+  var backLink = document.getElementById('header-nav');
   var intro = document.getElementById('prefs-intro');
   var saveBtn = document.getElementById('prefs-save-continue');
   var dataSection = document.getElementById('prefs-data-section');
-  if (backLink) backLink.style.display = firstRun ? 'none' : 'inline-block';
+  if (backLink) backLink.style.display = firstRun ? 'none' : 'block';
   if (intro) intro.style.display = firstRun ? 'block' : 'none';
   if (saveBtn) saveBtn.style.display = firstRun ? 'block' : 'none';
   if (dataSection) dataSection.style.display = firstRun ? 'none' : 'block';
