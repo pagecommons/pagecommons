@@ -217,7 +217,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.51 — Header nav extended to companion/chat screen. Toolbar "Find a book" and "End Chat" buttons removed — header ← Back now triggers endConversation() (save + go to shelf), same behaviour as the old button. Toolbar is now purely chat tools: Highlights · Passages · Notes · Language · Export · Sync.
+v0.52 — End Chat restored to toolbar: header ← Back covers early exit (before much scrolling), toolbar End Chat covers exit after a long conversation without scrolling back up. Toolbar: Highlights · Passages · Notes · Language · Export · Sync · End Chat.
+
+Earlier (v0.51): Header nav extended to companion/chat screen. Toolbar "Find a book" and "End Chat" buttons removed — header ← Back now triggers endConversation() (save + go to shelf), same behaviour as the old button. Toolbar is now purely chat tools: Highlights · Passages · Notes · Language · Export · Sync.
 
 Earlier (v0.50): Header nav: on inner screens the tagline swaps for "← Back · Main · Find a book" right-aligned in the header, saving a full row of vertical space per screen. Home screen keeps the tagline. Companion/tc/onboarding show a minimal header.
 
