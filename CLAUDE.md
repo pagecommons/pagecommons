@@ -217,7 +217,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.43 — Shelf screen: added Library Hall and Search navigation links. System prompt: tightened confabulation rule to distinguish well-known book content (state with confidence) from genuinely uncertain specifics (hedge and ask).
+v0.44 — Anthropic model updated to claude-sonnet-4-6 and extracted to a single ANTHROPIC_MODEL constant (one place to update going forward).
+
+Earlier (v0.43): Shelf screen: added Library Hall and Search navigation links. System prompt: tightened confabulation rule to distinguish well-known book content (state with confidence) from genuinely uncertain specifics (hedge and ask).
 
 Earlier (v0.42): Kindle clippings import built but hidden. Full pipeline implemented
 (gdriveDownloadText, importClippingsFromDrive, showDriveClippingsBooksConfirm,

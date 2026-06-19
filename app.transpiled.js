@@ -559,6 +559,8 @@ function updateGreeting() {
 // ═══════════════════════════════════════════════════
 //  PROVIDER SELECTION
 // ═══════════════════════════════════════════════════
+// Single source of truth for the Anthropic model — update here only.
+var ANTHROPIC_MODEL = 'claude-sonnet-4-6';
 var PROVIDER_CONFIG = {
   anthropic: {
     placeholder: 'sk-ant-…',
@@ -669,7 +671,7 @@ function _interpretSearchQuery() {
               'anthropic-dangerous-direct-browser-access': 'true'
             },
             body: JSON.stringify({
-              model: 'claude-sonnet-4-20250514',
+              model: ANTHROPIC_MODEL,
               max_tokens: 80,
               messages: [{
                 role: 'user',
@@ -1501,7 +1503,7 @@ function _renderStatusScreen() {
               'anthropic-dangerous-direct-browser-access': 'true'
             },
             body: JSON.stringify({
-              model: 'claude-sonnet-4-20250514',
+              model: ANTHROPIC_MODEL,
               max_tokens: 300,
               messages: [{
                 role: 'user',
@@ -2092,7 +2094,7 @@ function _generateThinkingPhrases() {
               'anthropic-dangerous-direct-browser-access': 'true'
             },
             body: JSON.stringify({
-              model: 'claude-sonnet-4-20250514',
+              model: ANTHROPIC_MODEL,
               max_tokens: 120,
               messages: [{
                 role: 'user',
@@ -2601,7 +2603,7 @@ function _fetchAIIcebreakers() {
               'anthropic-dangerous-direct-browser-access': 'true'
             },
             body: JSON.stringify(Object.assign({
-              model: 'claude-sonnet-4-20250514',
+              model: ANTHROPIC_MODEL,
               max_tokens: 200,
               messages: [{
                 role: 'user',
@@ -3105,7 +3107,7 @@ function _callAnthropic() {
               'anthropic-dangerous-direct-browser-access': 'true'
             },
             body: JSON.stringify({
-              model: 'claude-sonnet-4-20250514',
+              model: ANTHROPIC_MODEL,
               max_tokens: STATE.replyLength === 'short' ? 400 : 1500,
               system: system,
               messages: messages
