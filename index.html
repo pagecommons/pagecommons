@@ -778,7 +778,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.48</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.49</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -790,7 +790,7 @@
       <div class="hall-title">A quiet place to talk about books.</div>
       <p class="hall-description">
         Discuss what you're reading, discover what others thought,
-        or find your next book.
+        or find your next book.<br>No ads. No algorithms. No engagement metrics. Just books.
       </p>
 
       <div class="hall-doors">
@@ -808,10 +808,6 @@
         <a href="#" onclick="navigate('about'); return false;">New here? Learn what Page Commons is →</a>
       </p>
 
-      <hr class="hall-divider" />
-      <div class="hall-footer">
-        No ads. No algorithms. No engagement metrics. Just books.
-      </div>
     </div>
     <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
@@ -820,7 +816,7 @@
        ABOUT
        ══════════════════════════════════ -->
   <section id="screen-about" class="screen">
-    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
+    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Find a book</a></div>
     <h1>What is Page Commons?</h1>
 
     <p>Page Commons is a quiet place for readers. No social feed, no follower counts, no algorithmic recommendations. Just books and the people who read them.</p>
@@ -982,7 +978,7 @@
        BOOK DETAIL SCREEN
        ══════════════════════════════════ -->
   <section id="screen-book-detail" class="screen">
-    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
+    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Find a book</a></div>
     <div id="book-detail-content"></div>
     <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
@@ -991,7 +987,7 @@
        READING STATUS SCREEN
        ══════════════════════════════════ -->
   <section id="screen-status" class="screen">
-    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
+    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Find a book</a></div>
     <h1 id="status-book-title">Where are you with this book?</h1>
     <div class="status-options">
       <button class="status-opt" onclick="setReadingStatus('started')">
@@ -1018,7 +1014,7 @@
        LANGUAGE CHOICE SCREEN
        ══════════════════════════════════ -->
   <section id="screen-language" class="screen">
-    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
+    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Find a book</a></div>
     <h1>Which language?</h1>
     <p id="lang-prompt-text">This looks like a non-English book. Would you like to chat in the book's language or in English?</p>
     <div class="lang-options">
@@ -1071,7 +1067,7 @@
         <button class="toolbar-btn" id="language-toolbar-btn" onclick="toggleLanguagePanel()">Language</button>
         <button class="toolbar-btn" id="export-toolbar-btn" onclick="toggleExportPanel()">Export</button>
         <button class="toolbar-btn" id="sync-toolbar-btn" style="display:none" onclick="syncFromToolbar()">Sync</button>
-        <button class="toolbar-btn" onclick="navigate('search')">Search book</button>
+        <button class="toolbar-btn" onclick="navigate('search')">Find a book</button>
         <button class="toolbar-btn" onclick="endConversation()">End Chat</button>
       </div>
 
@@ -1184,7 +1180,7 @@
 
   <!-- YOUR SHELF -->
   <section id="screen-shelf" class="screen">
-    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
+    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Find a book</a></div>
     <h1>Your shelf</h1>
     <div id="shelf-list"></div>
     <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
@@ -1194,7 +1190,7 @@
        PREFERENCES
        ══════════════════════════════════ -->
   <section id="screen-preferences" class="screen">
-    <div class="screen-nav"><button id="prefs-back-link" onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
+    <div class="screen-nav"><button id="prefs-back-link" onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Find a book</a></div>
     <h1 id="prefs-heading">Preferences</h1>
     <p id="prefs-intro" style="display:none;margin-bottom:20px">Quick setup. Defaults are fine — change anything you like, then continue.</p>
 
@@ -1326,7 +1322,7 @@
 
   <!-- BOOK CONVERSATIONS -->
   <section id="screen-book-shelf" class="screen">
-    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
+    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Find a book</a></div>
     <h1 id="book-shelf-title">—</h1>
     <p id="book-shelf-author" style="font-size:0.88rem;color:#777777;margin-bottom:4px"></p>
     <p id="book-shelf-status" style="font-size:0.78rem;color:#777777;font-style:italic;margin-bottom:20px"></p>
