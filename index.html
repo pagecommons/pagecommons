@@ -754,7 +754,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.41</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.42</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -1280,9 +1280,18 @@
           <p style="font-size:0.85rem;margin-top:0;margin-bottom:4px">Connected as <span id="gdrive-email">&mdash;</span></p>
           <p id="gdrive-last-synced" style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px">Last synced: never</p>
           <button class="btn" style="margin-bottom:10px" onclick="syncToDrive()">Sync now</button>
+          <!-- Kindle clippings import hidden — Mac/MTP gap (2024 Kindle not mountable on Mac).
+               Code kept in app.js (importClippingsFromDrive, showDriveClippingsBooksConfirm,
+               confirmAddDriveBooks, gdriveDownloadText). Re-enable when a Mac-friendly
+               import path is identified (read.amazon.com parser, or Bookcision format support).
+          <button class="btn" style="margin-bottom:10px" onclick="importClippingsFromDrive()">Import My Clippings.txt</button>
+          <p style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px">Upload My Clippings.txt from your Kindle to your &ldquo;Page Commons&rdquo; folder in Google Drive first.</p>
+          -->
           <button class="btn" onclick="disconnectGDrive()">Disconnect</button>
         </div>
         <div id="gdrive-msg" style="display:none;font-size:0.85rem;margin-top:10px"></div>
+        <div id="clippings-drive-msg" style="display:none;font-size:0.85rem;margin-top:10px;color:#555555"></div>
+        <div id="clippings-drive-confirm" style="display:none;margin-top:16px;border-top:1px solid #eeeeee;padding-top:16px"></div>
       </div>
     </div>
 

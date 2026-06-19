@@ -217,7 +217,15 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.41 — post-verification polish. Fixed the bookKey() collision (now
+v0.42 — Kindle clippings import built but hidden. Full pipeline implemented
+(gdriveDownloadText, importClippingsFromDrive, showDriveClippingsBooksConfirm,
+confirmAddDriveBooks) and the existing parseClippingsText/getRelevantHighlights
+context injection is intact. Hidden because 2024 Kindle uses MTP which Mac does
+not support natively, making My Clippings.txt inaccessible for a significant
+portion of users. Re-enable when a Mac-friendly import path exists (e.g. parser
+for read.amazon.com/notebook format, or Bookcision export support).
+
+Earlier (v0.41): post-verification polish. Fixed the bookKey() collision (now
 keys on the full title+author, not the first 40 chars) with a one-time
 shelf-driven migration of existing per-book data; one-row footer (brand
 left, Support/Privacy/Terms right) across the app + standalone pages;

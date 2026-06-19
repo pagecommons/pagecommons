@@ -4618,6 +4618,12 @@ function gdriveUploadMarkdown(folderId, existingId, filename, content) {
 function gdriveDownloadJson(fileId) {
   return gdriveFetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media').then(gdriveJson);
 }
+function gdriveDownloadText(fileId) {
+  return gdriveFetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media').then(function (r) {
+    if (!r.ok) throw new Error('Drive request failed (HTTP ' + r.status + ')');
+    return r.text();
+  });
+}
 function gdriveUploadJson(folderId, fileId, payload) {
   // Multipart upload: metadata + body. If fileId given, PATCH; else POST.
   var boundary = '----pc_boundary_' + Date.now();
@@ -4791,6 +4797,151 @@ function disconnectGDrive() {
     localStorage.removeItem(k);
   });
   renderDriveStatus();
+}
+
+// ── Kindle clippings import from Drive ──────────────────────────────────────
+// User uploads My Clippings.txt to their "Page Commons" Drive folder;
+// we download it, parse it, and merge highlights into pc_highlights.
+// The AI companion already picks up relevant highlights in buildSystemPrompt().
+
+function importClippingsFromDrive() {
+  var msgEl = document.getElementById('clippings-drive-msg');
+  var confirmEl = document.getElementById('clippings-drive-confirm');
+  if (confirmEl) {
+    confirmEl.style.display = 'none';
+    confirmEl.innerHTML = '';
+  }
+  if (msgEl) {
+    msgEl.style.display = 'block';
+    msgEl.textContent = 'Looking for My Clippings.txt in your Page Commons folder…';
+  }
+  getOrCreatePageCommonsFolder().then(function (folderId) {
+    return gdriveFindFileInFolder(folderId, 'My Clippings.txt');
+  }).then(function (fileId) {
+    if (!fileId) {
+      if (msgEl) msgEl.textContent = 'My Clippings.txt not found. Upload it to your “Page Commons” folder in Google Drive, then try again.';
+      return;
+    }
+    if (msgEl) msgEl.textContent = 'Found — downloading…';
+    return gdriveDownloadText(fileId).then(function (text) {
+      var fresh = parseClippingsText(text);
+      if (!fresh.length) {
+        if (msgEl) msgEl.textContent = 'No highlights found in the file.';
+        return;
+      }
+      // Merge with existing highlights, deduplicating by title+text pair.
+      var existing = STATE.highlights.slice();
+      var seen = {};
+      var i;
+      for (i = 0; i < existing.length; i++) {
+        seen[existing[i].title + '\x00' + existing[i].text] = 1;
+      }
+      for (i = 0; i < fresh.length; i++) {
+        var dk = fresh[i].title + '\x00' + fresh[i].text;
+        if (!seen[dk]) {
+          existing.push(fresh[i]);
+          seen[dk] = 1;
+        }
+      }
+      STATE.highlights = existing;
+      localStorage.setItem('pc_highlights', JSON.stringify(existing));
+      if (msgEl) {
+        msgEl.style.display = 'none';
+      }
+      showDriveClippingsBooksConfirm(fresh);
+    });
+  }).catch(function (e) {
+    if (msgEl) msgEl.textContent = 'Import failed — ' + (e && e.message ? e.message : 'please try again.');
+  });
+}
+function showDriveClippingsBooksConfirm(highlights) {
+  var confirmEl = document.getElementById('clippings-drive-confirm');
+  if (!confirmEl) return;
+
+  // Aggregate unique books and their highlight counts.
+  var bookMap = {};
+  var i, k;
+  for (i = 0; i < highlights.length; i++) {
+    var h = highlights[i];
+    k = h.title + '\x00' + h.author;
+    if (!bookMap[k]) bookMap[k] = {
+      title: h.title,
+      author: h.author,
+      count: 0
+    };
+    bookMap[k].count++;
+  }
+  var shelf = getShelfBooks();
+  var books = [];
+  var keys = Object.keys(bookMap);
+  for (i = 0; i < keys.length; i++) {
+    var entry = bookMap[keys[i]];
+    var onShelf = false;
+    var bk = bookKey(entry);
+    for (var j = 0; j < shelf.length; j++) {
+      if (bookKey(shelf[j]) === bk) {
+        onShelf = true;
+        break;
+      }
+    }
+    books.push({
+      title: entry.title,
+      author: entry.author,
+      count: entry.count,
+      onShelf: onShelf
+    });
+  }
+  // New books first (sorted by highlight count), then already-on-shelf.
+  books.sort(function (a, b) {
+    if (a.onShelf !== b.onShelf) return a.onShelf ? 1 : -1;
+    return b.count - a.count;
+  });
+  var newCount = 0;
+  for (i = 0; i < books.length; i++) {
+    if (!books[i].onShelf) newCount++;
+  }
+  function esc(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  var html = '<p style="margin-top:0;margin-bottom:14px"><strong>Highlights imported.</strong> ' + (newCount > 0 ? 'Select books to add to your shelf:' : 'All books are already on your shelf.') + '</p>' + '<div id="clippings-book-list">';
+  for (i = 0; i < books.length; i++) {
+    var b = books[i];
+    var et = esc(b.title);
+    var ea = esc(b.author);
+    var countNote = ' <span style="font-size:0.8rem;color:#777777">(' + b.count + ' highlight' + (b.count !== 1 ? 's' : '') + ')</span>';
+    if (b.onShelf) {
+      html += '<div style="padding:10px 0;border-bottom:1px solid #eeeeee;color:#777777">' + et + ' <em>by</em> ' + ea + ' <span style="font-size:0.8rem">(already on shelf)</span></div>';
+    } else {
+      html += '<div style="padding:10px 0;border-bottom:1px solid #eeeeee">' + '<label style="display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:start;' + '-webkit-align-items:flex-start;align-items:flex-start;cursor:pointer">' + '<input type="checkbox" data-title="' + et + '" data-author="' + ea + '" checked ' + 'style="margin-right:10px;margin-top:3px;-webkit-flex-shrink:0;flex-shrink:0">' + '<span>' + et + ' <em>by</em> ' + ea + countNote + '</span></label></div>';
+    }
+  }
+  html += '</div>';
+  if (newCount > 0) {
+    html += '<button class="btn btn-primary" style="margin-top:16px;width:100%" onclick="confirmAddDriveBooks()">Add selected to shelf</button>';
+  }
+  html += '<p style="margin-top:10px;font-size:0.8rem;color:#777777">' + 'Your highlights inform your companion conversations — no action needed for that.</p>';
+  confirmEl.innerHTML = html;
+  confirmEl.style.display = 'block';
+}
+function confirmAddDriveBooks() {
+  var listEl = document.getElementById('clippings-book-list');
+  var confirmEl = document.getElementById('clippings-drive-confirm');
+  if (!listEl) return;
+  var checkboxes = listEl.querySelectorAll('input[type=checkbox]');
+  var added = 0;
+  for (var i = 0; i < checkboxes.length; i++) {
+    var cb = checkboxes[i];
+    if (cb.checked) {
+      addBookToShelf({
+        title: cb.getAttribute('data-title'),
+        author: cb.getAttribute('data-author')
+      });
+      added++;
+    }
+  }
+  if (confirmEl) {
+    confirmEl.innerHTML = '<p style="margin-top:0">' + (added > 0 ? added + ' book' + (added !== 1 ? 's' : '') + ' added to your shelf.' : 'No books added.') + ' Your highlights are active — your companion will use them in chat.</p>';
+  }
 }
 
 // Manual sync trigger from the conversation-view toolbar. Connect/disconnect
