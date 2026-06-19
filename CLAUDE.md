@@ -217,7 +217,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.42 — Kindle clippings import built but hidden. Full pipeline implemented
+v0.43 — Shelf screen: added Library Hall and Search navigation links. System prompt: tightened confabulation rule to distinguish well-known book content (state with confidence) from genuinely uncertain specifics (hedge and ask).
+
+Earlier (v0.42): Kindle clippings import built but hidden. Full pipeline implemented
 (gdriveDownloadText, importClippingsFromDrive, showDriveClippingsBooksConfirm,
 confirmAddDriveBooks) and the existing parseClippingsText/getRelevantHighlights
 context injection is intact. Hidden because 2024 Kindle uses MTP which Mac does
