@@ -137,6 +137,7 @@ function currentScreen() {
   return el ? el.id.replace('screen-', '') : null;
 }
 function goBack() {
+  if (currentScreen() === 'companion') { endConversation(); return; }
   var prev = navStack.length ? navStack.pop() : null;
   if (!prev) {
     var cur = currentScreen() || 'home';
@@ -182,7 +183,8 @@ function updatePreferencesFooterLinks() {
 
 var HEADER_NAV_SCREENS = {
   'about': true, 'book-detail': true, 'status': true, 'language': true,
-  'shelf': true, 'preferences': true, 'book-shelf': true, 'key': true, 'search': true
+  'shelf': true, 'preferences': true, 'book-shelf': true, 'key': true, 'search': true,
+  'companion': true
 };
 function updateHeaderNav(screenName) {
   var taglineEl = document.getElementById('site-tagline-el');

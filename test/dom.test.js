@@ -73,9 +73,14 @@ test('footer is a single row: brand left, Support/Privacy/Terms right', async fu
   assert.ok(hrefs.indexOf('/terms.html') !== -1, 'Terms link missing from footer');
 });
 
-test('the End Chat toolbar button is labelled correctly (not "Done"/"Close")', async function () {
+test('companion header nav is present and toolbar has End Chat', async function () {
   var app = await boot({ seed: RETURNING });
-  var toolbar = app.document.getElementById('reader-toolbar') || app.document.body;
-  var text = toolbar.textContent;
-  assert.ok(/End Chat/.test(text), 'reader toolbar should contain an "End Chat" button');
+  var nav = app.document.getElementById('header-nav');
+  assert.ok(nav, 'header-nav element should exist');
+  var navText = nav.textContent;
+  assert.ok(/Back/.test(navText), 'header-nav should contain Back');
+  assert.ok(/Main/.test(navText), 'header-nav should contain Main');
+  assert.ok(/Find/.test(navText), 'header-nav should contain Find');
+  var toolbar = app.document.getElementById('reader-toolbar');
+  assert.ok(toolbar && /End Chat/.test(toolbar.textContent), 'toolbar should contain End Chat button');
 });
