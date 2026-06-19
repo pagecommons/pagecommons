@@ -754,7 +754,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.44</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.45</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -1047,6 +1047,7 @@
         <button class="toolbar-btn" id="language-toolbar-btn" onclick="toggleLanguagePanel()">Language</button>
         <button class="toolbar-btn" id="export-toolbar-btn" onclick="toggleExportPanel()">Export</button>
         <button class="toolbar-btn" id="sync-toolbar-btn" style="display:none" onclick="syncFromToolbar()">Sync</button>
+        <button class="toolbar-btn" onclick="navigate('search')">Search book</button>
         <button class="toolbar-btn" onclick="endConversation()">End Chat</button>
       </div>
 
@@ -1161,11 +1162,10 @@
   <section id="screen-shelf" class="screen">
     <button class="back-link" onclick="goBack()">← Back</button>
     <h1>Your shelf</h1>
-    <p style="font-size:0.88rem;color:#777777;margin-bottom:8px">Books you have discussed with your companion.</p>
-    <p style="font-size:0.88rem;margin-bottom:20px">
-      <a href="#home" style="color:#111111">Library Hall</a>
-      <span style="color:#cccccc;margin:0 10px">|</span>
-      <a href="#search" style="color:#111111">Search for a book</a>
+    <p style="font-size:0.82rem;color:#777777;margin-top:-12px;margin-bottom:20px">
+      <a href="#home" style="color:#777777">Library Hall</a>
+      <span style="color:#cccccc;margin:0 8px">|</span>
+      <a href="#search" style="color:#777777">Search for a book</a>
     </p>
     <div id="shelf-list"></div>
     <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
