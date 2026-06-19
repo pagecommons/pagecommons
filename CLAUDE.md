@@ -217,7 +217,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.47 — Shelf archiving: books can be archived from the shelf (collapsible "Archived" section, folded by default, revivable). Removed redundant "New book" button from companion header (replaced by "Search book" in toolbar).
+v0.48 — UI polish: search screen hint ("search by title and author below"); footer now has top border + header-matching "PAGE COMMONS" brand text; "Support" → "Support us"; home screen top/bottom spacing reduced so greeting is closer to header on small screens.
+
+Earlier (v0.47): Shelf archiving: books can be archived from the shelf (collapsible "Archived" section, folded by default, revivable). Removed redundant "New book" button from companion header (replaced by "Search book" in toolbar).
 
 Earlier (v0.46): Unified screen-nav row (← Back · Library Hall · Search for a book) applied to all inner screens: About, Book detail, Status, Language, Shelf, Preferences, Book conversations. Single .screen-nav CSS class. Key and Search screens left with their existing custom nav.
 

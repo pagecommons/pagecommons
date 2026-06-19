@@ -459,7 +459,7 @@
     .manual-entry { border-top: 1px solid #111111; padding-top: 16px; margin-top: 8px; }
 
     /* === LIBRARY HALL === */
-    .hall-body { -webkit-box-flex: 1; -ms-flex: 1; flex: 1; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; padding: 48px 0 24px; }
+    .hall-body { -webkit-box-flex: 1; -ms-flex: 1; flex: 1; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-pack: start; -ms-flex-pack: start; justify-content: flex-start; padding: 8px 0 0; }
     .hall-greeting {
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
@@ -762,9 +762,9 @@
     .age-gate-btns > .btn:last-child { margin-bottom: 0; }
 
     /* === SCREEN SUPPORT FOOTER === */
-    .screen-support-footer { padding-top: 32px; padding-bottom: 16px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: #666666; display: -webkit-box; display: -webkit-flex; display: flex; -webkit-box-pack: justify; -webkit-justify-content: space-between; justify-content: space-between; -webkit-box-align: center; -webkit-align-items: center; align-items: center; -webkit-flex-wrap: wrap; flex-wrap: wrap; }
+    .screen-support-footer { border-top: 1px solid #111111; margin-top: 24px; padding-top: 16px; padding-bottom: 16px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: #666666; display: -webkit-box; display: -webkit-flex; display: flex; -webkit-box-pack: justify; -webkit-justify-content: space-between; justify-content: space-between; -webkit-box-align: center; -webkit-align-items: center; align-items: center; -webkit-flex-wrap: wrap; flex-wrap: wrap; }
     .screen-support-footer a { color: #666666; text-decoration: underline; }
-    .screen-support-footer .sf-brand { font-weight: 600; }
+    .screen-support-footer .sf-brand { font-weight: 600; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #111111; }
     .screen-support-footer .sf-links a { margin-left: 14px; }
   </style>
   <script src="app.transpiled.js" defer></script>
@@ -778,7 +778,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.47</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.48</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -813,7 +813,7 @@
         No ads. No algorithms. No engagement metrics. Just books.
       </div>
     </div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -866,7 +866,7 @@
     </div>
 
     <button class="btn btn-primary" onclick="navigate('home')">Back to the library</button>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -921,7 +921,7 @@
     <hr />
     <div id="key-error" class="status-msg error" style="display:none"></div>
     <button class="btn btn-primary" onclick="saveKey()">Continue</button>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -931,7 +931,8 @@
     <button class="back-link" onclick="goBack()">← Back</button>
     <h1 id="search-heading">Which book?</h1>
 
-    <button class="btn" style="width:100%;margin-bottom:24px" onclick="navigate('shelf')">Your saved books →</button>
+    <button class="btn" style="width:100%;margin-bottom:8px" onclick="navigate('shelf')">Your saved books →</button>
+    <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:0.78rem;color:#777777;margin-bottom:20px">Or search by title and author below.</p>
 
     <div class="field">
       <label for="book-search-title">Title</label>
@@ -974,7 +975,7 @@
     </div>
     <div id="clippings-status" class="status-msg" style="display:none"></div>
     </div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -983,7 +984,7 @@
   <section id="screen-book-detail" class="screen">
     <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
     <div id="book-detail-content"></div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -1010,7 +1011,7 @@
         <span class="status-opt-sub">Coming back with fresh eyes</span>
       </button>
     </div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -1025,7 +1026,7 @@
       <button class="btn" onclick="setLanguage('english')">Chat in English</button>
     </div>
     <p style="font-size:0.78rem;color:#777777;margin-top:16px">You can change this later in More.</p>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -1125,7 +1126,7 @@
       API key loaded &nbsp;·&nbsp;
       <button onclick="clearKey()" style="background:none;border:none;cursor:pointer;text-decoration:underline;font-family:Georgia, 'Times New Roman', serif;font-size:0.78rem;color:#777777">Remove</button>
     </div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
 
@@ -1141,7 +1142,7 @@
     <p style="font-size:0.78rem;color:#777777;margin-bottom:24px">Stronger knowledge across more titles and languages, always available. Anthropic Claude, Google Gemini, or Groq. Your key is stored only in this browser and never sent to our servers.</p>
 
     <p style="font-size:0.78rem;color:#777777">You can change this any time in Preferences.</p>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- T&C SCREEN -->
@@ -1165,7 +1166,7 @@
     </div>
     <button class="btn btn-primary" onclick="acceptTC()">I agree — take me in</button>
     <p style="font-size:0.78rem;color:#777777;margin-top:12px;text-align:center">Your agreement is stored locally in your browser only.</p>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- AGE GATE -->
@@ -1178,7 +1179,7 @@
       <button class="btn btn-primary" onclick="confirmAgeGate()">I'm 18 or over — continue</button>
       <button class="btn" onclick="navigate('search')">Take me back</button>
     </div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- YOUR SHELF -->
@@ -1186,7 +1187,7 @@
     <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
     <h1>Your shelf</h1>
     <div id="shelf-list"></div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -1320,7 +1321,7 @@
 
     <button class="btn btn-primary" id="prefs-save-continue" style="display:none;width:100%;margin-top:24px" onclick="savePreferencesAndContinue()">Save & continue</button>
 
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
   <!-- BOOK CONVERSATIONS -->
@@ -1334,7 +1335,7 @@
       <button class="btn btn-small" onclick="updateBookStatus()">Update status</button>
     </div>
     <div id="conv-list"></div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
 
 </div>
