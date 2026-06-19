@@ -171,6 +171,24 @@
       margin-bottom: 24px;
       padding: 0;
     }
+    .screen-nav {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      margin-bottom: 24px;
+    }
+    .screen-nav a, .screen-nav button {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: #111111;
+      text-decoration: underline;
+      font-family: inherit;
+      font-size: inherit;
+      letter-spacing: inherit;
+    }
+    .screen-nav .nav-sep { color: #cccccc; margin: 0 8px; }
 
     /* === PROVIDER SELECTOR === */
     .provider-options { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; margin-bottom: 20px; }
@@ -754,7 +772,7 @@
 
   <header class="site-header">
     <div class="site-name" id="site-name-el">Page Commons</div>
-    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.45</span></div>
+    <div class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.46</span></div>
   </header>
 
   <!-- ══════════════════════════════════
@@ -796,7 +814,7 @@
        ABOUT
        ══════════════════════════════════ -->
   <section id="screen-about" class="screen">
-    <button class="back-link" onclick="goBack()">← Back</button>
+    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
     <h1>What is Page Commons?</h1>
 
     <p>Page Commons is a quiet place for readers. No social feed, no follower counts, no algorithmic recommendations. Just books and the people who read them.</p>
@@ -957,7 +975,7 @@
        BOOK DETAIL SCREEN
        ══════════════════════════════════ -->
   <section id="screen-book-detail" class="screen">
-    <button class="back-link" onclick="goBack()">← Back</button>
+    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
     <div id="book-detail-content"></div>
     <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
@@ -966,7 +984,7 @@
        READING STATUS SCREEN
        ══════════════════════════════════ -->
   <section id="screen-status" class="screen">
-    <button class="back-link" onclick="goBack()">← Back</button>
+    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
     <h1 id="status-book-title">Where are you with this book?</h1>
     <div class="status-options">
       <button class="status-opt" onclick="setReadingStatus('started')">
@@ -993,7 +1011,7 @@
        LANGUAGE CHOICE SCREEN
        ══════════════════════════════════ -->
   <section id="screen-language" class="screen">
-    <button class="back-link" onclick="goBack()">← Back</button>
+    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
     <h1>Which language?</h1>
     <p id="lang-prompt-text">This looks like a non-English book. Would you like to chat in the book's language or in English?</p>
     <div class="lang-options">
@@ -1160,13 +1178,8 @@
 
   <!-- YOUR SHELF -->
   <section id="screen-shelf" class="screen">
-    <button class="back-link" onclick="goBack()">← Back</button>
+    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
     <h1>Your shelf</h1>
-    <p style="font-size:0.82rem;color:#777777;margin-top:-12px;margin-bottom:20px">
-      <a href="#home" style="color:#777777">Library Hall</a>
-      <span style="color:#cccccc;margin:0 8px">|</span>
-      <a href="#search" style="color:#777777">Search for a book</a>
-    </p>
     <div id="shelf-list"></div>
     <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
   </section>
@@ -1175,7 +1188,7 @@
        PREFERENCES
        ══════════════════════════════════ -->
   <section id="screen-preferences" class="screen">
-    <button class="back-link" id="prefs-back-link" onclick="goBack()">← Back</button>
+    <div class="screen-nav"><button id="prefs-back-link" onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
     <h1 id="prefs-heading">Preferences</h1>
     <p id="prefs-intro" style="display:none;margin-bottom:20px">Quick setup. Defaults are fine — change anything you like, then continue.</p>
 
@@ -1307,7 +1320,7 @@
 
   <!-- BOOK CONVERSATIONS -->
   <section id="screen-book-shelf" class="screen">
-    <button class="back-link" onclick="goBack()">← Back</button>
+    <div class="screen-nav"><button onclick="goBack()">← Back</button><span class="nav-sep">·</span><a href="#home">Library Hall</a><span class="nav-sep">·</span><a href="#search">Search for a book</a></div>
     <h1 id="book-shelf-title">—</h1>
     <p id="book-shelf-author" style="font-size:0.88rem;color:#777777;margin-bottom:4px"></p>
     <p id="book-shelf-status" style="font-size:0.78rem;color:#777777;font-style:italic;margin-bottom:20px"></p>

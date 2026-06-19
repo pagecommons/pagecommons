@@ -217,7 +217,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.45 — Shelf nav links moved above content and styled as subtle secondary text (grey, smaller). "Search book" button added to chat toolbar before End Chat. Description removed from shelf screen (self-evident from heading + list).
+v0.46 — Unified screen-nav row (← Back · Library Hall · Search for a book) applied to all inner screens: About, Book detail, Status, Language, Shelf, Preferences, Book conversations. Single .screen-nav CSS class. Key and Search screens left with their existing custom nav.
+
+Earlier (v0.45): Shelf nav links moved above content. "Search book" button added to chat toolbar.
 
 Earlier (v0.44): Anthropic model updated to claude-sonnet-4-6 and extracted to a single ANTHROPIC_MODEL constant (one place to update going forward).
 
