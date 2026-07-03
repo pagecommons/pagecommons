@@ -327,23 +327,33 @@ function _processOfflineQueue() {
   var queue = getOfflineQueue();
   // Shared-pool users have no apiKey but can still send via the free tier.
   if (!queue.length || (!STATE.apiKey && STATE.aiMode !== 'shared')) return Promise.resolve();
-  showToolbarMsg("You're back online — sending your saved message…");
   // Items queued for a different book than the one currently open are kept
   // for a later visit instead of being dropped.
+  var matching = [];
   var remaining = [];
+  for (var qi = 0; qi < queue.length; qi++) {
+    var item = queue[qi];
+    if (item.book && STATE.book && item.book.title === STATE.book.title) matching.push(item);
+    else remaining.push(item);
+  }
+  if (!matching.length) return Promise.resolve();
+  showToolbarMsg("You're back online — sending your saved message…");
+  // Drop the display-only placeholders; the real bubbles render below as
+  // each queued message is actually sent.
+  var log = document.getElementById('chat-log');
+  if (log) {
+    var pending = log.querySelectorAll('.pending-offline');
+    for (var pi = 0; pi < pending.length; pi++) log.removeChild(pending[pi]);
+  }
   var chain = Promise.resolve();
-  function sendItem(item) {
+  function sendItem(it) {
     chain = chain.then(function () {
-      if (!(item.book && STATE.book && item.book.title === STATE.book.title)) {
-        remaining.push(item);
-        return;
-      }
       STATE.messages.push({
         role: 'user',
-        content: item.text
+        content: it.text
       });
-      appendBubble('user', item.text);
-      STATE.lastUserText = item.text;
+      appendBubble('user', it.text);
+      STATE.lastUserText = it.text;
       return callAI().then(function (reply) {
         STATE.messages.push({
           role: 'assistant',
@@ -351,12 +361,13 @@ function _processOfflineQueue() {
         });
         var el = appendBubble('companion', reply);
         scrollToMessage(el);
+        saveCurrentConversation();
       }).catch(function (err) {
         appendError(err);
       });
     });
   }
-  for (var qi = 0; qi < queue.length; qi++) sendItem(queue[qi]);
+  for (var mi = 0; mi < matching.length; mi++) sendItem(matching[mi]);
   return chain.then(function () {
     if (remaining.length) localStorage.setItem('pc_offline_queue', JSON.stringify(remaining));
     else clearOfflineQueue();
@@ -418,6 +429,8 @@ function restoreCompanionUI(book) {
   updateStatusDisplay();
   populateIcebreakers(book);
   renderHighlightsPanel();
+  updatePassagesToolbarBtn();
+  updateNotesToolbarBtn();
   // Load per-book language override; fall back to the global preference
   // (pc_companion_lang) instead of wiping it when no per-book override exists.
   var savedOverride = localStorage.getItem('pc_companion_lang_override_' + bookKey(book));
@@ -451,6 +464,12 @@ function updateGreeting() {
 // ═══════════════════════════════════════════════════
 // Single source of truth for the Anthropic model — update here only.
 var ANTHROPIC_MODEL = 'claude-sonnet-4-6';
+// True only when the user's own key should be billed: a key is saved AND the
+// AI-mode toggle isn't set to the free shared tier. Every feature that can
+// spend the user's key must branch on this, not on STATE.apiKey alone.
+function byokActive() {
+  return !!(STATE.apiKey && STATE.aiMode !== 'shared');
+}
 var PROVIDER_CONFIG = {
   anthropic: {
     placeholder: 'sk-ant-…',
@@ -535,7 +554,7 @@ function _interpretSearchQuery() {
     return _regenerator().w(function (_context2) {
       while (1) switch (_context2.p = _context2.n) {
         case 0:
-          if (STATE.apiKey) {
+          if (byokActive()) {
             _context2.n = 1;
             break;
           }
@@ -598,14 +617,14 @@ function _interpretSearchQuery() {
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify(Object.assign({
+            body: JSON.stringify({
               contents: [{
                 parts: [{
                   text: prompt
                 }]
               }],
               generationConfig: { thinkingConfig: { thinkingBudget: 0 } }
-            }, langNote ? { systemInstruction: { parts: [{ text: langNote }] } } : {}))
+            })
           });
         case 7:
           _res = _context2.v;
@@ -810,7 +829,7 @@ function _searchBooks() {
 
           // AI natural language interpretation (title field only, no author given)
           isNL = !rawAuthor && looksLikeNaturalLanguage(rawTitle);
-          if (!(isNL && STATE.apiKey)) {
+          if (!(isNL && byokActive())) {
             _context4.n = 9;
             break;
           }
@@ -1138,7 +1157,7 @@ function lookupManualBook() {
       if (data && data.items && data.items[0]) {
         var item = data.items[0];
         var langCode = lang || (item.volumeInfo.language || 'en');
-        book = buildBookFromGoogleItem(item, LANG_NAMES[langCode] || item.volumeInfo.language || 'English', langCode);
+        book = buildBookFromGoogleItem(item, LANG_CODE_TO_NAME[langCode] || item.volumeInfo.language || 'English', langCode);
       } else {
         book = {
           title: title.trim(),
@@ -1343,7 +1362,7 @@ function _renderStatusScreen() {
           lang = getCompanionLang();
           chatLang = STATE.chatLanguage;
           options = STATUS_OPTIONS_EN; // Translate whenever there's a non-English target language and a key
-          if (!(lang && lang !== 'English' && STATE.apiKey)) {
+          if (!(lang && lang !== 'English' && byokActive())) {
             _context9.n = 15;
             break;
           }
@@ -1542,10 +1561,10 @@ function loadBookDetailScreen() {
   var container = document.getElementById('book-detail-content');
   if (!container) return;
   var meta = (book.year || book.pageCount) ? book.year + (book.pageCount ? ' · ' + book.pageCount + ' pages' : '') : '';
-  var desc = book.description || '';
+  var desc = (book.description || '').replace(/<[^>]*>/g, '');
   var truncated = desc.length > 300 ? desc.substring(0, 300) + '…' : desc;
-  var descHTML = truncated ? '<p class="book-detail-description">' + truncated + '</p>' : '<p class="book-detail-description" style="color:#aaaaaa;font-style:italic;">No description available — the companion can still help you explore this book.</p>';
-  container.innerHTML = '<h1 class="book-detail-title">' + (book.title || 'Untitled') + '</h1>' + '<p class="book-detail-author">' + (book.author || 'Unknown author') + '</p>' + (meta ? '<p class="book-detail-meta">' + meta + '</p>' : '') + descHTML + '<div class="book-detail-actions">' + '<button class="btn btn-primary" onclick="setReadingStatus(\'considering\')">Find out if it\'s for me →</button>' + '<button class="btn" onclick="renderStatusScreen(STATE.book);navigate(\'status\')">I have this book</button>' + '<button class="btn" onclick="goBack()">Back ←</button>' + '</div>';
+  var descHTML = truncated ? '<p class="book-detail-description">' + esc(truncated) + '</p>' : '<p class="book-detail-description" style="color:#aaaaaa;font-style:italic;">No description available — the companion can still help you explore this book.</p>';
+  container.innerHTML = '<h1 class="book-detail-title">' + esc(book.title || 'Untitled') + '</h1>' + '<p class="book-detail-author">' + esc(book.author || 'Unknown author') + '</p>' + (meta ? '<p class="book-detail-meta">' + esc(meta) + '</p>' : '') + descHTML + '<div class="book-detail-actions">' + '<button class="btn btn-primary" onclick="setReadingStatus(\'considering\')">Find out if it\'s for me →</button>' + '<button class="btn" onclick="renderStatusScreen(STATE.book);navigate(\'status\')">I have this book</button>' + '<button class="btn" onclick="goBack()">Back ←</button>' + '</div>';
 }
 function selectBook(_x6) {
   return _selectBook.apply(this, arguments);
@@ -1812,13 +1831,18 @@ function launchCompanion(book) {
   document.getElementById('language-toolbar-btn').classList.remove('active');
   document.getElementById('export-toolbar-btn').classList.remove('active');
   navigate('companion');
+  // Drain messages queued offline for this book — the 'online' event only
+  // helps if the tab stayed open; e-readers usually reopen the app later.
+  // Discover chats skip this: queued messages belong to reading conversations.
+  if (STATE.companionMode !== 'discover' && navigator.onLine) processOfflineQueue();
 }
 function updateStatusDisplay() {
   var labels = {
     considering: 'Considering reading',
     started: 'Just started',
     midway: 'Halfway through',
-    finished: 'Just finished'
+    finished: 'Just finished',
+    revisiting: 'Revisiting'
   };
   var el = document.getElementById('book-status-display');
   var ctaEl = document.getElementById('discover-convert-bar');
@@ -1907,10 +1931,12 @@ function buildBookFromGoogleItem(item, lang, langCode) {
     year: vi.publishedDate ? vi.publishedDate.substring(0, 4) : '',
     key: item.id || '',
     source: 'Google Books',
-    coverUrl: thumb,
+    thumb: thumb,
     pageCount: vi.pageCount || 0,
     lang: vi.language || langCode,
-    language: lang
+    language: lang,
+    cats: (vi.categories || []).join(' ').toLowerCase(),
+    description: vi.description || ''
   };
 }
 
@@ -1939,6 +1965,11 @@ function _generateThinkingPhrases() {
           _context11.p = 2;
           _t17 = _context11.v;
         case 3:
+          // Shared tier keeps its static English phrases \u2014 and a keyless
+          // BYOK call here would be doomed anyway.
+          if (!byokActive()) {
+            return _context11.a(2);
+          }
           prompt = "Generate 6 short natural \"thinking\" indicators (like \"typing\u2026\", \"one moment\u2026\") in " + language + '. Max 3 words each with an ellipsis. Return ONLY a JSON array of 6 strings. No other text.';
           _context11.p = 4;
           text = '';
@@ -2467,7 +2498,7 @@ function _fetchAIIcebreakers() {
             prompt += '\n\nThe text of all 4 prompt strings MUST be written in ' + _lang + '. ' + langNote + ' Keep the JSON array structure; only the wording inside each string changes language.';
           }
           text = '';
-          if (!STATE.apiKey) {
+          if (!byokActive()) {
             _context13.n = 14;
             break;
           }
@@ -2681,13 +2712,12 @@ function _sendMessage() {
             inputEl.value = '';
             inputEl.style.height = 'auto';
           }
-          STATE.messages.push({
-            role: 'user',
-            content: text
-          });
-          appendBubble('user', text);
+          // Display-only: the queued message lives ONLY in the queue until it
+          // is actually sent, so reconnect processing can't duplicate it.
+          el = appendBubble('user', text);
+          el.className += ' pending-offline';
           w = document.createElement('div');
-          w.className = 'message companion';
+          w.className = 'message companion pending-offline';
           r = document.createElement('div');
           r.className = 'message-role';
           r.textContent = STATE.companionName;
@@ -2890,7 +2920,7 @@ function _callAI() {
           system = buildSystemPrompt(), messages = STATE.messages.slice(-20);
           // Respect the AI-mode toggle: shared mode always uses the free
           // pool, even when a BYOK key is still saved in localStorage.
-          if (STATE.apiKey && STATE.aiMode !== 'shared') {
+          if (byokActive()) {
             _context15.n = 1;
             break;
           }
@@ -3234,6 +3264,9 @@ function addBookToShelf(book) {
 }
 function saveCurrentConversation() {
   if (!STATE.book || !STATE.messages.length) return;
+  // Discover ("is this for me?") chats are throwaway by design — converting
+  // via startReadingFromDiscover starts a fresh reading conversation.
+  if (STATE.companionMode === 'discover') return;
   var convs = getConvs(STATE.book);
   var convId = STATE.currentConvId;
   var existing = convs.find(function (c) {
@@ -3300,7 +3333,8 @@ function renderShelf() {
       considering: 'Considering',
       started: 'Just started',
       midway: 'Halfway through',
-      finished: 'Finished'
+      finished: 'Finished',
+      revisiting: 'Revisiting'
     }[status] || '';
     var el = document.createElement('div');
     el.className = 'shelf-book';
@@ -3353,7 +3387,8 @@ function openBookShelf(book) {
     considering: 'Considering',
     started: 'Just started',
     midway: 'Halfway through',
-    finished: 'Finished'
+    finished: 'Finished',
+    revisiting: 'Revisiting'
   }[status] || '';
   document.getElementById('book-shelf-title').textContent = book.title;
   document.getElementById('book-shelf-author').textContent = book.author;
@@ -3375,7 +3410,8 @@ function renderConvList(book) {
       considering: 'Considering',
       started: 'Just started',
       midway: 'Halfway through',
-      finished: 'Finished'
+      finished: 'Finished',
+      revisiting: 'Revisiting'
     }[conv.status] || '';
     var el = document.createElement('div');
     el.className = 'conv-item';
@@ -3410,6 +3446,9 @@ function _continueConversation() {
           }
           return _context19.a(2);
         case 1:
+          // Saved conversations are always reading conversations — clear any
+          // leftover discover mode so the right prompt and UI are used.
+          STATE.companionMode = 'reading';
           bk = bookKey(STATE.book);
           STATE.readingStatus = conv.status || localStorage.getItem('pc_status_' + bk) || null;
           STATE.chatLanguage = localStorage.getItem('pc_lang_' + bk) || 'english';
@@ -3431,6 +3470,8 @@ function _continueConversation() {
           document.getElementById('icebreakers').style.display = 'none';
           updateStatusDisplay();
           renderHighlightsPanel();
+          updatePassagesToolbarBtn();
+          updateNotesToolbarBtn();
 
           // render existing messages
           log = document.getElementById('chat-log');
@@ -3439,6 +3480,7 @@ function _continueConversation() {
             return appendBubble(m.role === 'user' ? 'user' : 'companion', m.content);
           });
           navigate('companion');
+          if (navigator.onLine) processOfflineQueue();
         case 3:
           return _context19.a(2);
       }
@@ -3476,6 +3518,7 @@ function _startNewConversation() {
     return _regenerator().w(function (_context20) {
       while (1) switch (_context20.n) {
         case 0:
+          STATE.companionMode = 'reading';
           bk = bookKey(STATE.book);
           STATE.readingStatus = localStorage.getItem('pc_status_' + bk) || null;
           STATE.chatLanguage = localStorage.getItem('pc_lang_' + bk) || 'english';
@@ -4049,6 +4092,9 @@ function importUserData(inputEl) {
       var keys = Object.keys(parsed.data);
       for (var i = 0; i < keys.length; i++) {
         var k = keys[i];
+        // Only restore Page Commons keys — a crafted "backup" must not be
+        // able to write arbitrary localStorage entries.
+        if (k.indexOf('pc_') !== 0) continue;
         localStorage.setItem(k, String(parsed.data[k]));
       }
       showDataMessage('data-import-msg', 'Data restored. Reload the page to see your shelf and settings.', false);
@@ -4078,7 +4124,10 @@ function updateProgressFromHighlights(highlights) {
     if (!byBook[bk] || h.page > byBook[bk]) byBook[bk] = h.page;
   });
   Object.keys(byBook).forEach(function(bk) {
-    var existing = getReadingProgress({ title: bk, author: '' });
+    // bk is already a bookKey — read the entry directly (getReadingProgress
+    // would bookKey it a second time and never find the stored value).
+    var existing = null;
+    try { existing = JSON.parse(localStorage.getItem('pc_progress_' + bk) || 'null'); } catch (e) {}
     if (!existing || byBook[bk] > (existing.page || 0)) {
       localStorage.setItem('pc_progress_' + bk, JSON.stringify({ page: byBook[bk], source: 'kindle' }));
       touchSyncMeta('status');

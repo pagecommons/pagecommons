@@ -217,7 +217,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.52 — End Chat restored to toolbar: header ← Back covers early exit (before much scrolling), toolbar End Chat covers exit after a long conversation without scrolling back up. Toolbar: Highlights · Passages · Notes · Language · Export · Sync · End Chat.
+v0.53 — Bug-fix round ported from the private repo (see BUGFIXES v0.53 log): Gemini NL-search ReferenceError (langNote); manual book lookup LANG_CODE_TO_NAME + thumb/cats/description on buildBookFromGoogleItem; book-detail XSS escaping; discover-mode leaks (no shelf save, companionMode reset on continue/new conversation); offline queue rework (display-only pending bubbles, drain on companion open, replies saved); clippings progress regression guard; byokActive() helper so shared mode never bills a leftover BYOK key; 'revisiting' status labels; stale Passages/Notes toolbar counts; transfer-code SET NX collision retry; backup import restricted to pc_ keys.
+
+Earlier (v0.52): End Chat restored to toolbar: header ← Back covers early exit (before much scrolling), toolbar End Chat covers exit after a long conversation without scrolling back up. Toolbar: Highlights · Passages · Notes · Language · Export · Sync · End Chat.
 
 Earlier (v0.51): Header nav extended to companion/chat screen. Toolbar "Find a book" and "End Chat" buttons removed — header ← Back now triggers endConversation() (save + go to shelf), same behaviour as the old button. Toolbar is now purely chat tools: Highlights · Passages · Notes · Language · Export · Sync.
 
