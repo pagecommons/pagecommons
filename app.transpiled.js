@@ -605,6 +605,10 @@ function updateGreeting() {
 // ═══════════════════════════════════════════════════
 // Single source of truth for the Anthropic model — update here only.
 var ANTHROPIC_MODEL = 'claude-sonnet-4-6';
+// Single source of truth for the Groq model — update here only.
+// (llama-3.3-70b-versatile is decommissioned on Groq on 2026-08-16;
+// openai/gpt-oss-120b is Groq's recommended replacement.)
+var GROQ_MODEL = 'openai/gpt-oss-120b';
 // True only when the user's own key should be billed: a key is saved AND the
 // AI-mode toggle isn't set to the free shared tier. Every feature that can
 // spend the user's key must branch on this, not on STATE.apiKey alone.
@@ -802,7 +806,7 @@ function _interpretSearchQuery() {
               'Authorization': 'Bearer ' + STATE.apiKey
             },
             body: JSON.stringify({
-              model: 'llama-3.3-70b-versatile',
+              model: GROQ_MODEL,
               max_tokens: 80,
               messages: [{
                 role: 'user',
@@ -1628,7 +1632,7 @@ function _renderStatusScreen() {
               'Authorization': 'Bearer ' + STATE.apiKey
             },
             body: JSON.stringify({
-              model: 'llama-3.3-70b-versatile',
+              model: GROQ_MODEL,
               max_tokens: 300,
               messages: [{
                 role: 'user',
@@ -2231,7 +2235,7 @@ function _generateThinkingPhrases() {
               'Authorization': 'Bearer ' + STATE.apiKey
             },
             body: JSON.stringify({
-              model: 'llama-3.3-70b-versatile',
+              model: GROQ_MODEL,
               max_tokens: 120,
               messages: [{
                 role: 'user',
@@ -2750,7 +2754,7 @@ function _fetchAIIcebreakers() {
               'Authorization': 'Bearer ' + STATE.apiKey
             },
             body: JSON.stringify({
-              model: 'llama-3.3-70b-versatile',
+              model: GROQ_MODEL,
               max_tokens: 200,
               messages: (langNote ? [{
                 role: 'system',
@@ -3302,7 +3306,7 @@ function _callGroq() {
               'Authorization': 'Bearer ' + STATE.apiKey
             },
             body: JSON.stringify({
-              model: 'llama-3.3-70b-versatile',
+              model: GROQ_MODEL,
               max_tokens: STATE.replyLength === 'short' ? 400 : 1500,
               messages: [{
                 role: 'system',
