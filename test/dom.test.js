@@ -73,6 +73,24 @@ test('footer is a single row: brand left, Support/Privacy/Terms right', async fu
   assert.ok(hrefs.indexOf('/terms.html') !== -1, 'Terms link missing from footer');
 });
 
+test('Back from an ended chat does not loop between shelf and chat', async function () {
+  var app = await boot({ seed: RETURNING });
+  // A selected book lets #companion pass its handleRoute redirect gate.
+  app.window.STATE.book = { title: 'Loop Test Book', author: 'An Author' };
+  assert.strictEqual(await app.go('companion'), 'companion');
+  // Header ← Back on the chat ends the conversation → shelf.
+  app.window.goBack();
+  await app.flush();
+  await app.flush();
+  assert.strictEqual(app.activeScreen(), 'shelf', 'ending the chat should land on the shelf');
+  // Back on the shelf must NOT bounce into the ended chat.
+  app.window.goBack();
+  await app.flush();
+  await app.flush();
+  assert.notStrictEqual(app.activeScreen(), 'companion', 'Back from shelf looped back into the ended chat');
+  assert.strictEqual(app.activeScreen(), 'home', 'Back from the shelf after ending a chat should go home');
+});
+
 test('companion header nav is present and toolbar has End Chat', async function () {
   var app = await boot({ seed: RETURNING });
   var nav = app.document.getElementById('header-nav');

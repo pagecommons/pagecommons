@@ -197,6 +197,8 @@ Standalone pages:
   Proxied via api/ai.js (500 RPD quota)
 - BYOK alternatives: Gemini
   (gemini-2.5-flash) and Groq
+  (openai/gpt-oss-120b — llama-3.3-70b
+  decommissioned 2026-08-16)
 
 ## Environment Variables (Vercel)
 - GOOGLE_BOOKS_API_KEY (sensitive)
@@ -217,7 +219,13 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.52 — End Chat restored to toolbar: header ← Back covers early exit (before much scrolling), toolbar End Chat covers exit after a long conversation without scrolling back up. Toolbar: Highlights · Passages · Notes · Language · Export · Sync · End Chat.
+v0.55 — Endless Back loop fix (BUGFIXES v0.55): endConversation() now clears the back stack and marks the navigation back-style, so chat → Back → shelf → Back goes to the Library Hall instead of bouncing back into the ended chat. Header links away from a live chat (Main / Find a book) still push 'companion' so Back returns to the active conversation. +1 regression test (25 total).
+
+Earlier (v0.54): Groq model migration (BUGFIXES v0.54): llama-3.3-70b-versatile is decommissioned on Groq 2026-08-16; all five Groq call sites now use a single GROQ_MODEL constant set to openai/gpt-oss-120b (Groq's recommended replacement). Manual quality check on a real Groq key still pending — flip GROQ_MODEL to qwen/qwen3.6-27b if quality disappoints.
+
+Earlier (v0.53): Bug-fix round ported from the private repo (see BUGFIXES v0.53 log): Gemini NL-search ReferenceError (langNote); manual book lookup LANG_CODE_TO_NAME + thumb/cats/description on buildBookFromGoogleItem; book-detail XSS escaping; discover-mode leaks (no shelf save, companionMode reset on continue/new conversation); offline queue rework (display-only pending bubbles, drain on companion open, replies saved); clippings progress regression guard; byokActive() helper so shared mode never bills a leftover BYOK key; 'revisiting' status labels; stale Passages/Notes toolbar counts; transfer-code SET NX collision retry; backup import restricted to pc_ keys.
+
+Earlier (v0.52): End Chat restored to toolbar: header ← Back covers early exit (before much scrolling), toolbar End Chat covers exit after a long conversation without scrolling back up. Toolbar: Highlights · Passages · Notes · Language · Export · Sync · End Chat.
 
 Earlier (v0.51): Header nav extended to companion/chat screen. Toolbar "Find a book" and "End Chat" buttons removed — header ← Back now triggers endConversation() (save + go to shelf), same behaviour as the old button. Toolbar is now purely chat tools: Highlights · Passages · Notes · Language · Export · Sync.
 

@@ -1,10 +1,89 @@
 # Page Commons — Current Status
 
-Last updated: June 15, 2026
-Current version: v0.41
-Updated by: Claude session — post-verification polish + test harness
+Last updated: July 4, 2026
+Current version: v0.54
+Updated by: Claude session — v0.42–v0.54: nav/UI polish, shelf archiving,
+private-repo bug-fix ports (v0.53), Groq model migration (v0.54)
 
-## What was done this session [v0.41]
+## What was done this session [v0.42 → v0.54]
+
+All on branch `claude/brave-lovelace-vet1sn`; v0.42–v0.52 merged to main
+(PRs #2–#8, squash), **v0.53 + v0.54 pushed to the branch but NOT yet
+merged to main**. All ES5/legacy-WebKit safe; app.transpiled.js rebuilt
+and committed each round; `npm test` 24/24 green throughout.
+
+### v0.54 — Groq model migration (BUGFIXES v0.54 port)
+- `llama-3.3-70b-versatile` is decommissioned on Groq **2026-08-16**.
+  Added `GROQ_MODEL` constant (below `ANTHROPIC_MODEL`) set to
+  `openai/gpt-oss-120b` (Groq's recommended replacement) and pointed all
+  five Groq call sites at it (chat, NL search, status translation,
+  thinking phrases, icebreakers). CLAUDE.md Providers updated.
+- **Pending (user):** manual quality check on a real Groq key; flip
+  `GROQ_MODEL` to `qwen/qwen3.6-27b` if quality disappoints. Must be on
+  main before 2026-08-16 (ideally before June 1 launch).
+
+### v0.53 — 11 bug fixes ported from the private repo (BUGFIXES v0.53)
+High: Gemini NL-search ReferenceError (undeclared `langNote`); manual book
+lookup (`LANG_CODE_TO_NAME` typo + `thumb`/`cats`/`description` on
+`buildBookFromGoogleItem` — restores metadata and the age gate); book-detail
+XSS escaping; discover-mode leaks (no shelf save from discover chats,
+`companionMode` reset on continue/new conversation); offline-queue rework
+(offline sends are display-only `pending-offline` bubbles, queue drains on
+companion open not just the `online` event, replies persisted).
+Medium/Low: clippings progress-regression guard (double-bookKey lookup);
+`byokActive()` helper so shared mode never bills a leftover BYOK key
+(6 call sites); `revisiting` status label in all four UI maps; stale
+Passages/Notes toolbar counts on continue/restore; transfer-code `SET NX`
+collision retry (api/transfer.js); backup import restricted to `pc_` keys.
+
+### v0.47–v0.52 — navigation + UI polish (merged to main)
+- **Header nav** (v0.50–v0.52): on inner screens the tagline swaps for a
+  right-aligned `← Back · Main · Find a book` row in the header — one full
+  row of vertical space saved per screen. Home keeps the tagline;
+  tc/onboarding/age-gate get a minimal header; first-run preferences hides
+  the nav. On the companion screen ← Back triggers `endConversation()`
+  (save + shelf). **End Chat stayed in the toolbar** (v0.52): after a long
+  chat the header is a long scroll away on e-ink.
+- **Shelf archiving** (v0.47): per-book Archive/Restore, collapsible
+  "Archived (N)" section folded by default (`archived` flag on
+  `pc_shelf_books` entries). Removed the redundant "New book" companion
+  header button.
+- **Wording/layout** (v0.48–v0.49): footer top border + header-matching
+  brand text; "Support us"; search-screen hint; home pitch line moved into
+  the description; "Search for a book"/"Search book" → "Find a book".
+
+### v0.42–v0.46 (earlier, merged to main)
+- v0.42: Kindle clippings import via Drive built then **hidden** (2024
+  Kindle is MTP-only, not mountable on macOS). Code kept for re-enable.
+- v0.43: confabulation rule calibrated (well-known frameworks stated with
+  confidence; hedge only genuinely uncertain specifics); shelf nav links.
+- v0.44: Anthropic model → `claude-sonnet-4-6` via `ANTHROPIC_MODEL`
+  constant. v0.45–v0.46: unified screen-nav row (since superseded by the
+  v0.50 header nav).
+
+### Verification this session
+- Browser smoke test (Chromium/Playwright, 28/28): first-run T&C, header
+  nav swap, archive/restore persistence, ← Back-from-chat = End Chat,
+  first-run nav hiding, zero console errors.
+- Known low-severity items (deliberate, documented): shelf merge is
+  local-wins per book so the `archived` flag doesn't propagate across
+  devices via Drive sync; ← Back from an empty chat lands on shelf.
+- From the v0.53 log, needs a product decision (not fixed): /api/ai has no
+  per-IP rate limit or payload cap; `exportUserData` includes `pc_api_key`
+  in plaintext backups; dead `STATIC_PROMPTS`/`DISCOVER_PROMPTS` tables;
+  50 vs 60 pages/hr inconsistency; transfer.html `reset()` doesn't clear
+  the key field.
+
+### Open items / next
+1. **Merge v0.53 + v0.54 to main** (Groq deadline 2026-08-16; launch June 1).
+2. Manual Groq quality check on `openai/gpt-oss-120b`.
+3. Kobo Libra Colour + Kindle device pass over v0.42–v0.54 (header nav,
+   shelf archiving, offline queue rework especially).
+4. Decide the four "not fixed" items above before launch.
+
+---
+
+## Previous session [v0.41]
 
 Post-verification polish on branch `claude/brave-lovelace-vet1sn`.
 All ES5/legacy-WebKit safe; app.transpiled.js rebuilt; `npm test` green.

@@ -42,8 +42,17 @@ export default async function handler(req, res) {
       return res.status(429).json({ error: 'Too many requests. Try again in an hour.' });
     }
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    await kv(['SET', 'transfer:' + code, key.trim(), 'EX', 600]);
+    // NX so a random collision with an in-flight code can never overwrite
+    // it (and hand that code's holder the wrong user's key) — retry instead.
+    let code = null;
+    for (let attempt = 0; attempt < 5 && code === null; attempt++) {
+      const candidate = Math.floor(100000 + Math.random() * 900000).toString();
+      const setRes = await kv(['SET', 'transfer:' + candidate, key.trim(), 'EX', 600, 'NX']);
+      if (setRes) code = candidate;
+    }
+    if (!code) {
+      return res.status(503).json({ error: 'Could not generate a code — please try again.' });
+    }
 
     return res.status(200).json({ code: code });
 
