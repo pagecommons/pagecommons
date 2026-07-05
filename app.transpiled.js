@@ -4039,6 +4039,13 @@ function copyAllPassages() {
 // ═══════════════════════════════════════════════════
 function endConversation() {
   saveCurrentConversation();
+  // Ending a chat is terminal, not a forward step. Left alone, showScreen
+  // would push 'companion' onto the back stack, so Back on the shelf bounced
+  // straight back into the ended chat — an endless chat↔shelf loop. Clear
+  // the stack and mark this navigation back-style; Back from the shelf then
+  // goes to the Library Hall (via BACK_FALLBACK) instead.
+  navStack.length = 0;
+  _navBack = true;
   // Land on the shelf — the reader's books and saved conversations — rather
   // than the Library Hall, so leaving a chat continues naturally from there.
   navigate('shelf');
