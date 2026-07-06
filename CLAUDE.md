@@ -219,7 +219,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.55 — Endless Back loop fix (BUGFIXES v0.55): endConversation() now clears the back stack and marks the navigation back-style, so chat → Back → shelf → Back goes to the Library Hall instead of bouncing back into the ended chat. Header links away from a live chat (Main / Find a book) still push 'companion' so Back returns to the active conversation. +1 regression test (25 total).
+v0.56 — Affiliate links removed for non-commercial compliance (Vercel Hobby): Amazon affiliate button + disclosure dropped from support.html (Ko-fi donation CTA kept), privacy/terms reworded, planning docs scrubbed of affiliate plans. The public lite version carries donations only.
+
+Earlier (v0.55): Endless Back loop fix (BUGFIXES v0.55): endConversation() now clears the back stack and marks the navigation back-style, so chat → Back → shelf → Back goes to the Library Hall instead of bouncing back into the ended chat. Header links away from a live chat (Main / Find a book) still push 'companion' so Back returns to the active conversation. +1 regression test (25 total).
 
 Earlier (v0.54): Groq model migration (BUGFIXES v0.54): llama-3.3-70b-versatile is decommissioned on Groq 2026-08-16; all five Groq call sites now use a single GROQ_MODEL constant set to openai/gpt-oss-120b (Groq's recommended replacement). Manual quality check on a real Groq key still pending — flip GROQ_MODEL to qwen/qwen3.6-27b if quality disappoints.
 

@@ -110,18 +110,13 @@ Do not work on Priority 4+ before launch.
       "Already read it — try again"
       Entry point from Library Hall.
 
-- [ ] Affiliate links
+- [ ] "Find this book" links
       Show on book selection screen.
       Also natural fit inside Discovery mode.
-      Amazon Associates link.
-      Bookshop.org affiliate link.
-      Waterstones affiliate link (UK).
-      WorldCat link (free, always shown).
+      WorldCat link (free library lookup).
       Email link option.
-      Clear disclosure always visible:
-      "Buying via these links supports
-      Page Commons at no extra cost to you."
-      Non-affiliate option always alongside.
+      (This public repo stays non-commercial:
+      no affiliate or referral links here.)
 
 ---
 
@@ -379,7 +374,6 @@ Do not work on Priority 4+ before launch.
 
 - [ ] Honest sustainability page
       How Page Commons stays independent.
-      Affiliate disclosure.
       Full model explained openly.
 
 ---

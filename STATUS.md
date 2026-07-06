@@ -1,16 +1,40 @@
 # Page Commons — Current Status
 
-Last updated: July 4, 2026
-Current version: v0.54
-Updated by: Claude session — v0.42–v0.54: nav/UI polish, shelf archiving,
-private-repo bug-fix ports (v0.53), Groq model migration (v0.54)
+Last updated: July 6, 2026
+Current version: v0.56
+Updated by: Claude session — v0.42–v0.56: nav/UI polish, shelf archiving,
+private-repo bug-fix ports (v0.53–v0.55), affiliate removal (v0.56)
 
-## What was done this session [v0.42 → v0.54]
+## What was done this session [v0.42 → v0.56]
+
+### v0.56 — Affiliate links removed (non-commercial compliance)
+- The public lite version must remain **non-commercial** (Vercel Hobby
+  plan compliance). Removed the Amazon affiliate button and the
+  disclosure line from support.html, plus the now-unused `.disclosure`
+  CSS; the page now has a single Ko-fi CTA.
+- privacy.html third-party-links section and terms.html third-party
+  services section reworded to drop the Amazon/affiliate mentions.
+- Planning docs scrubbed: ROADMAP.md V2 "Affiliate links" item replaced
+  by non-commercial "Find this book" links (WorldCat/email) and the
+  sustainability-page affiliate-disclosure line dropped; STRATEGY.md
+  monetisation posture now states the public repo carries donations
+  (Ko-fi) only; PENDING.md checklist items updated.
+- Ko-fi (donations) intentionally kept everywhere.
+- Note: `read.amazon.com` still appears in an index.html comment and
+  CLAUDE.md — that is the technical reference for the hidden Kindle
+  clippings-import feature (a device export URL), not a commercial link.
+
+### v0.55 — Endless Back loop fix (BUGFIXES v0.55 port)
+- `endConversation()` now clears the back stack and marks the navigation
+  back-style, so chat → Back → shelf → Back goes to the Library Hall
+  instead of bouncing back into the ended chat. Header links away from a
+  live chat still push 'companion' so Back returns to the conversation.
+  +1 regression test (25 total), verified failing against pre-fix bundle.
 
 All on branch `claude/brave-lovelace-vet1sn`; v0.42–v0.52 merged to main
-(PRs #2–#8, squash), **v0.53 + v0.54 pushed to the branch but NOT yet
-merged to main**. All ES5/legacy-WebKit safe; app.transpiled.js rebuilt
-and committed each round; `npm test` 24/24 green throughout.
+(PRs #2–#8, squash), v0.53–v0.55 merged via PR #9. All ES5/legacy-WebKit
+safe; app.transpiled.js rebuilt and committed each round; `npm test`
+green throughout (25 tests as of v0.55).
 
 ### v0.54 — Groq model migration (BUGFIXES v0.54 port)
 - `llama-3.3-70b-versatile` is decommissioned on Groq **2026-08-16**.
@@ -623,8 +647,9 @@ backwards from v0.37. Bumped to v0.38 to keep versions monotonic.
 
 ### Support Page (support.html) ✓ [from v0.28]
 - Standalone page, no new dependencies, same CSS foundations as index.html
-- Two full-width CTA buttons: Ko-fi (one-time tip) and Amazon affiliate
-- Affiliate disclosure below Amazon button (16px, #777777)
+- Full-width CTA button: Ko-fi (one-time tip)
+  (an affiliate button also shipped in v0.28; removed in v0.56 —
+  the public repo is non-commercial)
 - GitHub issues link as plain inline text
 - Italic "Pete" sign-off
 - Back link "← Page Commons" at top

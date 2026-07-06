@@ -103,7 +103,7 @@
 ### Support Page
 - [x] support.html: remove the "Support it →" footer link (it looped back to the same page)
 - [ ] Verify support.html renders correctly on Kobo
-- [ ] Verify Ko-fi and Amazon links open correctly
+- [ ] Verify the Ko-fi link opens correctly
 - [ ] Confirm per-screen footer line "Support it →" appears on all screens
 
 ### AI Companion Refinement
@@ -179,7 +179,7 @@
 - [x] ES5-safe, transpiled to app.transpiled.js (IE 11 target)
 
 ### v0.28 — Support page + per-screen footer
-- [x] support.html created (Ko-fi, Amazon affiliate, GitHub issues link)
+- [x] support.html created (Ko-fi, GitHub issues link; affiliate links removed in v0.56 — public repo is non-commercial)
 - [x] Per-screen "Support it →" footer on all 14 screens in index.html
 - [x] Removed ineffective search language selector (API filtering unreliable)
 
