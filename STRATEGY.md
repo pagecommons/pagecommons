@@ -197,9 +197,10 @@ phone and desktop" with a link to the modern version.
 
 - Core stays free, always. No ads, no data selling, no
   algorithmic feed.
-- Day-one revenue: Ko-fi tip jar + Amazon affiliate links,
-  surfaced via a subtle per-screen footer linking to the
-  support page.
+- Day-one support: Ko-fi tip jar (donations only), surfaced
+  via a subtle per-screen footer linking to the support page.
+  This public lite version stays non-commercial — no
+  affiliate or referral links (Vercel Hobby compliance).
 - A paid supporter tier comes later (Stripe + Clerk),
   framed as supporters subsidising the free tier — not
   free users being downgraded.
