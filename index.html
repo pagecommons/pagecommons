@@ -15,10 +15,25 @@
     body {
       background: #ffffff;
       color: #111111;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: Georgia, 'Times New Roman', 'Songti TC', 'Noto Serif CJK TC', 'Source Han Serif TC', PMingLiU, serif;
       line-height: 1.65;
       min-height: 100vh;
     }
+
+    /* === CJK INTERFACE ===
+       Applied by applyLanguage() when a CJK interface language is active.
+       CJK glyphs are square and dense: the Latin letter-spacing used on
+       uppercase chrome looks broken on them, and the type needs a little
+       more leading. Font families themselves need no switch here — every
+       stack already carries CJK fallbacks, and fallback is per-glyph. */
+    body.ui-cjk { line-height: 1.8; }
+    body.ui-cjk .site-name,
+    body.ui-cjk label,
+    body.ui-cjk .icebreaker-label,
+    body.ui-cjk .settings-section-label { letter-spacing: 0.02em; }
+    body.ui-cjk .hall-title { letter-spacing: 0; line-height: 1.4; }
+    body.ui-cjk .hall-greeting,
+    body.ui-cjk #header-nav { letter-spacing: 0.02em; }
 
     /* === OFFLINE BANNER === */
     #offline-banner {
@@ -29,7 +44,7 @@
       padding: 10px;
       font-size: 0.85rem;
       letter-spacing: 0.03em;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
     }
 
     /* === LAYOUT === */
@@ -45,7 +60,7 @@
       -webkit-box-pack: justify; -ms-flex-pack: justify; justify-content: space-between;
     }
     .site-name {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.75rem;
       font-weight: 600;
       letter-spacing: 0.12em;
@@ -54,14 +69,14 @@
     }
     .site-name-link { cursor: pointer; text-decoration: none; color: #111111; }
     .site-tagline {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.72rem;
       color: #777777;
       margin-top: 3px;
       letter-spacing: 0.02em;
     }
     #header-nav {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.72rem;
       letter-spacing: 0.03em;
       text-align: right;
@@ -86,7 +101,7 @@
 
     label {
       display: block;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.72rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -104,7 +119,7 @@
       border: 1px solid #111111;
       background: #ffffff;
       color: #111111;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: Georgia, 'Times New Roman', 'Songti TC', 'Noto Serif CJK TC', 'Source Han Serif TC', PMingLiU, serif;
       font-size: 1rem;
       padding: 12px 14px;
       outline: none;
@@ -121,7 +136,7 @@
       border: 1px solid #111111;
       background: #ffffff;
       color: #111111;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: Georgia, 'Times New Roman', 'Songti TC', 'Noto Serif CJK TC', 'Source Han Serif TC', PMingLiU, serif;
       font-size: 1rem;
       padding: 12px 24px;
       cursor: pointer;
@@ -144,7 +159,7 @@
       display: block;
       background: #111111;
       color: #ffffff;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: Georgia, 'Times New Roman', 'Songti TC', 'Noto Serif CJK TC', 'Source Han Serif TC', PMingLiU, serif;
       font-size: 1rem;
       padding: 12px 24px;
       border-radius: 0;
@@ -176,7 +191,7 @@
     }
     .back-link {
       display: inline-block;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.78rem;
       letter-spacing: 0.04em;
       color: #111111;
@@ -213,9 +228,9 @@
     .provider-opt-left { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-align: center; -ms-flex-align: center; align-items: center; }
     .provider-opt-left > * { margin-right: 10px; }
     .provider-opt-left > *:last-child { margin-right: 0; }
-    .provider-opt-name { font-family: Georgia, 'Times New Roman', serif; font-size: 1rem; }
+    .provider-opt-name { font-family: Georgia, 'Times New Roman', 'Songti TC', 'Noto Serif CJK TC', 'Source Han Serif TC', PMingLiU, serif; font-size: 1rem; }
     .provider-link {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.72rem;
       color: #777777;
       text-decoration: underline;
@@ -226,10 +241,10 @@
       padding: 0;
     }
 
-    #key-hint { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.78rem; color: #777777; margin-top: 6px; }
+    #key-hint { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif; font-size: 0.78rem; color: #777777; margin-top: 6px; }
     .key-toggle {
       background: none; border: none; cursor: pointer;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.78rem; color: #777777; text-decoration: underline; padding: 0; margin-top: 4px;
     }
 
@@ -244,19 +259,19 @@
     .book-result-inner { padding: 16px; cursor: pointer; }
     .book-result-inner:active { background: #f5f5f5; }
     .book-result-title  { font-size: 1.05rem; margin-bottom: 3px; }
-    .book-result-author { font-size: 0.9rem; color: #777777; margin-bottom: 3px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-    .book-result-meta   { font-size: 0.75rem; color: #777777; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+    .book-result-author { font-size: 0.9rem; color: #777777; margin-bottom: 3px; font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif; }
+    .book-result-meta   { font-size: 0.75rem; color: #777777; font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif; }
     .book-result-actions { border-top: 1px solid #e0e0e0; padding: 0; }
-    .book-discover-btn { display: block; width: 100%; background: none; border: none; color: #555555; font-family: Georgia, 'Times New Roman', serif; font-size: 0.85rem; font-style: italic; padding: 10px 16px; text-align: left; cursor: pointer; min-height: 44px; }
+    .book-discover-btn { display: block; width: 100%; background: none; border: none; color: #555555; font-family: Georgia, 'Times New Roman', 'Songti TC', 'Noto Serif CJK TC', 'Source Han Serif TC', PMingLiU, serif; font-size: 0.85rem; font-style: italic; padding: 10px 16px; text-align: left; cursor: pointer; min-height: 44px; }
     .book-discover-btn:active { background: #f5f5f5; }
 
     /* === BOOK DETAIL === */
-    .book-about-toggle { display: block; width: 100%; background: none; border: none; color: #777777; font-family: Georgia, 'Times New Roman', serif; font-size: 0.85rem; padding: 10px 0; text-align: left; cursor: pointer; text-decoration: underline; }
+    .book-about-toggle { display: block; width: 100%; background: none; border: none; color: #777777; font-family: Georgia, 'Times New Roman', 'Songti TC', 'Noto Serif CJK TC', 'Source Han Serif TC', PMingLiU, serif; font-size: 0.85rem; padding: 10px 0; text-align: left; cursor: pointer; text-decoration: underline; }
     .book-about-text { display: none; font-size: 0.9rem; color: #555555; line-height: 1.6; margin-top: 8px; margin-bottom: 12px; }
     #book-detail-content { margin-bottom: 24px; }
     .book-detail-title { font-size: 1.3rem; margin-bottom: 4px; }
-    .book-detail-author { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.9rem; color: #777777; margin-bottom: 8px; }
-    .book-detail-meta { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.75rem; color: #777777; margin-bottom: 16px; }
+    .book-detail-author { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif; font-size: 0.9rem; color: #777777; margin-bottom: 8px; }
+    .book-detail-meta { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif; font-size: 0.75rem; color: #777777; margin-bottom: 16px; }
     .book-detail-description { font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; color: #555555; }
     .book-detail-actions { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; }
     .book-detail-actions .btn { margin-bottom: 8px; }
@@ -272,7 +287,7 @@
       padding: 16px 18px;
       cursor: pointer;
       background: #ffffff;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: Georgia, 'Times New Roman', 'Songti TC', 'Noto Serif CJK TC', 'Source Han Serif TC', PMingLiU, serif;
       font-size: 1rem;
       text-align: left;
       min-height: 48px;
@@ -281,7 +296,7 @@
     }
     .status-opt:active { background: #f5f5f5; }
     .status-opt-label { font-size: 1rem; display: block; }
-    .status-opt-sub   { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.8rem; color: #777777; margin-top: 4px; display: block; }
+    .status-opt-sub   { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif; font-size: 0.8rem; color: #777777; margin-top: 4px; display: block; }
 
     /* === LANGUAGE === */
     .lang-options { display: -webkit-box; display: -ms-flexbox; display: flex; margin-top: 8px; }
@@ -300,12 +315,12 @@
       margin-bottom: 24px;
     }
     #book-title-display  { font-size: 1.1rem; margin-bottom: 3px; }
-    #book-author-display { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #777777; }
-    #book-status-display { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.75rem; color: #777777; margin-top: 4px; font-style: italic; }
+    #book-author-display { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif; font-size: 0.85rem; color: #777777; }
+    #book-status-display { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif; font-size: 0.75rem; color: #777777; margin-top: 4px; font-style: italic; }
     /* === ICE BREAKERS === */
     #icebreakers { margin-bottom: 24px; }
     .icebreaker-label {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
       color: #777777; margin-bottom: 10px;
     }
@@ -317,7 +332,7 @@
       border-radius: 0;
       background: #ffffff;
       color: #111111;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: Georgia, 'Times New Roman', 'Songti TC', 'Noto Serif CJK TC', 'Source Han Serif TC', PMingLiU, serif;
       font-size: 0.95rem;
       padding: 12px 16px;
       text-align: left;
@@ -334,7 +349,7 @@
     .message.user      { -webkit-box-align: end; -ms-flex-align: end; align-items: flex-end; }
     .message.companion { -webkit-box-align: start; -ms-flex-align: start; align-items: flex-start; }
     .message-role {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.68rem; letter-spacing: 0.07em; text-transform: uppercase;
       color: #777777; margin-bottom: 5px; padding: 0 4px;
     }
@@ -347,7 +362,7 @@
       background: none;
       border: 1px solid #111111;
       border-radius: 0;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: Georgia, 'Times New Roman', 'Songti TC', 'Noto Serif CJK TC', 'Source Han Serif TC', PMingLiU, serif;
       font-size: 0.88rem;
       padding: 8px 16px;
       cursor: pointer;
@@ -357,7 +372,7 @@
 
     #loading-indicator {
       display: none;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.85rem; color: #777777; font-style: italic;
       padding: 4px 4px; margin-bottom: 12px;
     }
@@ -365,7 +380,7 @@
     /* === CHAT INPUT === */
     #chat-input-area { border-top: 1px solid #111111; padding-top: 16px; margin-top: 8px; }
     #input-book-context {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.72rem; color: #777777; margin-bottom: 8px;
       text-transform: uppercase; letter-spacing: 0.05em;
     }
@@ -395,7 +410,7 @@
       background: #ffffff;
       border: none;
       border-right: 1px solid #111111;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.78rem;
       letter-spacing: 0.04em;
       padding: 10px 6px;
@@ -409,7 +424,7 @@
     .toolbar-btn.active { background: #111111; color: #ffffff; }
 
     .font-panel-label {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
       color: #777777; margin-bottom: 12px;
     }
@@ -421,7 +436,7 @@
       border: 1px solid #111111;
       border-radius: 0;
       background: #ffffff;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: Georgia, 'Times New Roman', 'Songti TC', 'Noto Serif CJK TC', 'Source Han Serif TC', PMingLiU, serif;
       cursor: pointer;
       padding: 10px 4px;
       text-align: center;
@@ -441,13 +456,13 @@
 
     #toolbar-msg {
       display: none;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.82rem; color: #777777; font-style: italic;
       padding: 4px 0; margin-bottom: 12px;
     }
     #key-status-bar {
       display: none;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.75rem; color: #777777;
       border-top: 1px solid #d0d0d0;
       padding: 10px 0; margin-top: 24px;
@@ -458,7 +473,7 @@
     /* === LIBRARY HALL === */
     .hall-body { -webkit-box-flex: 1; -ms-flex: 1; flex: 1; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-pack: start; -ms-flex-pack: start; justify-content: flex-start; padding: 8px 0 0; }
     .hall-greeting {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
       color: #777777; margin-bottom: 12px;
     }
@@ -476,7 +491,7 @@
       padding: 18px 20px;
       cursor: pointer;
       background: #ffffff;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: Georgia, 'Times New Roman', 'Songti TC', 'Noto Serif CJK TC', 'Source Han Serif TC', PMingLiU, serif;
       text-align: left;
       min-height: 48px;
       -webkit-appearance: none;
@@ -489,17 +504,17 @@
     .hall-door.disabled { opacity: 0.4; cursor: default; pointer-events: none; }
     .hall-door-title { font-size: 1rem; display: block; margin-bottom: 4px; }
     .hall-door-sub {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.78rem; opacity: 0.75; display: block;
     }
     .hall-newhero {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.82rem; color: #777777; margin-bottom: 40px;
     }
     .hall-newhero a { color: #777777; text-decoration: underline; }
     .hall-divider { border: none; border-top: 1px solid #d0d0d0; margin: 0 0 20px; }
     .hall-footer {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.75rem; color: #999999; line-height: 1.6; padding-bottom: 20px;
     }
     /* === ABOUT === */
@@ -507,7 +522,7 @@
     .about-section h2 { border-bottom: 1px solid #111111; padding-bottom: 8px; margin-bottom: 14px; }
     .about-feature { border: 1px solid #d0d0d0; border-radius: 0; padding: 16px; margin-bottom: 10px; }
     .about-feature-title { font-size: 1rem; margin-bottom: 4px; }
-    .about-feature-desc  { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.85rem; color: #777777; margin: 0; }
+    .about-feature-desc  { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif; font-size: 0.85rem; color: #777777; margin: 0; }
 
     /* === SHELF === */
     .shelf-empty { font-size: 0.9rem; color: #777777; font-style: italic; padding: 20px 0; }
@@ -521,21 +536,21 @@
     .shelf-book:active { background: #f5f5f5; }
     .shelf-book-title  { font-size: 1.05rem; margin-bottom: 3px; }
     .shelf-book-author {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.85rem; color: #777777; margin-bottom: 3px;
     }
     .shelf-book-meta {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.75rem; color: #777777;
     }
     .shelf-archive-btn {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.75rem; color: #777777; text-decoration: underline;
       background: none; border: none; padding: 0; cursor: pointer;
       margin-top: 8px; display: block;
     }
     .shelf-archive-toggle {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.85rem; color: #777777; background: none; border: none;
       padding: 16px 0 8px; cursor: pointer; text-decoration: underline;
       display: block;
@@ -543,7 +558,7 @@
 
     .conv-item { border: 1px solid #111111; border-radius: 0; padding: 14px 16px; margin-bottom: 10px; }
     .conv-item-name    { font-size: 1rem; margin-bottom: 3px; }
-    .conv-item-meta    { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 0.75rem; color: #777777; margin-bottom: 10px; }
+    .conv-item-meta    { font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif; font-size: 0.75rem; color: #777777; margin-bottom: 10px; }
     .conv-actions { display: -webkit-box; display: -ms-flexbox; display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap; }
     .conv-actions > .conv-btn { margin-right: 8px; margin-bottom: 4px; }
     .conv-actions > .conv-btn:last-child { margin-right: 0; }
@@ -551,7 +566,7 @@
       border: 1px solid #111111;
       border-radius: 0;
       background: #ffffff;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.82rem;
       padding: 8px 14px;
       cursor: pointer;
@@ -581,7 +596,7 @@
     .bubble-actions > .bubble-action-btn:last-child { margin-right: 0; }
     .bubble-action-btn {
       background: none; border: none; cursor: pointer;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.72rem;
       color: #777777; text-decoration: underline; padding: 0;
       min-height: 32px;
@@ -594,7 +609,7 @@
     /* === SETTINGS SCREEN === */
     .settings-section { margin-bottom: 28px; }
     .settings-section-label {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
       color: #777777; margin-bottom: 10px; border-bottom: 1px solid #d0d0d0; padding-bottom: 6px;
     }
@@ -607,7 +622,7 @@
       padding: 12px 16px;
       cursor: pointer;
       background: #ffffff;
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: Georgia, 'Times New Roman', 'Songti TC', 'Noto Serif CJK TC', 'Source Han Serif TC', PMingLiU, serif;
       font-size: 1rem;
       text-align: left;
       min-height: 48px;
@@ -637,7 +652,7 @@
       border: 1px solid #111111;
       background: #ffffff;
       color: #111111;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       font-size: 0.85rem;
       padding: 3px 8px;
       cursor: pointer;
@@ -671,7 +686,7 @@
       border: 1px solid #111111;
       border-radius: 0;
       background: #ffffff;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       cursor: pointer;
       padding: 10px 4px;
       text-align: center;
@@ -706,7 +721,7 @@
       border: 1px solid #111111;
       border-radius: 0;
       background: #ffffff;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       cursor: pointer;
       padding: 12px;
       text-align: left;
@@ -740,7 +755,7 @@
       border: 1px solid #111111;
       border-radius: 0;
       background: #ffffff;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
       cursor: pointer;
       padding: 12px;
       text-align: left;
@@ -759,7 +774,7 @@
     .age-gate-btns > .btn:last-child { margin-bottom: 0; }
 
     /* === SCREEN SUPPORT FOOTER === */
-    .screen-support-footer { border-top: 1px solid #111111; margin-top: 24px; padding-top: 16px; padding-bottom: 16px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; color: #666666; display: -webkit-box; display: -webkit-flex; display: flex; -webkit-box-pack: justify; -webkit-justify-content: space-between; justify-content: space-between; -webkit-box-align: center; -webkit-align-items: center; align-items: center; -webkit-flex-wrap: wrap; flex-wrap: wrap; }
+    .screen-support-footer { border-top: 1px solid #111111; margin-top: 24px; padding-top: 16px; padding-bottom: 16px; font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif; font-size: 15px; color: #666666; display: -webkit-box; display: -webkit-flex; display: flex; -webkit-box-pack: justify; -webkit-justify-content: space-between; justify-content: space-between; -webkit-box-align: center; -webkit-align-items: center; align-items: center; -webkit-flex-wrap: wrap; flex-wrap: wrap; }
     .screen-support-footer a { color: #666666; text-decoration: underline; }
     .screen-support-footer .sf-brand { font-weight: 600; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #111111; }
     .screen-support-footer .sf-links a { margin-left: 14px; }
@@ -769,17 +784,17 @@
 </head>
 <body>
 
-<div id="offline-banner">Offline — your message will be saved and sent when you reconnect</div>
+<div id="offline-banner" data-i18n="app.offline_your_message_will">Offline — your message will be saved and sent when you reconnect</div>
 
 <div class="page">
 
   <header class="site-header">
     <div>
       <div class="site-name" id="site-name-el">Page Commons</div>
-      <div id="site-tagline-el" class="site-tagline">Just books. No noise. <span style="color:#ccc;font-size:0.65rem">v0.56</span></div>
+      <div id="site-tagline-el" class="site-tagline"><span data-i18n="header.tagline">Just books. No noise.</span> <span style="color:#ccc;font-size:0.65rem">v0.57</span></div>
     </div>
     <nav id="header-nav" style="display:none">
-      <button onclick="goBack()">&#8592; Back</button><span class="nav-sep">&#183;</span><a href="#home">Main</a><span class="nav-sep">&#183;</span><a href="#search">Find a book</a>
+      <button onclick="goBack()" data-i18n="header.back">&#8592; Back</button><span class="nav-sep">&#183;</span><a href="#home" data-i18n="header.main">Main</a><span class="nav-sep">&#183;</span><a href="#search" data-i18n="header.find_a_book">Find a book</a>
     </nav>
   </header>
 
@@ -789,7 +804,7 @@
   <section id="screen-home" class="screen">
     <div class="hall-body">
       <div class="hall-greeting">Good evening</div>
-      <div class="hall-title">A quiet place to talk about books.</div>
+      <div class="hall-title" data-i18n="home.a_quiet_place_to">A quiet place to talk about books.</div>
       <p class="hall-description">
         Discuss what you're reading, discover what others thought,
         or find your next book.<br>No ads. No algorithms. No engagement metrics. Just books.
@@ -797,84 +812,84 @@
 
       <div class="hall-doors">
         <button class="hall-door primary" onclick="navigate('search')">
-          <span class="hall-door-title">Talk to your companion</span>
-          <span class="hall-door-sub">Start a new book conversation, or continue one from your shelf</span>
+          <span class="hall-door-title" data-i18n="home.talk_to_your_companion">Talk to your companion</span>
+          <span class="hall-door-sub" data-i18n="home.start_a_new_book">Start a new book conversation, or continue one from your shelf</span>
         </button>
         <button class="hall-door disabled">
-          <span class="hall-door-title">Enter a book room</span>
-          <span class="hall-door-sub">Coming soon — read notes from other readers</span>
+          <span class="hall-door-title" data-i18n="home.enter_a_book_room">Enter a book room</span>
+          <span class="hall-door-sub" data-i18n="home.coming_soon_read_notes">Coming soon — read notes from other readers</span>
         </button>
       </div>
 
       <p class="hall-newhero">
-        <a href="#" onclick="navigate('about'); return false;">New here? Learn what Page Commons is →</a>
+        <a href="#" onclick="navigate('about'); return false;" data-i18n="home.new_here_learn_what">New here? Learn what Page Commons is →</a>
       </p>
 
     </div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html" data-i18n="common.support_us">Support us</a><a href="/privacy.html" data-i18n="common.privacy">Privacy</a><a href="/terms.html" data-i18n="common.terms">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
        ABOUT
        ══════════════════════════════════ -->
   <section id="screen-about" class="screen">
-    <h1>What is Page Commons?</h1>
+    <h1 data-i18n="about.what_is_page_commons">What is Page Commons?</h1>
 
-    <p>Page Commons is a quiet place for readers. No social feed, no follower counts, no algorithmic recommendations. Just books and the people who read them.</p>
+    <p data-i18n="about.page_commons_is_a">Page Commons is a quiet place for readers. No social feed, no follower counts, no algorithmic recommendations. Just books and the people who read them.</p>
 
     <div class="about-section">
-      <h2>Your reading companion</h2>
-      <p style="font-size:0.9rem;color:#777777;margin-bottom:14px">A private AI companion you can talk to about any book — like a well-read friend who has also read it.</p>
+      <h2 data-i18n="about.your_reading_companion">Your reading companion</h2>
+      <p style="font-size:0.9rem;color:#777777;margin-bottom:14px" data-i18n="about.a_private_ai_companion">A private AI companion you can talk to about any book — like a well-read friend who has also read it.</p>
       <div class="about-feature">
-        <div class="about-feature-title">Discusses books, not summaries</div>
-        <p class="about-feature-desc">Your companion never recites plot points. It asks questions, offers opinions when asked, and follows your lead.</p>
+        <div class="about-feature-title" data-i18n="about.discusses_books_not_summaries">Discusses books, not summaries</div>
+        <p class="about-feature-desc" data-i18n="about.your_companion_never_recites">Your companion never recites plot points. It asks questions, offers opinions when asked, and follows your lead.</p>
       </div>
       <!-- Hidden for soft launch alongside the Kindle clippings import -->
       <div class="about-feature" style="display:none">
-        <div class="about-feature-title">Knows your highlights</div>
-        <p class="about-feature-desc">Import your Kindle clippings and the companion will remember the passages that stayed with you.</p>
+        <div class="about-feature-title" data-i18n="about.knows_your_highlights">Knows your highlights</div>
+        <p class="about-feature-desc" data-i18n="about.import_your_kindle_clippings">Import your Kindle clippings and the companion will remember the passages that stayed with you.</p>
       </div>
       <div class="about-feature">
-        <div class="about-feature-title">Meets you where you are</div>
-        <p class="about-feature-desc">Tell it whether you're considering the book, just started, halfway through, or finished — and it adapts accordingly.</p>
+        <div class="about-feature-title" data-i18n="about.meets_you_where_you">Meets you where you are</div>
+        <p class="about-feature-desc" data-i18n="about.tell_it_whether_you">Tell it whether you're considering the book, just started, halfway through, or finished — and it adapts accordingly.</p>
       </div>
       <div class="about-feature">
-        <div class="about-feature-title">Bring your own key</div>
-        <p class="about-feature-desc">Your conversations are powered by your own AI provider key. Nothing is stored on our servers.</p>
+        <div class="about-feature-title" data-i18n="about.bring_your_own_key">Bring your own key</div>
+        <p class="about-feature-desc" data-i18n="about.your_conversations_are_powered">Your conversations are powered by your own AI provider key. Nothing is stored on our servers.</p>
       </div>
     </div>
 
     <div class="about-section">
-      <h2>Book rooms <span style="font-size:0.78rem;color:#777777;font-weight:normal">(coming soon)</span></h2>
-      <p style="font-size:0.9rem;color:#777777;margin-bottom:14px">Each book has a room. Readers leave short notes — like margin notes in a second-hand book.</p>
+      <h2><span data-i18n="about.book_rooms">Book rooms</span> <span style="font-size:0.78rem;color:#777777;font-weight:normal" data-i18n="about.coming_soon">(coming soon)</span></h2>
+      <p style="font-size:0.9rem;color:#777777;margin-bottom:14px" data-i18n="about.each_book_has_a">Each book has a room. Readers leave short notes — like margin notes in a second-hand book.</p>
       <div class="about-feature">
-        <div class="about-feature-title">No likes, no rankings</div>
-        <p class="about-feature-desc">Notes are shown in reading order, not by popularity. There is no engagement metric to optimise for.</p>
+        <div class="about-feature-title" data-i18n="about.no_likes_no_rankings">No likes, no rankings</div>
+        <p class="about-feature-desc" data-i18n="about.notes_are_shown_in">Notes are shown in reading order, not by popularity. There is no engagement metric to optimise for.</p>
       </div>
       <div class="about-feature">
-        <div class="about-feature-title">Spoiler-aware by default</div>
-        <p class="about-feature-desc">Notes are gated by reading stage. You only see what's appropriate for where you are in the book.</p>
+        <div class="about-feature-title" data-i18n="about.spoiler_aware_by_default">Spoiler-aware by default</div>
+        <p class="about-feature-desc" data-i18n="about.notes_are_gated_by">Notes are gated by reading stage. You only see what's appropriate for where you are in the book.</p>
       </div>
     </div>
 
     <div class="about-section">
-      <h2>The philosophy</h2>
-      <p style="font-size:0.9rem;color:#777777">Page Commons is built for serious readers who feel underserved by Goodreads and generic AI chatbots. It is open source, privacy-first, and funded by readers — not advertisers.</p>
+      <h2 data-i18n="about.the_philosophy">The philosophy</h2>
+      <p style="font-size:0.9rem;color:#777777" data-i18n="about.page_commons_is_built">Page Commons is built for serious readers who feel underserved by Goodreads and generic AI chatbots. It is open source, privacy-first, and funded by readers — not advertisers.</p>
     </div>
 
-    <button class="btn btn-primary" onclick="navigate('home')">Back to the library</button>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <button class="btn btn-primary" onclick="navigate('home')" data-i18n="about.back_to_the_library">Back to the library</button>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html" data-i18n="common.support_us">Support us</a><a href="/privacy.html" data-i18n="common.privacy">Privacy</a><a href="/terms.html" data-i18n="common.terms">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
        KEY SCREEN
        ══════════════════════════════════ -->
   <section id="screen-key" class="screen">
-    <h1>Your companion awaits</h1>
-    <p>Choose your AI provider and enter your API key. Your key stays in your browser and never touches our servers — unless you use the transfer code option, where your key briefly passes through our servers to complete the transfer and is deleted immediately. No record is kept.</p>
+    <h1 data-i18n="key.your_companion_awaits">Your companion awaits</h1>
+    <p data-i18n="key.choose_your_ai_provider">Choose your AI provider and enter your API key. Your key stays in your browser and never touches our servers — unless you use the transfer code option, where your key briefly passes through our servers to complete the transfer and is deleted immediately. No record is kept.</p>
 
     <div class="field">
-      <label>AI Provider</label>
+      <label data-i18n="key.ai_provider">AI Provider</label>
       <div class="provider-options">
         <div class="provider-opt selected" id="prov-anthropic" onclick="selectProvider('anthropic')">
           <div class="provider-opt-left"><span class="provider-opt-name">Anthropic Claude</span></div>
@@ -889,85 +904,85 @@
     </div>
 
     <div class="field">
-      <label for="api-key-input">API Key</label>
+      <label for="api-key-input" data-i18n="key.api_key">API Key</label>
       <input type="password" id="api-key-input" placeholder="sk-ant-…" autocomplete="off" spellcheck="false" />
-      <button class="key-toggle" onclick="toggleKeyVisibility()">Show key</button>
-      <p id="key-hint">Get your key at console.anthropic.com</p>
+      <button class="key-toggle" onclick="toggleKeyVisibility()" data-i18n="key.show_key">Show key</button>
+      <p id="key-hint" data-i18n="key.get_your_key_at">Get your key at console.anthropic.com</p>
     </div>
 
     <!-- Transfer code entry -->
     <div id="transfer-section" style="margin-bottom:20px">
-      <button class="back-link" style="margin-bottom:12px" onclick="toggleTransferSection()">↓ Transferring from another device? Enter a code</button>
+      <button class="back-link" style="margin-bottom:12px" onclick="toggleTransferSection()" data-i18n="key.transferring_from_another_device">↓ Transferring from another device? Enter a code</button>
       <div id="transfer-fields" style="display:none">
         <div class="field">
-          <label for="transfer-code-input">6-digit transfer code</label>
+          <label for="transfer-code-input" data-i18n="key.6_digit_transfer_code">6-digit transfer code</label>
           <input type="tel" id="transfer-code-input" placeholder="e.g. 482 951" maxlength="7" autocomplete="off" />
         </div>
         <div id="transfer-error" class="status-msg error" style="display:none"></div>
         <div id="transfer-success" class="status-msg" style="display:none;color:#111"></div>
-        <button class="btn" onclick="redeemTransferCode()">Fetch my key</button>
-        <p class="note" style="margin-top:10px">Generate a code at <strong>pagecommons.com/transfer.html</strong> on your phone or desktop.</p>
-        <p class="note" style="margin-top:8px">Your key briefly passes through our servers to complete this transfer and is deleted immediately. No record is kept.</p>
+        <button class="btn" onclick="redeemTransferCode()" data-i18n="key.fetch_my_key">Fetch my key</button>
+        <p class="note" style="margin-top:10px" data-i18n-html="key.generate_a_code_at">Generate a code at <strong>pagecommons.com/transfer.html</strong> on your phone or desktop.</p>
+        <p class="note" style="margin-top:8px" data-i18n="key.your_key_briefly_passes">Your key briefly passes through our servers to complete this transfer and is deleted immediately. No record is kept.</p>
       </div>
     </div>
 
     <hr />
     <div id="key-error" class="status-msg error" style="display:none"></div>
-    <button class="btn btn-primary" onclick="saveKey()">Continue</button>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <button class="btn btn-primary" onclick="saveKey()" data-i18n="key.continue">Continue</button>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html" data-i18n="common.support_us">Support us</a><a href="/privacy.html" data-i18n="common.privacy">Privacy</a><a href="/terms.html" data-i18n="common.terms">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
        SEARCH
        ══════════════════════════════════ -->
   <section id="screen-search" class="screen">
-    <h1 id="search-heading">Which book?</h1>
+    <h1 id="search-heading" data-i18n="search.which_book">Which book?</h1>
 
-    <button class="btn" style="width:100%;margin-bottom:8px" onclick="navigate('shelf')">Your saved books →</button>
-    <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:0.78rem;color:#777777;margin-bottom:20px">Or search by title and author below.</p>
+    <button class="btn" style="width:100%;margin-bottom:8px" onclick="navigate('shelf')" data-i18n="search.your_saved_books">Your saved books →</button>
+    <p style="font-family:'Helvetica Neue',Helvetica,Arial,'PingFang TC','Heiti TC','Noto Sans CJK TC','Microsoft JhengHei',sans-serif;font-size:0.78rem;color:#777777;margin-bottom:20px" data-i18n="search.or_search_by_title">Or search by title and author below.</p>
 
     <div class="field">
-      <label for="book-search-title">Title</label>
+      <label for="book-search-title" data-i18n="search.title">Title</label>
       <input type="search" id="book-search-title"
              placeholder="e.g. Middlemarch, Reacher…"
              onkeydown="if(event.key==='Enter') searchBooks()" />
     </div>
     <div class="field">
-      <label for="book-search-author">Author <span style="font-weight:normal;text-transform:none">(optional)</span></label>
+      <label for="book-search-author"><span data-i18n="search.author">Author</span> <span style="font-weight:normal;text-transform:none" data-i18n="search.optional">(optional)</span></label>
       <div class="search-row">
         <input type="search" id="book-search-author"
                placeholder="e.g. Austen, Lee Child…"
                onkeydown="if(event.key==='Enter') searchBooks()" />
-        <button class="btn btn-primary btn-small" onclick="searchBooks()">Search</button>
+        <button class="btn btn-primary btn-small" onclick="searchBooks()" data-i18n="search.search">Search</button>
       </div>
     </div>
 
-    <div class="note" style="margin-bottom:12px">Tip: paste an ISBN (e.g. 9780747532743) to find an exact edition.</div>
+    <div class="note" style="margin-bottom:12px" data-i18n="search.tip_paste_an_isbn">Tip: paste an ISBN (e.g. 9780747532743) to find an exact edition.</div>
     <div id="search-status" class="status-msg" style="display:none"></div>
     <div id="search-results"></div>
 
     <!-- Kindle clippings import — hidden for soft launch; markup kept for future use -->
     <div id="kindle-import-section" style="display:none">
     <hr />
-    <h2>Or import from Kindle</h2>
-    <p class="note">Everything is processed locally in your browser. The file is never uploaded.</p>
-    <p class="note">Upload your <em>My Clippings.txt</em> to auto-detect your last book and load your highlights.</p>
+    <h2 data-i18n="search.or_import_from_kindle">Or import from Kindle</h2>
+    <p class="note" data-i18n="search.everything_is_processed_locally">Everything is processed locally in your browser. The file is never uploaded.</p>
+    <p class="note" data-i18n-html="search.upload_clippings_hint">Upload your <em>My Clippings.txt</em> to auto-detect your last book and load your highlights.</p>
     <div class="field">
-      <label>My Clippings.txt</label>
+      <label data-i18n="search.my_clippings_txt">My Clippings.txt</label>
       <div class="file-input-wrapper">
-        <div class="file-btn-label">Choose file</div>
+        <div class="file-btn-label" data-i18n="search.choose_file">Choose file</div>
         <input type="file" id="clippings-file" accept=".txt" onchange="parseClippings(this)" />
       </div>
-      <div id="clippings-filename">No file chosen</div>
+      <div id="clippings-filename" data-i18n="search.no_file_chosen">No file chosen</div>
     </div>
     <div class="field" style="margin-top:16px">
-      <label for="clippings-paste">Or paste clippings text</label>
-      <textarea id="clippings-paste" rows="5" placeholder="Paste the full contents of My Clippings.txt here…" style="width:100%;border:1px solid #111111;padding:10px;font-size:0.9rem;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;resize:vertical;border-radius:0;background:#ffffff;color:#111111"></textarea>
-      <button class="btn" style="margin-top:8px" onclick="parseClippingsPaste()">Import pasted text</button>
+      <label for="clippings-paste" data-i18n="search.or_paste_clippings_text">Or paste clippings text</label>
+      <textarea id="clippings-paste" rows="5" data-i18n-placeholder="search.ph_paste_the_full_contents" placeholder="Paste the full contents of My Clippings.txt here…" style="width:100%;border:1px solid #111111;padding:10px;font-size:0.9rem;font-family:'Helvetica Neue',Helvetica,Arial,'PingFang TC','Heiti TC','Noto Sans CJK TC','Microsoft JhengHei',sans-serif;resize:vertical;border-radius:0;background:#ffffff;color:#111111"></textarea>
+      <button class="btn" style="margin-top:8px" onclick="parseClippingsPaste()" data-i18n="search.import_pasted_text">Import pasted text</button>
     </div>
     <div id="clippings-status" class="status-msg" style="display:none"></div>
     </div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html" data-i18n="common.support_us">Support us</a><a href="/privacy.html" data-i18n="common.privacy">Privacy</a><a href="/terms.html" data-i18n="common.terms">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -975,47 +990,47 @@
        ══════════════════════════════════ -->
   <section id="screen-book-detail" class="screen">
     <div id="book-detail-content"></div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html" data-i18n="common.support_us">Support us</a><a href="/privacy.html" data-i18n="common.privacy">Privacy</a><a href="/terms.html" data-i18n="common.terms">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
        READING STATUS SCREEN
        ══════════════════════════════════ -->
   <section id="screen-status" class="screen">
-    <h1 id="status-book-title">Where are you with this book?</h1>
+    <h1 id="status-book-title" data-i18n="status.where_are_you_with">Where are you with this book?</h1>
     <div class="status-options">
       <button class="status-opt" onclick="setReadingStatus('started')">
-        <span class="status-opt-label">Just started</span>
-        <span class="status-opt-sub">I'm in the early pages</span>
+        <span class="status-opt-label" data-i18n="status.just_started">Just started</span>
+        <span class="status-opt-sub" data-i18n="status.i_m_in_the">I'm in the early pages</span>
       </button>
       <button class="status-opt" onclick="setReadingStatus('midway')">
-        <span class="status-opt-label">Halfway through</span>
-        <span class="status-opt-sub">Getting into it</span>
+        <span class="status-opt-label" data-i18n="status.halfway_through">Halfway through</span>
+        <span class="status-opt-sub" data-i18n="status.getting_into_it">Getting into it</span>
       </button>
       <button class="status-opt" onclick="setReadingStatus('finished')">
-        <span class="status-opt-label">Just finished</span>
-        <span class="status-opt-sub">Ready to talk about all of it</span>
+        <span class="status-opt-label" data-i18n="status.just_finished">Just finished</span>
+        <span class="status-opt-sub" data-i18n="status.ready_to_talk_about">Ready to talk about all of it</span>
       </button>
       <button class="status-opt" onclick="setReadingStatus('revisiting')">
-        <span class="status-opt-label">Read before, revisiting</span>
-        <span class="status-opt-sub">Coming back with fresh eyes</span>
+        <span class="status-opt-label" data-i18n="status.read_before_revisiting">Read before, revisiting</span>
+        <span class="status-opt-sub" data-i18n="status.coming_back_with_fresh">Coming back with fresh eyes</span>
       </button>
     </div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html" data-i18n="common.support_us">Support us</a><a href="/privacy.html" data-i18n="common.privacy">Privacy</a><a href="/terms.html" data-i18n="common.terms">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
        LANGUAGE CHOICE SCREEN
        ══════════════════════════════════ -->
   <section id="screen-language" class="screen">
-    <h1>Which language?</h1>
-    <p id="lang-prompt-text">This looks like a non-English book. Would you like to chat in the book's language or in English?</p>
+    <h1 data-i18n="language.which_language">Which language?</h1>
+    <p id="lang-prompt-text" data-i18n="language.this_looks_like_a">This looks like a non-English book. Would you like to chat in the book's language or in English?</p>
     <div class="lang-options">
-      <button class="btn btn-primary" id="lang-native-btn" onclick="setLanguage('native')">Chat in the book's language</button>
-      <button class="btn" onclick="setLanguage('english')">Chat in English</button>
+      <button class="btn btn-primary" id="lang-native-btn" onclick="setLanguage('native')" data-i18n="language.chat_in_the_book">Chat in the book's language</button>
+      <button class="btn" onclick="setLanguage('english')" data-i18n="language.chat_in_english">Chat in English</button>
     </div>
-    <p style="font-size:0.78rem;color:#777777;margin-top:16px">You can change this later in More.</p>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <p style="font-size:0.78rem;color:#777777;margin-top:16px" data-i18n="language.you_can_change_this">You can change this later in More.</p>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html" data-i18n="common.support_us">Support us</a><a href="/privacy.html" data-i18n="common.privacy">Privacy</a><a href="/terms.html" data-i18n="common.terms">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
@@ -1032,16 +1047,16 @@
     </div>
 
     <div id="discover-convert-bar" style="display:none;margin-bottom:24px;display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column">
-      <button class="btn btn-primary" style="width:100%;min-height:44px" onclick="startReadingFromDiscover()">I want to read this</button>
+      <button class="btn btn-primary" style="width:100%;min-height:44px" onclick="startReadingFromDiscover()" data-i18n="companion.i_want_to_read">I want to read this</button>
     </div>
 
     <div id="icebreakers">
-      <div class="icebreaker-label">Start here, or write your own below</div>
+      <div class="icebreaker-label" data-i18n="companion.start_here_or_write">Start here, or write your own below</div>
       <div class="icebreaker-prompts" id="icebreaker-list"></div>
     </div>
 
     <div id="chat-log"></div>
-    <div id="loading-indicator">Thinking…</div>
+    <div id="loading-indicator" data-i18n="companion.thinking">Thinking…</div>
 
     <div id="chat-input-area">
       <div id="input-book-context"></div>
@@ -1050,17 +1065,17 @@
                   placeholder="Write your message…"
                   oninput="autoGrow(this)"
                   onkeydown="handleChatKeydown(event)"></textarea>
-        <button class="btn btn-primary btn-small" onclick="sendMessage()">Send</button>
+        <button class="btn btn-primary btn-small" onclick="sendMessage()" data-i18n="companion.send">Send</button>
       </div>
 
       <div id="reader-toolbar">
-        <button class="toolbar-btn" id="highlights-toolbar-btn" style="display:none" onclick="toggleHighlights()">Highlights</button>
-        <button class="toolbar-btn" id="passages-toolbar-btn" style="display:none" onclick="togglePassagesPanel()">Passages</button>
-        <button class="toolbar-btn" id="notes-toolbar-btn" onclick="toggleNotesPanel()">Notes</button>
-        <button class="toolbar-btn" id="language-toolbar-btn" onclick="toggleLanguagePanel()">Language</button>
-        <button class="toolbar-btn" id="export-toolbar-btn" onclick="toggleExportPanel()">Export</button>
-        <button class="toolbar-btn" id="sync-toolbar-btn" style="display:none" onclick="syncFromToolbar()">Sync</button>
-        <button class="toolbar-btn" onclick="endConversation()">End Chat</button>
+        <button class="toolbar-btn" id="highlights-toolbar-btn" style="display:none" onclick="toggleHighlights()" data-i18n="companion.highlights">Highlights</button>
+        <button class="toolbar-btn" id="passages-toolbar-btn" style="display:none" onclick="togglePassagesPanel()" data-i18n="companion.passages">Passages</button>
+        <button class="toolbar-btn" id="notes-toolbar-btn" onclick="toggleNotesPanel()" data-i18n="companion.notes">Notes</button>
+        <button class="toolbar-btn" id="language-toolbar-btn" onclick="toggleLanguagePanel()" data-i18n="companion.language">Language</button>
+        <button class="toolbar-btn" id="export-toolbar-btn" onclick="toggleExportPanel()" data-i18n="companion.export">Export</button>
+        <button class="toolbar-btn" id="sync-toolbar-btn" style="display:none" onclick="syncFromToolbar()" data-i18n="companion.sync">Sync</button>
+        <button class="toolbar-btn" onclick="endConversation()" data-i18n="companion.end_chat">End Chat</button>
       </div>
 
       <div id="toolbar-msg"></div>
@@ -1071,173 +1086,187 @@
       </div>
 
       <div id="notes-panel">
-        <div class="font-panel-label">Your notes</div>
-        <textarea id="note-input" rows="4" placeholder="Write a private note about this book…" style="width:100%;border:1px solid #111111;padding:8px;font-size:0.9rem;font-family:Georgia,'Times New Roman',serif;resize:vertical;border-radius:0;background:#ffffff;color:#111111;margin-bottom:8px"></textarea>
-        <button class="btn btn-primary btn-small" onclick="saveNoteEntry()" style="margin-bottom:16px">Save note</button>
+        <div class="font-panel-label" data-i18n="companion.your_notes">Your notes</div>
+        <textarea id="note-input" rows="4" data-i18n-placeholder="companion.ph_write_a_private_note" placeholder="Write a private note about this book…" style="width:100%;border:1px solid #111111;padding:8px;font-size:0.9rem;font-family:Georgia,'Times New Roman','Songti TC','Noto Serif CJK TC','Source Han Serif TC',PMingLiU,serif;resize:vertical;border-radius:0;background:#ffffff;color:#111111;margin-bottom:8px"></textarea>
+        <button class="btn btn-primary btn-small" onclick="saveNoteEntry()" style="margin-bottom:16px" data-i18n="companion.save_note">Save note</button>
         <div id="notes-list"></div>
       </div>
 
       <div id="passages-panel">
         <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
-          <span style="font-size:0.85rem;color:#777777" id="passages-count">No passages saved yet</span>
-          <button class="bubble-action-btn" onclick="copyAllPassages()" style="font-size:0.85rem">Copy all</button>
+          <span style="font-size:0.85rem;color:#777777" id="passages-count" data-i18n="companion.no_passages_saved_yet">No passages saved yet</span>
+          <button class="bubble-action-btn" onclick="copyAllPassages()" style="font-size:0.85rem" data-i18n="companion.copy_all">Copy all</button>
         </div>
         <div id="passages-list"></div>
       </div>
 
       <div id="language-panel">
-        <div class="font-panel-label">Prompt language</div>
+        <div class="font-panel-label" data-i18n="companion.prompt_language">Prompt language</div>
         <div class="language-options">
-          <button class="language-opt" onclick="setCompanionLanguage('English')">English</button>
-          <button class="language-opt" onclick="setCompanionLanguage('French')">French</button>
-          <button class="language-opt" onclick="setCompanionLanguage('German')">German</button>
-          <button class="language-opt" onclick="setCompanionLanguage('Spanish')">Spanish</button>
-          <button class="language-opt" onclick="setCompanionLanguage('Portuguese')">Portuguese</button>
-          <button class="language-opt" onclick="setCompanionLanguage('Japanese')">Japanese</button>
-          <button class="language-opt" onclick="setCompanionLanguage('Korean')">Korean</button>
-          <button class="language-opt" onclick="setCompanionLanguage('Traditional Chinese')">Traditional Chinese</button>
-          <button class="language-opt" onclick="setCompanionLanguage('Simplified Chinese')">Simplified Chinese</button>
+          <button class="language-opt" onclick="setCompanionLanguage('English')" data-i18n="common.english">English</button>
+          <button class="language-opt" onclick="setCompanionLanguage('French')" data-i18n="common.french">French</button>
+          <button class="language-opt" onclick="setCompanionLanguage('German')" data-i18n="common.german">German</button>
+          <button class="language-opt" onclick="setCompanionLanguage('Spanish')" data-i18n="common.spanish">Spanish</button>
+          <button class="language-opt" onclick="setCompanionLanguage('Portuguese')" data-i18n="common.portuguese">Portuguese</button>
+          <button class="language-opt" onclick="setCompanionLanguage('Japanese')" data-i18n="common.japanese">Japanese</button>
+          <button class="language-opt" onclick="setCompanionLanguage('Korean')" data-i18n="common.korean">Korean</button>
+          <button class="language-opt" onclick="setCompanionLanguage('Traditional Chinese')" data-i18n="common.traditional_chinese">Traditional Chinese</button>
+          <button class="language-opt" onclick="setCompanionLanguage('Simplified Chinese')" data-i18n="common.simplified_chinese">Simplified Chinese</button>
         </div>
       </div>
 
       <div id="export-panel">
-        <div class="font-panel-label">Export conversation</div>
+        <div class="font-panel-label" data-i18n="companion.export_conversation">Export conversation</div>
         <div class="export-options">
-          <button class="export-opt" onclick="exportConversation('txt')">Plain text (.txt)</button>
-          <button class="export-opt" onclick="exportConversation('md')">Markdown (.md)</button>
+          <button class="export-opt" onclick="exportConversation('txt')" data-i18n="companion.plain_text_txt">Plain text (.txt)</button>
+          <button class="export-opt" onclick="exportConversation('md')" data-i18n="companion.markdown_md">Markdown (.md)</button>
         </div>
-        <p style="font-size:0.78rem;color:#777777;margin-top:12px">Kindle can only download and open .txt files. Markdown is best for desktop or note-taking apps.</p>
+        <p style="font-size:0.78rem;color:#777777;margin-top:12px" data-i18n="companion.kindle_can_only_download">Kindle can only download and open .txt files. Markdown is best for desktop or note-taking apps.</p>
       </div>
     </div>
 
     <div id="key-status-bar">
       API key loaded &nbsp;·&nbsp;
-      <button onclick="clearKey()" style="background:none;border:none;cursor:pointer;text-decoration:underline;font-family:Georgia, 'Times New Roman', serif;font-size:0.78rem;color:#777777">Remove</button>
+      <button onclick="clearKey()" style="background:none;border:none;cursor:pointer;text-decoration:underline;font-family:Georgia, 'Times New Roman', 'Songti TC', 'Noto Serif CJK TC', 'Source Han Serif TC', PMingLiU, serif;font-size:0.78rem;color:#777777" data-i18n="companion.remove">Remove</button>
     </div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html" data-i18n="common.support_us">Support us</a><a href="/privacy.html" data-i18n="common.privacy">Privacy</a><a href="/terms.html" data-i18n="common.terms">Terms</a></span></div>
   </section>
 
 
   <!-- ONBOARDING — AI MODE CHOICE -->
   <section id="screen-onboarding" class="screen">
-    <h1>Choose your companion</h1>
-    <p>Page Commons uses AI to power your reading companion. You can use the free shared pool or bring your own API key.</p>
+    <h1 data-i18n="onboarding.choose_your_companion">Choose your companion</h1>
+    <p data-i18n="onboarding.page_commons_uses_ai">Page Commons uses AI to power your reading companion. You can use the free shared pool or bring your own API key.</p>
 
-    <button class="btn btn-primary" onclick="chooseAIMode('shared')" style="width:100%;margin-bottom:8px">Use free shared companion</button>
-    <p style="font-size:0.78rem;color:#777777;margin-bottom:24px">No key needed. Best for well-known books in English. May not know recent or niche titles in depth — works best when you share what you remember as you go. Shared with other readers; may be slow at busy times.</p>
+    <button class="btn btn-primary" onclick="chooseAIMode('shared')" style="width:100%;margin-bottom:8px" data-i18n="onboarding.use_free_shared_companion">Use free shared companion</button>
+    <p style="font-size:0.78rem;color:#777777;margin-bottom:24px" data-i18n="onboarding.no_key_needed_best">No key needed. Best for well-known books in English. May not know recent or niche titles in depth — works best when you share what you remember as you go. Shared with other readers; may be slow at busy times.</p>
 
-    <button class="btn" onclick="chooseAIMode('byok')" style="width:100%;margin-bottom:8px">Use my own API key</button>
-    <p style="font-size:0.78rem;color:#777777;margin-bottom:24px">Stronger knowledge across more titles and languages, always available. Anthropic Claude, Google Gemini, or Groq. Your key is stored only in this browser and never sent to our servers.</p>
+    <button class="btn" onclick="chooseAIMode('byok')" style="width:100%;margin-bottom:8px" data-i18n="onboarding.use_my_own_api">Use my own API key</button>
+    <p style="font-size:0.78rem;color:#777777;margin-bottom:24px" data-i18n="onboarding.stronger_knowledge_across_more">Stronger knowledge across more titles and languages, always available. Anthropic Claude, Google Gemini, or Groq. Your key is stored only in this browser and never sent to our servers.</p>
 
-    <p style="font-size:0.78rem;color:#777777">You can change this any time in Preferences.</p>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <p style="font-size:0.78rem;color:#777777" data-i18n="onboarding.you_can_change_this">You can change this any time in Preferences.</p>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html" data-i18n="common.support_us">Support us</a><a href="/privacy.html" data-i18n="common.privacy">Privacy</a><a href="/terms.html" data-i18n="common.terms">Terms</a></span></div>
   </section>
 
   <!-- T&C SCREEN -->
   <section id="screen-tc" class="screen">
-    <h1>Welcome to Page Commons</h1>
-    <p class="tc-intro">Page Commons is a calm, private reading companion. Talk through the book you're reading with an AI that knows the work, save the passages that stay with you, and keep your shelf — all stored in your own browser, with no ads and no personal data on our servers.</p>
+    <h1 data-i18n="tc.welcome_to_page_commons">Welcome to Page Commons</h1>
+    <p class="tc-intro" data-i18n="tc.page_commons_is_a">Page Commons is a calm, private reading companion. Talk through the book you're reading with an AI that knows the work, save the passages that stay with you, and keep your shelf — all stored in your own browser, with no ads and no personal data on our servers.</p>
     <div class="tc-section">
-      <p>Before you continue, please read and agree to the following:</p>
+      <p data-i18n="tc.before_you_continue_please">Before you continue, please read and agree to the following:</p>
       <div class="note">
-        <strong>Age:</strong> By continuing you confirm you are 13 years of age or older. Some books contain adult content — you confirm you are 18 or over before accessing such material.
+        <strong data-i18n="tc.age">Age:</strong> By continuing you confirm you are 13 years of age or older. Some books contain adult content — you confirm you are 18 or over before accessing such material.
       </div>
       <div class="note">
-        <strong>Privacy:</strong> Your API key and reading data are stored only in your browser. We do not collect or store personal data on our servers.
+        <strong data-i18n="tc.privacy">Privacy:</strong> Your API key and reading data are stored only in your browser. We do not collect or store personal data on our servers.
       </div>
       <div class="note">
-        <strong>Content:</strong> Page Commons is a reading companion. Discussions are anchored to books. We are not responsible for AI responses but take reasonable steps to keep them appropriate.
+        <strong data-i18n="tc.content">Content:</strong> Page Commons is a reading companion. Discussions are anchored to books. We are not responsible for AI responses but take reasonable steps to keep them appropriate.
       </div>
       <div class="note">
-        <strong>Open source:</strong> Page Commons is open source software provided as-is. Use it responsibly.
+        <strong data-i18n="tc.open_source">Open source:</strong> Page Commons is open source software provided as-is. Use it responsibly.
       </div>
     </div>
-    <button class="btn btn-primary" onclick="acceptTC()">I agree — take me in</button>
-    <p style="font-size:0.78rem;color:#777777;margin-top:12px;text-align:center">Your agreement is stored locally in your browser only.</p>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <button class="btn btn-primary" onclick="acceptTC()" data-i18n="tc.i_agree_take_me">I agree — take me in</button>
+    <p style="font-size:0.78rem;color:#777777;margin-top:12px;text-align:center" data-i18n="tc.your_agreement_is_stored">Your agreement is stored locally in your browser only.</p>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html" data-i18n="common.support_us">Support us</a><a href="/privacy.html" data-i18n="common.privacy">Privacy</a><a href="/terms.html" data-i18n="common.terms">Terms</a></span></div>
   </section>
 
   <!-- AGE GATE -->
   <section id="screen-age-gate" class="screen">
-    <h1>Just a moment</h1>
+    <h1 data-i18n="age_gate.just_a_moment">Just a moment</h1>
     <p id="age-gate-book-name" style="font-style:italic;margin-bottom:8px"></p>
-    <p>This book has been flagged as containing adult content.</p>
-    <p style="font-size:0.88rem;color:#777777">We don't store this confirmation — it is only used at this moment of adding the book.</p>
+    <p data-i18n="age_gate.this_book_has_been">This book has been flagged as containing adult content.</p>
+    <p style="font-size:0.88rem;color:#777777" data-i18n="age_gate.we_don_t_store">We don't store this confirmation — it is only used at this moment of adding the book.</p>
     <div class="age-gate-btns">
-      <button class="btn btn-primary" onclick="confirmAgeGate()">I'm 18 or over — continue</button>
-      <button class="btn" onclick="navigate('search')">Take me back</button>
+      <button class="btn btn-primary" onclick="confirmAgeGate()" data-i18n="age_gate.i_m_18_or">I'm 18 or over — continue</button>
+      <button class="btn" onclick="navigate('search')" data-i18n="age_gate.take_me_back">Take me back</button>
     </div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html" data-i18n="common.support_us">Support us</a><a href="/privacy.html" data-i18n="common.privacy">Privacy</a><a href="/terms.html" data-i18n="common.terms">Terms</a></span></div>
   </section>
 
   <!-- YOUR SHELF -->
   <section id="screen-shelf" class="screen">
-    <h1>Your shelf</h1>
+    <h1 data-i18n="shelf.your_shelf">Your shelf</h1>
     <div id="shelf-list"></div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html" data-i18n="common.support_us">Support us</a><a href="/privacy.html" data-i18n="common.privacy">Privacy</a><a href="/terms.html" data-i18n="common.terms">Terms</a></span></div>
   </section>
 
   <!-- ══════════════════════════════════
        PREFERENCES
        ══════════════════════════════════ -->
   <section id="screen-preferences" class="screen">
-    <h1 id="prefs-heading">Preferences</h1>
-    <p id="prefs-intro" style="display:none;margin-bottom:20px">Quick setup. Defaults are fine — change anything you like, then continue.</p>
+    <h1 id="prefs-heading" data-i18n="preferences.preferences">Preferences</h1>
+    <p id="prefs-intro" style="display:none;margin-bottom:20px" data-i18n="preferences.quick_setup_defaults_are">Quick setup. Defaults are fine — change anything you like, then continue.</p>
 
     <div class="settings-section">
-      <div class="settings-section-label">Your name</div>
+      <div class="settings-section-label" data-i18n="preferences.your_name">Your name</div>
       <div class="field">
-        <input type="text" id="settings-name" placeholder="e.g. Alex" autocomplete="off" oninput="saveSettingName()" />
-        <p style="font-size:0.78rem;color:#777777;margin-top:6px">Used for personalised headings.</p>
+        <input type="text" id="settings-name" data-i18n-placeholder="preferences.ph_e_g_alex" placeholder="e.g. Alex" autocomplete="off" oninput="saveSettingName()" />
+        <p style="font-size:0.78rem;color:#777777;margin-top:6px" data-i18n="preferences.used_for_personalised_headings">Used for personalised headings.</p>
       </div>
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-label">Companion name</div>
+      <div class="settings-section-label" data-i18n="preferences.companion_name">Companion name</div>
       <div class="field">
-        <input type="text" id="settings-companion-name" placeholder="e.g. Ellis, River, Claude…" autocomplete="off" oninput="saveSettingCompanionName()" />
-        <p style="font-size:0.78rem;color:#777777;margin-top:6px">Leave blank to use "Companion".</p>
+        <input type="text" id="settings-companion-name" data-i18n-placeholder="preferences.ph_e_g_ellis_river" placeholder="e.g. Ellis, River, Claude…" autocomplete="off" oninput="saveSettingCompanionName()" />
+        <p style="font-size:0.78rem;color:#777777;margin-top:6px" data-i18n="preferences.leave_blank_to_use">Leave blank to use "Companion".</p>
       </div>
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-label">Companion language</div>
+      <div class="settings-section-label" data-i18n="preferences.interface_language">Interface language</div>
       <div class="field">
         <div style="position:relative">
-          <select id="settings-companion-lang" onchange="saveCompanionLangSetting(this.value)" style="width:100%;border:1px solid #111111;background:#ffffff;color:#111111;font-family:Georgia,'Times New Roman',serif;font-size:1rem;padding:12px 14px;padding-right:36px;outline:none;border-radius:0;-webkit-appearance:none;appearance:none">
-            <option value="English">English</option>
-            <option value="French">French</option>
-            <option value="German">German</option>
-            <option value="Spanish">Spanish</option>
-            <option value="Italian">Italian</option>
-            <option value="Portuguese">Portuguese</option>
-            <option value="Traditional Chinese">Traditional Chinese</option>
-            <option value="Simplified Chinese">Simplified Chinese</option>
-            <option value="Japanese">Japanese</option>
-            <option value="Korean">Korean</option>
-            <option value="Arabic">Arabic</option>
-            <option value="Russian">Russian</option>
-            <option value="Dutch">Dutch</option>
-            <option value="Polish">Polish</option>
-            <option value="Turkish">Turkish</option>
+          <select id="settings-ui-lang" onchange="setUILang(this.value)" style="width:100%;border:1px solid #111111;background:#ffffff;color:#111111;font-family:Georgia,'Times New Roman','Songti TC','Noto Serif CJK TC','Source Han Serif TC',PMingLiU,serif;font-size:1rem;padding:12px 14px;padding-right:36px;outline:none;border-radius:0;-webkit-appearance:none;appearance:none">
+            <option value="en">English</option>
+            <option value="zh-TW">繁體中文</option>
+          </select>
+          <span style="position:absolute;right:14px;top:14px;pointer-events:none;color:#777777">▾</span>
+        </div>
+        <p style="font-size:0.78rem;color:#777777;margin-top:6px" data-i18n="preferences.interface_language_note">The language of buttons and labels. Your companion's language is set separately below.</p>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label" data-i18n="preferences.companion_language">Companion language</div>
+      <div class="field">
+        <div style="position:relative">
+          <select id="settings-companion-lang" onchange="saveCompanionLangSetting(this.value)" style="width:100%;border:1px solid #111111;background:#ffffff;color:#111111;font-family:Georgia,'Times New Roman','Songti TC','Noto Serif CJK TC','Source Han Serif TC',PMingLiU,serif;font-size:1rem;padding:12px 14px;padding-right:36px;outline:none;border-radius:0;-webkit-appearance:none;appearance:none">
+            <option value="English" data-i18n="common.english">English</option>
+            <option value="French" data-i18n="common.french">French</option>
+            <option value="German" data-i18n="common.german">German</option>
+            <option value="Spanish" data-i18n="common.spanish">Spanish</option>
+            <option value="Italian" data-i18n="preferences.italian">Italian</option>
+            <option value="Portuguese" data-i18n="common.portuguese">Portuguese</option>
+            <option value="Traditional Chinese" data-i18n="common.traditional_chinese">Traditional Chinese</option>
+            <option value="Simplified Chinese" data-i18n="common.simplified_chinese">Simplified Chinese</option>
+            <option value="Japanese" data-i18n="common.japanese">Japanese</option>
+            <option value="Korean" data-i18n="common.korean">Korean</option>
+            <option value="Arabic" data-i18n="preferences.arabic">Arabic</option>
+            <option value="Russian" data-i18n="preferences.russian">Russian</option>
+            <option value="Dutch" data-i18n="preferences.dutch">Dutch</option>
+            <option value="Polish" data-i18n="preferences.polish">Polish</option>
+            <option value="Turkish" data-i18n="preferences.turkish">Turkish</option>
           </select>
           <span style="position:absolute;right:12px;top:50%;margin-top:-8px;font-size:1rem;line-height:1;pointer-events:none;color:#111111">&#9660;</span>
         </div>
-        <p style="font-size:0.78rem;color:#777777;margin-top:6px">The companion chats in this language. Defaults to English; per-book overrides are available from the Language button in a chat.</p>
+        <p style="font-size:0.78rem;color:#777777;margin-top:6px" data-i18n="preferences.the_companion_chats_in">The companion chats in this language. Defaults to English; per-book overrides are available from the Language button in a chat.</p>
       </div>
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-label">Default reply length</div>
+      <div class="settings-section-label" data-i18n="preferences.default_reply_length">Default reply length</div>
       <div class="length-options">
-        <button class="length-opt" data-length="short"    onclick="setReplyLength('short')">Short</button>
-        <button class="length-opt" data-length="medium"   onclick="setReplyLength('medium')">Medium</button>
-        <button class="length-opt" data-length="detailed" onclick="setReplyLength('detailed')">Detailed</button>
+        <button class="length-opt" data-length="short"    onclick="setReplyLength('short')" data-i18n="preferences.short">Short</button>
+        <button class="length-opt" data-length="medium"   onclick="setReplyLength('medium')" data-i18n="preferences.medium">Medium</button>
+        <button class="length-opt" data-length="detailed" onclick="setReplyLength('detailed')" data-i18n="preferences.detailed">Detailed</button>
       </div>
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-label">Text size</div>
+      <div class="settings-section-label" data-i18n="preferences.text_size">Text size</div>
       <div class="font-size-options">
         <button class="font-size-opt" style="font-size:0.85rem" data-size="16" onclick="setFontSize(16)">A</button>
         <button class="font-size-opt" style="font-size:1rem"    data-size="18" onclick="setFontSize(18)">A</button>
@@ -1246,58 +1275,58 @@
       </div>
     </div>
 
-    <button class="back-link" id="prefs-more-toggle" style="margin-top:8px" onclick="togglePreferencesMore()">More settings ▾</button>
+    <button class="back-link" id="prefs-more-toggle" style="margin-top:8px" onclick="togglePreferencesMore()" data-i18n="preferences.more_settings">More settings ▾</button>
 
     <div id="prefs-more" style="display:none">
       <div class="settings-section">
-        <div class="settings-section-label">AI companion</div>
+        <div class="settings-section-label" data-i18n="preferences.ai_companion">AI companion</div>
         <div class="settings-radio-options">
-          <button class="settings-radio" id="settings-mode-shared" onclick="switchAIMode('shared')">Free shared pool</button>
-          <button class="settings-radio" id="settings-mode-byok" onclick="switchAIMode('byok')">My own key</button>
+          <button class="settings-radio" id="settings-mode-shared" onclick="switchAIMode('shared')" data-i18n="preferences.free_shared_pool">Free shared pool</button>
+          <button class="settings-radio" id="settings-mode-byok" onclick="switchAIMode('byok')" data-i18n="preferences.my_own_key">My own key</button>
         </div>
         <p style="font-size:0.78rem;color:#777777;margin-top:8px" id="settings-ai-mode-note"></p>
       </div>
 
       <div class="settings-section" id="prefs-provider-section" style="display:none">
-        <div class="settings-section-label">API key &amp; provider</div>
+        <div class="settings-section-label" data-i18n="preferences.api_key_provider">API key &amp; provider</div>
         <div class="settings-radio-options">
           <button class="settings-radio" id="settings-prov-anthropic" onclick="selectProvider('anthropic')">Anthropic Claude</button>
           <button class="settings-radio" id="settings-prov-gemini" onclick="selectProvider('gemini')">Google Gemini</button>
           <button class="settings-radio" id="settings-prov-groq" onclick="selectProvider('groq')">Groq</button>
         </div>
         <p style="font-size:0.78rem;color:#777777;margin-top:8px">
-          <a href="#" onclick="navigate('key'); return false;" style="color:#777777">Set your API key →</a>
+          <a href="#" onclick="navigate('key'); return false;" style="color:#777777" data-i18n="preferences.set_your_api_key">Set your API key →</a>
         </p>
       </div>
 
       <div class="settings-section" id="prefs-data-section">
-        <div class="settings-section-label">Your data</div>
-        <p style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px">Back up your Page Commons data or restore it on another device.</p>
-        <button class="btn" style="margin-bottom:10px" onclick="exportUserData()">Export my data</button>
+        <div class="settings-section-label" data-i18n="preferences.your_data">Your data</div>
+        <p style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px" data-i18n="preferences.back_up_your_page">Back up your Page Commons data or restore it on another device.</p>
+        <button class="btn" style="margin-bottom:10px" onclick="exportUserData()" data-i18n="preferences.export_my_data">Export my data</button>
         <div id="data-export-msg" style="display:none;font-size:0.85rem;margin-bottom:14px"></div>
-        <button class="btn" onclick="triggerImportPicker()">Import data from backup</button>
+        <button class="btn" onclick="triggerImportPicker()" data-i18n="preferences.import_data_from_backup">Import data from backup</button>
         <input type="file" id="data-import-input" accept="application/json,.json" style="display:none" onchange="importUserData(this)" />
         <div id="data-import-msg" style="display:none;font-size:0.85rem;margin-top:10px"></div>
       </div>
 
       <div class="settings-section" id="prefs-gdrive-section">
-        <div class="settings-section-label">Google Drive sync</div>
+        <div class="settings-section-label" data-i18n="preferences.google_drive_sync">Google Drive sync</div>
         <div id="gdrive-not-connected">
-          <p style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px">Back up and access your conversations from any device.</p>
-          <button class="btn" onclick="initGDriveAuth()">Connect Google Drive</button>
+          <p style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px" data-i18n="preferences.back_up_and_access">Back up and access your conversations from any device.</p>
+          <button class="btn" onclick="initGDriveAuth()" data-i18n="preferences.connect_google_drive">Connect Google Drive</button>
         </div>
         <div id="gdrive-connected" style="display:none">
-          <p style="font-size:0.85rem;margin-top:0;margin-bottom:4px">Connected as <span id="gdrive-email">&mdash;</span></p>
-          <p id="gdrive-last-synced" style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px">Last synced: never</p>
-          <button class="btn" style="margin-bottom:10px" onclick="syncToDrive()">Sync now</button>
+          <p style="font-size:0.85rem;margin-top:0;margin-bottom:4px"><span data-i18n="preferences.connected_as">Connected as</span> <span id="gdrive-email">&mdash;</span></p>
+          <p id="gdrive-last-synced" style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px" data-i18n="preferences.last_synced_never">Last synced: never</p>
+          <button class="btn" style="margin-bottom:10px" onclick="syncToDrive()" data-i18n="preferences.sync_now">Sync now</button>
           <!-- Kindle clippings import hidden — Mac/MTP gap (2024 Kindle not mountable on Mac).
                Code kept in app.js (importClippingsFromDrive, showDriveClippingsBooksConfirm,
                confirmAddDriveBooks, gdriveDownloadText). Re-enable when a Mac-friendly
                import path is identified (read.amazon.com parser, or Bookcision format support).
-          <button class="btn" style="margin-bottom:10px" onclick="importClippingsFromDrive()">Import My Clippings.txt</button>
-          <p style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px">Upload My Clippings.txt from your Kindle to your &ldquo;Page Commons&rdquo; folder in Google Drive first.</p>
+          <button class="btn" style="margin-bottom:10px" onclick="importClippingsFromDrive()" data-i18n="preferences.import_my_clippings_txt">Import My Clippings.txt</button>
+          <p style="font-size:0.78rem;color:#777777;margin-top:0;margin-bottom:14px" data-i18n="preferences.upload_my_clippings_txt">Upload My Clippings.txt from your Kindle to your &ldquo;Page Commons&rdquo; folder in Google Drive first.</p>
           -->
-          <button class="btn" onclick="disconnectGDrive()">Disconnect</button>
+          <button class="btn" onclick="disconnectGDrive()" data-i18n="preferences.disconnect">Disconnect</button>
         </div>
         <div id="gdrive-msg" style="display:none;font-size:0.85rem;margin-top:10px"></div>
         <div id="clippings-drive-msg" style="display:none;font-size:0.85rem;margin-top:10px;color:#555555"></div>
@@ -1305,9 +1334,9 @@
       </div>
     </div>
 
-    <button class="btn btn-primary" id="prefs-save-continue" style="display:none;width:100%;margin-top:24px" onclick="savePreferencesAndContinue()">Save & continue</button>
+    <button class="btn btn-primary" id="prefs-save-continue" style="display:none;width:100%;margin-top:24px" onclick="savePreferencesAndContinue()" data-i18n="preferences.save_continue">Save & continue</button>
 
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html" data-i18n="common.support_us">Support us</a><a href="/privacy.html" data-i18n="common.privacy">Privacy</a><a href="/terms.html" data-i18n="common.terms">Terms</a></span></div>
   </section>
 
   <!-- BOOK CONVERSATIONS -->
@@ -1316,11 +1345,11 @@
     <p id="book-shelf-author" style="font-size:0.88rem;color:#777777;margin-bottom:4px"></p>
     <p id="book-shelf-status" style="font-size:0.78rem;color:#777777;font-style:italic;margin-bottom:20px"></p>
     <div style="display:-webkit-box;display:-ms-flexbox;display:flex;margin-bottom:24px">
-      <button class="btn btn-primary btn-small" style="margin-right:10px" onclick="startNewConversation()">New conversation</button>
-      <button class="btn btn-small" onclick="updateBookStatus()">Update status</button>
+      <button class="btn btn-primary btn-small" style="margin-right:10px" onclick="startNewConversation()" data-i18n="book_shelf.new_conversation">New conversation</button>
+      <button class="btn btn-small" onclick="updateBookStatus()" data-i18n="book_shelf.update_status">Update status</button>
     </div>
     <div id="conv-list"></div>
-    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html">Support us</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div>
+    <div class="screen-support-footer"><span class="sf-brand">Page Commons</span><span class="sf-links"><a href="/support.html" data-i18n="common.support_us">Support us</a><a href="/privacy.html" data-i18n="common.privacy">Privacy</a><a href="/terms.html" data-i18n="common.terms">Terms</a></span></div>
   </section>
 
 </div>

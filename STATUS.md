@@ -1,11 +1,62 @@
 # Page Commons — Current Status
 
 Last updated: July 6, 2026
-Current version: v0.56
-Updated by: Claude session — v0.42–v0.56: nav/UI polish, shelf archiving,
-private-repo bug-fix ports (v0.53–v0.55), affiliate removal (v0.56)
+Current version: v0.57
+Updated by: Claude session — v0.42–v0.57: nav/UI polish, shelf archiving,
+private-repo bug-fix ports (v0.53–v0.55), affiliate removal (v0.56),
+interface i18n + Traditional Chinese (v0.57)
 
-## What was done this session [v0.42 → v0.56]
+## What was done this session [v0.42 → v0.57]
+
+### v0.57 — Interface language layer + Traditional Chinese
+Motivation: a Cantonese YouTube channel demo / soft launch, which reads
+much better with a Chinese interface. The companion side already spoke
+Traditional Chinese; only the chrome was hardcoded English.
+
+- **Architecture.** Interface text now lives in `UI_STRINGS` (app.js),
+  **244 keys × 2 languages**. Markup carries the key, never the
+  translation: `data-i18n` (textContent), `data-i18n-html` (strings with
+  inline markup), `data-i18n-placeholder`. `applyLanguage(lang)` walks
+  those attributes on boot and on every switch; JS-built text uses
+  `t('key')`. All ES5/Kobo-safe — indexed loops, no NodeList.forEach.
+- **Separate from the companion language.** New `pc_ui_lang` preference
+  with its own picker in Preferences. A reader can run a Chinese
+  interface with an English companion, or the reverse. A test asserts
+  switching the interface never touches `pc_companion_lang`.
+- **Fonts (the risk flagged before starting).** Georgia and Helvetica
+  Neue carry no CJK glyphs. All 79 font stacks across index/support/
+  privacy/terms now end with CJK families (Songti TC / Noto Serif CJK /
+  PingFang TC / Noto Sans CJK / Microsoft JhengHei). Fallback is
+  per-glyph so Latin text renders exactly as before — and this **also
+  fixes Chinese book titles in the English UI**, a pre-existing gap.
+  `body.ui-cjk` adds CJK-only line-height (1.8) and letter-spacing
+  tuning, since Latin tracking looks broken on square glyphs.
+- **Never translated:** brand "Page Commons", provider names, version.
+- **Dead code removed:** `SEARCH_HEADINGS` / `SEARCH_HEADINGS_NAMED`
+  arrays, now superseded by table keys that rotate per language.
+- **Tests: 25 → 32.** New: default-English, switch-and-switch-back
+  (asserts the exact English string returns), interface/companion
+  independence, brand never translated, both tables have identical key
+  sets, every markup key exists in the table, CJK fallback present and
+  ordered after the Latin families. Plus a 28-check Chromium smoke pass
+  (persistence across reload, no raw keys leaking to screen, no console
+  errors).
+
+**Open — needs the founder, a native speaker:** the Traditional Chinese
+is a careful first pass, not a native review. The app's whole personality
+lives in its wording ("warm but not gushing"), and machine translation
+flattens exactly that. Terminology chosen: 書伴 (companion), 書架
+(shelf), 摘句 (passages), 標註 (highlights), 主頁 (main). Worth a read
+end-to-end before filming.
+
+**Open — device test:** whether Kobo Libra Colour and Kindle actually
+have a CJK font to fall back to. This cannot be settled headlessly and
+is the one thing that could still derail a demo. Test before committing
+to a filming date.
+
+**Not translated (deliberate):** privacy.html and terms.html (1,367
+words of legal text — a translation raises the question of which version
+governs; the normal approach is a note that the English is authoritative).
 
 ### v0.56 — Affiliate links removed (non-commercial compliance)
 - The public lite version must remain **non-commercial** (Vercel Hobby

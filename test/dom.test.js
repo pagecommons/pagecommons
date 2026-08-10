@@ -73,6 +73,84 @@ test('footer is a single row: brand left, Support/Privacy/Terms right', async fu
   assert.ok(hrefs.indexOf('/terms.html') !== -1, 'Terms link missing from footer');
 });
 
+// ─── Interface language (i18n) ──────────────────────────────────────────────
+var HAN = /[一-鿿]/;
+
+test('interface defaults to English and carries no CJK class', async function () {
+  var app = await boot({ seed: RETURNING });
+  assert.ok(!HAN.test(app.document.querySelector('.hall-title').textContent),
+    'default UI should be English');
+  assert.ok(!/ui-cjk/.test(app.document.body.className), 'ui-cjk must be off by default');
+});
+
+test('setUILang swaps the interface to Traditional Chinese and back', async function () {
+  var app = await boot({ seed: RETURNING });
+  var englishTitle = app.document.querySelector('.hall-title').textContent;
+
+  app.window.setUILang('zh-TW');
+  assert.ok(HAN.test(app.document.querySelector('.hall-title').textContent),
+    'hall title should be Chinese after switching');
+  assert.ok(HAN.test(app.document.getElementById('header-nav').textContent),
+    'header nav should be Chinese after switching');
+  assert.ok(/ui-cjk/.test(app.document.body.className), 'ui-cjk class should be applied');
+  assert.strictEqual(app.localStorage.getItem('pc_ui_lang'), 'zh-TW', 'choice should persist');
+
+  app.window.setUILang('en');
+  assert.strictEqual(app.document.querySelector('.hall-title').textContent, englishTitle,
+    'switching back should restore the exact English string');
+  assert.ok(!/ui-cjk/.test(app.document.body.className), 'ui-cjk class should be removed');
+});
+
+test('interface language is independent of companion language', async function () {
+  var app = await boot({ seed: RETURNING });
+  app.window.setUILang('zh-TW');
+  assert.strictEqual(app.localStorage.getItem('pc_companion_lang'), null,
+    'switching the interface must not touch the companion language preference');
+});
+
+test('the brand name is never translated', async function () {
+  var app = await boot({ seed: RETURNING });
+  app.window.setUILang('zh-TW');
+  assert.strictEqual(app.document.getElementById('site-name-el').textContent.trim(), 'Page Commons');
+});
+
+test('every English string key has a Traditional Chinese counterpart', async function () {
+  var app = await boot({ seed: RETURNING });
+  var tables = app.window.UI_STRINGS;
+  var en = Object.keys(tables.en), zh = tables['zh-TW'];
+  var missing = en.filter(function (k) { return !(k in zh); });
+  assert.strictEqual(missing.length, 0, 'untranslated keys: ' + missing.join(', '));
+  var extra = Object.keys(zh).filter(function (k) { return !(k in tables.en); });
+  assert.strictEqual(extra.length, 0, 'stale zh-TW keys with no English source: ' + extra.join(', '));
+});
+
+test('every data-i18n key in the markup exists in the string table', async function () {
+  var app = await boot({ seed: RETURNING });
+  var en = app.window.UI_STRINGS.en;
+  var missing = [];
+  var attrs = ['data-i18n', 'data-i18n-html', 'data-i18n-placeholder'];
+  for (var a = 0; a < attrs.length; a++) {
+    var els = app.document.querySelectorAll('[' + attrs[a] + ']');
+    for (var i = 0; i < els.length; i++) {
+      var key = els[i].getAttribute(attrs[a]);
+      if (key && !(key in en)) missing.push(key);
+    }
+  }
+  assert.strictEqual(missing.length, 0, 'markup references unknown keys: ' + missing.join(', '));
+});
+
+test('font stacks carry a CJK fallback after the Latin families', async function () {
+  var app = await boot({ seed: RETURNING });
+  var css = '';
+  var styles = app.document.querySelectorAll('style');
+  for (var i = 0; i < styles.length; i++) css += styles[i].textContent;
+  assert.ok(/Songti TC|Noto Serif CJK/.test(css), 'serif stack needs a CJK fallback');
+  assert.ok(/PingFang TC|Noto Sans CJK/.test(css), 'sans stack needs a CJK fallback');
+  // Latin must still win for Latin glyphs.
+  assert.ok(/Georgia,\s*'Times New Roman',\s*'Songti TC'/.test(css),
+    'CJK families must come after Georgia, not before');
+});
+
 test('Back from an ended chat does not loop between shelf and chat', async function () {
   var app = await boot({ seed: RETURNING });
   // A selected book lets #companion pass its handleRoute redirect gate.

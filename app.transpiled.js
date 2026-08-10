@@ -225,17 +225,618 @@ var STATIC_PROMPTS = ["I just finished it", "Something is still on my mind", "I 
 var STATIC_THINKING = ['Typing…', 'Reading your note…', 'Considering…', 'Let me think…', 'Hmm…', 'One moment…', 'With you…'];
 
 // ═══════════════════════════════════════════════════
+//  INTERFACE LANGUAGE (i18n)
+//  Markup carries data-i18n / data-i18n-html / data-i18n-placeholder
+//  keys; applyLanguage() fills them from UI_STRINGS on boot and on every
+//  language change. Text built in JS uses t('key').
+//  Kobo-safe throughout: var, function(){}, indexed loops, no template
+//  literals, no NodeList.forEach.
+//  The interface language is deliberately SEPARATE from the companion
+//  language (pc_companion_lang) — a reader may want a Chinese interface
+//  with an English companion, or the reverse.
+// ═══════════════════════════════════════════════════
+var UI_LANGS = [{
+  code: 'en',
+  label: 'English'
+}, {
+  code: 'zh-TW',
+  label: '繁體中文'
+}];
+// Locale used for dates rendered in the interface.
+var UI_DATE_LOCALE = {
+  'en': 'en-GB',
+  'zh-TW': 'zh-TW'
+};
+var UI_STRINGS = {
+  'en': {
+    'about.a_private_ai_companion': 'A private AI companion you can talk to about any book — like a well-read friend who has also read it.',
+    'about.back_to_the_library': 'Back to the library',
+    'about.book_rooms': 'Book rooms',
+    'about.bring_your_own_key': 'Bring your own key',
+    'about.coming_soon': '(coming soon)',
+    'about.discusses_books_not_summaries': 'Discusses books, not summaries',
+    'about.each_book_has_a': 'Each book has a room. Readers leave short notes — like margin notes in a second-hand book.',
+    'about.import_your_kindle_clippings': 'Import your Kindle clippings and the companion will remember the passages that stayed with you.',
+    'about.knows_your_highlights': 'Knows your highlights',
+    'about.meets_you_where_you': 'Meets you where you are',
+    'about.no_likes_no_rankings': 'No likes, no rankings',
+    'about.notes_are_gated_by': 'Notes are gated by reading stage. You only see what\'s appropriate for where you are in the book.',
+    'about.notes_are_shown_in': 'Notes are shown in reading order, not by popularity. There is no engagement metric to optimise for.',
+    'about.page_commons_is_a': 'Page Commons is a quiet place for readers. No social feed, no follower counts, no algorithmic recommendations. Just books and the people who read them.',
+    'about.page_commons_is_built': 'Page Commons is built for serious readers who feel underserved by Goodreads and generic AI chatbots. It is open source, privacy-first, and funded by readers — not advertisers.',
+    'about.spoiler_aware_by_default': 'Spoiler-aware by default',
+    'about.tell_it_whether_you': 'Tell it whether you\'re considering the book, just started, halfway through, or finished — and it adapts accordingly.',
+    'about.the_philosophy': 'The philosophy',
+    'about.what_is_page_commons': 'What is Page Commons?',
+    'about.your_companion_never_recites': 'Your companion never recites plot points. It asks questions, offers opinions when asked, and follows your lead.',
+    'about.your_conversations_are_powered': 'Your conversations are powered by your own AI provider key. Nothing is stored on our servers.',
+    'about.your_reading_companion': 'Your reading companion',
+    'age_gate.i_m_18_or': 'I\'m 18 or over — continue',
+    'age_gate.just_a_moment': 'Just a moment',
+    'age_gate.take_me_back': 'Take me back',
+    'age_gate.this_book_has_been': 'This book has been flagged as containing adult content.',
+    'age_gate.we_don_t_store': 'We don\'t store this confirmation — it is only used at this moment of adding the book.',
+    'app.offline_your_message_will': 'Offline — your message will be saved and sent when you reconnect',
+    'book_shelf.new_conversation': 'New conversation',
+    'book_shelf.update_status': 'Update status',
+    'common.english': 'English',
+    'common.french': 'French',
+    'common.german': 'German',
+    'common.japanese': 'Japanese',
+    'common.korean': 'Korean',
+    'common.portuguese': 'Portuguese',
+    'common.privacy': 'Privacy',
+    'common.simplified_chinese': 'Simplified Chinese',
+    'common.spanish': 'Spanish',
+    'common.support_us': 'Support us',
+    'common.terms': 'Terms',
+    'common.traditional_chinese': 'Traditional Chinese',
+    'companion.copy_all': 'Copy all',
+    'companion.end_chat': 'End Chat',
+    'companion.export': 'Export',
+    'companion.export_conversation': 'Export conversation',
+    'companion.highlights': 'Highlights',
+    'companion.i_want_to_read': 'I want to read this',
+    'companion.kindle_can_only_download': 'Kindle can only download and open .txt files. Markdown is best for desktop or note-taking apps.',
+    'companion.language': 'Language',
+    'companion.markdown_md': 'Markdown (.md)',
+    'companion.no_passages_saved_yet': 'No passages saved yet',
+    'companion.notes': 'Notes',
+    'companion.passages': 'Passages',
+    'companion.ph_write_a_private_note': 'Write a private note about this book…',
+    'companion.plain_text_txt': 'Plain text (.txt)',
+    'companion.prompt_language': 'Prompt language',
+    'companion.remove': 'Remove',
+    'companion.save_note': 'Save note',
+    'companion.send': 'Send',
+    'companion.start_here_or_write': 'Start here, or write your own below',
+    'companion.sync': 'Sync',
+    'companion.thinking': 'Thinking…',
+    'companion.your_notes': 'Your notes',
+    'header.back': '&#8592; Back',
+    'header.find_a_book': 'Find a book',
+    'header.main': 'Main',
+    'header.tagline': 'Just books. No noise.',
+    'home.a_quiet_place_to': 'A quiet place to talk about books.',
+    'home.coming_soon_read_notes': 'Coming soon — read notes from other readers',
+    'home.enter_a_book_room': 'Enter a book room',
+    'home.new_here_learn_what': 'New here? Learn what Page Commons is →',
+    'home.start_a_new_book': 'Start a new book conversation, or continue one from your shelf',
+    'home.talk_to_your_companion': 'Talk to your companion',
+    'js.already_saved': 'Already saved',
+    'js.archive': 'Archive',
+    'js.archived': 'Archived',
+    'js.back_online_sending': 'You\'re back online — sending your saved message…',
+    'js.connect_drive_first': 'Connect Google Drive in Preferences to sync.',
+    'js.continue': 'Continue',
+    'js.conversation': 'conversation',
+    'js.conversations': 'conversations',
+    'js.copied': 'Copied',
+    'js.copy': 'Copy',
+    'js.copy_unavailable': 'Copy not available in this browser.',
+    'js.delete': 'Delete',
+    'js.err_generic': 'Something went wrong: ',
+    'js.err_network': 'Couldn\'t reach your companion — poor connection? Try again when you have a better signal.',
+    'js.err_ratelimit': 'Your AI key has hit its rate limit. Wait a moment and try again, or switch to a different provider.',
+    'js.finding_questions': 'Finding the right questions…',
+    'js.greet_afternoon': 'Good afternoon',
+    'js.greet_evening': 'Good evening',
+    'js.greet_late': 'Reading late?',
+    'js.greet_morning': 'Good morning',
+    'js.greet_night': 'Reading tonight?',
+    'js.isbn_failed': 'ISBN lookup failed — check your connection.',
+    'js.isbn_not_found': 'ISBN not found — try searching by title.',
+    'js.last': 'Last',
+    'js.last_synced': 'Last synced: ',
+    'js.last_synced_never': 'Last synced: never',
+    'js.loading': 'Loading…',
+    'js.looking_up_isbn': 'Looking up ISBN…',
+    'js.no_conversations_yet': 'No conversations yet.',
+    'js.no_export_yet': 'No conversation to export yet.',
+    'js.no_more_results': 'No more results found.',
+    'js.no_passages_yet': 'No passages saved yet',
+    'js.no_results': 'No results found — try different keywords or enter manually below.',
+    'js.offline_saved': 'Saved for when you\'re back online. Your companion will reply then.',
+    'js.please_enter_key': 'Please enter your API key.',
+    'js.rename': 'Rename',
+    'js.restore': 'Restore',
+    'js.save_passage': 'Save passage',
+    'js.saved_check': 'Saved ✓',
+    'js.search_failed': 'Search failed — check your connection and try again.',
+    'js.search_heading_0': 'Which book?',
+    'js.search_heading_1': 'What are you reading?',
+    'js.search_heading_2': 'What are you lost in?',
+    'js.search_heading_3': 'What\'s keeping you up?',
+    'js.search_heading_4': 'What\'s calling to you?',
+    'js.search_heading_5': 'What\'s in your hands?',
+    'js.search_heading_6': 'Which world are you in?',
+    'js.search_heading_named_0': 'What are you reading, {name}?',
+    'js.search_heading_named_1': 'What are you lost in, {name}?',
+    'js.search_heading_named_2': 'What\'s keeping you up, {name}?',
+    'js.search_heading_named_3': 'What\'s calling to you, {name}?',
+    'js.search_heading_named_4': 'Which world are you in, {name}?',
+    'js.searching': 'Searching…',
+    'js.searching_google': 'Searching Google Books…',
+    'js.shelf_empty': 'Your shelf is empty. Start a conversation to add books here.',
+    'js.show_more_results': 'Show more results',
+    'js.status_considering': 'Considering',
+    'js.status_considering_long': 'Considering reading',
+    'js.status_finished': 'Finished',
+    'js.status_finished_long': 'Just finished',
+    'js.status_midway': 'Halfway through',
+    'js.status_revisiting': 'Revisiting',
+    'js.status_started': 'Just started',
+    'js.thinking': 'Thinking…',
+    'js.try_again': 'Try again',
+    'js.trying_title_only': 'Trying title only…',
+    'js.understanding_search': 'Understanding your search…',
+    'key.6_digit_transfer_code': '6-digit transfer code',
+    'key.ai_provider': 'AI Provider',
+    'key.api_key': 'API Key',
+    'key.choose_your_ai_provider': 'Choose your AI provider and enter your API key. Your key stays in your browser and never touches our servers — unless you use the transfer code option, where your key briefly passes through our servers to complete the transfer and is deleted immediately. No record is kept.',
+    'key.continue': 'Continue',
+    'key.fetch_my_key': 'Fetch my key',
+    'key.generate_a_code_at': 'Generate a code at <strong>pagecommons.com/transfer.html</strong> on your phone or desktop.',
+    'key.get_your_key_at': 'Get your key at console.anthropic.com',
+    'key.show_key': 'Show key',
+    'key.transferring_from_another_device': '↓ Transferring from another device? Enter a code',
+    'key.your_companion_awaits': 'Your companion awaits',
+    'key.your_key_briefly_passes': 'Your key briefly passes through our servers to complete this transfer and is deleted immediately. No record is kept.',
+    'language.chat_in_english': 'Chat in English',
+    'language.chat_in_the_book': 'Chat in the book\'s language',
+    'language.this_looks_like_a': 'This looks like a non-English book. Would you like to chat in the book\'s language or in English?',
+    'language.which_language': 'Which language?',
+    'language.you_can_change_this': 'You can change this later in More.',
+    'onboarding.choose_your_companion': 'Choose your companion',
+    'onboarding.no_key_needed_best': 'No key needed. Best for well-known books in English. May not know recent or niche titles in depth — works best when you share what you remember as you go. Shared with other readers; may be slow at busy times.',
+    'onboarding.page_commons_uses_ai': 'Page Commons uses AI to power your reading companion. You can use the free shared pool or bring your own API key.',
+    'onboarding.stronger_knowledge_across_more': 'Stronger knowledge across more titles and languages, always available. Anthropic Claude, Google Gemini, or Groq. Your key is stored only in this browser and never sent to our servers.',
+    'onboarding.use_free_shared_companion': 'Use free shared companion',
+    'onboarding.use_my_own_api': 'Use my own API key',
+    'onboarding.you_can_change_this': 'You can change this any time in Preferences.',
+    'preferences.ai_companion': 'AI companion',
+    'preferences.api_key_provider': 'API key &amp; provider',
+    'preferences.arabic': 'Arabic',
+    'preferences.back_up_and_access': 'Back up and access your conversations from any device.',
+    'preferences.back_up_your_page': 'Back up your Page Commons data or restore it on another device.',
+    'preferences.companion_language': 'Companion language',
+    'preferences.companion_name': 'Companion name',
+    'preferences.connect_google_drive': 'Connect Google Drive',
+    'preferences.connected_as': 'Connected as',
+    'preferences.default_reply_length': 'Default reply length',
+    'preferences.detailed': 'Detailed',
+    'preferences.disconnect': 'Disconnect',
+    'preferences.dutch': 'Dutch',
+    'preferences.export_my_data': 'Export my data',
+    'preferences.free_shared_pool': 'Free shared pool',
+    'preferences.google_drive_sync': 'Google Drive sync',
+    'preferences.import_data_from_backup': 'Import data from backup',
+    'preferences.import_my_clippings_txt': 'Import My Clippings.txt',
+    'preferences.interface_language': 'Interface language',
+    'preferences.interface_language_note': 'The language of buttons and labels. Your companion\'s language is set separately below.',
+    'preferences.italian': 'Italian',
+    'preferences.last_synced_never': 'Last synced: never',
+    'preferences.leave_blank_to_use': 'Leave blank to use "Companion".',
+    'preferences.medium': 'Medium',
+    'preferences.more_settings': 'More settings ▾',
+    'preferences.my_own_key': 'My own key',
+    'preferences.ph_e_g_alex': 'e.g. Alex',
+    'preferences.ph_e_g_ellis_river': 'e.g. Ellis, River, Claude…',
+    'preferences.polish': 'Polish',
+    'preferences.preferences': 'Preferences',
+    'preferences.quick_setup_defaults_are': 'Quick setup. Defaults are fine — change anything you like, then continue.',
+    'preferences.russian': 'Russian',
+    'preferences.save_continue': 'Save & continue',
+    'preferences.set_your_api_key': 'Set your API key →',
+    'preferences.short': 'Short',
+    'preferences.sync_now': 'Sync now',
+    'preferences.text_size': 'Text size',
+    'preferences.the_companion_chats_in': 'The companion chats in this language. Defaults to English; per-book overrides are available from the Language button in a chat.',
+    'preferences.turkish': 'Turkish',
+    'preferences.upload_my_clippings_txt': 'Upload My Clippings.txt from your Kindle to your &ldquo;Page Commons&rdquo; folder in Google Drive first.',
+    'preferences.used_for_personalised_headings': 'Used for personalised headings.',
+    'preferences.your_data': 'Your data',
+    'preferences.your_name': 'Your name',
+    'search.author': 'Author',
+    'search.choose_file': 'Choose file',
+    'search.everything_is_processed_locally': 'Everything is processed locally in your browser. The file is never uploaded.',
+    'search.import_pasted_text': 'Import pasted text',
+    'search.my_clippings_txt': 'My Clippings.txt',
+    'search.no_file_chosen': 'No file chosen',
+    'search.optional': '(optional)',
+    'search.or_import_from_kindle': 'Or import from Kindle',
+    'search.or_paste_clippings_text': 'Or paste clippings text',
+    'search.or_search_by_title': 'Or search by title and author below.',
+    'search.ph_paste_the_full_contents': 'Paste the full contents of My Clippings.txt here…',
+    'search.search': 'Search',
+    'search.tip_paste_an_isbn': 'Tip: paste an ISBN (e.g. 9780747532743) to find an exact edition.',
+    'search.title': 'Title',
+    'search.upload_clippings_hint': 'Upload your <em>My Clippings.txt</em> to auto-detect your last book and load your highlights.',
+    'search.which_book': 'Which book?',
+    'search.your_saved_books': 'Your saved books →',
+    'shelf.your_shelf': 'Your shelf',
+    'status.coming_back_with_fresh': 'Coming back with fresh eyes',
+    'status.getting_into_it': 'Getting into it',
+    'status.halfway_through': 'Halfway through',
+    'status.i_m_in_the': 'I\'m in the early pages',
+    'status.just_finished': 'Just finished',
+    'status.just_started': 'Just started',
+    'status.read_before_revisiting': 'Read before, revisiting',
+    'status.ready_to_talk_about': 'Ready to talk about all of it',
+    'status.where_are_you_with': 'Where are you with this book?',
+    'tc.age': 'Age:',
+    'tc.before_you_continue_please': 'Before you continue, please read and agree to the following:',
+    'tc.content': 'Content:',
+    'tc.i_agree_take_me': 'I agree — take me in',
+    'tc.open_source': 'Open source:',
+    'tc.page_commons_is_a': 'Page Commons is a calm, private reading companion. Talk through the book you\'re reading with an AI that knows the work, save the passages that stay with you, and keep your shelf — all stored in your own browser, with no ads and no personal data on our servers.',
+    'tc.privacy': 'Privacy:',
+    'tc.welcome_to_page_commons': 'Welcome to Page Commons',
+    'tc.your_agreement_is_stored': 'Your agreement is stored locally in your browser only.'
+  },
+  'zh-TW': {
+    'about.a_private_ai_companion': '一位私密的 AI 書伴，任何書都可以聊——像一位讀過同一本書的老朋友。',
+    'about.back_to_the_library': '回到書房',
+    'about.book_rooms': '書房',
+    'about.bring_your_own_key': '使用你自己的金鑰',
+    'about.coming_soon': '（即將推出）',
+    'about.discusses_books_not_summaries': '談書，而不是複述內容',
+    'about.each_book_has_a': '每本書都有自己的房間。讀者留下短短的筆記——就像二手書頁邊的字跡。',
+    'about.import_your_kindle_clippings': '匯入你的 Kindle 標註，書伴會記得那些留在你心裡的段落。',
+    'about.knows_your_highlights': '認得你的標註',
+    'about.meets_you_where_you': '在你所在之處與你相遇',
+    'about.no_likes_no_rankings': '沒有讚，沒有排名',
+    'about.notes_are_gated_by': '筆記依閱讀進度顯示。你只會看到與你目前進度相符的內容。',
+    'about.notes_are_shown_in': '筆記按閱讀順序排列，而非人氣。這裡沒有需要迎合的互動指標。',
+    'about.page_commons_is_a': 'Page Commons 是屬於讀者的一處靜地。沒有社群動態，沒有追蹤人數，沒有演算法推薦。只有書，和讀書的人。',
+    'about.page_commons_is_built': 'Page Commons 為認真的讀者而建——那些覺得 Goodreads 與一般 AI 聊天機械人並不合用的人。它開放原始碼、隱私優先，由讀者支持，而非廣告商。',
+    'about.spoiler_aware_by_default': '預設避免劇透',
+    'about.tell_it_whether_you': '告訴它你是正在考慮這本書、剛開始讀、讀到一半，還是已經讀完——它會隨之調整。',
+    'about.the_philosophy': '我們的理念',
+    'about.what_is_page_commons': 'Page Commons 是什麼？',
+    'about.your_companion_never_recites': '你的書伴從不複述情節。它提問、在你想聽時給出看法，並且跟隨你的節奏。',
+    'about.your_conversations_are_powered': '你的對話由你自己的 AI 服務金鑰驅動。我們的伺服器不會儲存任何內容。',
+    'about.your_reading_companion': '你的閱讀書伴',
+    'age_gate.i_m_18_or': '我已年滿 18 歲——繼續',
+    'age_gate.just_a_moment': '請稍等',
+    'age_gate.take_me_back': '返回',
+    'age_gate.this_book_has_been': '這本書被標示為含有成人內容。',
+    'age_gate.we_don_t_store': '我們不會儲存這項確認——它只在加入這本書的當下使用。',
+    'app.offline_your_message_will': '離線中——你的訊息會先儲存，重新連線後送出',
+    'book_shelf.new_conversation': '開始新對話',
+    'book_shelf.update_status': '更新閱讀進度',
+    'common.english': '英文',
+    'common.french': '法文',
+    'common.german': '德文',
+    'common.japanese': '日文',
+    'common.korean': '韓文',
+    'common.portuguese': '葡萄牙文',
+    'common.privacy': '私隱',
+    'common.simplified_chinese': '簡體中文',
+    'common.spanish': '西班牙文',
+    'common.support_us': '支持我們',
+    'common.terms': '條款',
+    'common.traditional_chinese': '繁體中文',
+    'companion.copy_all': '全部複製',
+    'companion.end_chat': '結束對話',
+    'companion.export': '匯出',
+    'companion.export_conversation': '匯出對話',
+    'companion.highlights': '標註',
+    'companion.i_want_to_read': '我想讀這本書',
+    'companion.kindle_can_only_download': 'Kindle 只能下載和開啟 .txt 檔案。Markdown 較適合電腦或筆記應用程式。',
+    'companion.language': '語言',
+    'companion.markdown_md': 'Markdown（.md）',
+    'companion.no_passages_saved_yet': '尚未收藏任何摘句',
+    'companion.notes': '筆記',
+    'companion.passages': '摘句',
+    'companion.ph_write_a_private_note': '寫下關於這本書的私人筆記…',
+    'companion.plain_text_txt': '純文字（.txt）',
+    'companion.prompt_language': '提示語言',
+    'companion.remove': '移除',
+    'companion.save_note': '儲存筆記',
+    'companion.send': '傳送',
+    'companion.start_here_or_write': '從這裡開始，或在下方自己寫',
+    'companion.sync': '同步',
+    'companion.thinking': '思考中…',
+    'companion.your_notes': '你的筆記',
+    'header.back': '&#8592; 返回',
+    'header.find_a_book': '尋找書籍',
+    'header.main': '主頁',
+    'header.tagline': '只有書。沒有雜音。',
+    'home.a_quiet_place_to': '一處安靜的地方，聊聊書。',
+    'home.coming_soon_read_notes': '即將推出——閱讀其他讀者的筆記',
+    'home.enter_a_book_room': '進入書房',
+    'home.new_here_learn_what': '初次到訪？認識 Page Commons →',
+    'home.start_a_new_book': '開始一段新的書話，或從書架接續之前的對話',
+    'home.talk_to_your_companion': '與你的書伴聊聊',
+    'js.already_saved': '已經收藏',
+    'js.archive': '封存',
+    'js.archived': '已封存',
+    'js.back_online_sending': '已重新連線——正在送出你儲存的訊息…',
+    'js.connect_drive_first': '請先在「偏好設定」連結 Google Drive 才能同步。',
+    'js.continue': '繼續',
+    'js.conversation': '段對話',
+    'js.conversations': '段對話',
+    'js.copied': '已複製',
+    'js.copy': '複製',
+    'js.copy_unavailable': '此瀏覽器不支援複製功能。',
+    'js.delete': '刪除',
+    'js.err_generic': '發生問題：',
+    'js.err_network': '無法連上你的書伴——訊號不好？網絡穩定後再試一次。',
+    'js.err_ratelimit': '你的 AI 金鑰已達速率上限。稍候再試，或改用其他服務供應商。',
+    'js.finding_questions': '正在想幾個好問題…',
+    'js.greet_afternoon': '午安',
+    'js.greet_evening': '晚上好',
+    'js.greet_late': '夜深了還在讀？',
+    'js.greet_morning': '早晨',
+    'js.greet_night': '今晚讀點什麼？',
+    'js.isbn_failed': 'ISBN 查詢失敗——請檢查網絡連線。',
+    'js.isbn_not_found': '找不到此 ISBN——試試用書名搜尋。',
+    'js.last': '最後',
+    'js.last_synced': '上次同步：',
+    'js.last_synced_never': '上次同步：從未',
+    'js.loading': '載入中…',
+    'js.looking_up_isbn': '正在查詢 ISBN…',
+    'js.no_conversations_yet': '還沒有對話。',
+    'js.no_export_yet': '還沒有可匯出的對話。',
+    'js.no_more_results': '沒有更多結果了。',
+    'js.no_passages_yet': '尚未收藏任何摘句',
+    'js.no_results': '找不到結果——換個關鍵字，或在下方手動輸入。',
+    'js.offline_saved': '已為你儲存，重新連線後書伴會回覆。',
+    'js.please_enter_key': '請輸入你的 API 金鑰。',
+    'js.rename': '重新命名',
+    'js.restore': '取回',
+    'js.save_passage': '收藏摘句',
+    'js.saved_check': '已收藏 ✓',
+    'js.search_failed': '搜尋失敗——請檢查網絡連線後再試。',
+    'js.search_heading_0': '哪一本書？',
+    'js.search_heading_1': '你在讀什麼？',
+    'js.search_heading_2': '你正沉浸在哪本書裡？',
+    'js.search_heading_3': '哪本書讓你捨不得睡？',
+    'js.search_heading_4': '哪本書在呼喚你？',
+    'js.search_heading_5': '你手上拿著哪本書？',
+    'js.search_heading_6': '你正身處哪個世界？',
+    'js.search_heading_named_0': '{name}，你在讀什麼？',
+    'js.search_heading_named_1': '{name}，你正沉浸在哪本書裡？',
+    'js.search_heading_named_2': '{name}，哪本書讓你捨不得睡？',
+    'js.search_heading_named_3': '{name}，哪本書在呼喚你？',
+    'js.search_heading_named_4': '{name}，你正身處哪個世界？',
+    'js.searching': '搜尋中…',
+    'js.searching_google': '正在搜尋 Google Books…',
+    'js.shelf_empty': '你的書架還是空的。開始一段對話，書就會出現在這裡。',
+    'js.show_more_results': '顯示更多結果',
+    'js.status_considering': '考慮中',
+    'js.status_considering_long': '考慮閱讀',
+    'js.status_finished': '已讀完',
+    'js.status_finished_long': '剛剛讀完',
+    'js.status_midway': '讀到一半',
+    'js.status_revisiting': '重讀中',
+    'js.status_started': '剛開始讀',
+    'js.thinking': '思考中…',
+    'js.try_again': '再試一次',
+    'js.trying_title_only': '改用書名搜尋…',
+    'js.understanding_search': '正在理解你的搜尋…',
+    'key.6_digit_transfer_code': '6 位數傳送碼',
+    'key.ai_provider': 'AI 服務供應商',
+    'key.api_key': 'API 金鑰',
+    'key.choose_your_ai_provider': '選擇你的 AI 服務供應商並輸入 API 金鑰。你的金鑰只留在瀏覽器中，不會經過我們的伺服器——除非你使用傳送碼功能，此時金鑰會短暫經過伺服器以完成傳送，並立即刪除，不留任何紀錄。',
+    'key.continue': '繼續',
+    'key.fetch_my_key': '取得我的金鑰',
+    'key.generate_a_code_at': '在手機或電腦上前往 <strong>pagecommons.com/transfer.html</strong> 產生傳送碼。',
+    'key.get_your_key_at': '前往 console.anthropic.com 取得金鑰',
+    'key.show_key': '顯示金鑰',
+    'key.transferring_from_another_device': '↓ 從其他裝置傳送？輸入傳送碼',
+    'key.your_companion_awaits': '你的書伴在等你',
+    'key.your_key_briefly_passes': '你的金鑰會短暫經過我們的伺服器以完成這次傳送，隨即刪除，不留任何紀錄。',
+    'language.chat_in_english': '用英文聊',
+    'language.chat_in_the_book': '用這本書的語言聊',
+    'language.this_looks_like_a': '這似乎是一本非英文書籍。你想用這本書的語言，還是用英文聊？',
+    'language.which_language': '使用哪種語言？',
+    'language.you_can_change_this': '稍後可在「更多」中更改。',
+    'onboarding.choose_your_companion': '選擇你的書伴',
+    'onboarding.no_key_needed_best': '無需金鑰。最適合英文的知名書籍。對近期或冷門書籍未必深入——你邊讀邊分享記得的內容，效果最好。與其他讀者共用，繁忙時可能較慢。',
+    'onboarding.page_commons_uses_ai': 'Page Commons 以 AI 驅動你的閱讀書伴。你可以使用免費共用資源，或帶上自己的 API 金鑰。',
+    'onboarding.stronger_knowledge_across_more': '涵蓋更多書籍與語言，知識更紮實，隨時可用。支援 Anthropic Claude、Google Gemini 或 Groq。你的金鑰只儲存在這部瀏覽器，絕不會傳送到我們的伺服器。',
+    'onboarding.use_free_shared_companion': '使用免費共用書伴',
+    'onboarding.use_my_own_api': '使用我自己的 API 金鑰',
+    'onboarding.you_can_change_this': '你隨時可以在「偏好設定」中更改。',
+    'preferences.ai_companion': 'AI 書伴',
+    'preferences.api_key_provider': 'API 金鑰與服務供應商',
+    'preferences.arabic': '阿拉伯文',
+    'preferences.back_up_and_access': '備份對話，並在任何裝置上取用。',
+    'preferences.back_up_your_page': '備份你的 Page Commons 資料，或在另一部裝置上還原。',
+    'preferences.companion_language': '書伴語言',
+    'preferences.companion_name': '書伴名稱',
+    'preferences.connect_google_drive': '連結 Google Drive',
+    'preferences.connected_as': '已連結帳戶',
+    'preferences.default_reply_length': '預設回覆長度',
+    'preferences.detailed': '詳細',
+    'preferences.disconnect': '中斷連結',
+    'preferences.dutch': '荷蘭文',
+    'preferences.export_my_data': '匯出我的資料',
+    'preferences.free_shared_pool': '免費共用資源',
+    'preferences.google_drive_sync': 'Google Drive 同步',
+    'preferences.import_data_from_backup': '從備份匯入資料',
+    'preferences.import_my_clippings_txt': '匯入 My Clippings.txt',
+    'preferences.interface_language': '介面語言',
+    'preferences.interface_language_note': '按鈕與標籤所用的語言。書伴的語言在下方另行設定。',
+    'preferences.italian': '意大利文',
+    'preferences.last_synced_never': '上次同步：從未',
+    'preferences.leave_blank_to_use': '留空則使用「書伴」。',
+    'preferences.medium': '中等',
+    'preferences.more_settings': '更多設定 ▾',
+    'preferences.my_own_key': '我自己的金鑰',
+    'preferences.ph_e_g_alex': '例如：小明',
+    'preferences.ph_e_g_ellis_river': '例如：小書、明月、Claude…',
+    'preferences.polish': '波蘭文',
+    'preferences.preferences': '偏好設定',
+    'preferences.quick_setup_defaults_are': '快速設定。預設值已經合用——你可以隨意調整，然後繼續。',
+    'preferences.russian': '俄文',
+    'preferences.save_continue': '儲存並繼續',
+    'preferences.set_your_api_key': '設定你的 API 金鑰 →',
+    'preferences.short': '簡短',
+    'preferences.sync_now': '立即同步',
+    'preferences.text_size': '文字大小',
+    'preferences.the_companion_chats_in': '書伴會以這種語言與你交談。預設為英文；在對話中按「語言」可為個別書籍另作設定。',
+    'preferences.turkish': '土耳其文',
+    'preferences.upload_my_clippings_txt': '請先將 Kindle 的 My Clippings.txt 上載到你 Google Drive 的「Page Commons」資料夾。',
+    'preferences.used_for_personalised_headings': '用於個人化的標題。',
+    'preferences.your_data': '你的資料',
+    'preferences.your_name': '你的名字',
+    'search.author': '作者',
+    'search.choose_file': '選擇檔案',
+    'search.everything_is_processed_locally': '所有處理都在你的瀏覽器本機完成。檔案不會被上載。',
+    'search.import_pasted_text': '匯入貼上的文字',
+    'search.my_clippings_txt': 'My Clippings.txt',
+    'search.no_file_chosen': '尚未選擇檔案',
+    'search.optional': '（可選）',
+    'search.or_import_from_kindle': '或從 Kindle 匯入',
+    'search.or_paste_clippings_text': '或貼上標註文字',
+    'search.or_search_by_title': '或在下方以書名和作者搜尋。',
+    'search.ph_paste_the_full_contents': '在此貼上 My Clippings.txt 的完整內容…',
+    'search.search': '搜尋',
+    'search.tip_paste_an_isbn': '小提示：貼上 ISBN（例如 9780747532743）可找到特定版本。',
+    'search.title': '書名',
+    'search.upload_clippings_hint': '上載你的 <em>My Clippings.txt</em>，自動辨識你最近讀的書並載入標註。',
+    'search.which_book': '哪一本書？',
+    'search.your_saved_books': '你收藏的書 →',
+    'shelf.your_shelf': '你的書架',
+    'status.coming_back_with_fresh': '以新的眼光重讀',
+    'status.getting_into_it': '漸入佳境',
+    'status.halfway_through': '讀到一半',
+    'status.i_m_in_the': '還在前面幾頁',
+    'status.just_finished': '剛剛讀完',
+    'status.just_started': '剛開始讀',
+    'status.read_before_revisiting': '讀過了，重讀中',
+    'status.ready_to_talk_about': '可以聊整本書了',
+    'status.where_are_you_with': '這本書你讀到哪裡了？',
+    'tc.age': '年齡：',
+    'tc.before_you_continue_please': '繼續之前，請閱讀並同意以下條款：',
+    'tc.content': '內容：',
+    'tc.i_agree_take_me': '我同意——帶我進去',
+    'tc.open_source': '開放原始碼：',
+    'tc.page_commons_is_a': 'Page Commons 是一位安靜而私密的閱讀書伴。與熟悉作品的 AI 聊聊你正在讀的書，收藏那些留在心裡的段落，整理自己的書架——全部儲存在你自己的瀏覽器中，沒有廣告，伺服器上也沒有你的個人資料。',
+    'tc.privacy': '私隱：',
+    'tc.welcome_to_page_commons': '歡迎來到 Page Commons',
+    'tc.your_agreement_is_stored': '你的同意僅儲存在你的瀏覽器本機。'
+  }
+};
+var UI_LANG = 'en';
+function getUILang() {
+  try {
+    var saved = localStorage.getItem('pc_ui_lang');
+    if (saved && UI_STRINGS[saved]) return saved;
+  } catch (e) {}
+  return 'en';
+}
+// Look up a string in the active language, falling back to English, then to
+// the key itself so a missing entry is visible rather than blank.
+function t(key, fallback) {
+  var table = UI_STRINGS[UI_LANG] || UI_STRINGS['en'];
+  var v = table[key];
+  if (v === undefined && UI_STRINGS['en']) v = UI_STRINGS['en'][key];
+  if (v === undefined) v = fallback === undefined ? key : fallback;
+  return v;
+}
+function dateLocale() {
+  return UI_DATE_LOCALE[UI_LANG] || 'en-GB';
+}
+// Walk the annotated markup and fill in the active language. Safe to call
+// repeatedly; it is idempotent.
+function applyLanguage(lang) {
+  if (lang && UI_STRINGS[lang]) UI_LANG = lang;
+  var i, els, el, key;
+  try {
+    document.documentElement.setAttribute('lang', UI_LANG === 'zh-TW' ? 'zh-Hant' : 'en');
+  } catch (e) {}
+  // CJK glyphs are absent from Georgia / Helvetica Neue, so the whole page
+  // switches to a CJK-capable stack when a CJK interface is active.
+  try {
+    var root = document.body || document.documentElement;
+    if (root) {
+      var cls = (root.className || '').replace(/\s*\bui-cjk\b/g, '');
+      root.className = UI_LANG === 'zh-TW' ? cls + ' ui-cjk' : cls;
+    }
+  } catch (e) {}
+  els = document.querySelectorAll('[data-i18n]');
+  for (i = 0; i < els.length; i++) {
+    el = els[i];
+    key = el.getAttribute('data-i18n');
+    if (key) el.innerHTML = t(key);
+  }
+  els = document.querySelectorAll('[data-i18n-html]');
+  for (i = 0; i < els.length; i++) {
+    el = els[i];
+    key = el.getAttribute('data-i18n-html');
+    if (key) el.innerHTML = t(key);
+  }
+  els = document.querySelectorAll('[data-i18n-placeholder]');
+  for (i = 0; i < els.length; i++) {
+    el = els[i];
+    key = el.getAttribute('data-i18n-placeholder');
+    if (key) el.setAttribute('placeholder', t(key));
+  }
+  // Strings that JS owns and would otherwise keep their old-language text.
+  try {
+    updateGreeting();
+  } catch (e) {}
+  try {
+    updateSearchHeading();
+  } catch (e) {}
+  try {
+    if (STATE.book) updateStatusDisplay();
+  } catch (e) {}
+}
+function setUILang(lang) {
+  if (!UI_STRINGS[lang]) return;
+  try {
+    localStorage.setItem('pc_ui_lang', lang);
+  } catch (e) {}
+  touchSyncMeta('preferences');
+  applyLanguage(lang);
+  // Re-render whatever is on screen in the new language.
+  try {
+    var cur = currentScreen();
+    if (cur === 'shelf') renderShelf();
+    if (cur === 'book-shelf' && STATE.book) renderConvList(STATE.book);
+  } catch (e) {}
+}
+
+// ═══════════════════════════════════════════════════
 //  SCREENS + NAVIGATION
 // ═══════════════════════════════════════════════════
 var SCREENS = ['home', 'key', 'search', 'status', 'language', 'companion', 'about', 'shelf', 'book-shelf', 'book-detail', 'tc', 'age-gate', 'preferences', 'onboarding'];
-var SEARCH_HEADINGS = ['Which book?', 'What are you reading?', 'What are you lost in?', 'What\'s keeping you up?', 'What\'s calling to you?', 'What\'s in your hands?', 'Which world are you in?'];
-var SEARCH_HEADINGS_NAMED = ['What are you reading, {name}?', 'What are you lost in, {name}?', 'What\'s keeping you up, {name}?', 'What\'s calling to you, {name}?', 'Which world are you in, {name}?'];
+
+// Search headings moved into UI_STRINGS ('js.search_heading_*' /
+// 'js.search_heading_named_*') so they rotate in the active interface language.
 function updateSearchHeading() {
   var el = document.getElementById('search-heading');
   if (!el) return;
-  var pool = STATE.userName ? SEARCH_HEADINGS_NAMED : SEARCH_HEADINGS;
-  var h = pool[Math.floor(Math.random() * pool.length)];
-  el.textContent = h.replace('{name}', STATE.userName || '');
+  // Headings live in the string table so they rotate in the active language.
+  var named = !!STATE.userName;
+  var n = named ? 5 : 7;
+  var key = 'js.search_heading_' + (named ? 'named_' : '') + Math.floor(Math.random() * n);
+  el.textContent = t(key).replace('{name}', STATE.userName || '');
 }
 
 // navigate() defined above with showScreen
@@ -595,7 +1196,7 @@ function restoreCompanionUI(book) {
 // ═══════════════════════════════════════════════════
 function updateGreeting() {
   var h = new Date().getHours();
-  var g = h < 5 ? 'Reading late?' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 21 ? 'Good evening' : 'Reading tonight?';
+  var g = h < 5 ? t('js.greet_late') : h < 12 ? t('js.greet_morning') : h < 17 ? t('js.greet_afternoon') : h < 21 ? t('js.greet_evening') : t('js.greet_night');
   var el = document.querySelector('.hall-greeting');
   if (el) el.textContent = g;
 }
@@ -2007,11 +2608,11 @@ function launchCompanion(book) {
 }
 function updateStatusDisplay() {
   var labels = {
-    considering: 'Considering reading',
-    started: 'Just started',
-    midway: 'Halfway through',
-    finished: 'Just finished',
-    revisiting: 'Revisiting'
+    considering: t('js.status_considering_long'),
+    started: t('js.status_started'),
+    midway: t('js.status_midway'),
+    finished: t('js.status_finished_long'),
+    revisiting: t('js.status_revisiting')
   };
   var el = document.getElementById('book-status-display');
   var ctaEl = document.getElementById('discover-convert-bar');
@@ -2978,12 +3579,12 @@ function appendBubble(role, text) {
     actions.className = 'bubble-actions';
     var copyBtn = document.createElement('button');
     copyBtn.className = 'bubble-action-btn';
-    copyBtn.textContent = 'Copy';
+    copyBtn.textContent = t('js.copy');
     copyBtn.onclick = function () {
       navigator.clipboard.writeText(text).then(function () {
-        copyBtn.textContent = 'Copied';
+        copyBtn.textContent = t('js.copied');
         setTimeout(function () {
-          copyBtn.textContent = 'Copy';
+          copyBtn.textContent = t('js.copy');
         }, 1500);
       }).catch(function () {
         return showToolbarMsg('Copy not available in this browser.');
@@ -2995,7 +3596,7 @@ function appendBubble(role, text) {
     var alreadySaved = getPassages().some(function (p) {
       return p.text === text;
     });
-    saveBtn.textContent = alreadySaved ? 'Saved ✓' : 'Save passage';
+    saveBtn.textContent = alreadySaved ? t('js.saved_check') : t('js.save_passage');
     if (alreadySaved) saveBtn.classList.add('saved');
     saveBtn.onclick = function () {
       savePassage(text, saveBtn);
@@ -3018,7 +3619,7 @@ function appendError(err) {
   bubble.textContent = msg;
   var retryBtn = document.createElement('button');
   retryBtn.className = 'retry-btn';
-  retryBtn.textContent = 'Try again';
+  retryBtn.textContent = t('js.try_again');
   retryBtn.onclick = function () {
     wrap.remove();
     // The failed user message is still in STATE.messages; sendMessage with
@@ -3502,26 +4103,28 @@ function renderShelf() {
     if (books[i].archived) archived.push(books[i]);else active.push(books[i]);
   }
   if (!active.length && !archived.length) {
-    listEl.innerHTML = '<p class="shelf-empty">Your shelf is empty. Start a conversation to add books here.</p>';
+    listEl.innerHTML = '<p class="shelf-empty">' + esc(t('js.shelf_empty')) + '</p>';
     return;
   }
   listEl.innerHTML = '';
   function makeBookEl(book, isArchived) {
     var convs = getConvs(book);
-    var last = convs.length ? new Date(convs[0].lastUpdated).toLocaleDateString() : '';
+    var last = convs.length ? new Date(convs[0].lastUpdated).toLocaleDateString(dateLocale()) : '';
     var bk = bookKey(book);
     var status = localStorage.getItem('pc_status_' + bk) || '';
     var statusLabel = {
-      considering: 'Considering',
-      started: 'Just started',
-      midway: 'Halfway through',
-      finished: 'Finished',
-      revisiting: 'Revisiting'
+      considering: t('js.status_considering'),
+      started: t('js.status_started'),
+      midway: t('js.status_midway'),
+      finished: t('js.status_finished'),
+      revisiting: t('js.status_revisiting')
     }[status] || '';
     var el = document.createElement('div');
     el.className = 'shelf-book';
-    var actionBtn = isArchived ? '<button class="shelf-archive-btn" data-action="unarchive">Restore</button>' : '<button class="shelf-archive-btn" data-action="archive">Archive</button>';
-    el.innerHTML = '<div class="shelf-book-title">' + esc(book.title) + '</div>' + '<div class="shelf-book-author">' + esc(book.author) + '</div>' + '<div class="shelf-book-meta">' + (statusLabel ? statusLabel + ' · ' : '') + convs.length + ' conversation' + (convs.length !== 1 ? 's' : '') + (last ? ' · Last: ' + last : '') + '</div>' + actionBtn;
+    var actionBtn = isArchived ? '<button class="shelf-archive-btn" data-action="unarchive">' + esc(t('js.restore')) + '</button>' : '<button class="shelf-archive-btn" data-action="archive">' + esc(t('js.archive')) + '</button>';
+    // Chinese has no plural form; both keys resolve to the same word there.
+    var convCount = convs.length + ' ' + (convs.length !== 1 ? t('js.conversations') : t('js.conversation'));
+    el.innerHTML = '<div class="shelf-book-title">' + esc(book.title) + '</div>' + '<div class="shelf-book-author">' + esc(book.author) + '</div>' + '<div class="shelf-book-meta">' + (statusLabel ? esc(statusLabel) + ' · ' : '') + esc(convCount) + (last ? ' · ' + esc(t('js.last')) + ': ' + last : '') + '</div>' + actionBtn;
     el.addEventListener('click', function (evt) {
       var btn = evt.target;
       var action = btn.getAttribute ? btn.getAttribute('data-action') : null;
@@ -3544,7 +4147,7 @@ function renderShelf() {
     var toggle = document.createElement('button');
     toggle.className = 'shelf-archive-toggle';
     toggle.setAttribute('aria-expanded', 'false');
-    toggle.textContent = 'Archived (' + archived.length + ')';
+    toggle.textContent = t('js.archived') + ' (' + archived.length + ')';
     var archivedList = document.createElement('div');
     archivedList.id = 'shelf-archived-list';
     archivedList.style.display = 'none';
@@ -3565,11 +4168,11 @@ function openBookShelf(book) {
   var bk = bookKey(book);
   var status = localStorage.getItem('pc_status_' + bk) || '';
   var statusLabel = {
-    considering: 'Considering',
-    started: 'Just started',
-    midway: 'Halfway through',
-    finished: 'Finished',
-    revisiting: 'Revisiting'
+    considering: t('js.status_considering'),
+    started: t('js.status_started'),
+    midway: t('js.status_midway'),
+    finished: t('js.status_finished'),
+    revisiting: t('js.status_revisiting')
   }[status] || '';
   document.getElementById('book-shelf-title').textContent = book.title;
   document.getElementById('book-shelf-author').textContent = book.author;
@@ -3581,23 +4184,23 @@ function renderConvList(book) {
   var convs = getConvs(book);
   var listEl = document.getElementById('conv-list');
   if (!convs.length) {
-    listEl.innerHTML = '<p class="shelf-empty">No conversations yet.</p>';
+    listEl.innerHTML = '<p class="shelf-empty">' + esc(t('js.no_conversations_yet')) + '</p>';
     return;
   }
   listEl.innerHTML = '';
   convs.forEach(function (conv) {
-    var date = new Date(conv.lastUpdated).toLocaleDateString();
+    var date = new Date(conv.lastUpdated).toLocaleDateString(dateLocale());
     var statusLabel = {
-      considering: 'Considering',
-      started: 'Just started',
-      midway: 'Halfway through',
-      finished: 'Finished',
-      revisiting: 'Revisiting'
+      considering: t('js.status_considering'),
+      started: t('js.status_started'),
+      midway: t('js.status_midway'),
+      finished: t('js.status_finished'),
+      revisiting: t('js.status_revisiting')
     }[conv.status] || '';
     var el = document.createElement('div');
     el.className = 'conv-item';
     var safeId = String(conv.id).replace(/[^a-z0-9_]/gi, "");
-    el.innerHTML = '<div class="conv-item-name">' + esc(conv.name) + '</div>' + '<div class="conv-item-meta">' + (statusLabel ? statusLabel + ' · ' : '') + date + '</div>' + '<div class="conv-actions">' + '<button class="conv-btn primary" data-action="continue" data-id="' + safeId + '">Continue</button>' + '<button class="conv-btn" data-action="rename" data-id="' + safeId + '">Rename</button>' + '<button class="conv-btn danger" data-action="delete" data-id="' + safeId + '">Delete</button>' + '</div>';
+    el.innerHTML = '<div class="conv-item-name">' + esc(conv.name) + '</div>' + '<div class="conv-item-meta">' + (statusLabel ? esc(statusLabel) + ' · ' : '') + date + '</div>' + '<div class="conv-actions">' + '<button class="conv-btn primary" data-action="continue" data-id="' + safeId + '">' + esc(t('js.continue')) + '</button>' + '<button class="conv-btn" data-action="rename" data-id="' + safeId + '">' + esc(t('js.rename')) + '</button>' + '<button class="conv-btn danger" data-action="delete" data-id="' + safeId + '">' + esc(t('js.delete')) + '</button>' + '</div>';
     el.addEventListener('click', function (evt) {
       var btn = evt.target;
       var action = btn.getAttribute('data-action');
@@ -3816,10 +4419,10 @@ function savePassage(text, btn) {
   if (passages.some(function (p) {
     return p.text === text;
   })) {
-    btn.textContent = 'Already saved';
+    btn.textContent = t('js.already_saved');
     btn.classList.add('saved');
     setTimeout(function () {
-      btn.textContent = 'Save passage';
+      btn.textContent = t('js.save_passage');
       btn.classList.remove('saved');
     }, 1500);
     return;
@@ -3829,10 +4432,10 @@ function savePassage(text, btn) {
     ts: Date.now()
   });
   localStorage.setItem('pc_passages_' + bookKey(STATE.book), JSON.stringify(passages));
-  btn.textContent = 'Saved ✓';
+  btn.textContent = t('js.saved_check');
   btn.classList.add('saved');
   setTimeout(function () {
-    btn.textContent = 'Save passage';
+    btn.textContent = t('js.save_passage');
     btn.classList.remove('saved');
   }, 1500);
   updatePassagesToolbarBtn();
@@ -3914,7 +4517,7 @@ function exportConversation(format) {
     return n < 10 ? '0' + n : '' + n;
   };
   var isoDate = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
-  var date = now.toLocaleDateString('en-GB', {
+  var date = now.toLocaleDateString(dateLocale(), {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
@@ -3987,7 +4590,7 @@ function renderNotesPanel() {
     return;
   }
   list.innerHTML = notes.map(function (n) {
-    var d = new Date(n.ts).toLocaleDateString('en-GB', {
+    var d = new Date(n.ts).toLocaleDateString(dateLocale(), {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
@@ -4159,6 +4762,8 @@ function loadPreferencesScreen() {
   }
   var clangEl = document.getElementById('settings-companion-lang');
   if (clangEl) clangEl.value = STATE.companionLangOverride || 'English';
+  var uilangEl = document.getElementById('settings-ui-lang');
+  if (uilangEl) uilangEl.value = getUILang();
 
   // First-run mode: hide back link, show intro + Save & continue, hide
   // the data export/import section (nothing to back up yet).
@@ -4835,7 +5440,7 @@ function syncConversationMarkdowns(convFolderId) {
       var conv = withMsgs[wi];
       var d = conv.lastUpdated ? new Date(conv.lastUpdated) : new Date();
       var iso = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
-      var dateStr = d.toLocaleDateString('en-GB', {
+      var dateStr = d.toLocaleDateString(dateLocale(), {
         day: 'numeric',
         month: 'long',
         year: 'numeric'
@@ -4905,7 +5510,7 @@ function exportConversationToDrive(book, fullMessages) {
     return n < 10 ? '0' + n : '' + n;
   };
   var iso = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
-  var date = now.toLocaleDateString('en-GB', {
+  var date = now.toLocaleDateString(dateLocale(), {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
@@ -5137,7 +5742,7 @@ function renderDriveStatus() {
     if (lastEl) {
       if (last) {
         var d = new Date(parseInt(last, 10));
-        lastEl.textContent = 'Last synced: ' + d.toLocaleString('en-GB', {
+        lastEl.textContent = 'Last synced: ' + d.toLocaleString(dateLocale(), {
           day: 'numeric',
           month: 'long',
           year: 'numeric',
@@ -5169,6 +5774,9 @@ function init() {
   runInitInner();
 }
 function runInitInner() {
+  // Paint the interface in the saved language before anything else renders,
+  // so no screen flashes English on a Chinese install.
+  applyLanguage(getUILang());
   // Migrate any legacy (truncated) book keys before we read per-book data.
   migrateBookKeys();
   try {

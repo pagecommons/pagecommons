@@ -139,6 +139,50 @@ These will break the app on Kobo:
 - Feels like a well-read friend
 - Plain prose only — no bullet points
 
+## INTERFACE LANGUAGE (i18n)
+Interface text lives in UI_STRINGS
+(app.js), keyed by screen:
+  'home.talk_to_your_companion'
+  'js.status_midway'   (JS-built text)
+
+Markup carries the key, never the
+translation:
+  data-i18n             → textContent
+  data-i18n-html        → innerHTML
+                          (strings with
+                          inline markup)
+  data-i18n-placeholder → placeholder
+
+applyLanguage(lang) walks those
+attributes on boot and on every switch.
+Text built in JS uses t('key').
+
+ADDING A STRING: put the English in
+UI_STRINGS.en, the translation in
+UI_STRINGS['zh-TW'], then reference the
+key from markup or t(). A test fails if
+either table is missing a key, or if
+markup references a key that doesn't
+exist.
+
+NEVER translate: the brand "Page
+Commons", provider names (Anthropic
+Claude, Google Gemini, Groq), or the
+version string.
+
+The interface language (pc_ui_lang) is
+SEPARATE from the companion language
+(pc_companion_lang) — readers may want
+a Chinese interface with an English
+companion, or the reverse.
+
+Fonts: Georgia and Helvetica Neue have
+no CJK glyphs, so every stack ends with
+CJK families. Fallback is per-glyph, so
+Latin text is unaffected. body.ui-cjk
+carries CJK-only line-height and
+letter-spacing tuning.
+
 ## App Structure
 Single file SPA with hash navigation:
 - #home — Library Hall
@@ -219,7 +263,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.56 — Affiliate links removed for non-commercial compliance (Vercel Hobby): Amazon affiliate button + disclosure dropped from support.html (Ko-fi donation CTA kept), privacy/terms reworded, planning docs scrubbed of affiliate plans. The public lite version carries donations only.
+v0.57 — Interface language (i18n) layer + Traditional Chinese. Markup carries data-i18n / data-i18n-html / data-i18n-placeholder keys; applyLanguage() fills them from UI_STRINGS on boot and on switch; JS-built text uses t('key'). New pc_ui_lang preference with a picker in Preferences, deliberately separate from the companion language. All font stacks extended with CJK fallbacks (also fixes Chinese book titles in the English UI). 244 keys × 2 languages, +7 regression tests (32 total). Traditional Chinese is a first-pass translation pending a native review.
+
+Earlier (v0.56): Affiliate links removed for non-commercial compliance (Vercel Hobby): Amazon affiliate button + disclosure dropped from support.html (Ko-fi donation CTA kept), privacy/terms reworded, planning docs scrubbed of affiliate plans. The public lite version carries donations only.
 
 Earlier (v0.55): Endless Back loop fix (BUGFIXES v0.55): endConversation() now clears the back stack and marks the navigation back-style, so chat → Back → shelf → Back goes to the Library Hall instead of bouncing back into the ended chat. Header links away from a live chat (Main / Find a book) still push 'companion' so Back returns to the active conversation. +1 regression test (25 total).
 
