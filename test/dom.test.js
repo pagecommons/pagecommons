@@ -139,6 +139,39 @@ test('every data-i18n key in the markup exists in the string table', async funct
   assert.strictEqual(missing.length, 0, 'markup references unknown keys: ' + missing.join(', '));
 });
 
+// This scans the WHOLE document rather than line by line. The first pass of
+// the i18n work used a line-based audit, which silently skipped any element
+// whose text spanned several lines (the home description, the T&C notes) and
+// shipped them untranslated. Whole-document scanning is what catches those.
+test('no user-visible markup text is left untranslated', async function () {
+  var fs = require('fs');
+  var path = require('path');
+  var html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  var body = html.replace(/<style[\s\S]*?<\/style>/g, '').replace(/<!--[\s\S]*?-->/g, '');
+  // Elements translated wholesale via data-i18n-html own all their inner text.
+  body = body.replace(/<([a-z0-9]+)([^>]*\sdata-i18n-html="[^"]*"[^>]*)>[\s\S]*?<\/\1>/g, '<$1$2></$1>');
+
+  // Deliberately untranslated: brand, third-party product names, version,
+  // language names shown in their own language, and JS-owned text.
+  var ALLOWED = /^(Page Commons|Anthropic Claude|Google Gemini|Groq|v0\.\d+|English|繁體中文|Good evening|My Clippings\.txt)$/;
+
+  var missing = [], re = />([^<>]+)</g, m;
+  while ((m = re.exec(body))) {
+    var text = m[1].replace(/\s+/g, ' ').trim();
+    // Entities carry latin letters (&nbsp; &mdash;) but are punctuation, not
+    // copy — strip them before deciding whether this is real text.
+    var words = text.replace(/&[a-z]+;|&#\d+;/g, ' ').trim();
+    if (!text || words.length < 3 || !/[A-Za-z]/.test(words)) continue;
+    if (ALLOWED.test(text)) continue;
+    var before = body.slice(0, m.index + 1);
+    var openTag = before.slice(before.lastIndexOf('<'));
+    if (/data-i18n/.test(openTag)) continue;
+    missing.push(text.slice(0, 60));
+  }
+  assert.strictEqual(missing.length, 0,
+    'untranslated markup text:\n  ' + missing.join('\n  '));
+});
+
 test('font stacks carry a CJK fallback after the Latin families', async function () {
   var app = await boot({ seed: RETURNING });
   var css = '';

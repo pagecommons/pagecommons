@@ -249,6 +249,46 @@ var UI_DATE_LOCALE = {
 };
 var UI_STRINGS = {
   'en': {
+    'js.by_author': ' by {author}',
+    'js.preferences': 'Preferences',
+    'js.trying_google': 'Trying Google Books…',
+    'js.searching_for': 'Searching for “{title}”',
+    'js.showing_books_by': 'Showing books by “{author}”. Add a title above to narrow down.',
+    'js.free_tier_note': 'Using the free shared companion. Best for well-known books in English; weaker on recent, niche, or non-English titles. Add your own key for stronger book knowledge.',
+    'js.is_this_for_me': 'Is this for me?',
+    'js.reading_clippings': 'Reading clippings…',
+    'js.no_highlights_file': 'No highlights found in this file.',
+    'js.loaded': 'Loaded ',
+    'js.paste_clippings_first': 'Please paste your clippings text first.',
+    'js.no_highlights_paste': 'No highlights found. Make sure you pasted the full contents of My Clippings.txt.',
+    'js.highlights': 'Highlights',
+    'js.passages': 'Passages',
+    'js.notes': 'Notes',
+    'js.hide_transfer': '↑ Hide transfer code entry',
+    'js.show_transfer': '↓ Transferring from another device? Enter a code',
+    'js.enter_code_exactly': 'Please enter the 6-digit code exactly as shown.',
+    'js.fetching': 'Fetching…',
+    'js.fetch_my_key': 'Fetch my key',
+    'js.key_transferred': 'Key transferred successfully! Tap Continue.',
+    'js.network_error': 'Network error — please check your connection and try again.',
+    'js.error_prefix': 'Error: ',
+    'js.more_settings': 'More settings ▾',
+    'js.companion_name_set': 'Companion name set to ',
+    'js.reply_length_set': 'Reply length set to ',
+    'js.prompts_now_in': 'Prompts now in ',
+    'js.auto_detect_enabled': 'Auto-detect enabled.',
+    'js.untitled': 'Untitled',
+    'js.unknown_author': 'Unknown author',
+    'js.no_description': 'No description available — the companion can still help you explore this book.',
+    'js.find_out_if_for_me': 'Find out if it\'s for me →',
+    'js.i_have_this_book': 'I have this book',
+    'js.back_arrow': 'Back ←',
+    'home.description': 'Discuss what you\'re reading, discover what others thought, or find your next book.<br>No ads. No algorithms. No engagement metrics. Just books.',
+    'key.api_key_loaded': 'API key loaded',
+    'tc.age_note': '<strong>Age:</strong> By continuing you confirm you are 13 years of age or older. Some books contain adult content — you confirm you are 18 or over before accessing such material.',
+    'tc.privacy_note': '<strong>Privacy:</strong> Your API key and reading data are stored only in your browser. We do not collect or store personal data on our servers.',
+    'tc.content_note': '<strong>Content:</strong> Page Commons is a reading companion. Discussions are anchored to books. We are not responsible for AI responses but take reasonable steps to keep them appropriate.',
+    'tc.open_source_note': '<strong>Open source:</strong> Page Commons is open source software provided as-is. Use it responsibly.',
     'about.a_private_ai_companion': 'A private AI companion you can talk to about any book — like a well-read friend who has also read it.',
     'about.back_to_the_library': 'Back to the library',
     'about.book_rooms': 'Book rooms',
@@ -484,17 +524,53 @@ var UI_STRINGS = {
     'status.read_before_revisiting': 'Read before, revisiting',
     'status.ready_to_talk_about': 'Ready to talk about all of it',
     'status.where_are_you_with': 'Where are you with this book?',
-    'tc.age': 'Age:',
     'tc.before_you_continue_please': 'Before you continue, please read and agree to the following:',
-    'tc.content': 'Content:',
     'tc.i_agree_take_me': 'I agree — take me in',
-    'tc.open_source': 'Open source:',
     'tc.page_commons_is_a': 'Page Commons is a calm, private reading companion. Talk through the book you\'re reading with an AI that knows the work, save the passages that stay with you, and keep your shelf — all stored in your own browser, with no ads and no personal data on our servers.',
-    'tc.privacy': 'Privacy:',
     'tc.welcome_to_page_commons': 'Welcome to Page Commons',
     'tc.your_agreement_is_stored': 'Your agreement is stored locally in your browser only.'
   },
   'zh-TW': {
+    'js.by_author': '（{author}）',
+    'js.preferences': '偏好設定',
+    'js.trying_google': '改用 Google Books 搜尋…',
+    'js.searching_for': '正在搜尋「{title}」',
+    'js.showing_books_by': '顯示「{author}」的著作。在上方加入書名可縮小範圍。',
+    'js.free_tier_note': '正在使用免費共用書伴。最適合英文的知名書籍；對近期、冷門或非英文書籍較弱。加上你自己的金鑰可獲得更扎實的書籍知識。',
+    'js.is_this_for_me': '這本書適合我嗎？',
+    'js.reading_clippings': '正在讀取標註…',
+    'js.no_highlights_file': '這個檔案中找不到標註。',
+    'js.loaded': '已載入 ',
+    'js.paste_clippings_first': '請先貼上你的標註文字。',
+    'js.no_highlights_paste': '找不到標註。請確認你貼上了 My Clippings.txt 的完整內容。',
+    'js.highlights': '標註',
+    'js.passages': '摘句',
+    'js.notes': '筆記',
+    'js.hide_transfer': '↑ 收起傳送碼輸入',
+    'js.show_transfer': '↓ 從其他裝置傳送？輸入傳送碼',
+    'js.enter_code_exactly': '請完全依照顯示輸入 6 位數傳送碼。',
+    'js.fetching': '取得中…',
+    'js.fetch_my_key': '取得我的金鑰',
+    'js.key_transferred': '金鑰傳送成功！請按「繼續」。',
+    'js.network_error': '網絡錯誤——請檢查連線後再試。',
+    'js.error_prefix': '錯誤："',
+    'js.more_settings': '更多設定 ▾',
+    'js.companion_name_set': '書伴名稱已設為 ',
+    'js.reply_length_set': '回覆長度已設為 ',
+    'js.prompts_now_in': '提示語言已設為 ',
+    'js.auto_detect_enabled': '已啟用自動偵測。',
+    'js.untitled': '未命名',
+    'js.unknown_author': '作者不詳',
+    'js.no_description': '沒有簡介——書伴仍然可以陪你探索這本書。',
+    'js.find_out_if_for_me': '看看適不適合我 →',
+    'js.i_have_this_book': '我有這本書',
+    'js.back_arrow': '返回 ←',
+    'home.description': '聊聊你正在讀的書，看看別人怎麼想，或找到下一本書。<br>沒有廣告。沒有演算法。沒有互動指標。只有書。',
+    'key.api_key_loaded': 'API 金鑰已載入',
+    'tc.age_note': '<strong>年齡：</strong>繼續即表示你確認已年滿 13 歲。部分書籍含有成人內容——取用該類內容前，你確認已年滿 18 歲。',
+    'tc.privacy_note': '<strong>私隱：</strong>你的 API 金鑰與閱讀資料只儲存在你的瀏覽器中。我們不會在伺服器上收集或儲存個人資料。',
+    'tc.content_note': '<strong>內容：</strong>Page Commons 是一位閱讀書伴，討論皆以書籍為本。我們不對 AI 的回應負責，但會採取合理措施使其保持適當。',
+    'tc.open_source_note': '<strong>開放原始碼：</strong>Page Commons 是依現況提供的開放原始碼軟件。請負責任地使用。',
     'about.a_private_ai_companion': '一位私密的 AI 書伴，任何書都可以聊——像一位讀過同一本書的老朋友。',
     'about.back_to_the_library': '回到書房',
     'about.book_rooms': '書房',
@@ -730,13 +806,9 @@ var UI_STRINGS = {
     'status.read_before_revisiting': '讀過了，重讀中',
     'status.ready_to_talk_about': '可以聊整本書了',
     'status.where_are_you_with': '這本書你讀到哪裡了？',
-    'tc.age': '年齡：',
     'tc.before_you_continue_please': '繼續之前，請閱讀並同意以下條款：',
-    'tc.content': '內容：',
     'tc.i_agree_take_me': '我同意——帶我進去',
-    'tc.open_source': '開放原始碼：',
     'tc.page_commons_is_a': 'Page Commons 是一位安靜而私密的閱讀書伴。與熟悉作品的 AI 聊聊你正在讀的書，收藏那些留在心裡的段落，整理自己的書架——全部儲存在你自己的瀏覽器中，沒有廣告，伺服器上也沒有你的個人資料。',
-    'tc.privacy': '私隱：',
     'tc.welcome_to_page_commons': '歡迎來到 Page Commons',
     'tc.your_agreement_is_stored': '你的同意僅儲存在你的瀏覽器本機。'
   }
@@ -904,7 +976,7 @@ function updatePreferencesFooterLinks() {
       link = document.createElement('a');
       link.className = 'prefs-footer-link';
       link.href = '#';
-      link.textContent = 'Preferences';
+      link.textContent = t('js.preferences');
       link.style.color = '#666666';
       link.style.textDecoration = 'underline';
       link.onclick = function (e) {
@@ -1262,7 +1334,7 @@ function saveKey() {
   var err = document.getElementById('key-error');
   err.style.display = 'none';
   if (!val) {
-    err.textContent = 'Please enter your API key.';
+    err.textContent = t('js.please_enter_key');
     err.style.display = 'block';
     return;
   }
@@ -1515,7 +1587,7 @@ function _searchBooks() {
             _context4.n = 7;
             break;
           }
-          statusEl.textContent = 'Looking up ISBN…';
+          statusEl.textContent = t('js.looking_up_isbn');
           statusEl.className = 'status-msg';
           statusEl.style.display = 'block';
           _context4.p = 2;
@@ -1555,7 +1627,7 @@ function _searchBooks() {
             });
             resultsEl.appendChild(el);
           } else {
-            statusEl.textContent = 'ISBN not found — try searching by title.';
+            statusEl.textContent = t('js.isbn_not_found');
             statusEl.style.display = 'block';
             renderManualEntry(raw, resultsEl);
           }
@@ -1564,7 +1636,7 @@ function _searchBooks() {
         case 5:
           _context4.p = 5;
           _t0 = _context4.v;
-          statusEl.textContent = 'ISBN lookup failed — check your connection.';
+          statusEl.textContent = t('js.isbn_failed');
           statusEl.className = 'status-msg error';
           statusEl.style.display = 'block';
         case 6:
@@ -1572,7 +1644,7 @@ function _searchBooks() {
         case 7:
           // Build search terms
           searchTitle = rawTitle, searchAuthor = rawAuthor;
-          statusEl.textContent = 'Searching…';
+          statusEl.textContent = t('js.searching');
           statusEl.className = 'status-msg';
           statusEl.style.display = 'block';
 
@@ -1582,14 +1654,14 @@ function _searchBooks() {
             _context4.n = 9;
             break;
           }
-          statusEl.textContent = 'Understanding your search…';
+          statusEl.textContent = t('js.understanding_search');
           _context4.n = 8;
           return interpretSearchQuery(rawTitle);
         case 8:
           interp = _context4.v;
           searchTitle = interp.title;
           searchAuthor = interp.author || rawAuthor;
-          statusEl.textContent = 'Searching for "' + searchTitle + '"' + (searchAuthor ? ' by ' + searchAuthor : '') + '…';
+          statusEl.textContent = t('js.searching_for').replace('{title}', searchTitle) + (searchAuthor ? t('js.by_author').replace('{author}', searchAuthor) : '') + '…';
         case 9:
           gbParts = [];
           if (searchTitle) gbParts.push('intitle:' + searchTitle);
@@ -1601,14 +1673,14 @@ function _searchBooks() {
           _addShowMoreBtn = function addShowMoreBtn() {
             var moreBtn = document.createElement('button');
             moreBtn.className = 'btn';
-            moreBtn.textContent = 'Show more results';
+            moreBtn.textContent = t('js.show_more_results');
             moreBtn.style.marginBottom = '10px';
             moreBtn.onclick = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
               var more, fresh, _manualEntry, noMore, _t9;
               return _regenerator().w(function (_context3) {
                 while (1) switch (_context3.p = _context3.n) {
                   case 0:
-                    moreBtn.textContent = 'Loading…';
+                    moreBtn.textContent = t('js.loading');
                     moreBtn.disabled = true;
                     _page++;
                     _context3.p = 1;
@@ -1643,7 +1715,7 @@ function _searchBooks() {
                     } else {
                       noMore = document.createElement('p');
                       noMore.style.cssText = 'font-size:0.85rem;color:#777777;font-style:italic;margin-bottom:12px';
-                      noMore.textContent = 'No more results found.';
+                      noMore.textContent = t('js.no_more_results');
                       if (_manualEntry) resultsEl.insertBefore(noMore, _manualEntry);else resultsEl.appendChild(noMore);
                     }
                     _context3.n = 7;
@@ -1651,7 +1723,7 @@ function _searchBooks() {
                   case 6:
                     _context3.p = 6;
                     _t9 = _context3.v;
-                    moreBtn.textContent = 'Show more results';
+                    moreBtn.textContent = t('js.show_more_results');
                     moreBtn.disabled = false;
                   case 7:
                     return _context3.a(2);
@@ -1666,7 +1738,7 @@ function _searchBooks() {
             _context4.n = 12;
             break;
           }
-          statusEl.textContent = 'Searching Google Books…';
+          statusEl.textContent = t('js.searching_google');
           statusEl.style.display = 'block';
           _context4.n = 11;
           return fetchGoogleBooksWithFallback(raw, gbQuery);
@@ -1683,7 +1755,7 @@ function _searchBooks() {
             _context4.n = 15;
             break;
           }
-          statusEl.textContent = 'Trying title only…';
+          statusEl.textContent = t('js.trying_title_only');
           statusEl.style.display = 'block';
           _context4.n = 14;
           return fetchOpenLibrary(searchTitle, 10, 0);
@@ -1694,7 +1766,7 @@ function _searchBooks() {
             _context4.n = 17;
             break;
           }
-          statusEl.textContent = 'Trying Google Books…';
+          statusEl.textContent = t('js.trying_google');
           statusEl.style.display = 'block';
           _context4.n = 16;
           return fetchGoogleBooks(gbQuery, 8, 0);
@@ -1715,7 +1787,7 @@ function _searchBooks() {
             _context4.n = 20;
             break;
           }
-          statusEl.textContent = 'No results found — try different keywords or enter manually below.';
+          statusEl.textContent = t('js.no_results');
           statusEl.style.display = 'block';
           renderManualEntry(searchTitle, resultsEl);
           return _context4.a(2);
@@ -1724,7 +1796,7 @@ function _searchBooks() {
           if (!searchTitle && searchAuthor) {
             refineEl = document.createElement('p');
             refineEl.style.cssText = 'font-size:0.85rem;color:#777777;margin-bottom:12px;font-style:italic';
-            refineEl.textContent = 'Showing books by "' + searchAuthor + '". Add a title above to narrow down.';
+            refineEl.textContent = t('js.showing_books_by').replace('{author}', searchAuthor);
             resultsEl.appendChild(refineEl);
           }
           renderBookBatch(books.slice(0, 6), resultsEl, null);
@@ -1743,7 +1815,7 @@ function _searchBooks() {
         case 21:
           _context4.p = 21;
           _t1 = _context4.v;
-          statusEl.textContent = 'Search failed — check your connection and try again.';
+          statusEl.textContent = t('js.search_failed');
           statusEl.className = 'status-msg error';
           statusEl.style.display = 'block';
           renderManualEntry(searchTitle, resultsEl);
@@ -1980,7 +2052,7 @@ function updateAIModeUI() {
   if (STATE.aiMode === 'shared') {
     sharedBtn.classList.add('active');
     byokBtn.classList.remove('active');
-    if (note) note.textContent = 'Using the free shared companion. Best for well-known books in English; weaker on recent, niche, or non-English titles. Add your own key for stronger book knowledge.';
+    if (note) note.textContent = t('js.free_tier_note');
     if (providerSection) providerSection.style.display = 'none';
   } else {
     sharedBtn.classList.remove('active');
@@ -2319,8 +2391,8 @@ function loadBookDetailScreen() {
   var meta = book.year || book.pageCount ? book.year + (book.pageCount ? ' · ' + book.pageCount + ' pages' : '') : '';
   var desc = (book.description || '').replace(/<[^>]*>/g, '');
   var truncated = desc.length > 300 ? desc.substring(0, 300) + '…' : desc;
-  var descHTML = truncated ? '<p class="book-detail-description">' + esc(truncated) + '</p>' : '<p class="book-detail-description" style="color:#aaaaaa;font-style:italic;">No description available — the companion can still help you explore this book.</p>';
-  container.innerHTML = '<h1 class="book-detail-title">' + esc(book.title || 'Untitled') + '</h1>' + '<p class="book-detail-author">' + esc(book.author || 'Unknown author') + '</p>' + (meta ? '<p class="book-detail-meta">' + esc(meta) + '</p>' : '') + descHTML + '<div class="book-detail-actions">' + '<button class="btn btn-primary" onclick="setReadingStatus(\'considering\')">Find out if it\'s for me →</button>' + '<button class="btn" onclick="renderStatusScreen(STATE.book);navigate(\'status\')">I have this book</button>' + '<button class="btn" onclick="goBack()">Back ←</button>' + '</div>';
+  var descHTML = truncated ? '<p class="book-detail-description">' + esc(truncated) + '</p>' : '<p class="book-detail-description" style="color:#aaaaaa;font-style:italic;">' + esc(t('js.no_description')) + '</p>';
+  container.innerHTML = '<h1 class="book-detail-title">' + esc(book.title || t('js.untitled')) + '</h1>' + '<p class="book-detail-author">' + esc(book.author || t('js.unknown_author')) + '</p>' + (meta ? '<p class="book-detail-meta">' + esc(meta) + '</p>' : '') + descHTML + '<div class="book-detail-actions">' + '<button class="btn btn-primary" onclick="setReadingStatus(\'considering\')">' + esc(t('js.find_out_if_for_me')) + '</button>' + '<button class="btn" onclick="renderStatusScreen(STATE.book);navigate(\'status\')">' + esc(t('js.i_have_this_book')) + '</button>' + '<button class="btn" onclick="goBack()">' + esc(t('js.back_arrow')) + '</button>' + '</div>';
 }
 function selectBook(_x6) {
   return _selectBook.apply(this, arguments);
@@ -2617,7 +2689,7 @@ function updateStatusDisplay() {
   var el = document.getElementById('book-status-display');
   var ctaEl = document.getElementById('discover-convert-bar');
   if (STATE.companionMode === 'discover') {
-    if (el) el.textContent = 'Is this for me?';
+    if (el) el.textContent = t('js.is_this_for_me');
     if (ctaEl) ctaEl.style.display = 'block';
   } else {
     if (el && STATE.readingStatus && labels[STATE.readingStatus]) {
@@ -2891,13 +2963,13 @@ function parseClippings(input) {
   if (!file) return;
   document.getElementById('clippings-filename').textContent = file.name;
   var statusEl = document.getElementById('clippings-status');
-  statusEl.textContent = 'Reading clippings…';
+  statusEl.textContent = t('js.reading_clippings');
   statusEl.style.display = 'block';
   var reader = new FileReader();
   reader.onload = function (e) {
     var highlights = parseClippingsText(e.target.result);
     if (!highlights.length) {
-      statusEl.textContent = 'No highlights found in this file.';
+      statusEl.textContent = t('js.no_highlights_file');
       return;
     }
     STATE.highlights = highlights;
@@ -2922,15 +2994,15 @@ function parseClippingsPaste() {
   if (!textarea) return;
   var text = textarea.value.trim();
   if (!text) {
-    statusEl.textContent = 'Please paste your clippings text first.';
+    statusEl.textContent = t('js.paste_clippings_first');
     statusEl.style.display = 'block';
     return;
   }
-  statusEl.textContent = 'Reading clippings…';
+  statusEl.textContent = t('js.reading_clippings');
   statusEl.style.display = 'block';
   var highlights = parseClippingsText(text);
   if (!highlights.length) {
-    statusEl.textContent = 'No highlights found. Make sure you pasted the full contents of My Clippings.txt.';
+    statusEl.textContent = t('js.no_highlights_paste');
     return;
   }
   STATE.highlights = highlights;
@@ -3036,7 +3108,7 @@ function renderHighlightsPanel() {
   var btn = document.getElementById('highlights-toolbar-btn');
   if (relevant.length) {
     btn.style.display = 'block';
-    btn.textContent = 'Highlights (' + relevant.length + ')';
+    btn.textContent = t('js.highlights') + ' (' + relevant.length + ')';
     document.getElementById('highlights-count').textContent = relevant.length + ' highlight' + (relevant.length !== 1 ? 's' : '') + ' from your Kindle';
     document.getElementById('highlights-list').innerHTML = relevant.map(function (h) {
       return '<p style="border-left:3px solid #d0d0d0;padding-left:10px;margin-bottom:12px;font-style:italic">"' + esc(h.text) + '"</p>';
@@ -3084,7 +3156,7 @@ function _populateIcebreakers() {
           loadEl = document.createElement('div');
           loadEl.className = 'icebreaker-label';
           loadEl.style.fontStyle = 'italic';
-          loadEl.textContent = 'Finding the right questions…';
+          loadEl.textContent = t('js.finding_questions');
           list.appendChild(loadEl);
           cacheKey = 'pc_icebreakers_' + bookKey(book) + '_' + (STATE.readingStatus || '') + '_' + (STATE.chatLanguage || 'english') + '_' + (STATE.detectedLang || '') + '_' + (STATE.companionLangOverride || '');
           _context12.p = 1;
@@ -3587,7 +3659,7 @@ function appendBubble(role, text) {
           copyBtn.textContent = t('js.copy');
         }, 1500);
       }).catch(function () {
-        return showToolbarMsg('Copy not available in this browser.');
+        return showToolbarMsg(t('js.copy_unavailable'));
       });
     };
     var saveBtn = document.createElement('button');
@@ -4374,7 +4446,7 @@ function setCompanionLanguage(lang) {
   } else {
     localStorage.removeItem('pc_companion_lang_override_' + bookKey(STATE.book));
     touchSyncMeta('status');
-    showToolbarMsg('Auto-detect enabled.');
+    showToolbarMsg(t('js.auto_detect_enabled'));
   }
   // Refresh the icebreaker prompts so they appear in the newly chosen language
   // right away (the cache key now includes the override, so this regenerates).
@@ -4447,7 +4519,7 @@ function updatePassagesToolbarBtn() {
   if (!btn) return;
   if (passages.length) {
     btn.style.display = 'block';
-    btn.textContent = 'Passages (' + passages.length + ')';
+    btn.textContent = t('js.passages') + ' (' + passages.length + ')';
   } else {
     btn.style.display = 'none';
   }
@@ -4457,7 +4529,7 @@ function renderPassagesPanel() {
   var listEl = document.getElementById('passages-list');
   var countEl = document.getElementById('passages-count');
   if (!passages.length) {
-    countEl.textContent = 'No passages saved yet';
+    countEl.textContent = t('js.no_passages_yet');
     listEl.innerHTML = '';
     return;
   }
@@ -4619,7 +4691,7 @@ function updateNotesToolbarBtn() {
   var btn = document.getElementById('notes-toolbar-btn');
   if (!btn || !STATE.book) return;
   var notes = getNotes(STATE.book);
-  btn.textContent = notes.length ? 'Notes (' + notes.length + ')' : 'Notes';
+  btn.textContent = notes.length ? t('js.notes') + ' (' + notes.length + ')' : t('js.notes');
 }
 function copyAllPassages() {
   var passages = getPassages();
@@ -4633,7 +4705,7 @@ function copyAllPassages() {
   navigator.clipboard.writeText(text).then(function () {
     showToolbarMsg(passages.length + ' passage' + (passages.length !== 1 ? 's' : '') + ' copied to clipboard.');
   }).catch(function () {
-    return showToolbarMsg('Copy not available in this browser.');
+    return showToolbarMsg(t('js.copy_unavailable'));
   });
 }
 
@@ -4663,12 +4735,12 @@ function toggleTransferSection() {
   if (!fields) return;
   if (fields.style.display === 'none') {
     fields.style.display = 'block';
-    if (btn) btn.textContent = '↑ Hide transfer code entry';
+    if (btn) btn.textContent = t('js.hide_transfer');
     var inp = document.getElementById('transfer-code-input');
     if (inp) inp.focus();
   } else {
     fields.style.display = 'none';
-    if (btn) btn.textContent = '↓ Transferring from another device? Enter a code';
+    if (btn) btn.textContent = t('js.show_transfer');
   }
 }
 function redeemTransferCode() {
@@ -4682,21 +4754,21 @@ function redeemTransferCode() {
   errEl.style.display = 'none';
   okEl.style.display = 'none';
   if (!/^\d{6}$/.test(code)) {
-    errEl.textContent = 'Please enter the 6-digit code exactly as shown.';
+    errEl.textContent = t('js.enter_code_exactly');
     errEl.style.display = 'block';
     return;
   }
   var btn = document.querySelector('#transfer-fields .btn');
   if (btn) {
     btn.disabled = true;
-    btn.textContent = 'Fetching…';
+    btn.textContent = t('js.fetching');
   }
   fetch('/api/transfer?code=' + code).then(function (res) {
     return res.json();
   }).then(function (data) {
     if (btn) {
       btn.disabled = false;
-      btn.textContent = 'Fetch my key';
+      btn.textContent = t('js.fetch_my_key');
     }
     if (data.error) {
       errEl.textContent = data.error === 'Code not found or expired' ? 'Code not found or expired. Generate a new one and try again.' : 'Error: ' + data.error;
@@ -4711,7 +4783,7 @@ function redeemTransferCode() {
     var statusBar = document.getElementById('key-status-bar');
     if (statusBar) statusBar.style.display = 'block';
     // Show success
-    okEl.textContent = 'Key transferred successfully! Tap Continue.';
+    okEl.textContent = t('js.key_transferred');
     okEl.style.display = 'block';
     input.value = '';
     // Hide the transfer fields
@@ -4720,9 +4792,9 @@ function redeemTransferCode() {
   }).catch(function (err) {
     if (btn) {
       btn.disabled = false;
-      btn.textContent = 'Fetch my key';
+      btn.textContent = t('js.fetch_my_key');
     }
-    errEl.textContent = 'Network error — please check your connection and try again.';
+    errEl.textContent = t('js.network_error');
     errEl.style.display = 'block';
   });
 }
@@ -4787,7 +4859,7 @@ function loadPreferencesScreen() {
   var more = document.getElementById('prefs-more');
   var toggle = document.getElementById('prefs-more-toggle');
   if (more) more.style.display = 'none';
-  if (toggle) toggle.textContent = 'More settings ▾';
+  if (toggle) toggle.textContent = t('js.more_settings');
 }
 function togglePreferencesMore() {
   var more = document.getElementById('prefs-more');
@@ -4795,7 +4867,7 @@ function togglePreferencesMore() {
   if (!more || !toggle) return;
   var open = more.style.display !== 'none';
   more.style.display = open ? 'none' : 'block';
-  toggle.textContent = open ? 'More settings ▾' : 'More settings ▴';
+  toggle.textContent = open ? t('js.more_settings') : 'More settings ▴';
 }
 function savePreferencesAndContinue() {
   localStorage.setItem('pc_preferences_set', '1');
@@ -5742,7 +5814,7 @@ function renderDriveStatus() {
     if (lastEl) {
       if (last) {
         var d = new Date(parseInt(last, 10));
-        lastEl.textContent = 'Last synced: ' + d.toLocaleString(dateLocale(), {
+        lastEl.textContent = t('js.last_synced') + d.toLocaleString(dateLocale(), {
           day: 'numeric',
           month: 'long',
           year: 'numeric',
@@ -5750,7 +5822,7 @@ function renderDriveStatus() {
           minute: '2-digit'
         });
       } else {
-        lastEl.textContent = 'Last synced: never';
+        lastEl.textContent = t('js.last_synced_never');
       }
     }
   } else {

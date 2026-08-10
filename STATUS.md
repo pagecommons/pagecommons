@@ -8,6 +8,30 @@ interface i18n + Traditional Chinese (v0.57)
 
 ## What was done this session [v0.42 → v0.57]
 
+### v0.58 — i18n coverage fixes (found by the founder in testing)
+Four gaps reported, and a root-cause sweep found more. All fixed.
+
+- **Root cause:** the v0.57 gap audit ran line-by-line, so any element
+  whose text spanned multiple lines was silently skipped — the home
+  description (wrapped, with a `<br>`) and the four T&C notes (where only
+  the inner `<strong>` was tagged, leaving the sentence after it English).
+  Re-audited across the whole document and fixed with `data-i18n-html`
+  on the parent.
+- **Also fixed:** the JS-injected "Preferences" footer link; book-detail
+  buttons ("Find out if it's for me", "I have this book", "Back");
+  Notes / Passages / Highlights toolbar counts; the API-key status bar;
+  and ~50 further JS-built strings swept up in the same pass (search
+  statuses, ISBN lookup, transfer-code flow, toolbar messages, free-tier
+  note, "Untitled" / "Unknown author" fallbacks).
+- 244 → **280 keys** per language. Four orphaned `tc.*` keys removed.
+- **New test: whole-document markup scan.** Fails if any user-visible
+  text lacks a data-i18n attribute. Verified it catches a real
+  regression by removing an annotation and watching it fail. This is the
+  test that would have prevented v0.57 shipping incomplete; the lesson is
+  that line-based scanning of HTML is not sound.
+- Tests 32 → **33**; plus an 11-check browser pass over the exact items
+  reported, and the 28-check i18n smoke still green.
+
 ### v0.57 — Interface language layer + Traditional Chinese
 Motivation: a Cantonese YouTube channel demo / soft launch, which reads
 much better with a Chinese interface. The companion side already spoke

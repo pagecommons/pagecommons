@@ -160,10 +160,20 @@ Text built in JS uses t('key').
 ADDING A STRING: put the English in
 UI_STRINGS.en, the translation in
 UI_STRINGS['zh-TW'], then reference the
-key from markup or t(). A test fails if
-either table is missing a key, or if
-markup references a key that doesn't
-exist.
+key from markup or t(). Tests fail if
+either table is missing a key, if markup
+references a key that doesn't exist, or
+if any user-visible markup text has no
+data-i18n at all.
+
+MULTI-LINE / MIXED CONTENT: an element
+whose text wraps across lines, or that
+wraps text around <br>/<strong>, needs
+data-i18n-html on the PARENT with the
+markup inside the translation. Tagging
+only the inner <strong> leaves the
+surrounding text in English — this is
+what shipped broken in v0.57.
 
 NEVER translate: the brand "Page
 Commons", provider names (Anthropic
@@ -263,7 +273,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.57 — Interface language (i18n) layer + Traditional Chinese. Markup carries data-i18n / data-i18n-html / data-i18n-placeholder keys; applyLanguage() fills them from UI_STRINGS on boot and on switch; JS-built text uses t('key'). New pc_ui_lang preference with a picker in Preferences, deliberately separate from the companion language. All font stacks extended with CJK fallbacks (also fixes Chinese book titles in the English UI). 244 keys × 2 languages, +7 regression tests (32 total). Traditional Chinese is a first-pass translation pending a native review.
+v0.58 — i18n coverage fixes found in testing: the home description and T&C notes (multi-line elements the first-pass audit skipped), the JS-injected "Preferences" footer link, book-detail buttons, Notes/Passages/Highlights toolbar counts, key status bar, and ~50 further JS-built strings (search statuses, transfer flow, toolbar messages). 280 keys × 2 languages. New test scans the WHOLE document for untranslated markup — the line-based audit that missed these is the reason they shipped.
+
+Earlier (v0.57): Interface language (i18n) layer + Traditional Chinese. Markup carries data-i18n / data-i18n-html / data-i18n-placeholder keys; applyLanguage() fills them from UI_STRINGS on boot and on switch; JS-built text uses t('key'). New pc_ui_lang preference with a picker in Preferences, deliberately separate from the companion language. All font stacks extended with CJK fallbacks (also fixes Chinese book titles in the English UI). 244 keys × 2 languages, +7 regression tests (32 total). Traditional Chinese is a first-pass translation pending a native review.
 
 Earlier (v0.56): Affiliate links removed for non-commercial compliance (Vercel Hobby): Amazon affiliate button + disclosure dropped from support.html (Ko-fi donation CTA kept), privacy/terms reworded, planning docs scrubbed of affiliate plans. The public lite version carries donations only.
 
