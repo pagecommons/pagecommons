@@ -158,3 +158,78 @@ test('migrateBookKeys is a no-op when already migrated', async function () {
   assert.strictEqual(ls.getItem('pc_status_' + legacyKey(LONG_BOOK)), 'midway');
   assert.strictEqual(ls.getItem('pc_status_' + fullKey(LONG_BOOK)), null);
 });
+
+// ─── ISBN lookup ────────────────────────────────────────────────────────────
+// Regression: ISBN search used to query Open Library alone, so recent titles
+// came back "not found" even when Google Books had them (reported against
+// 9781804953334). Google Books is now tried first, via the authenticated
+// proxy, with Open Library kept as the fallback.
+
+function stubISBNFetch(app, opts) {
+  var calls = [];
+  app.window.__isbnCalls = calls;
+  app.window.fetch = function (url) {
+    var u = String(url);
+    calls.push(u);
+    // Open Library's URL is openlibrary.org/api/books — test it first.
+    if (u.indexOf('openlibrary.org') !== -1) {
+      if (opts.olThrows) return Promise.reject(new Error('ol down'));
+      return Promise.resolve({ ok: true, status: 200,
+        json: function () { return Promise.resolve(opts.ol || {}); } });
+    }
+    if (opts.gbThrows) return Promise.reject(new Error('gb down'));
+    return Promise.resolve({ ok: true, status: 200,
+      json: function () { return Promise.resolve({ items: opts.gb || [] }); } });
+  };
+  return calls;
+}
+
+var GB_ITEM = [{
+  id: 'gb1',
+  volumeInfo: {
+    title: 'A Recent Title', authors: ['Some Author'], publishedDate: '2024',
+    language: 'en', pageCount: 300, categories: ['Fiction'], description: 'Blurb.'
+  }
+}];
+var OL_REC = { 'ISBN:9781804953334': { title: 'Older Record', authors: [{ name: 'OL Author' }] } };
+
+test('ISBN lookup prefers Google Books and skips Open Library on a hit', async function () {
+  var app = await boot({ seed: SEED });
+  var calls = stubISBNFetch(app, { gb: GB_ITEM, ol: OL_REC });
+  var book = await app.window.lookupISBN('9781804953334');
+  assert.ok(book, 'expected a book');
+  assert.strictEqual(book.title, 'A Recent Title');
+  assert.strictEqual(book.cats, 'fiction', 'categories must survive — the age gate reads them');
+  assert.ok(calls.some(function (c) { return c.indexOf('/api/books?q=isbn%3A') !== -1; }),
+    'should query Google Books through the authenticated proxy');
+  assert.ok(!calls.some(function (c) { return c.indexOf('openlibrary') !== -1; }),
+    'Open Library should not be queried when Google Books answers');
+});
+
+test('ISBN lookup falls back to Open Library when Google Books is empty', async function () {
+  var app = await boot({ seed: SEED });
+  stubISBNFetch(app, { gb: [], ol: OL_REC });
+  var book = await app.window.lookupISBN('9781804953334');
+  assert.ok(book, 'expected the Open Library fallback to answer');
+  assert.strictEqual(book.title, 'Older Record');
+  assert.strictEqual(book.cats, '', 'Open Library gives no categories');
+});
+
+test('ISBN lookup falls back when the Google Books call throws', async function () {
+  var app = await boot({ seed: SEED });
+  stubISBNFetch(app, { gbThrows: true, ol: OL_REC });
+  var book = await app.window.lookupISBN('9781804953334');
+  assert.ok(book && book.title === 'Older Record', 'a failed GB call must not abort the lookup');
+});
+
+test('ISBN lookup resolves to null when neither source has the book', async function () {
+  var app = await boot({ seed: SEED });
+  stubISBNFetch(app, { gb: [], ol: {} });
+  assert.strictEqual(await app.window.lookupISBN('9781804953334'), null);
+});
+
+test('ISBN lookup resolves to null (not a rejection) when both sources fail', async function () {
+  var app = await boot({ seed: SEED });
+  stubISBNFetch(app, { gbThrows: true, olThrows: true });
+  assert.strictEqual(await app.window.lookupISBN('9781804953334'), null);
+});

@@ -8,6 +8,31 @@ interface i18n + Traditional Chinese (v0.57)
 
 ## What was done this session [v0.42 → v0.57]
 
+### v0.59 — ISBN lookup fixed (reported: 9781804953334 not found)
+- **Cause:** the ISBN branch of `_searchBooks` queried **Open Library
+  alone**, while every other search path uses Google Books as primary via
+  the authenticated `/api/books` proxy. Open Library's coverage of recent
+  editions is much thinner, so newer titles reported "ISBN not found"
+  even when the same book was findable by title in the same app.
+- **Fix:** new `lookupISBN()` tries Google Books first, falls back to
+  Open Library, and resolves to null only when neither has the book.
+- **Secondary bug fixed by the same change:** the Open Library path
+  returned no `cats`, so **the age gate could not classify any
+  ISBN-found book**. Google Books records carry categories, plus the
+  description and page count the detail screen wants. The Open Library
+  fallback now sets `cats: ''` explicitly (unclassified, not "safe").
+- **i18n:** "Is this for me?" on ISBN results was embedded inside an
+  innerHTML string, so the v0.58 sweep (which matched standalone
+  literals) missed it. Now wired, along with a new `js.unknown_title`.
+- **+5 regression tests (38 total)**, covering: GB hit skips OL, GB empty
+  falls back, GB throwing still falls back, neither source → null, and
+  both failing → null rather than an unhandled rejection.
+- **Not verified against the live APIs.** This sandbox's network policy
+  blocks Open Library and returns 429 on anonymous Google Books, and
+  pagecommons.com/api/books answers 403 here — so whether that specific
+  ISBN exists in Google Books is still unconfirmed. The logic is verified
+  against stubs. Worth re-testing the real ISBN once deployed.
+
 ### v0.58 — i18n coverage fixes (found by the founder in testing)
 Four gaps reported, and a root-cause sweep found more. All fixed.
 

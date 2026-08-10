@@ -249,6 +249,7 @@ var UI_DATE_LOCALE = {
 };
 var UI_STRINGS = {
   'en': {
+    'js.unknown_title': 'Unknown title',
     'js.by_author': ' by {author}',
     'js.preferences': 'Preferences',
     'js.trying_google': 'Trying Google Books…',
@@ -531,6 +532,7 @@ var UI_STRINGS = {
     'tc.your_agreement_is_stored': 'Your agreement is stored locally in your browser only.'
   },
   'zh-TW': {
+    'js.unknown_title': '書名不詳',
     'js.by_author': '（{author}）',
     'js.preferences': '偏好設定',
     'js.trying_google': '改用 Google Books 搜尋…',
@@ -1564,7 +1566,7 @@ function searchBooks() {
 }
 function _searchBooks() {
   _searchBooks = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
-    var rawTitle, rawAuthor, raw, statusEl, resultsEl, isbnClean, isbnUrl, res, data, key, b, book, el, th, searchTitle, searchAuthor, isNL, interp, gbParts, gbQuery, olQuery, hasNonLatin, _addShowMoreBtn, books, refineEl, _page, _olQuery, _gbQuery, _hasNonLatin, _seen, _t0, _t1;
+    var rawTitle, rawAuthor, raw, statusEl, resultsEl, isbnClean, res, data, key, b, book, el, th, searchTitle, searchAuthor, isNL, interp, gbParts, gbQuery, olQuery, hasNonLatin, _addShowMoreBtn, books, refineEl, _page, _olQuery, _gbQuery, _hasNonLatin, _seen, _t0, _t1;
     return _regenerator().w(function (_context4) {
       while (1) switch (_context4.p = _context4.n) {
         case 0:
@@ -1591,33 +1593,16 @@ function _searchBooks() {
           statusEl.className = 'status-msg';
           statusEl.style.display = 'block';
           _context4.p = 2;
-          isbnUrl = 'https://openlibrary.org/api/books?bibkeys=ISBN:' + isbnClean + '&format=json&jscmd=data';
-          _context4.n = 3;
-          return fetch(isbnUrl);
-        case 3:
-          res = _context4.v;
           _context4.n = 4;
-          return res.json();
+          return lookupISBN(isbnClean);
         case 4:
-          data = _context4.v;
-          key = 'ISBN:' + isbnClean;
-          if (data[key]) {
-            b = data[key];
-            book = {
-              title: b.title || 'Unknown title',
-              author: (b.authors || [{
-                name: 'Unknown author'
-              }])[0].name,
-              year: b.publish_date ? b.publish_date.slice(-4) : '',
-              key: '',
-              source: 'Open Library (ISBN)',
-              thumb: b.cover ? b.cover.small || '' : ''
-            };
+          book = _context4.v;
+          if (book) {
             statusEl.style.display = 'none';
             el = document.createElement('div');
             el.className = 'book-result';
             th = book.thumb ? '<img class="book-cover-thumb" src="' + esc(book.thumb) + '" alt="" loading="lazy">' : '';
-            el.innerHTML = '<div class="book-result-inner">' + th + '<div class="book-result-text"><div class="book-result-title">' + esc(book.title) + '</div><div class="book-result-author">' + esc(book.author) + '</div><div class="book-result-meta">' + (book.year || '') + (book.year ? ' · ' : '') + esc(book.source) + '</div></div></div>' + '<div class="book-result-actions"><button class="book-discover-btn">Is this for me?</button></div>';
+            el.innerHTML = '<div class="book-result-inner">' + th + '<div class="book-result-text"><div class="book-result-title">' + esc(book.title) + '</div><div class="book-result-author">' + esc(book.author) + '</div><div class="book-result-meta">' + (book.year || '') + (book.year ? ' · ' : '') + esc(book.source) + '</div></div></div>' + '<div class="book-result-actions"><button class="book-discover-btn">' + esc(t('js.is_this_for_me')) + '</button></div>';
             el.querySelector('.book-result-inner').addEventListener('click', function () {
               return selectBookWithAgeCheck(book);
             });
@@ -1884,6 +1869,49 @@ function _fetchOpenLibrary() {
     }, _callee5);
   }));
   return _fetchOpenLibrary.apply(this, arguments);
+}
+// ISBN lookup. Google Books first, Open Library second.
+//
+// This used to query Open Library ALONE, which is why recent titles came back
+// "ISBN not found" even though the same book was findable by title — Open
+// Library's ISBN coverage of new editions is much thinner than Google Books'.
+// Going through /api/books also means the authenticated key (no anonymous
+// quota) and richer records: categories (which the age gate reads), the
+// description, and page count, none of which the Open Library path returns.
+// Resolves to a book object, or null when neither source has it.
+function lookupISBN(isbn) {
+  return fetchGoogleBooks('isbn:' + isbn, 5, 0).then(function (books) {
+    if (books && books.length) return books[0];
+    return fetchOpenLibraryISBN(isbn);
+  })['catch'](function () {
+    return fetchOpenLibraryISBN(isbn);
+  });
+}
+function fetchOpenLibraryISBN(isbn) {
+  var url = 'https://openlibrary.org/api/books?bibkeys=ISBN:' + isbn + '&format=json&jscmd=data';
+  return fetch(url).then(function (r) {
+    return r.json();
+  }).then(function (data) {
+    var b = data && data['ISBN:' + isbn];
+    if (!b) return null;
+    return {
+      title: b.title || t('js.unknown_title'),
+      author: (b.authors || [{
+        name: t('js.unknown_author')
+      }])[0].name,
+      year: b.publish_date ? b.publish_date.slice(-4) : '',
+      key: '',
+      source: 'Open Library (ISBN)',
+      thumb: b.cover ? b.cover.small || '' : '',
+      // Open Library gives us no categories, so the age gate cannot judge
+      // these; treated as unclassified rather than as safe.
+      cats: '',
+      description: '',
+      pageCount: b.number_of_pages || 0
+    };
+  })['catch'](function () {
+    return null;
+  });
 }
 function fetchGoogleBooksWithFallback(bareQuery, intitleQuery) {
   return fetchGoogleBooks(bareQuery, 8, 0).then(function (books) {
