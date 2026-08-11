@@ -1,13 +1,47 @@
 # Page Commons — Current Status
 
 Last updated: August 11, 2026
-Current version: v0.62
-Updated by: Claude session — v0.42–v0.62: nav/UI polish, shelf archiving,
+Current version: v0.63
+Updated by: Claude session — v0.42–v0.63: nav/UI polish, shelf archiving,
 private-repo bug-fix ports (v0.53–v0.55), affiliate removal (v0.56),
 interface i18n + Traditional Chinese (v0.57–v0.58), ISBN lookup fix
-(v0.59), companion personas (v0.60–v0.61), runtime i18n coverage (v0.62)
+(v0.59), companion personas (v0.60–v0.61), runtime i18n coverage (v0.62), cross-book leak fix (v0.63)
 
-## What was done this session [v0.42 → v0.62]
+## What was done this session [v0.42 → v0.63]
+
+### v0.63 — Cross-book conversation leak
+Reported as a question, not a bug: the companion referred back to a book
+discussed earlier, and the reader liked it — was it designed? It was not.
+
+- **Cause.** `STATE.messages` is the live chat buffer and belongs to one
+  book, but only two of the four entry paths cleared it.
+  `showBookDetail()` and `openBookShelf()` set `STATE.book` without
+  touching the buffer, and `setReadingStatus()` then called
+  `launchCompanion()` with the previous book's conversation still in it.
+  Clean: search-result click (`selectBook`), "Is this for me?"
+  (`discoverBook`). Leaking: book detail → status, shelf → Update status.
+- **Consequences.** The old conversation went to the model as history
+  under the new book's system prompt (hence the continuity), it was
+  **written into the new book's saved conversation** on the shelf, it
+  carried spoilers across books whose spoiler rules are per-book, and on
+  BYOK it billed up to 20 unrelated turns per call.
+- **Fix.** `ensureMessagesBelongTo(book)` at the top of
+  `launchCompanion()` — the chokepoint every chat passes through — clears
+  the buffer when its owning book changes. `STATE.messagesBookKey` tracks
+  the owner. Guarding centrally rather than patching the two callers means
+  a future entry point cannot silently reintroduce it.
+  `continueConversation()` loads a stored conversation without going
+  through `launchCompanion`, so it stamps the owner itself.
+- **+4 regression tests (54 total)**, covering both leaking paths, that a
+  leaked conversation is never saved into another book's history, and that
+  continuing a saved conversation still keeps its own messages. Verified
+  by removing the guard and watching three of them fail.
+- **Follow-up logged in PENDING.md:** the reader liked the effect, so
+  designed cross-book continuity is proposed there — a compact shelf
+  digest (titles/authors/status), never another book's transcript, capped
+  and behind a preference. Includes an open question for the founder on
+  whether the companion should know only what is on the shelf or also a
+  summary of what was said about it.
 
 ### v0.62 — Every remaining untranslated surface, + persona weighting
 Four items reported in testing, all fixed, plus the test that makes the

@@ -17,6 +17,35 @@
 - [ ] Decide whether to wire exportConversationToDrive() into the toolbar
       Export button (currently still does local .md download)
 
+## Proposed feature — cross-book continuity (designed, not accidental)
+
+Found while investigating the v0.63 leak. A reader noticed the companion
+referring back to a book discussed earlier and *liked* it — it felt like a
+real companion who remembers what you've been reading. That behaviour was
+a bug (another book's raw conversation was sitting in the message buffer)
+and has been fixed, but the effect is worth building properly.
+
+What NOT to do: resend another book's conversation as chat history. That
+is what leaked — it is expensive (up to 20 unrelated turns per call),
+carries spoilers across books, and corrupts the saved conversation.
+
+Suggested design:
+- Pass a compact **shelf digest** in the system prompt: titles, authors and
+  reading status for books on the shelf, plus perhaps the last few
+  discussed. A few hundred characters, not a transcript.
+- Never include other books' conversation text, notes or highlights —
+  spoiler rules are per-book and cannot be enforced across them.
+- Put it behind a preference (default on?), since some readers will want
+  each book kept sealed. Privacy-wise it stays local: the digest is built
+  from localStorage and sent only to the user's chosen AI provider.
+- Consider capping it (e.g. 10 most recent books) so the prompt cannot
+  grow without bound as the shelf fills up.
+
+Open question for the founder: should the companion know only *what* is on
+the shelf, or also *what was said* about those books in summary form? The
+first is cheap and safe; the second is richer but needs per-book summaries
+generated and stored somewhere.
+
 ## Known concerns — keep in view
 
 ### Shared-pool response quality — resolved in v0.37 ✓

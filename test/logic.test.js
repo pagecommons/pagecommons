@@ -361,3 +361,79 @@ test('no persona is allowed to stack multiple questions in one reply', async fun
   assert.match(app.window.buildSystemPrompt(), /Never ask more than one question/,
     'discover mode may stack questions');
 });
+
+// ─── Cross-book conversation leakage ────────────────────────────────────────
+// Reported: starting a chat about one book, then opening another, made the
+// companion contrast the two. The system prompt was correct for the new book,
+// but STATE.messages still held the previous book's conversation — so it went
+// to the model as history AND was written into the new book's saved
+// conversation. Two of the four entry paths bypassed the message reset.
+
+var BOOK_A = { title: '碧血劍', author: '金庸' };
+var BOOK_B = { title: '連城訣', author: '金庸' };
+
+function seedConversationAbout(app, book) {
+  app.window.STATE.book = book;
+  app.window.STATE.companionMode = 'reading';
+  app.window.STATE.readingStatus = 'midway';
+  app.window.STATE.currentConvId = 'conv_seed';
+  app.window.STATE.currentConvName = null;
+  app.window.STATE.messages = [
+    { role: 'user', content: 'A-USER-TURN' },
+    { role: 'assistant', content: 'A-REPLY' }
+  ];
+  // every real path into a chat stamps the buffer's owner
+  app.window.STATE.messagesBookKey = app.window.bookKey(book);
+}
+
+test('book detail then status does not carry the previous book\'s conversation', async function () {
+  var app = await boot({ seed: SEED });
+  seedConversationAbout(app, BOOK_A);
+  app.window.showBookDetail(BOOK_B);
+  await app.window.setReadingStatus('started');
+  assert.strictEqual(app.window.STATE.messages.length, 0,
+    'the previous book\'s turns leaked into the new chat');
+  assert.strictEqual(app.window.STATE.messagesBookKey, app.window.bookKey(BOOK_B));
+});
+
+test('shelf then Update status does not carry the previous conversation', async function () {
+  var app = await boot({ seed: SEED });
+  seedConversationAbout(app, BOOK_A);
+  app.window.openBookShelf(BOOK_B);
+  app.window.updateBookStatus();
+  await app.window.setReadingStatus('midway');
+  assert.strictEqual(app.window.STATE.messages.length, 0,
+    'the previous book\'s turns leaked in via the shelf');
+});
+
+test('a leaked conversation is never written into another book\'s history', async function () {
+  var app = await boot({ seed: SEED });
+  seedConversationAbout(app, BOOK_A);
+  app.window.showBookDetail(BOOK_B);
+  await app.window.setReadingStatus('started');
+  app.window.STATE.messages.push({ role: 'user', content: 'B-OWN-TURN' });
+  app.window.saveCurrentConversation();
+  var convs = JSON.parse(app.localStorage.getItem('pc_convs_' + app.window.bookKey(BOOK_B)) || '[]');
+  var saved = convs.length ? convs[0].messages.map(function (m) { return m.content; }) : [];
+  assert.deepStrictEqual(saved, ['B-OWN-TURN'],
+    'another book\'s turns were saved into this book: ' + saved.join(' | '));
+});
+
+test('continuing a saved conversation keeps its own messages', async function () {
+  var app = await boot({ seed: SEED });
+  // store a conversation against book B, then continue it
+  app.window.STATE.book = BOOK_B;
+  app.window.STATE.companionMode = 'reading';
+  app.window.STATE.currentConvId = 'conv_keep';
+  app.window.STATE.messages = [{ role: 'user', content: 'B-SAVED-TURN' }];
+  app.window.STATE.messagesBookKey = app.window.bookKey(BOOK_B);
+  app.window.saveCurrentConversation();
+
+  // arrive from a different book, then continue B's conversation
+  seedConversationAbout(app, BOOK_A);
+  app.window.STATE.book = BOOK_B;
+  await app.window.continueConversation('conv_keep');
+  var contents = app.window.STATE.messages.map(function (m) { return m.content; });
+  assert.ok(contents.indexOf('B-SAVED-TURN') !== -1, 'the saved conversation was lost');
+  assert.ok(contents.indexOf('A-USER-TURN') === -1, 'the other book\'s turns came along');
+});

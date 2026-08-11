@@ -180,6 +180,36 @@ Persona resolution (getPersonaId):
   → 'companion'
 Unknown/absent values fall back safely.
 
+## ONE BOOK PER CONVERSATION
+STATE.messages holds the live chat and
+belongs to exactly ONE book, tracked by
+STATE.messagesBookKey.
+
+ensureMessagesBelongTo(book) runs at the
+top of launchCompanion() — the chokepoint
+every chat passes through — and clears
+the buffer when the owning book changes.
+Guard there, never in individual callers:
+two paths (book detail → status, shelf →
+Update status) set STATE.book without
+clearing messages, and the previous
+book's conversation was then sent as
+history under the new book's prompt AND
+saved into the new book's history.
+
+continueConversation() loads a stored
+conversation without calling
+launchCompanion, so it stamps
+messagesBookKey itself. Any future path
+that sets STATE.messages directly must
+do the same.
+
+There is deliberately NO cross-book
+memory: the system prompt describes only
+the current book. A designed version of
+that (a compact shelf digest, never raw
+transcripts) is proposed in PENDING.md.
+
 ## INTERFACE LANGUAGE (i18n)
 Interface text lives in UI_STRINGS
 (app.js), keyed by screen:
@@ -330,7 +360,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.62 — Runtime translation coverage + persona weighting. Fixes every remaining untranslated surface found in testing: status-screen options (JS rebuilt them from STATUS_OPTIONS_EN, discarding the markup's data-i18n), the manual-entry form, "About this book", "No notes yet", the clippings confirm, and three input placeholders whose attributes wrapped across lines. Persona closings are now RESTATED as the final line of the system prompt — they previously sat 19% in and were ignored by the free tier's flash-lite model. Companion and Kindred voices sharpened so they stop converging. New runtime test renders each screen in Chinese and fails on surviving English prose; it catches the whole "JS rebuilds annotated markup" class that three separate static tests missed. +3 tests (50 total).
+v0.63 — Cross-book conversation leak fixed. Two of the four paths into a chat (book detail → status, shelf → Update status) left the previous book's conversation in STATE.messages, so it was sent to the model as history under the new book's system prompt AND written into the new book's saved conversation. New ensureMessagesBelongTo() guard at launchCompanion() — the chokepoint every chat passes through — clears the buffer when its owning book changes; STATE.messagesBookKey tracks the owner. +4 regression tests (54 total), verified failing without the guard. Designed cross-book continuity is now a proposal in PENDING.md.
+
+Earlier (v0.62): Runtime translation coverage + persona weighting. Fixes every remaining untranslated surface found in testing: status-screen options (JS rebuilt them from STATUS_OPTIONS_EN, discarding the markup's data-i18n), the manual-entry form, "About this book", "No notes yet", the clippings confirm, and three input placeholders whose attributes wrapped across lines. Persona closings are now RESTATED as the final line of the system prompt — they previously sat 19% in and were ignored by the free tier's flash-lite model. Companion and Kindred voices sharpened so they stop converging. New runtime test renders each screen in Chinese and fails on surviving English prose; it catches the whole "JS rebuilds annotated markup" class that three separate static tests missed. +3 tests (50 total).
 
 Earlier (v0.61): Persona closings rewritten as instructions, not permissions. Kindred shipped with "sometimes a question, sometimes room to say more", which models read as permission and so asked every time — the exact behaviour personas exist to avoid. Guide had the same weakness. Both now carry an explicit "Do not end with a question by default". New shared rule: never more than one question per reply (the reported case stacked two). Also fixes a false positive in the Kobo-syntax test, which scanned string literals and tripped on the word "let" inside prose. +2 tests (47 total).
 

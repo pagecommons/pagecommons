@@ -188,6 +188,9 @@ var STATE = {
   companionMode: 'reading',
   // 'reading' | 'discover'
   book: null,
+  // bookKey the live message buffer belongs to. Guards against one book's
+  // conversation being carried into another — see ensureMessagesBelongTo().
+  messagesBookKey: null,
   readingStatus: null,
   // 'considering' | 'started' | 'midway' | 'finished'
   chatLanguage: 'english',
@@ -2740,7 +2743,25 @@ function getCompanionLang() {
   // It no longer auto-follows the book's detected language.
   return STATE.companionLangOverride || 'English';
 }
+// The live message buffer belongs to exactly one book. Two paths reach a chat
+// without passing through selectBook/discoverBook — book detail → status, and
+// shelf → Update status — and they used to leave the previous book's
+// conversation in STATE.messages. It was then sent to the model as history
+// under the NEW book's system prompt, and saved into the new book's stored
+// conversation. Guarding at this chokepoint, rather than in each caller, means
+// a future entry point cannot quietly reintroduce the same leak.
+function ensureMessagesBelongTo(book) {
+  if (!book) return;
+  var key = bookKey(book);
+  if (STATE.messagesBookKey !== key && STATE.messages && STATE.messages.length) {
+    STATE.messages = [];
+    STATE.currentConvId = null;
+    STATE.currentConvName = null;
+  }
+  STATE.messagesBookKey = key;
+}
 function launchCompanion(book) {
+  ensureMessagesBelongTo(book);
   // assign conversation ID if not set
   if (!STATE.currentConvId) {
     STATE.currentConvId = 'conv_' + Date.now();
@@ -4505,6 +4526,11 @@ function _continueConversation() {
           STATE.chatLanguage = localStorage.getItem('pc_lang_' + bk) || 'english';
           STATE.detectedLang = STATE.book.detectedLang || detectLanguage(STATE.book);
           STATE.messages = conv.messages || [];
+          // This path navigates straight to the chat without calling
+          // launchCompanion, so it claims the buffer itself — otherwise the
+          // guard would later see a stale owner and wipe the restored
+          // conversation.
+          STATE.messagesBookKey = bookKey(STATE.book);
           STATE.currentConvId = conv.id;
           STATE.currentConvName = conv.name;
           if (!(STATE.chatLanguage === 'native' && STATE.detectedLang)) {
