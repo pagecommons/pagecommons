@@ -67,9 +67,18 @@ test('app.transpiled.js has no Kobo-fatal modern syntax', function () {
     // guarantee. (Raw backticks survive only inside regex/strings, e.g. the
     // markdown code-fence stripper, which would be false positives.)
   ];
+  // Scan CODE only. String literals hold English prose (system prompts), and
+  // an ordinary sentence can contain "let ", "const " or "?." without being
+  // syntax at all — a Kindred persona line reading "better to let your last
+  // sentence rest" tripped the const/let rule. Blank out string bodies first.
+  var code = transpiled
+    .replace(/'(?:[^'\\\n]|\\.)*'/g, "''")
+    .replace(/"(?:[^"\\\n]|\\.)*"/g, '""')
+    .replace(/\/\/[^\n]*/g, '');
+
   var hits = [];
   forbidden.forEach(function (f) {
-    if (f.re.test(transpiled)) hits.push(f.name);
+    if (f.re.test(code)) hits.push(f.name);
   });
   assert.deepStrictEqual(hits, [], 'Kobo-fatal syntax found in app.transpiled.js: ' + hits.join(', '));
 });

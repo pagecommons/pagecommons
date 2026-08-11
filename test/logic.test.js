@@ -324,3 +324,40 @@ test('every persona has a translated label and description', async function () {
     assert.ok(tables.en[desc] && tables['zh-TW'][desc], 'missing description for ' + ids[i]);
   }
 });
+
+test('non-default personas state the no-question rule as an instruction, not a permission', async function () {
+  var app = await boot({ seed: SEED });
+  withBook(app);
+  // Kindred first shipped with "sometimes a question, sometimes room to say
+  // more". Models read that as permission and asked every time, which is the
+  // opposite of the point. Every persona that is meant to hold back must say
+  // so with an explicit negative.
+  var quiet = ['guide', 'direct', 'kindred'];
+  for (var i = 0; i < quiet.length; i++) {
+    app.window.saveDefaultPersona(quiet[i]);
+    var p = app.window.buildSystemPrompt();
+    assert.match(p, /Do not end (every turn |with a question)/,
+      quiet[i] + ' must instruct against closing questions, not merely permit them');
+    assert.doesNotMatch(p, /sometimes a question/,
+      quiet[i] + ' reverted to permissive phrasing');
+    assert.doesNotMatch(p, /Always end with a question/,
+      quiet[i] + ' still carries the Companion closing');
+  }
+  // The default is unaffected — it is supposed to ask.
+  app.window.saveDefaultPersona('companion');
+  assert.match(app.window.buildSystemPrompt(), /Always end with a question/);
+});
+
+test('no persona is allowed to stack multiple questions in one reply', async function () {
+  var app = await boot({ seed: SEED });
+  withBook(app);
+  var ids = ['companion', 'guide', 'direct', 'kindred'];
+  for (var i = 0; i < ids.length; i++) {
+    app.window.saveDefaultPersona(ids[i]);
+    assert.match(app.window.buildSystemPrompt(), /Never ask more than one question/,
+      ids[i] + ' may stack questions');
+  }
+  app.window.STATE.companionMode = 'discover';
+  assert.match(app.window.buildSystemPrompt(), /Never ask more than one question/,
+    'discover mode may stack questions');
+});

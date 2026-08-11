@@ -1,12 +1,39 @@
 # Page Commons — Current Status
 
-Last updated: July 6, 2026
-Current version: v0.57
-Updated by: Claude session — v0.42–v0.57: nav/UI polish, shelf archiving,
+Last updated: August 11, 2026
+Current version: v0.61
+Updated by: Claude session — v0.42–v0.61: nav/UI polish, shelf archiving,
 private-repo bug-fix ports (v0.53–v0.55), affiliate removal (v0.56),
-interface i18n + Traditional Chinese (v0.57)
+interface i18n + Traditional Chinese (v0.57–v0.58), ISBN lookup fix
+(v0.59), companion personas (v0.60–v0.61)
 
-## What was done this session [v0.42 → v0.57]
+## What was done this session [v0.42 → v0.61]
+
+### v0.61 — Persona closings rewritten as instructions
+Reported: Kindred still ended every reply with a question (two, in the
+example given). Verified it was not a plumbing bug — the persona resolved
+correctly and reached the prompt. The wording was the fault.
+
+- **Cause.** Kindred's closing read "End with warmth — sometimes a
+  question, sometimes simply room for them to say more." Models default
+  strongly to closing on a question, so a permissive phrasing is read as
+  consent and they ask every time. Guide had the same weakness ("only
+  when it genuinely helps" — the model judges that it always helps).
+  Only Direct was phrased as a real constraint, which is why only Direct
+  behaved.
+- **Fix.** Guide and Kindred now open with an explicit "Do not end every
+  turn with a question" / "Do not end with a question by default".
+  Companion is untouched — it is supposed to ask.
+- **New shared rule:** never more than one question per reply. The
+  reported example stacked two, which no persona should do.
+- **Test added** asserting the distinction structurally: every non-default
+  persona must contain an explicit negative and must not contain
+  "sometimes a question"; Companion must keep "Always end with a
+  question". Wording drift back to permissive phrasing now fails CI.
+- **Also fixed:** the Kobo-syntax build test scanned string literals, so
+  the word "let" inside the new prose ("better to let your last sentence
+  rest") registered as a `let` declaration. It now blanks string bodies
+  before scanning — verified it still catches a genuine injected `const`.
 
 ### v0.60 — Companion personas
 Reported: the companion throws a question back on every turn, which is

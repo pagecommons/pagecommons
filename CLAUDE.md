@@ -156,6 +156,18 @@ app.js) — each supplies a `voice` and a
 - kindred — quietly present for books
   that land emotionally; not a therapist
 
+WRITING A `closing`: phrase it as an
+instruction, never a permission. Models
+default to ending on a question, so
+"sometimes a question" reads as consent
+and they ask every time — this is what
+made Kindred behave like Companion in
+v0.60. Any persona meant to hold back
+must say "Do not end with a question..."
+explicitly. A test enforces this.
+No persona may stack two questions in
+one reply.
+
 "Always ends with a question" was a
 blanket rule until v0.60. It is now
 persona-dependent: it made the companion
@@ -302,7 +314,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.60 — Companion personas. One voice did not fit every use case: the default always asks something back, which works against a reader using "Find out if it's for me" who simply wants to know what a book is like. Four voices — Companion (default, unchanged behaviour), Guide, Direct, Kindred — each supplying a `voice` and a `closing`; all other prompt rules stay shared. Global default in Preferences plus a per-book override via a new Voice button in the chat toolbar. Discover mode no longer demands a taste question before saying anything useful. Also fixes a v0.57 regression where the language panel's active highlight compared translated button text against English values. +7 tests (45 total).
+v0.61 — Persona closings rewritten as instructions, not permissions. Kindred shipped with "sometimes a question, sometimes room to say more", which models read as permission and so asked every time — the exact behaviour personas exist to avoid. Guide had the same weakness. Both now carry an explicit "Do not end with a question by default". New shared rule: never more than one question per reply (the reported case stacked two). Also fixes a false positive in the Kobo-syntax test, which scanned string literals and tripped on the word "let" inside prose. +2 tests (47 total).
+
+Earlier (v0.60): Companion personas. One voice did not fit every use case: the default always asks something back, which works against a reader using "Find out if it's for me" who simply wants to know what a book is like. Four voices — Companion (default, unchanged behaviour), Guide, Direct, Kindred — each supplying a `voice` and a `closing`; all other prompt rules stay shared. Global default in Preferences plus a per-book override via a new Voice button in the chat toolbar. Discover mode no longer demands a taste question before saying anything useful. Also fixes a v0.57 regression where the language panel's active highlight compared translated button text against English values. +7 tests (45 total).
 
 Earlier (v0.59): ISBN lookup fixed: it queried Open Library ALONE, so recent titles returned "ISBN not found" even when Google Books had them (reported against 9781804953334). New lookupISBN() tries Google Books first via the authenticated /api/books proxy, keeping Open Library as fallback. Google Books also returns the categories the age gate reads, plus description and page count, which the Open Library path never provided. +5 regression tests (38 total). Also fixed "Is this for me?" on ISBN results, which was embedded in an innerHTML string and missed by the v0.58 sweep.
 
