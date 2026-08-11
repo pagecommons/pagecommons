@@ -214,7 +214,23 @@ data-i18n-html on the PARENT with the
 markup inside the translation. Tagging
 only the inner <strong> leaves the
 surrounding text in English — this is
-what shipped broken in v0.57.
+what shipped broken in v0.57. The same
+applies to a wrapped placeholder= — the
+attribute must be on the same construct
+you annotate.
+
+MARKUP REBUILT IN JS: if a function does
+container.innerHTML = ... it destroys the
+data-i18n attributes underneath, and
+applyLanguage() can never reach them
+again. Such code MUST build its text from
+t(), not from an English constant. This
+was the bug behind the status options,
+the manual-entry form and the toolbar
+counts. Static scans cannot see it —
+the runtime test ("no English prose
+survives on the core screens in Chinese")
+is what catches it.
 
 NEVER translate: the brand "Page
 Commons", provider names (Anthropic
@@ -314,7 +330,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.61 — Persona closings rewritten as instructions, not permissions. Kindred shipped with "sometimes a question, sometimes room to say more", which models read as permission and so asked every time — the exact behaviour personas exist to avoid. Guide had the same weakness. Both now carry an explicit "Do not end with a question by default". New shared rule: never more than one question per reply (the reported case stacked two). Also fixes a false positive in the Kobo-syntax test, which scanned string literals and tripped on the word "let" inside prose. +2 tests (47 total).
+v0.62 — Runtime translation coverage + persona weighting. Fixes every remaining untranslated surface found in testing: status-screen options (JS rebuilt them from STATUS_OPTIONS_EN, discarding the markup's data-i18n), the manual-entry form, "About this book", "No notes yet", the clippings confirm, and three input placeholders whose attributes wrapped across lines. Persona closings are now RESTATED as the final line of the system prompt — they previously sat 19% in and were ignored by the free tier's flash-lite model. Companion and Kindred voices sharpened so they stop converging. New runtime test renders each screen in Chinese and fails on surviving English prose; it catches the whole "JS rebuilds annotated markup" class that three separate static tests missed. +3 tests (50 total).
+
+Earlier (v0.61): Persona closings rewritten as instructions, not permissions. Kindred shipped with "sometimes a question, sometimes room to say more", which models read as permission and so asked every time — the exact behaviour personas exist to avoid. Guide had the same weakness. Both now carry an explicit "Do not end with a question by default". New shared rule: never more than one question per reply (the reported case stacked two). Also fixes a false positive in the Kobo-syntax test, which scanned string literals and tripped on the word "let" inside prose. +2 tests (47 total).
 
 Earlier (v0.60): Companion personas. One voice did not fit every use case: the default always asks something back, which works against a reader using "Find out if it's for me" who simply wants to know what a book is like. Four voices — Companion (default, unchanged behaviour), Guide, Direct, Kindred — each supplying a `voice` and a `closing`; all other prompt rules stay shared. Global default in Preferences plus a per-book override via a new Voice button in the chat toolbar. Discover mode no longer demands a taste question before saying anything useful. Also fixes a v0.57 regression where the language panel's active highlight compared translated button text against English values. +7 tests (45 total).
 

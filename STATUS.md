@@ -1,13 +1,57 @@
 # Page Commons — Current Status
 
 Last updated: August 11, 2026
-Current version: v0.61
-Updated by: Claude session — v0.42–v0.61: nav/UI polish, shelf archiving,
+Current version: v0.62
+Updated by: Claude session — v0.42–v0.62: nav/UI polish, shelf archiving,
 private-repo bug-fix ports (v0.53–v0.55), affiliate removal (v0.56),
 interface i18n + Traditional Chinese (v0.57–v0.58), ISBN lookup fix
-(v0.59), companion personas (v0.60–v0.61)
+(v0.59), companion personas (v0.60–v0.61), runtime i18n coverage (v0.62)
 
-## What was done this session [v0.42 → v0.61]
+## What was done this session [v0.42 → v0.62]
+
+### v0.62 — Every remaining untranslated surface, + persona weighting
+Four items reported in testing, all fixed, plus the test that makes the
+whole class visible.
+
+**1. Status screen options.** `renderStatusScreen()` did
+`container.innerHTML = ''` and rebuilt the buttons from
+`STATUS_OPTIONS_EN`, discarding the markup's data-i18n attributes. The
+only translation path was gated on companion-language + BYOK, so it never
+fired for a Chinese interface with the default English companion. Options
+now come from the string table via `statusOptionsFromTable()`; the AI
+translation path is kept only for companion languages the table has no
+entry for (interface English + non-English companion + BYOK).
+
+**2. Three input placeholders** — `e.g. Middlemarch…`, `e.g. Austen…`,
+`Write your message…`. Their attributes wrap across lines and the
+line-based annotator could not see them.
+
+**3. English embedded in built HTML** — the whole `renderManualEntry()`
+form (9 strings + the language dropdown), "About this book ▾",
+"No notes yet.", and the clippings confirm. Same class as the v0.59
+"Is this for me?" miss: English inside a larger innerHTML template.
+
+**4. Persona closing was structurally under-weighted.** Measured: the
+instruction sat at 19% of a 2,594-char prompt, with the final — highest
+attention — position spent on [RECOMMEND] formatting. The free tier's
+`gemini-3.1-flash-lite` (thinkingBudget 0) ignored it 3 times in 4. The
+active persona's closing is now RESTATED as the last line of both the
+reading and discovery prompts, with "this instruction outranks any habit
+you have of closing with a question". Companion needs no such help
+because its instruction agrees with the model's prior; only the negative
+personas did.
+Companion and Kindred voices were also sharpened — both previously read
+as "a warm friend who reads", which is why 知音 sounded like 書伴.
+Kindred is now explicitly soft-spoken, stays with the feeling, and is
+told not to hurry on to literary analysis; Companion is now explicitly
+curious about the text and its craft.
+
+**The test that closes the class.** Three separate static tests missed
+these because static scans cannot see what JS builds at runtime. New test
+renders every core screen in Chinese and fails on any surviving English
+prose (brand names allowed; anything containing CJK counts as
+translated). Verified by reverting the status fix and watching it fail
+with the exact original symptom. Tests 47 → 50.
 
 ### v0.61 — Persona closings rewritten as instructions
 Reported: Kindred still ended every reply with a question (two, in the

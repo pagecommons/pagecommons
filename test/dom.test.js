@@ -213,3 +213,87 @@ test('companion header nav is present and toolbar has End Chat', async function 
   var toolbar = app.document.getElementById('reader-toolbar');
   assert.ok(toolbar && /End Chat/.test(toolbar.textContent), 'toolbar should contain End Chat button');
 });
+
+// ─── Runtime translation coverage ───────────────────────────────────────────
+// The static markup scan above cannot see what JS builds at runtime. Three
+// separate reports (toolbar counts, status options, the manual-entry form) were
+// all the same bug: JS rebuilds a container and discards its data-i18n
+// annotations. This renders each screen in Chinese and asserts no English
+// prose survives on the visible DOM — the only check that catches that class.
+
+// Latin words that are legitimately English on a Chinese screen.
+var ALLOWED_TERMS = [
+  'Page Commons', 'Anthropic Claude', 'Google Gemini', 'Google Drive',
+  'Google Books', 'Open Library', 'My Clippings.txt', 'Goodreads',
+  'Ko-fi', 'GitHub', 'Groq', 'Claude', 'Gemini', 'Kindle', 'Kobo',
+  'Markdown', 'API', 'ISBN'
+];
+
+// A string is untranslated only if, once brand and product names are removed,
+// it still reads as latin prose and carries no CJK at all. Translated copy
+// routinely embeds "Page Commons" or "Google Drive" and must not be flagged.
+function isEnglishProse(text) {
+  if (!text) return false;
+  var t = String(text).replace(/\s+/g, ' ').trim();
+  if (!t) return false;
+  var stripped = t;
+  ALLOWED_TERMS.forEach(function (term) {
+    stripped = stripped.split(term).join(' ');
+  });
+  if (/[\u4e00-\u9fff]/.test(stripped)) return false;   // has CJK -> translated
+  return /[A-Za-z]{2,}\s+[A-Za-z]{2,}/.test(stripped);
+}
+
+function englishLeftOn(app, rootSelector) {
+  var root = app.document.querySelector(rootSelector);
+  if (!root) return [];
+  var found = [];
+  // Any run of 2+ latin words is prose, not a product name or a code.
+  var walk = function (el) {
+    for (var i = 0; i < el.childNodes.length; i++) {
+      var n = el.childNodes[i];
+      if (n.nodeType === 3) {
+        var txt = (n.nodeValue || '').replace(/\s+/g, ' ').trim();
+        if (isEnglishProse(txt)) found.push(txt.slice(0, 60));
+      } else if (n.nodeType === 1) {
+        var ph = n.getAttribute && n.getAttribute('placeholder');
+        if (isEnglishProse(ph)) found.push('[placeholder] ' + String(ph).slice(0, 60));
+        walk(n);
+      }
+    }
+  };
+  walk(root);
+  return found;
+}
+
+test('the status screen renders its options in the interface language', async function () {
+  var app = await boot({ seed: RETURNING });
+  app.window.setUILang('zh-TW');
+  app.window.STATE.book = { title: '測試書', author: '作者' };
+  await app.window.renderStatusScreen(app.window.STATE.book);
+  var left = englishLeftOn(app, '#screen-status .status-options');
+  assert.strictEqual(left.length, 0,
+    'status options still in English (JS rebuilds them from STATUS_OPTIONS_EN):\n  ' + left.join('\n  '));
+});
+
+test('the manual-entry form renders in the interface language', async function () {
+  var app = await boot({ seed: RETURNING });
+  app.window.setUILang('zh-TW');
+  var host = app.document.getElementById('search-results');
+  app.window.renderManualEntry('', host);
+  var left = englishLeftOn(app, '#search-results');
+  assert.strictEqual(left.length, 0,
+    'manual-entry form still in English:\n  ' + left.join('\n  '));
+});
+
+test('no English prose survives on the core screens in Chinese', async function () {
+  var app = await boot({ seed: RETURNING });
+  app.window.setUILang('zh-TW');
+  var screens = ['home', 'search', 'shelf', 'about', 'preferences', 'tc', 'key', 'onboarding', 'age-gate'];
+  var problems = [];
+  for (var i = 0; i < screens.length; i++) {
+    var left = englishLeftOn(app, '#screen-' + screens[i]);
+    for (var j = 0; j < left.length; j++) problems.push(screens[i] + ': ' + left[j]);
+  }
+  assert.strictEqual(problems.length, 0, 'untranslated at runtime:\n  ' + problems.join('\n  '));
+});

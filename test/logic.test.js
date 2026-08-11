@@ -296,7 +296,7 @@ test('a per-book voice overrides the global default, and clearing it falls back'
   app.window.saveDefaultPersona('companion');
   app.window.setBookPersona('kindred');
   assert.strictEqual(app.window.getPersonaId(), 'kindred');
-  assert.match(app.window.buildSystemPrompt(), /quietly present/i);
+  assert.match(app.window.buildSystemPrompt(), /soft-spoken/i);
 
   // a different book is unaffected
   withBook(app, { title: 'Another Book', author: 'Someone Else' });

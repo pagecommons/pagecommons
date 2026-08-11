@@ -111,6 +111,27 @@ var UI_LANGS = [
 var UI_DATE_LOCALE = { 'en': 'en-GB', 'zh-TW': 'zh-TW' };
 var UI_STRINGS = {
   'en': {
+    'js.select_books_to_add': 'Select books to add to your shelf:',
+    'js.all_books_on_shelf': 'All books are already on your shelf.',
+    'status.thinking_about_reading': 'Thinking about reading it',
+    'status.help_me_decide': 'Help me decide if it\'s for me',
+    'search.ph_title': 'e.g. Middlemarch, Reacher…',
+    'search.ph_author': 'e.g. Austen, Lee Child…',
+    'companion.ph_write_message': 'Write your message…',
+    'js.not_seeing_your_book': 'Not seeing your book? Enter it manually:',
+    'js.title': 'Title',
+    'js.author': 'Author',
+    'js.language': 'Language',
+    'js.year': 'Year',
+    'js.optional': '(optional)',
+    'js.select_language': 'Select language...',
+    'js.ph_author_name': 'Author name',
+    'js.ph_year_example': 'e.g. 2024',
+    'js.find_this_book': 'Find this book',
+    'js.about_this_book': 'About this book ▾',
+    'js.no_notes_yet': 'No notes yet.',
+    'js.highlights_imported': 'Highlights imported.',
+    'js.add_selected_to_shelf': 'Add selected to shelf',
     'persona.companion.label': 'Companion',
     'persona.companion.desc': 'Warm and curious — asks you something back',
     'persona.guide.label': 'Guide',
@@ -408,6 +429,27 @@ var UI_STRINGS = {
     'tc.your_agreement_is_stored': 'Your agreement is stored locally in your browser only.'
   },
   'zh-TW': {
+    'js.select_books_to_add': '選擇要加入書架的書：',
+    'js.all_books_on_shelf': '所有書籍都已在你的書架上。',
+    'status.thinking_about_reading': '考慮讀這本書',
+    'status.help_me_decide': '幫我看看適不適合我',
+    'search.ph_title': '例如：紅樓夢、金庸…',
+    'search.ph_author': '例如：張愛玲、東野圭吾…',
+    'companion.ph_write_message': '寫下你的訊息…',
+    'js.not_seeing_your_book': '找不到你的書？手動輸入：',
+    'js.title': '書名',
+    'js.author': '作者',
+    'js.language': '語言',
+    'js.year': '出版年份',
+    'js.optional': '（可選）',
+    'js.select_language': '選擇語言…',
+    'js.ph_author_name': '作者姓名',
+    'js.ph_year_example': '例如：2024',
+    'js.find_this_book': '尋找這本書',
+    'js.about_this_book': '關於這本書 ▾',
+    'js.no_notes_yet': '還沒有筆記。',
+    'js.highlights_imported': '標註已匯入。',
+    'js.add_selected_to_shelf': '將所選加入書架',
     'persona.companion.label': '書伴',
     'persona.companion.desc': '溫暖而好奇——每次都會反問你',
     'persona.guide.label': '導讀',
@@ -1398,7 +1440,7 @@ function renderBookBatch(batch, container, insertBefore) {
     var aboutId = 'about-' + Math.random().toString(36).substr(2, 9);
     var hasDesc = book.description && book.description.trim().length > 0;
     var descTrunc = hasDesc ? book.description.substring(0, 300) + (book.description.length > 300 ? '…' : '') : '';
-    var aboutHtml = hasDesc ? '<button class="book-about-toggle" onclick="toggleBookAbout(\'' + aboutId + '\')">About this book ▾</button>' + '<div id="' + aboutId + '" class="book-about-text" style="display:none;padding:10px 16px;font-size:0.85rem;color:#555555;border-top:1px solid #e0e0e0;line-height:1.6">' + esc(descTrunc) + '</div>' : '';
+    var aboutHtml = hasDesc ? '<button class="book-about-toggle" onclick="toggleBookAbout(\'' + aboutId + '\')">' + esc(t('js.about_this_book')) + '</button>' + '<div id="' + aboutId + '" class="book-about-text" style="display:none;padding:10px 16px;font-size:0.85rem;color:#555555;border-top:1px solid #e0e0e0;line-height:1.6">' + esc(descTrunc) + '</div>' : '';
     el.innerHTML = '<div class="book-result-inner">' + th + '<div class="book-result-text">' + '<div class="book-result-title">' + esc(book.title) + '</div>' + '<div class="book-result-author">' + esc(book.author) + '</div>' + '<div class="book-result-meta">' + (book.year ? book.year + ' · ' : '') + esc(book.source || 'Open Library') + '</div>' + '</div></div>' + aboutHtml;
     el.querySelector('.book-result-inner').addEventListener('click', function () {
       return showBookDetail(book);
@@ -1839,11 +1881,15 @@ function renderManualEntry(prefill, container) {
   if (ex) ex.remove();
   var wrap = document.createElement('div');
   wrap.className = 'manual-entry';
-  var langOptions = '<option value="">Select language...</option>';
+  var langOptions = '<option value="">' + esc(t('js.select_language')) + '</option>';
   Object.keys(LANG_NAME_TO_CODE).forEach(function(name) {
-    langOptions += '<option value="' + LANG_NAME_TO_CODE[name] + '">' + name + '</option>';
+    // Language names have their own table entries where we have them; fall
+    // back to the English name for the long tail.
+    var lk = 'common.' + name.toLowerCase().replace(/\s+/g, '_');
+    langOptions += '<option value="' + LANG_NAME_TO_CODE[name] + '">' + esc(t(lk, name)) + '</option>';
   });
-  wrap.innerHTML = '<p style="font-size:0.85rem;color:#777777;margin-bottom:14px">Not seeing your book? Enter it manually:</p>' + '<div class="field"><label>Title</label><input type="text" id="manual-title" /></div>' + '<div class="field"><label>Author <span style="font-weight:normal;text-transform:none">(optional)</span></label><input type="text" id="manual-author" placeholder="Author name" /></div>' + '<div class="field"><label>Language <span style="font-weight:normal;text-transform:none">(optional)</span></label><select id="manual-language">' + langOptions + '</select></div>' + '<div class="field"><label>Year <span style="font-weight:normal;text-transform:none">(optional)</span></label><input type="text" id="manual-year" placeholder="e.g. 2024" /></div>' + '<button class="btn btn-primary" onclick="lookupManualBook()">Find this book</button>';
+  var opt = '<span style="font-weight:normal;text-transform:none">' + esc(t('js.optional')) + '</span>';
+  wrap.innerHTML = '<p style="font-size:0.85rem;color:#777777;margin-bottom:14px">' + esc(t('js.not_seeing_your_book')) + '</p>' + '<div class="field"><label>' + esc(t('js.title')) + '</label><input type="text" id="manual-title" /></div>' + '<div class="field"><label>' + esc(t('js.author')) + ' ' + opt + '</label><input type="text" id="manual-author" placeholder="' + esc(t('js.ph_author_name')) + '" /></div>' + '<div class="field"><label>' + esc(t('js.language')) + ' ' + opt + '</label><select id="manual-language">' + langOptions + '</select></div>' + '<div class="field"><label>' + esc(t('js.year')) + ' ' + opt + '</label><input type="text" id="manual-year" placeholder="' + esc(t('js.ph_year_example')) + '" /></div>' + '<button class="btn btn-primary" onclick="lookupManualBook()">' + esc(t('js.find_this_book')) + '</button>';
   container.appendChild(wrap);
   var ti = document.getElementById('manual-title');
   if (ti) ti.value = prefill || '';
@@ -2051,6 +2097,31 @@ var STATUS_OPTIONS_EN = [{
   label: 'Read before, revisiting',
   sub: 'Coming back with fresh eyes'
 }];
+// The status screen rebuilds its buttons in JS, which throws away the
+// data-i18n attributes in the markup — so the options must come from the
+// string table, not from STATUS_OPTIONS_EN. The English array is kept only
+// as the source for the AI translation path (companion languages the table
+// does not cover) and as the ultimate fallback.
+var STATUS_OPTION_KEYS = {
+  considering: ['status.thinking_about_reading', 'status.help_me_decide'],
+  started: ['status.just_started', 'status.i_m_in_the'],
+  midway: ['status.halfway_through', 'status.getting_into_it'],
+  finished: ['status.just_finished', 'status.ready_to_talk_about'],
+  revisiting: ['status.read_before_revisiting', 'status.coming_back_with_fresh']
+};
+function statusOptionsFromTable() {
+  var out = [];
+  for (var i = 0; i < STATUS_OPTIONS_EN.length; i++) {
+    var o = STATUS_OPTIONS_EN[i];
+    var keys = STATUS_OPTION_KEYS[o.value];
+    out.push({
+      value: o.value,
+      label: keys ? t(keys[0], o.label) : o.label,
+      sub: keys ? t(keys[1], o.sub) : o.sub
+    });
+  }
+  return out;
+}
 function renderStatusScreen(_x5) {
   return _renderStatusScreen.apply(this, arguments);
 } // ═══════════════════════════════════════════════════
@@ -2067,8 +2138,13 @@ function _renderStatusScreen() {
           // the status options match what the companion will speak.
           lang = getCompanionLang();
           chatLang = STATE.chatLanguage;
-          options = STATUS_OPTIONS_EN; // Translate whenever there's a non-English target language and a key
-          if (!(lang && lang !== 'English' && byokActive())) {
+          options = statusOptionsFromTable();
+          // The table already covers the interface language, so only reach for
+          // a live AI translation when the interface is English but the
+          // companion speaks something else — i.e. a language the table has no
+          // entry for. When the interface is already translated, the table
+          // wins and no call is made.
+          if (!(lang && lang !== 'English' && byokActive() && UI_LANG === 'en')) {
             _context9.n = 15;
             break;
           }
@@ -3602,7 +3678,7 @@ function scrollToMessage(el) {
 var PERSONAS = [
   {
     id: 'companion',
-    voice: "You are warm but not gushing. Curious — you always ask something back at the end. You never summarise the plot unprompted. You offer opinions when asked. You are honest about what you don't know. Literary without being academic. You feel like a well-read friend who has also read this book.",
+    voice: "You are warm but not gushing, and above all curious about the book itself — its characters, its craft, why it works the way it does. You have opinions about the text and offer them when asked. You never summarise the plot unprompted. You are honest about what you don't know. Literary without being academic. You feel like a well-read friend who has also read this book and wants to compare notes.",
     closing: 'Always end with a question or an invitation to continue.'
   },
   {
@@ -3617,7 +3693,7 @@ var PERSONAS = [
   },
   {
     id: 'kindred',
-    voice: "You are quietly present with the reader. Books land on people, and you notice when one has — if something in the reading seems to have touched them, name it gently before moving to analysis. You can sit with a feeling instead of resolving it. You are not a therapist and do not perform therapy; you are a friend who reads, and who is not in a hurry.",
+    voice: "You are soft-spoken and personal. Books land on people, and that landing is what interests you — far more than the book's construction. When the reader tells you something, respond to the feeling in it before anything else, and stay there: do not hurry on to literary analysis, and do not treat a feeling as an introduction to a point about the text. Speak plainly and gently, in the second person, about them and their reading rather than about the author's technique. Silence and short replies are fine. You are not a therapist and do not perform therapy — you are the friend someone messages at 1am about a book that got to them.",
     closing: 'Do not end with a question by default. Usually it is better to let your last sentence rest — a reflection, or simply space. Ask something only when the reader has opened a door and a question would be a kindness rather than a prompt to keep talking.'
   }
 ];
@@ -3656,7 +3732,7 @@ function buildDiscoveryPrompt() {
     'Never reveal plot details, spoilers, or endings. Never summarise the story. Keep each response short — this is read on an e-ink screen.\n\n' +
     persona.closing + ' Never ask more than one question in a single reply. Respond in plain prose only. No bullet points. No headers.\n\n' +
     'When you mention a specific book you\'d recommend, format it exactly as: [RECOMMEND: Title by Author].\n\n' +
-    'If there are any signs this reader may be a minor, default to age-appropriate discussion.' + langNote;
+    'If there are any signs this reader may be a minor, default to age-appropriate discussion.' + langNote + '\n\n' + 'HOW TO END EVERY REPLY: ' + persona.closing + ' Never ask more than one question in a single reply. This instruction outranks any habit you have of closing with a question.';
 }
 function buildSystemPrompt() {
   if (STATE.companionMode === 'discover') return buildDiscoveryPrompt();
@@ -3677,7 +3753,7 @@ function buildSystemPrompt() {
   var langNote = (_companionLang && _companionLang !== 'English') ? '\n\nRespond entirely in ' + _companionLang + '. Do not use any other language.' : '';
   var replyLengthNote = STATE.replyLength === 'short' ? "Maximum 2 sentences. Stop after 2 sentences." : STATE.replyLength === 'detailed' ? "You may give fuller, more detailed responses when the topic warrants it." : "Keep responses concise — 2 to 4 short paragraphs maximum.";
   var persona = getPersona();
-  return "You are a reading companion for \"" + book.title + "\" by " + book.author + ".\n\n" + persona.voice + "\n\n" + "Never say \"Great question!\" Keep responses concise — this is read on an e-ink screen. Short paragraphs. " + persona.closing + " Never ask more than one question in a single reply.\n\n" + statusNote + "\n\n" + "If the conversation drifts away from the book, find a gentle bridge back — connect what the reader said to something in the book rather than refusing or redirecting bluntly. You are a reading companion, not a general assistant.\n\n" + "If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.\n\n" + replyLengthNote + "\n\n" + "Be honest about the limits of your knowledge, but calibrate carefully. For well-known books, their central frameworks, famous arguments, and widely documented content are fair to state with confidence — if a book is famous for a specific framework or set of ideas, engage with those ideas directly rather than hedging. Reserve uncertainty for things you genuinely might misremember: exact quotes, minor plot details, precise chapter sequences, secondary characters. In those cases, say so plainly and invite the reader to share what they recall. Never confabulate. CRITICAL: do not escape an unknown by suggesting a different book. Stay with the book the reader is reading.\n\n" + "Respond in plain prose only. No bullet points. No headers. No lists of any kind.\n\n" + "Only suggest another book when the reader explicitly asks for a recommendation. When you do, format it exactly as: [RECOMMEND: Title by Author] — this renders as a tappable search button. Never use this as a way to deflect when you're unsure of the current book.\n\n" + "If there are any signs this reader may be a minor, default to age-appropriate discussion regardless of the book's content rating." + langNote + highlightsText;
+  return "You are a reading companion for \"" + book.title + "\" by " + book.author + ".\n\n" + persona.voice + "\n\n" + "Never say \"Great question!\" Keep responses concise — this is read on an e-ink screen. Short paragraphs. " + persona.closing + " Never ask more than one question in a single reply.\n\n" + statusNote + "\n\n" + "If the conversation drifts away from the book, find a gentle bridge back — connect what the reader said to something in the book rather than refusing or redirecting bluntly. You are a reading companion, not a general assistant.\n\n" + "If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.\n\n" + replyLengthNote + "\n\n" + "Be honest about the limits of your knowledge, but calibrate carefully. For well-known books, their central frameworks, famous arguments, and widely documented content are fair to state with confidence — if a book is famous for a specific framework or set of ideas, engage with those ideas directly rather than hedging. Reserve uncertainty for things you genuinely might misremember: exact quotes, minor plot details, precise chapter sequences, secondary characters. In those cases, say so plainly and invite the reader to share what they recall. Never confabulate. CRITICAL: do not escape an unknown by suggesting a different book. Stay with the book the reader is reading.\n\n" + "Respond in plain prose only. No bullet points. No headers. No lists of any kind.\n\n" + "Only suggest another book when the reader explicitly asks for a recommendation. When you do, format it exactly as: [RECOMMEND: Title by Author] — this renders as a tappable search button. Never use this as a way to deflect when you're unsure of the current book.\n\n" + "If there are any signs this reader may be a minor, default to age-appropriate discussion regardless of the book's content rating." + langNote + highlightsText + "\n\n" + "HOW TO END EVERY REPLY: " + persona.closing + " Never ask more than one question in a single reply. This instruction outranks any habit you have of closing with a question.";
 }
 function callAI() {
   return _callAI.apply(this, arguments);
@@ -4618,7 +4694,7 @@ function renderNotesPanel() {
   if (!list || !STATE.book) return;
   var notes = getNotes(STATE.book);
   if (!notes.length) {
-    list.innerHTML = '<p class="passages-empty">No notes yet.</p>';
+    list.innerHTML = '<p class="passages-empty">' + esc(t('js.no_notes_yet')) + '</p>';
     return;
   }
   list.innerHTML = notes.map(function(n) {
@@ -5635,8 +5711,8 @@ function showDriveClippingsBooksConfirm(highlights) {
     return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  var html = '<p style="margin-top:0;margin-bottom:14px"><strong>Highlights imported.</strong> '
-    + (newCount > 0 ? 'Select books to add to your shelf:' : 'All books are already on your shelf.') + '</p>'
+  var html = '<p style="margin-top:0;margin-bottom:14px"><strong>' + esc(t('js.highlights_imported')) + '</strong> '
+    + esc(newCount > 0 ? t('js.select_books_to_add') : t('js.all_books_on_shelf')) + '</p>'
     + '<div id="clippings-book-list">';
   for (i = 0; i < books.length; i++) {
     var b = books[i];
@@ -5657,7 +5733,7 @@ function showDriveClippingsBooksConfirm(highlights) {
   }
   html += '</div>';
   if (newCount > 0) {
-    html += '<button class="btn btn-primary" style="margin-top:16px;width:100%" onclick="confirmAddDriveBooks()">Add selected to shelf</button>';
+    html += '<button class="btn btn-primary" style="margin-top:16px;width:100%" onclick="confirmAddDriveBooks()">' + esc(t('js.add_selected_to_shelf')) + '</button>';
   }
   html += '<p style="margin-top:10px;font-size:0.8rem;color:#777777">'
     + 'Your highlights inform your companion conversations — no action needed for that.</p>';
