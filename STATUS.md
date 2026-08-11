@@ -8,6 +8,48 @@ interface i18n + Traditional Chinese (v0.57)
 
 ## What was done this session [v0.42 → v0.57]
 
+### v0.60 — Companion personas
+Reported: the companion throws a question back on every turn, which is
+wrong for a reader using "Find out if it's for me" who just wants to know
+what a book is like — and different kinds of book want different kinds of
+conversation.
+
+- **Four voices.** Each persona supplies only two things: a `voice` (who
+  it is) and a `closing` (whether it hands the turn back). Everything
+  else — spoiler rules by reading status, the honesty/no-confabulation
+  rules, plain-prose formatting, [RECOMMEND] — stays shared, so a persona
+  can change the tone without loosening any of the guarantees.
+  - **Companion** (default) — the existing voice, verbatim, still always
+    ends with a question. Nobody who ignores this feature sees a change.
+  - **Guide** — patient explainer: context, themes, structure.
+  - **Direct** — answer first, no padding, explicitly does *not*
+    interrogate. This is the fix for the reported problem.
+  - **Kindred** — quietly present for books that land emotionally;
+    explicitly not a therapist.
+- **Two levels.** Global default in Preferences; per-book override from a
+  new **Voice** button in the chat toolbar, mirroring how the companion
+  language already works (`pc_persona` / `pc_persona_override_<bk>`).
+  Unknown or missing values fall back to Companion.
+- **Discover mode fixed independently.** It used to open with "ask ONE
+  question about their preferences… wait for their answer before
+  describing the book" — so the reader was interrogated before getting
+  anything useful. It now leads with what the book is like and may ask
+  about taste only *after* giving something worth reading. Spoiler rules
+  unchanged.
+- **Also fixed:** a v0.57 regression where the language panel's active
+  highlight compared the button's *translated* text ("英文") against the
+  stored English value, so no language ever highlighted in the Chinese
+  UI. Now matches on a `data-lang` attribute. The "Prompts now in …"
+  toolbar message was also still hardcoded English.
+- **+7 tests (45 total)**, incl. that shared rules survive every persona,
+  that Direct removes the always-ask rule, that discover no longer gates
+  on a taste question, and per-book override precedence. Plus a 26-check
+  browser pass.
+
+**Note on scope:** CLAUDE.md's "AI Companion Design Rules" listed "Always
+ends with question" as a blanket rule. That is now persona-dependent and
+the file has been restructured into shared vs persona-set rules.
+
 ### v0.59 — ISBN lookup fixed (reported: 9781804953334 not found)
 - **Cause:** the ISBN branch of `_searchBooks` queried **Open Library
   alone**, while every other search path uses Google Books as primary via

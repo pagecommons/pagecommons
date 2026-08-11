@@ -697,6 +697,41 @@
     .length-opt.active { background: #111111; color: #ffffff; }
 
     /* === LANGUAGE PANEL === */
+    /* === PERSONA PANEL === */
+    #persona-panel {
+      display: none;
+      border: 1px solid #111111;
+      border-radius: 0;
+      padding: 16px;
+      margin-bottom: 16px;
+      background: #f5f5f5;
+    }
+    #persona-panel.open { display: block; }
+    .persona-options { display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; }
+    .persona-options > .persona-opt { margin-bottom: 8px; }
+    .persona-options > .persona-opt:last-child { margin-bottom: 0; }
+    .persona-opt {
+      border: 1px solid #111111;
+      border-radius: 0;
+      background: #ffffff;
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
+      cursor: pointer;
+      padding: 12px;
+      text-align: left;
+      min-height: 44px;
+      color: #111111;
+      width: 100%;
+      display: block;
+    }
+    .persona-opt.active { background: #111111; color: #ffffff; }
+    .persona-opt.active .persona-opt-desc { color: #d0d0d0; }
+    .persona-opt-label { font-size: 0.95rem; display: block; margin-bottom: 2px; }
+    .persona-opt-desc { font-size: 0.78rem; color: #777777; display: block; line-height: 1.5; }
+    .persona-panel-note {
+      font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang TC', 'Heiti TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;
+      font-size: 0.75rem; color: #777777; margin-top: 12px; margin-bottom: 0;
+    }
+
     #language-panel {
       display: none;
       border: 1px solid #111111;
@@ -791,7 +826,7 @@
   <header class="site-header">
     <div>
       <div class="site-name" id="site-name-el">Page Commons</div>
-      <div id="site-tagline-el" class="site-tagline"><span data-i18n="header.tagline">Just books. No noise.</span> <span style="color:#ccc;font-size:0.65rem">v0.59</span></div>
+      <div id="site-tagline-el" class="site-tagline"><span data-i18n="header.tagline">Just books. No noise.</span> <span style="color:#ccc;font-size:0.65rem">v0.60</span></div>
     </div>
     <nav id="header-nav" style="display:none">
       <button onclick="goBack()" data-i18n="header.back">&#8592; Back</button><span class="nav-sep">&#183;</span><a href="#home" data-i18n="header.main">Main</a><span class="nav-sep">&#183;</span><a href="#search" data-i18n="header.find_a_book">Find a book</a>
@@ -1069,6 +1104,7 @@
         <button class="toolbar-btn" id="highlights-toolbar-btn" style="display:none" onclick="toggleHighlights()" data-i18n="companion.highlights">Highlights</button>
         <button class="toolbar-btn" id="passages-toolbar-btn" style="display:none" onclick="togglePassagesPanel()" data-i18n="companion.passages">Passages</button>
         <button class="toolbar-btn" id="notes-toolbar-btn" onclick="toggleNotesPanel()" data-i18n="companion.notes">Notes</button>
+        <button class="toolbar-btn" id="persona-toolbar-btn" onclick="togglePersonaPanel()" data-i18n="companion.voice">Voice</button>
         <button class="toolbar-btn" id="language-toolbar-btn" onclick="toggleLanguagePanel()" data-i18n="companion.language">Language</button>
         <button class="toolbar-btn" id="export-toolbar-btn" onclick="toggleExportPanel()" data-i18n="companion.export">Export</button>
         <button class="toolbar-btn" id="sync-toolbar-btn" style="display:none" onclick="syncFromToolbar()" data-i18n="companion.sync">Sync</button>
@@ -1100,16 +1136,39 @@
       <div id="language-panel">
         <div class="font-panel-label" data-i18n="companion.prompt_language">Prompt language</div>
         <div class="language-options">
-          <button class="language-opt" onclick="setCompanionLanguage('English')" data-i18n="common.english">English</button>
-          <button class="language-opt" onclick="setCompanionLanguage('French')" data-i18n="common.french">French</button>
-          <button class="language-opt" onclick="setCompanionLanguage('German')" data-i18n="common.german">German</button>
-          <button class="language-opt" onclick="setCompanionLanguage('Spanish')" data-i18n="common.spanish">Spanish</button>
-          <button class="language-opt" onclick="setCompanionLanguage('Portuguese')" data-i18n="common.portuguese">Portuguese</button>
-          <button class="language-opt" onclick="setCompanionLanguage('Japanese')" data-i18n="common.japanese">Japanese</button>
-          <button class="language-opt" onclick="setCompanionLanguage('Korean')" data-i18n="common.korean">Korean</button>
-          <button class="language-opt" onclick="setCompanionLanguage('Traditional Chinese')" data-i18n="common.traditional_chinese">Traditional Chinese</button>
-          <button class="language-opt" onclick="setCompanionLanguage('Simplified Chinese')" data-i18n="common.simplified_chinese">Simplified Chinese</button>
+          <button class="language-opt" data-lang="English" onclick="setCompanionLanguage('English')" data-i18n="common.english">English</button>
+          <button class="language-opt" data-lang="French" onclick="setCompanionLanguage('French')" data-i18n="common.french">French</button>
+          <button class="language-opt" data-lang="German" onclick="setCompanionLanguage('German')" data-i18n="common.german">German</button>
+          <button class="language-opt" data-lang="Spanish" onclick="setCompanionLanguage('Spanish')" data-i18n="common.spanish">Spanish</button>
+          <button class="language-opt" data-lang="Portuguese" onclick="setCompanionLanguage('Portuguese')" data-i18n="common.portuguese">Portuguese</button>
+          <button class="language-opt" data-lang="Japanese" onclick="setCompanionLanguage('Japanese')" data-i18n="common.japanese">Japanese</button>
+          <button class="language-opt" data-lang="Korean" onclick="setCompanionLanguage('Korean')" data-i18n="common.korean">Korean</button>
+          <button class="language-opt" data-lang="Traditional Chinese" onclick="setCompanionLanguage('Traditional Chinese')" data-i18n="common.traditional_chinese">Traditional Chinese</button>
+          <button class="language-opt" data-lang="Simplified Chinese" onclick="setCompanionLanguage('Simplified Chinese')" data-i18n="common.simplified_chinese">Simplified Chinese</button>
         </div>
+      </div>
+
+      <div id="persona-panel">
+        <div class="font-panel-label" data-i18n="companion.companion_voice">Companion voice</div>
+        <div class="persona-options">
+          <button class="persona-opt" data-persona="companion" onclick="setBookPersona('companion')">
+            <span class="persona-opt-label" data-i18n="persona.companion.label">Companion</span>
+            <span class="persona-opt-desc" data-i18n="persona.companion.desc">Warm and curious — asks you something back</span>
+          </button>
+          <button class="persona-opt" data-persona="guide" onclick="setBookPersona('guide')">
+            <span class="persona-opt-label" data-i18n="persona.guide.label">Guide</span>
+            <span class="persona-opt-desc" data-i18n="persona.guide.desc">Explains context and ideas, patiently</span>
+          </button>
+          <button class="persona-opt" data-persona="direct" onclick="setBookPersona('direct')">
+            <span class="persona-opt-label" data-i18n="persona.direct.label">Direct</span>
+            <span class="persona-opt-desc" data-i18n="persona.direct.desc">Answers first — won't keep questioning you</span>
+          </button>
+          <button class="persona-opt" data-persona="kindred" onclick="setBookPersona('kindred')">
+            <span class="persona-opt-label" data-i18n="persona.kindred.label">Kindred</span>
+            <span class="persona-opt-desc" data-i18n="persona.kindred.desc">Quietly present for books that move you</span>
+          </button>
+        </div>
+        <p class="persona-panel-note" data-i18n="companion.voice_note">Applies to this book only. The default is set in Preferences.</p>
       </div>
 
       <div id="export-panel">
@@ -1215,6 +1274,23 @@
           <span style="position:absolute;right:14px;top:14px;pointer-events:none;color:#777777">▾</span>
         </div>
         <p style="font-size:0.78rem;color:#777777;margin-top:6px" data-i18n="preferences.interface_language_note">The language of buttons and labels. Your companion's language is set separately below.</p>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-label" data-i18n="preferences.companion_voice">Companion voice</div>
+      <div class="field">
+        <div style="position:relative">
+          <select id="settings-persona" onchange="saveDefaultPersona(this.value)" style="width:100%;border:1px solid #111111;background:#ffffff;color:#111111;font-family:Georgia,'Times New Roman','Songti TC','Noto Serif CJK TC','Source Han Serif TC',PMingLiU,serif;font-size:1rem;padding:12px 14px;padding-right:36px;outline:none;border-radius:0;-webkit-appearance:none;appearance:none">
+            <option value="companion" data-i18n="persona.companion.label">Companion</option>
+            <option value="guide" data-i18n="persona.guide.label">Guide</option>
+            <option value="direct" data-i18n="persona.direct.label">Direct</option>
+            <option value="kindred" data-i18n="persona.kindred.label">Kindred</option>
+          </select>
+          <span style="position:absolute;right:14px;top:14px;pointer-events:none;color:#777777">▾</span>
+        </div>
+        <p id="persona-pref-desc" style="font-size:0.78rem;color:#777777;margin-top:6px"></p>
+        <p style="font-size:0.78rem;color:#777777;margin-top:6px" data-i18n="preferences.companion_voice_note">How your companion talks. You can set a different voice for an individual book from the Voice button in a chat.</p>
       </div>
     </div>
 

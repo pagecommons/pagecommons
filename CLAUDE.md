@@ -129,15 +129,44 @@ These will break the app on Kobo:
 - Webkit vendor prefixes on all flexbox
 
 ## AI Companion Design Rules
-- Warm but not gushing
-- Curious — always asks something back
+SHARED by every persona (never vary):
 - Never summarises plot unprompted
 - Short responses (e-ink screen size)
-- Always ends with question
 - Spoiler-aware by reading status
 - Never says "Great question!"
-- Feels like a well-read friend
 - Plain prose only — no bullet points
+- Honest about what it doesn't know;
+  never confabulates, never escapes an
+  unknown by suggesting another book
+- [RECOMMEND: Title by Author] only when
+  the reader asks for a recommendation
+
+SET BY THE PERSONA (see PERSONAS in
+app.js) — each supplies a `voice` and a
+`closing`:
+- companion (default) — warm but not
+  gushing, well-read friend, ALWAYS ends
+  with a question. This is the original
+  pre-v0.60 voice; unchanged for anyone
+  who never picks another.
+- guide — patient explainer; context and
+  ideas; questions only when useful
+- direct — answer first, no padding,
+  does NOT question the reader back
+- kindred — quietly present for books
+  that land emotionally; not a therapist
+
+"Always ends with a question" was a
+blanket rule until v0.60. It is now
+persona-dependent: it made the companion
+interrogate readers who only wanted to
+know what a book was like.
+
+Persona resolution (getPersonaId):
+  per-book pc_persona_override_<bk>
+  → global pc_persona
+  → 'companion'
+Unknown/absent values fall back safely.
 
 ## INTERFACE LANGUAGE (i18n)
 Interface text lives in UI_STRINGS
@@ -273,7 +302,9 @@ Standalone pages:
 - User owns all their data always
 
 ## Current Version
-v0.59 — ISBN lookup fixed: it queried Open Library ALONE, so recent titles returned "ISBN not found" even when Google Books had them (reported against 9781804953334). New lookupISBN() tries Google Books first via the authenticated /api/books proxy, keeping Open Library as fallback. Google Books also returns the categories the age gate reads, plus description and page count, which the Open Library path never provided. +5 regression tests (38 total). Also fixed "Is this for me?" on ISBN results, which was embedded in an innerHTML string and missed by the v0.58 sweep.
+v0.60 — Companion personas. One voice did not fit every use case: the default always asks something back, which works against a reader using "Find out if it's for me" who simply wants to know what a book is like. Four voices — Companion (default, unchanged behaviour), Guide, Direct, Kindred — each supplying a `voice` and a `closing`; all other prompt rules stay shared. Global default in Preferences plus a per-book override via a new Voice button in the chat toolbar. Discover mode no longer demands a taste question before saying anything useful. Also fixes a v0.57 regression where the language panel's active highlight compared translated button text against English values. +7 tests (45 total).
+
+Earlier (v0.59): ISBN lookup fixed: it queried Open Library ALONE, so recent titles returned "ISBN not found" even when Google Books had them (reported against 9781804953334). New lookupISBN() tries Google Books first via the authenticated /api/books proxy, keeping Open Library as fallback. Google Books also returns the categories the age gate reads, plus description and page count, which the Open Library path never provided. +5 regression tests (38 total). Also fixed "Is this for me?" on ISBN results, which was embedded in an innerHTML string and missed by the v0.58 sweep.
 
 Earlier (v0.58): i18n coverage fixes found in testing: the home description and T&C notes (multi-line elements the first-pass audit skipped), the JS-injected "Preferences" footer link, book-detail buttons, Notes/Passages/Highlights toolbar counts, key status bar, and ~50 further JS-built strings (search statuses, transfer flow, toolbar messages). 280 keys × 2 languages. New test scans the WHOLE document for untranslated markup — the line-based audit that missed these is the reason they shipped.
 

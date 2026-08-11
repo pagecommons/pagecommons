@@ -233,3 +233,94 @@ test('ISBN lookup resolves to null (not a rejection) when both sources fail', as
   stubISBNFetch(app, { gbThrows: true, olThrows: true });
   assert.strictEqual(await app.window.lookupISBN('9781804953334'), null);
 });
+
+// ─── Companion personas ─────────────────────────────────────────────────────
+// One voice did not suit every use case: the default always asks something
+// back, which works against a reader who only wants to know what a book is
+// like. Personas swap the voice and the closing rule; everything else in the
+// prompt (spoilers, honesty, formatting) is shared.
+
+function withBook(app, book) {
+  app.window.STATE.book = book || { title: 'Test Book', author: 'An Author', pageCount: 300 };
+  app.window.STATE.readingStatus = 'midway';
+  app.window.STATE.companionMode = 'reading';
+}
+
+test('the default persona is Companion and preserves the original voice', async function () {
+  var app = await boot({ seed: SEED });
+  withBook(app);
+  assert.strictEqual(app.window.getPersonaId(), 'companion');
+  var p = app.window.buildSystemPrompt();
+  assert.match(p, /warm but not gushing/);
+  assert.match(p, /Always end with a question/);
+});
+
+test('the Direct persona stops the companion interrogating the reader', async function () {
+  var app = await boot({ seed: SEED });
+  withBook(app);
+  app.window.saveDefaultPersona('direct');
+  var p = app.window.buildSystemPrompt();
+  assert.match(p, /Lead with the answer/);
+  assert.doesNotMatch(p, /Always end with a question/,
+    'the always-ask rule must not survive under Direct');
+  assert.match(p, /Do not end with a question unless/);
+});
+
+test('shared prompt rules survive every persona', async function () {
+  var app = await boot({ seed: SEED });
+  withBook(app);
+  var ids = ['companion', 'guide', 'direct', 'kindred'];
+  for (var i = 0; i < ids.length; i++) {
+    app.window.saveDefaultPersona(ids[i]);
+    var p = app.window.buildSystemPrompt();
+    assert.match(p, /Never confabulate/, ids[i] + ' lost the honesty rule');
+    assert.match(p, /RECOMMEND/, ids[i] + ' lost the recommendation format');
+    assert.match(p, /No bullet points/, ids[i] + ' lost the plain-prose rule');
+  }
+});
+
+test('discover mode no longer demands a taste question before helping', async function () {
+  var app = await boot({ seed: SEED });
+  withBook(app);
+  app.window.STATE.companionMode = 'discover';
+  var p = app.window.buildSystemPrompt();
+  assert.doesNotMatch(p, /Start by asking ONE question/,
+    'discover mode used to interrogate before saying anything useful');
+  assert.match(p, /ANSWER WHAT THEY ASK/);
+  assert.match(p, /Never reveal plot details/, 'discover must stay spoiler-safe');
+});
+
+test('a per-book voice overrides the global default, and clearing it falls back', async function () {
+  var app = await boot({ seed: SEED });
+  withBook(app);
+  app.window.saveDefaultPersona('companion');
+  app.window.setBookPersona('kindred');
+  assert.strictEqual(app.window.getPersonaId(), 'kindred');
+  assert.match(app.window.buildSystemPrompt(), /quietly present/i);
+
+  // a different book is unaffected
+  withBook(app, { title: 'Another Book', author: 'Someone Else' });
+  assert.strictEqual(app.window.getPersonaId(), 'companion');
+
+  withBook(app);
+  app.window.setBookPersona(null);
+  assert.strictEqual(app.window.getPersonaId(), 'companion');
+});
+
+test('an unrecognised stored persona falls back to Companion', async function () {
+  var app = await boot({ seed: SEED });
+  withBook(app);
+  app.localStorage.setItem('pc_persona', 'nonsense');
+  assert.strictEqual(app.window.getPersonaId(), 'companion');
+});
+
+test('every persona has a translated label and description', async function () {
+  var app = await boot({ seed: SEED });
+  var tables = app.window.UI_STRINGS;
+  var ids = ['companion', 'guide', 'direct', 'kindred'];
+  for (var i = 0; i < ids.length; i++) {
+    var lab = 'persona.' + ids[i] + '.label', desc = 'persona.' + ids[i] + '.desc';
+    assert.ok(tables.en[lab] && tables['zh-TW'][lab], 'missing label for ' + ids[i]);
+    assert.ok(tables.en[desc] && tables['zh-TW'][desc], 'missing description for ' + ids[i]);
+  }
+});

@@ -111,6 +111,20 @@ var UI_LANGS = [
 var UI_DATE_LOCALE = { 'en': 'en-GB', 'zh-TW': 'zh-TW' };
 var UI_STRINGS = {
   'en': {
+    'persona.companion.label': 'Companion',
+    'persona.companion.desc': 'Warm and curious — asks you something back',
+    'persona.guide.label': 'Guide',
+    'persona.guide.desc': 'Explains context and ideas, patiently',
+    'persona.direct.label': 'Direct',
+    'persona.direct.desc': 'Answers first — won\'t keep questioning you',
+    'persona.kindred.label': 'Kindred',
+    'persona.kindred.desc': 'Quietly present for books that move you',
+    'companion.voice': 'Voice',
+    'companion.companion_voice': 'Companion voice',
+    'companion.voice_note': 'Applies to this book only. The default is set in Preferences.',
+    'preferences.companion_voice': 'Companion voice',
+    'preferences.companion_voice_note': 'How your companion talks. You can set a different voice for an individual book from the Voice button in a chat.',
+    'js.voice_set_to': 'Voice set to ',
     'js.unknown_title': 'Unknown title',
     'js.by_author': ' by {author}',
     'js.preferences': 'Preferences',
@@ -394,6 +408,20 @@ var UI_STRINGS = {
     'tc.your_agreement_is_stored': 'Your agreement is stored locally in your browser only.'
   },
   'zh-TW': {
+    'persona.companion.label': '書伴',
+    'persona.companion.desc': '溫暖而好奇——每次都會反問你',
+    'persona.guide.label': '導讀',
+    'persona.guide.desc': '耐心解說背景與思想',
+    'persona.direct.label': '直說',
+    'persona.direct.desc': '先給答案——不會一直反問你',
+    'persona.kindred.label': '知音',
+    'persona.kindred.desc': '安靜地陪你讀那些觸動你的書',
+    'companion.voice': '語氣',
+    'companion.companion_voice': '書伴語氣',
+    'companion.voice_note': '只套用於這本書。預設值可在「偏好設定」中更改。',
+    'preferences.companion_voice': '書伴語氣',
+    'preferences.companion_voice_note': '書伴說話的方式。在對話中按「語氣」，可為個別書籍另設語氣。',
+    'js.voice_set_to': '語氣已設為 ',
     'js.unknown_title': '書名不詳',
     'js.by_author': '（{author}）',
     'js.preferences': '偏好設定',
@@ -1078,6 +1106,7 @@ function restoreCompanionUI(book) {
   renderHighlightsPanel();
   updatePassagesToolbarBtn();
   updateNotesToolbarBtn();
+  updatePersonaPanelDisplay();
   // Load per-book language override; fall back to the global preference
   // (pc_companion_lang) instead of wiping it when no per-book override exists.
   var savedOverride = localStorage.getItem('pc_companion_lang_override_' + bookKey(book));
@@ -1088,6 +1117,8 @@ function restoreCompanionUI(book) {
   document.getElementById('passages-panel').classList.remove('open');
   document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('language-panel').classList.remove('open');
+  var _pp0 = document.getElementById('persona-panel');
+  if (_pp0) _pp0.classList.remove('open');
   document.getElementById('export-panel').classList.remove('open');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('passages-toolbar-btn').classList.remove('active');
@@ -2487,6 +2518,7 @@ function launchCompanion(book) {
   renderHighlightsPanel();
   updatePassagesToolbarBtn();
   updateNotesToolbarBtn();
+  updatePersonaPanelDisplay();
   if (typeof renderDriveStatus === 'function') renderDriveStatus();
   populateIcebreakers(book);
   // Load per-book language override; fall back to the global preference
@@ -2499,6 +2531,8 @@ function launchCompanion(book) {
   document.getElementById('passages-panel').classList.remove('open');
   document.getElementById('notes-panel').classList.remove('open');
   document.getElementById('language-panel').classList.remove('open');
+  var _pp0 = document.getElementById('persona-panel');
+  if (_pp0) _pp0.classList.remove('open');
   document.getElementById('export-panel').classList.remove('open');
   document.getElementById('highlights-toolbar-btn').classList.remove('active');
   document.getElementById('passages-toolbar-btn').classList.remove('active');
@@ -2938,6 +2972,10 @@ function toggleHighlights() {
   document.getElementById('notes-toolbar-btn').classList.remove('active');
   document.getElementById('export-panel').classList.remove('open');
   document.getElementById('export-toolbar-btn').classList.remove('active');
+  var _pp = document.getElementById('persona-panel');
+  var _pb = document.getElementById('persona-toolbar-btn');
+  if (_pp) _pp.classList.remove('open');
+  if (_pb) _pb.classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
 }
 
@@ -3549,17 +3587,74 @@ function scrollToMessage(el) {
 // ═══════════════════════════════════════════════════
 //  AI PROVIDERS
 // ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+//  COMPANION PERSONAS
+//  One reading companion did not fit every use case: the default voice
+//  always asks something back, which is right for reflective reading but
+//  works against a reader who just wants to know what a book is like.
+//  Each persona supplies a `voice` (who it is) and a `closing` (whether it
+//  hands the turn back with a question). Everything else in the system
+//  prompt — spoiler rules, honesty rules, formatting — is shared and does
+//  not change with the persona.
+//  'companion' is the default and reproduces the pre-v0.60 behaviour, so
+//  existing readers notice no change unless they choose one.
+// ═══════════════════════════════════════════════════
+var PERSONAS = [
+  {
+    id: 'companion',
+    voice: "You are warm but not gushing. Curious — you always ask something back at the end. You never summarise the plot unprompted. You offer opinions when asked. You are honest about what you don't know. Literary without being academic. You feel like a well-read friend who has also read this book.",
+    closing: 'Always end with a question or an invitation to continue.'
+  },
+  {
+    id: 'guide',
+    voice: "You are a patient guide to this book. You explain — context, themes, structure, the ideas behind the work — building from what the reader already knows rather than from nowhere. You reach for an analogy when it earns its place. You check whether an explanation landed before piling on another. Encouraging without being saccharine: when something in the book is genuinely difficult, you say so plainly instead of smoothing it over.",
+    closing: 'Close by checking understanding or offering the next step — but only when it genuinely helps. Do not end every turn with a question.'
+  },
+  {
+    id: 'direct',
+    voice: "You are direct. Lead with the answer, then the support for it. No padding, no restating the reader's question back to them, no hollow affirmations. Flag your assumptions and your uncertainties explicitly, and be clear about which parts are your reading of the book and which are widely agreed.",
+    closing: 'Do not end with a question unless you genuinely need something from the reader in order to answer. Let them lead.'
+  },
+  {
+    id: 'kindred',
+    voice: "You are quietly present with the reader. Books land on people, and you notice when one has — if something in the reading seems to have touched them, name it gently before moving to analysis. You can sit with a feeling instead of resolving it. You are not a therapist and do not perform therapy; you are a friend who reads, and who is not in a hurry.",
+    closing: 'End with warmth — sometimes a question, sometimes simply room for them to say more.'
+  }
+];
+function getPersonaById(id) {
+  for (var i = 0; i < PERSONAS.length; i++) {
+    if (PERSONAS[i].id === id) return PERSONAS[i];
+  }
+  return PERSONAS[0];
+}
+// Per-book override wins over the global preference, mirroring how the
+// companion language already works.
+function getPersonaId() {
+  try {
+    if (STATE.book) {
+      var over = localStorage.getItem('pc_persona_override_' + bookKey(STATE.book));
+      if (over && getPersonaById(over).id === over) return over;
+    }
+    var pref = localStorage.getItem('pc_persona');
+    if (pref && getPersonaById(pref).id === pref) return pref;
+  } catch (e) {}
+  return 'companion';
+}
+function getPersona() {
+  return getPersonaById(getPersonaId());
+}
 function buildDiscoveryPrompt() {
   var book = STATE.book;
   var readingTime = book.pageCount ? ' The book is ' + book.pageCount + ' pages — roughly ' + Math.round(book.pageCount / 50) + ' hours for an average reader.' : '';
   var _companionLang = getCompanionLang();
   var langNote = (_companionLang && _companionLang !== 'English') ? '\n\nRespond entirely in ' + _companionLang + '. Do not use any other language.' : '';
+  var persona = getPersona();
   return 'You are a book discovery companion. The reader is considering whether "' + book.title + '" by ' + book.author + ' is right for them.' + readingTime + '\n\n' +
+    persona.voice + '\n\n' +
     'Your role: help them decide if this book is for them — not summarise or sell it.\n\n' +
-    'Start by asking ONE question about their reading preferences — what they\'ve loved recently, what mood they\'re in, what they\'re looking for right now. Ask only one question. Wait for their answer before describing the book.\n\n' +
-    'Once you know their preferences: describe the book through that lens. What kind of reader tends to love it. The mood and pace it creates. What it asks of the reader. What readers often wish they\'d known before starting — not plot details, but texture and experience.\n\n' +
+    'ANSWER WHAT THEY ASK. A reader here wants to know what the book is like, so tell them: what kind of reader tends to love it, the mood and pace it creates, what it asks of the reader, what readers often wish they had known before starting — texture and experience, not plot. Do not interrogate them about their taste before you will say anything useful. If knowing their taste would genuinely sharpen your answer, you may ask for it once, after you have already given them something worth reading.\n\n' +
     'Never reveal plot details, spoilers, or endings. Never summarise the story. Keep each response short — this is read on an e-ink screen.\n\n' +
-    'Always end with a question or an invitation. Respond in plain prose only. No bullet points. No headers.\n\n' +
+    persona.closing + ' Respond in plain prose only. No bullet points. No headers.\n\n' +
     'When you mention a specific book you\'d recommend, format it exactly as: [RECOMMEND: Title by Author].\n\n' +
     'If there are any signs this reader may be a minor, default to age-appropriate discussion.' + langNote;
 }
@@ -3581,7 +3676,8 @@ function buildSystemPrompt() {
   var _companionLang = getCompanionLang();
   var langNote = (_companionLang && _companionLang !== 'English') ? '\n\nRespond entirely in ' + _companionLang + '. Do not use any other language.' : '';
   var replyLengthNote = STATE.replyLength === 'short' ? "Maximum 2 sentences. Stop after 2 sentences." : STATE.replyLength === 'detailed' ? "You may give fuller, more detailed responses when the topic warrants it." : "Keep responses concise — 2 to 4 short paragraphs maximum.";
-  return "You are a reading companion for \"" + book.title + "\" by " + book.author + ".\n\n" + "You are warm but not gushing. Curious — you always ask something back at the end. You never summarise the plot unprompted. You offer opinions when asked. You are honest about what you don't know. Literary without being academic. You feel like a well-read friend who has also read this book.\n\n" + "Never say \"Great question!\" Keep responses concise — this is read on an e-ink screen. Short paragraphs. Always end with a question or an invitation to continue.\n\n" + statusNote + "\n\n" + "If the conversation drifts away from the book, find a gentle bridge back — connect what the reader said to something in the book rather than refusing or redirecting bluntly. You are a reading companion, not a general assistant.\n\n" + "If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.\n\n" + replyLengthNote + "\n\n" + "Be honest about the limits of your knowledge, but calibrate carefully. For well-known books, their central frameworks, famous arguments, and widely documented content are fair to state with confidence — if a book is famous for a specific framework or set of ideas, engage with those ideas directly rather than hedging. Reserve uncertainty for things you genuinely might misremember: exact quotes, minor plot details, precise chapter sequences, secondary characters. In those cases, say so plainly and invite the reader to share what they recall. Never confabulate. CRITICAL: do not escape an unknown by suggesting a different book. Stay with the book the reader is reading.\n\n" + "Respond in plain prose only. No bullet points. No headers. No lists of any kind.\n\n" + "Only suggest another book when the reader explicitly asks for a recommendation. When you do, format it exactly as: [RECOMMEND: Title by Author] — this renders as a tappable search button. Never use this as a way to deflect when you're unsure of the current book.\n\n" + "If there are any signs this reader may be a minor, default to age-appropriate discussion regardless of the book's content rating." + langNote + highlightsText;
+  var persona = getPersona();
+  return "You are a reading companion for \"" + book.title + "\" by " + book.author + ".\n\n" + persona.voice + "\n\n" + "Never say \"Great question!\" Keep responses concise — this is read on an e-ink screen. Short paragraphs. " + persona.closing + "\n\n" + statusNote + "\n\n" + "If the conversation drifts away from the book, find a gentle bridge back — connect what the reader said to something in the book rather than refusing or redirecting bluntly. You are a reading companion, not a general assistant.\n\n" + "If a reader seems personally distressed — not just intellectually engaged with dark themes — acknowledge that warmth first before continuing the literary discussion.\n\n" + replyLengthNote + "\n\n" + "Be honest about the limits of your knowledge, but calibrate carefully. For well-known books, their central frameworks, famous arguments, and widely documented content are fair to state with confidence — if a book is famous for a specific framework or set of ideas, engage with those ideas directly rather than hedging. Reserve uncertainty for things you genuinely might misremember: exact quotes, minor plot details, precise chapter sequences, secondary characters. In those cases, say so plainly and invite the reader to share what they recall. Never confabulate. CRITICAL: do not escape an unknown by suggesting a different book. Stay with the book the reader is reading.\n\n" + "Respond in plain prose only. No bullet points. No headers. No lists of any kind.\n\n" + "Only suggest another book when the reader explicitly asks for a recommendation. When you do, format it exactly as: [RECOMMEND: Title by Author] — this renders as a tappable search button. Never use this as a way to deflect when you're unsure of the current book.\n\n" + "If there are any signs this reader may be a minor, default to age-appropriate discussion regardless of the book's content rating." + langNote + highlightsText;
 }
 function callAI() {
   return _callAI.apply(this, arguments);
@@ -4256,6 +4352,10 @@ function toggleLanguagePanel() {
   document.getElementById('notes-toolbar-btn').classList.remove('active');
   document.getElementById('export-panel').classList.remove('open');
   document.getElementById('export-toolbar-btn').classList.remove('active');
+  var _pp = document.getElementById('persona-panel');
+  var _pb = document.getElementById('persona-toolbar-btn');
+  if (_pp) _pp.classList.remove('open');
+  if (_pb) _pb.classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
   updateLanguagePanelDisplay();
 }
@@ -4265,7 +4365,7 @@ function setCompanionLanguage(lang) {
   if (lang) {
     localStorage.setItem('pc_companion_lang_override_' + bookKey(STATE.book), lang);
     touchSyncMeta('status');
-    showToolbarMsg('Prompts now in ' + lang + '.');
+    showToolbarMsg(t('js.prompts_now_in') + lang + '.');
   } else {
     localStorage.removeItem('pc_companion_lang_override_' + bookKey(STATE.book));
     touchSyncMeta('status');
@@ -4282,12 +4382,67 @@ function updateLanguagePanelDisplay() {
   var langOpts = document.querySelectorAll('.language-opt');
   for (var i = 0; i < langOpts.length; i++) {
     var b = langOpts[i];
-    var btnLang = b.textContent.trim();
+    // Match on the data-lang attribute, not the button's text: once the
+    // interface is translated the label reads "英文" while the stored value
+    // is still "English", so comparing text never matched.
+    var btnLang = b.getAttribute('data-lang') || b.textContent.trim();
     if (overrideLang && btnLang === overrideLang) {
       b.classList.add('active');
     } else {
       b.classList.remove('active');
     }
+  }
+}
+// Global default, used for any book without its own override.
+function saveDefaultPersona(id) {
+  if (getPersonaById(id).id !== id) return;
+  localStorage.setItem('pc_persona', id);
+  touchSyncMeta('preferences');
+  updatePersonaPrefDescription();
+  updatePersonaPanelDisplay();
+}
+function updatePersonaPrefDescription() {
+  var el = document.getElementById('persona-pref-desc');
+  if (!el) return;
+  var sel = document.getElementById('settings-persona');
+  var id = (sel && sel.value) || localStorage.getItem('pc_persona') || 'companion';
+  el.textContent = t('persona.' + getPersonaById(id).id + '.desc');
+}
+// ── Persona picker (chat toolbar) ──────────────────────────────────────────
+function togglePersonaPanel() {
+  var panel = document.getElementById('persona-panel');
+  var btn = document.getElementById('persona-toolbar-btn');
+  if (!panel || !btn) return;
+  panel.classList.toggle('open');
+  var others = ['highlights', 'passages', 'notes', 'language', 'export'];
+  for (var i = 0; i < others.length; i++) {
+    var p = document.getElementById(others[i] + '-panel');
+    var b = document.getElementById(others[i] + '-toolbar-btn');
+    if (p) p.classList.remove('open');
+    if (b) b.classList.remove('active');
+  }
+  panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
+  updatePersonaPanelDisplay();
+}
+function setBookPersona(id) {
+  if (!STATE.book) return;
+  var key = 'pc_persona_override_' + bookKey(STATE.book);
+  if (id) {
+    localStorage.setItem(key, id);
+  } else {
+    localStorage.removeItem(key);   // fall back to the global preference
+  }
+  touchSyncMeta('status');
+  showToolbarMsg(t('js.voice_set_to') + t('persona.' + getPersonaId() + '.label') + '.');
+  updatePersonaPanelDisplay();
+}
+function updatePersonaPanelDisplay() {
+  var active = getPersonaId();
+  var opts = document.querySelectorAll('.persona-opt');
+  for (var i = 0; i < opts.length; i++) {
+    var b = opts[i];
+    if (b.getAttribute('data-persona') === active) b.classList.add('active');
+    else b.classList.remove('active');
   }
 }
 
@@ -4362,6 +4517,10 @@ function togglePassagesPanel() {
   document.getElementById('notes-toolbar-btn').classList.remove('active');
   document.getElementById('export-panel').classList.remove('open');
   document.getElementById('export-toolbar-btn').classList.remove('active');
+  var _pp = document.getElementById('persona-panel');
+  var _pb = document.getElementById('persona-toolbar-btn');
+  if (_pp) _pp.classList.remove('open');
+  if (_pb) _pb.classList.remove('active');
   panel.classList.contains('open') ? btn.classList.add('active') : btn.classList.remove('active');
   if (panel.classList.contains('open')) renderPassagesPanel();
 }
@@ -4477,6 +4636,10 @@ function toggleNotesPanel() {
   document.getElementById('passages-toolbar-btn').classList.remove('active');
   document.getElementById('export-panel').classList.remove('open');
   document.getElementById('export-toolbar-btn').classList.remove('active');
+  var _pp = document.getElementById('persona-panel');
+  var _pb = document.getElementById('persona-toolbar-btn');
+  if (_pp) _pp.classList.remove('open');
+  if (_pb) _pb.classList.remove('active');
   if (panel.classList.contains('open')) {
     btn.classList.add('active');
     renderNotesPanel();
@@ -4633,6 +4796,9 @@ function loadPreferencesScreen() {
   if (clangEl) clangEl.value = STATE.companionLangOverride || 'English';
   var uilangEl = document.getElementById('settings-ui-lang');
   if (uilangEl) uilangEl.value = getUILang();
+  var personaEl = document.getElementById('settings-persona');
+  if (personaEl) personaEl.value = localStorage.getItem('pc_persona') || 'companion';
+  updatePersonaPrefDescription();
 
   // First-run mode: hide back link, show intro + Save & continue, hide
   // the data export/import section (nothing to back up yet).
